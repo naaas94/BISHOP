@@ -1,0 +1,153 @@
+services:
+  state-worker:
+    build:
+      context: .
+      dockerfile: services/state-worker/Dockerfile
+    image: bishop/state-worker:m0
+    networks:
+      - bishop-internal
+    volumes:
+      - ${BISHOP_DATA_ROOT}/sqlite:/app/data/sqlite
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  scraper:
+    build:
+      context: .
+      dockerfile: services/scraper/Dockerfile
+    image: bishop/scraper:m0
+    networks:
+      - bishop-internal
+    volumes:
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+    environment:
+      STATE_WORKER_URL: http://state-worker:8000
+    depends_on:
+      state-worker:
+        condition: service_healthy
+
+  pre-filter-worker:
+    build:
+      context: .
+      dockerfile: services/pre-filter-worker/Dockerfile
+    image: bishop/pre-filter-worker:m0
+    networks:
+      - bishop-internal
+    volumes:
+      - ${BISHOP_DATA_ROOT}/profiles:/app/config/profiles
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+    environment:
+      STATE_WORKER_URL: http://state-worker:8000
+    depends_on:
+      state-worker:
+        condition: service_healthy
+
+  content-scraper:
+    build:
+      context: .
+      dockerfile: services/content-scraper/Dockerfile
+    image: bishop/content-scraper:m0
+    networks:
+      - bishop-internal
+    volumes:
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+    environment:
+      STATE_WORKER_URL: http://state-worker:8000
+    depends_on:
+      state-worker:
+        condition: service_healthy
+
+  enrichment-batcher:
+    build:
+      context: .
+      dockerfile: services/enrichment-batcher/Dockerfile
+    image: bishop/enrichment-batcher:m0
+    networks:
+      - bishop-internal
+    volumes:
+      - ${BISHOP_DATA_ROOT}/profiles:/app/config/profiles
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+    environment:
+      STATE_WORKER_URL: http://state-worker:8000
+    depends_on:
+      state-worker:
+        condition: service_healthy
+
+  batch-poller:
+    build:
+      context: .
+      dockerfile: services/batch-poller/Dockerfile
+    image: bishop/batch-poller:m0
+    networks:
+      - bishop-internal
+    volumes:
+      - ${BISHOP_DATA_ROOT}/sqlite:/app/data/sqlite
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+    environment:
+      STATE_WORKER_URL: http://state-worker:8000
+    depends_on:
+      state-worker:
+        condition: service_healthy
+
+  vector-writer:
+    build:
+      context: .
+      dockerfile: services/vector-writer/Dockerfile
+    image: bishop/vector-writer:m0
+    networks:
+      - bishop-internal
+    volumes:
+      - ${BISHOP_DATA_ROOT}/lancedb:/app/data/lancedb
+      - ${BISHOP_DATA_ROOT}/duckdb:/app/data/duckdb
+      - ${BISHOP_DATA_ROOT}/bm25:/app/data/bm25
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+    environment:
+      STATE_WORKER_URL: http://state-worker:8000
+    depends_on:
+      state-worker:
+        condition: service_healthy
+
+  query-api:
+    build:
+      context: .
+      dockerfile: services/query-api/Dockerfile
+    image: bishop/query-api:m0
+    networks:
+      - bishop-internal
+    volumes:
+      - ${BISHOP_DATA_ROOT}/lancedb:/app/data/lancedb
+      - ${BISHOP_DATA_ROOT}/duckdb:/app/data/duckdb
+      - ${BISHOP_DATA_ROOT}/bm25:/app/data/bm25
+      - ${BISHOP_DATA_ROOT}/sqlite:/app/data/sqlite
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+    environment:
+      STATE_WORKER_URL: http://state-worker:8000
+    ports:
+      - "${QUERY_API_HOST_PORT}:8000"
+    depends_on:
+      state-worker:
+        condition: service_healthy
+
+  ui:
+    build:
+      context: .
+      dockerfile: services/ui/Dockerfile
+    image: bishop/ui:m0
+    networks:
+      - bishop-internal
+    environment:
+      STATE_WORKER_URL: http://state-worker:8000
+    ports:
+      - "${UI_HOST_PORT}:80"
+    depends_on:
+      state-worker:
+        condition: service_healthy
+
+networks:
+  bishop-internal:
+    name: bishop-internal
