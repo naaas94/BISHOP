@@ -1,0 +1,12 @@
+[project]
+name = "bishop"
+version = "0.0.0"
+description = "Bishop knowledge-base pipeline (M0 workshop)"
+requires-python = ">=3.12"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
