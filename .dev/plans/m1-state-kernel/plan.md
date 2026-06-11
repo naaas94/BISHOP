@@ -1,8 +1,9 @@
 # M1 — State Kernel
 
 **Plan name:** `m1-state-kernel`  
-**Version:** 1.0  
-**Status:** Complete (planning) — executor packets emitted; pending user confirmation on orch defaults in §Decision log  
+**Version:** 1.2  
+**Status:** Complete + amendment landed  
+**Prior version:** 1.1 (T1–T6 complete; §8 handoff recorded but uncommitted at audit HEAD — see F-002/F-003)  
 **Charter slice:** `.dev/bishop_program_charter.md` L130–180  
 **Normative spec:** `bishop_spec_0_6.md` v1.5.0 @ `8d339ee2cd5dd2b16549bbe556ea995462a53a20` (tracked)
 
@@ -76,6 +77,9 @@ Implement the complete `state-worker` service as the program contract anchor: Al
 | `SWEEP_INTERVAL_SEC`, `STUCK_THRESHOLD_SEC` | T1 | `services/state-worker/app/config.py` — defaults `300`, `900` | config round-trip test |
 | Transition functions | T2 | `services/state-worker/app/transitions.py` | `tests/test_state_worker_transitions.py` |
 | Lock-state + retry sweeps | T5 | `services/state-worker/app/sweeps.py` | contract test + log assertion in T6 |
+| `emit_alert()` | T8 | `services/state-worker/app/alerts.py` (or `transitions.py` if single-module) | `tests/test_state_worker_alerts.py::test_record_failure_escalation_emits_critical_alert` |
+| Log level contracts | T8 | `transitions.py`, `sweeps.py` — WARNING/ERROR/CRITICAL per §2 Logging | `tests/test_state_worker_alerts.py::test_*_log_level` |
+| `content_raw` omission (G2) | T9 | `tests/test_state_worker_contract.py` | `test_entries_poll_vector_write_queued_omits_content_raw` |
 
 **JSON list[str] columns:** `concepts`, `tags`, `challenge_hooks`, `references`, `cited_by`, `top_entries` — `json.dumps` on write, `json.loads` on read at state-worker boundary (§7.2 M2 note).
 
@@ -93,6 +97,7 @@ Implement the complete `state-worker` service as the program contract anchor: Al
 | Invalid state transition | `409` + `{"error": "invalid_transition", "source_id": str, "from_state": str, "to_state": str}` |
 | Terminal state overwrite | `409` + `{"error": "terminal_state", "source_id": str}` |
 | Invalid poll state param | `400` + `{"error": "invalid_poll_state", "state": str}` |
+| Invalid batch status filter (`GET /batches?status=`) | `400` + `{"error": "invalid_batch_status", "status": str}` |
 | `GET /health` | `200` + `{"status": "ok"}` — unchanged from M0 |
 
 ### Naming
@@ -107,8 +112,9 @@ Implement the complete `state-worker` service as the program contract anchor: Al
 
 ### Logging
 
-- **Levels:** INFO for startup, migration, sweep actions; WARNING for idempotent no-ops; ERROR for transition failures; CRITICAL for alert_type per §14.3
-- **Structured fields:** `source_id`, `from_state`, `to_state`, `batch_id`, `sweep_reset_count`, `retry_requeue_count`
+- **Levels:** INFO for startup, migration, sweep actions, successful transitions; WARNING for idempotent no-ops; ERROR for transition failures; CRITICAL for alert emission per §14.3
+- **Structured fields:** `source_id`, `from_state`, `to_state`, `batch_id`, `sweep_reset_count`, `retry_requeue_count`, `alert_type` (on CRITICAL alert lines only)
+- **Alert emission (binding — T8):** `emit_alert(conn, *, source_id, alert_type, message, ...)` writes (a) `logger.critical(..., extra={"alert_type": ..., "source_id": ...})` and (b) an `error_log` row with `error_class = "ALERT"`. M1 triggers: `retry_budget_exhausted`, `escalation_flagged`, `permanent_failure` inside `record_failure` when target state is `ESCALATION_FLAGGED` or `PERMANENTLY_FAILED`. Spec conditions deferred to later milestones: `profile_hash_mismatch` (M3), `batch_timeout_48h` / `batch_abort` (M5) — documented in T8 decision log; no stub hooks required in M1.
 - **Sink:** stdout (Docker logs); optional file under `/app/logs` deferred
 
 ### Tests
@@ -152,7 +158,7 @@ GET  /escalations
 
 **Atomic claim mapping (binding):** `DISCOVERED→RELEVANCE_QUEUED`, `RELEVANCE_PASSED→SCRAPE_QUEUED`, `SCRAPED→ENRICHMENT_STAGE1_QUEUED`, `ENRICHMENT_STAGE2_QUEUED→ENRICHMENT_STAGE2_CLAIMED`; `VECTOR_WRITE_QUEUED` poll returns without claim (`transitioned_to: null`).
 
-**Decision log paths (architectural):** `.dev/decision-logs/m1-state-kernel/T1-schema-foundation.md`, `.dev/decision-logs/m1-state-kernel/T2-transition-engine.md`
+**Decision log paths (architectural):** `.dev/decision-logs/m1-state-kernel/T1-schema-foundation.md`, `.dev/decision-logs/m1-state-kernel/T2-transition-engine.md`, `.dev/decision-logs/m1-state-kernel/T8-alert-logging.md`
 
 ---
 
@@ -173,9 +179,15 @@ graph TD
     T3 --> T5
     T4 --> T5
     T5 --> T6
+    T6 --> T8
+    T6 --> T9
+    T8 --> T7
+    T9 --> T7
 ```
 
-**Parallel groups:** `{T3, T4}` may run concurrently after T2 completes (disjoint router files).
+**Parallel groups:** `{T3, T4}` may run concurrently after T2 completes (disjoint router files). **Amendment parallel group:** `{T8, T9}` after T6; T7 runs last (handoff closure consumes T8/T9 outputs).
+
+**Amendment trigger:** `.dev/audits/2026-06-11-m1-state-kernel.md` verdict **fail** — majors F-002, F-003, F-004.
 
 **Soft dependency:** T5 owns `main.py` lifespan and router registration — must merge after T3/T4.
 
@@ -316,41 +328,283 @@ Self-contained packets:
 - `.dev/plans/m1-state-kernel/packets/T4.md`
 - `.dev/plans/m1-state-kernel/packets/T5.md`
 - `.dev/plans/m1-state-kernel/packets/T6.md`
+- `.dev/plans/m1-state-kernel/packets/T7.md` (amendment)
+- `.dev/plans/m1-state-kernel/packets/T8.md` (amendment)
+- `.dev/plans/m1-state-kernel/packets/T9.md` (amendment)
 
 ---
 
 ## 7. Amendment subtasks
 
-None at plan v1.0.
+Triggered by audit `.dev/audits/2026-06-11-m1-state-kernel.md` (revision 1, verdict **fail** at `2ac1e3c`).
+
+### T8 — §14.3 alert emission and log-level contract (audit F-004, F-005, F-006)
+
+| Field | Content |
+|-------|---------|
+| **ID** | T8 |
+| **Scope** | Implement `emit_alert()` per spec §14.3 and plan §2 Logging; wire M1-applicable triggers in `record_failure`; correct log levels (WARNING idempotent skips, ERROR transition failures, CRITICAL+`alert_type` on alerts). |
+| **Files to touch** | `services/state-worker/app/alerts.py` (preferred) or `transitions.py`, `services/state-worker/app/transitions.py`, `services/state-worker/app/sweeps.py` (if sweep log levels touched), `tests/test_state_worker_alerts.py`, `.dev/decision-logs/m1-state-kernel/T8-alert-logging.md` |
+| **Contract bindings** | §2 Logging (amended), ErrorLog `error_class = "ALERT"` |
+| **Inputs** | T6 (landed transitions/routers) |
+| **Outputs** | Alert helper; CRITICAL structured logs; `error_log` ALERT rows; level-correct logging; decision log T8; tests proving F-004/F-005/F-006 closed |
+| **Kill criteria** | Halt if spec §14.3 dual-write (log + `error_log`) cannot be expressed without schema migration; halt if no falsifiable test can assert `logger.critical` + `alert_type` extra field |
+| **Log tier** | architectural |
+| **Risks & mitigations** | Profile-hash and batch-timeout alerts deferred — document explicit deferral in T8 log to avoid scope creep into M3/M5 |
+
+**Audit findings closed:** F-004 (major), F-005 (minor), F-006 (minor).
+
+### T9 — G2 `content_raw` omission coverage (audit F-007)
+
+| Field | Content |
+|-------|---------|
+| **ID** | T9 |
+| **Scope** | Port `test_entries_poll_vector_write_queued_omits_content_raw` into `tests/test_state_worker_contract.py` so `scripts/verify-g2.sh` exercises Flag 3 / context-map resolution in the G2 gate file. |
+| **Files to touch** | `tests/test_state_worker_contract.py` |
+| **Contract bindings** | §2 Tests, poll `content_raw` omission binding |
+| **Inputs** | T6 (contract harness), T3 (poll router landed) |
+| **Outputs** | Named G2 contract test; optional dedup comment in `tests/test_state_worker_routers_poll.py` (keep router unit test or remove duplicate — executor chooses; contract file must own G2 assertion) |
+| **Kill criteria** | Halt if contract harness cannot seed `VECTOR_WRITE_QUEUED` entry without importing poll-router-only fixtures unavailable to contract module |
+| **Log tier** | standard |
+| **Risks & mitigations** | Reuse contract suite DB seed helpers from existing enrichment/H3 tests |
+
+**Audit findings closed:** F-007 (minor).
+
+### T7 — Handoff closure and narrative sync (audit F-002, F-003, F-008, F-009)
+
+| Field | Content |
+|-------|---------|
+| **ID** | T7 |
+| **Scope** | Commit-ready plan v1.2: refresh §8 auditor handoff at amendment SHA on **clean tree**; correct §8.1 cleanliness claim; add CHANGELOG T3 line; confirm §2 `invalid_batch_status` and T8 logging rows landed; update §8.4 audit finding disposition; emit §8.6 cross-link. |
+| **Files to touch** | `.dev/plans/m1-state-kernel/plan.md`, `CHANGELOG.MD` |
+| **Contract bindings** | §8 auditor handoff schema (orch §8); §2 back-annotation |
+| **Inputs** | T8, T9 |
+| **Outputs** | Plan status → **Complete + amendment landed**; valid §8.1 snapshot; §8.3 evidence rows for T8/T9; §8.6 pointing to audit + amendment packets |
+| **Kill criteria** | Halt if T8 or T9 not complete; halt if §8.1 verification runs on dirty tree; halt if `git show HEAD:plan.md` at recorded SHA still lacks §8 fill-in |
+| **Log tier** | standard |
+| **Risks & mitigations** | F-001 context-map staleness — record **treat-as-prediction** in §8.4; no context-map rewrite in M1 amendment scope |
+
+**Audit findings closed:** F-002 (major), F-003 (major), F-008 (minor), F-009 (minor narrative).
+
+**Explicit DAG edges into T7:** plan §8 (F-002/F-003), CHANGELOG (F-008), §2 error envelope row (F-009), §8.3 T8 evidence (F-004), §8.3 T9 evidence (F-007).
+
+---
+
+## 7R. Amendment adversarial pass
+
+### 7R.1 Rejected decompositions
+
+**Alternative — Defer all §14.3 alerts to M2 and amend §2 to mark logging non-binding:** Rejected because audit F-004 is **major** and spec §14.3 is labeled G2; deferral would require charter/spec amendment, not plan prose edit alone.
+
+**Alternative — Merge T8+T9+T7 into single doc-only amendment:** Rejected — F-004 requires code; T7 §8.3 evidence depends on landed tests from T8/T9.
+
+### 7R.2 Load-bearing assumptions (amendment)
+
+| Tuple |
+|-------|
+| `(emit_alert dual-write in same transaction as record_failure state update \| §2 Logging T8 row \| alert row missing when escalation lands \| T8)` |
+| `(caplog or mock logger can assert CRITICAL + alert_type extra \| §2 Tests \| F-004 reopens at audit \| T8)` |
+| `(contract file seed helpers sufficient for VECTOR_WRITE_QUEUED poll \| §2 content_raw G2 row \| T9 kill criterion fires \| T9)` |
+| `(amendment SHA recorded only after T7 commit on clean tree \| §8.1 \| F-003 repeats \| T7)` |
+
+### 7R.3 Highest re-plan risk
+
+**T8** — alert trigger taxonomy may expand if auditor interprets spec §14.3 conditions as requiring batch-timeout sweep in M1. Mitigation: T8 decision log explicitly defers non-state-worker conditions.
+
+### 7R.4 Hidden couplings (amendment)
+
+| Tuple | Status |
+|-------|--------|
+| `(T8 record_failure transaction \| emit_alert INSERT error_log \| partial commit leaves escalated row without alert \| T8)` | suspected — mitigate with same-transaction insert or post-commit alert with documented tradeoff in T8 log |
+| `(T9 contract test duplicates routers_poll fixture \| two tests diverge \| T9)` | suspected — contract test should be self-contained; router test may remain as unit slice |
+| `(T7 §8.1 SHA \| uncommitted plan at audit \| executor commits plan in T7 \| T7)` | confirmed — T7 owns single commit bundle |
 
 ---
 
 ## 8. Auditor handoff
 
-*Deferred until M1 execution completes. Template below for post-execution fill.*
+### §8.1 Completion snapshot (T1–T9 + amendment)
 
-### §8.1 Completion snapshot
+**Tree SHA:** `57d95bcdf734564c9b59b4c23c5e6ab73eec8c7f`
 
-**Tree SHA:** _(pending)_
+**Tracked-tree cleanliness:** **clean** — `git status` shows no modified tracked files at handoff recording.
 
-**Command:** `pytest tests/test_state_worker_contract.py tests/test_state_worker_health.py tests/test_constants.py -v --tb=short`
+**M1 commit chain** (`8d339ee`…`57d95bc`, eight executor commits + `7d38c89` plan/docs bundle):
 
-**Result:** _(pending clean-tree run)_
+| Commit | Subtask | Summary |
+|--------|---------|---------|
+| `68e5148` | T1 | Alembic, enums, models, db pool, config, `bishop_shared` SQLite path |
+| `9c4d249` | T2 | `transitions.py` — claims, H3, N3, sweeps helpers |
+| `cc85f2d` | T3 | Manifest ingest + poll routers, `content_raw` omission |
+| `5f891b0` | T4 | Entry write routers (`POST /entries/*`, pre-filter-results) |
+| `898245c` | T5 | Remaining routers, sweeps, `main.py` lifespan, compose `:m1` |
+| `2ac1e3c` | T6 | G2 contract suite, `verify-g2.sh`, health-test amendment |
+| `6581ed7` | T9 | G2 `content_raw` omission contract test in contract suite |
+| `b7bd8a1` | T8 | `emit_alert()` dual-write, log-level corrections |
+| `57d95bc` | T7 | Plan v1.2 handoff closure, CHANGELOG T3 line, §2/§8 narrative sync |
+
+**Primary automated verification (G2 gate — clean checkout of handoff SHA):**
+
+```
+Command: pytest tests/test_state_worker_contract.py tests/test_state_worker_health.py tests/test_constants.py tests/test_state_worker_alerts.py -v --tb=short
+Environment: win32, Python 3.12.3, pytest 8.4.2
+Result: 39 passed in 11.24s, exit code 0
+```
+
+**Full regression slice (recommended auditor sanity check):**
+
+```
+Command: pytest tests/ -q
+Result: not re-run at T7 handoff; pre-amendment audit recorded 147 passed at `2ac1e3c`
+```
+
+**Live Docker gate:** Not executed on handoff host during this recording. G2 scope is TestClient + temp SQLite per plan §2 Tests policy. Auditor may optionally run `docker compose up --build -d` and `docker compose exec -T state-worker curl -sf http://localhost:8000/health` on a bash/Docker host; `scripts/verify-g2.sh` does not require Docker.
+
+**Alembic deprecation warnings:** 39 warnings from `alembic.config` `path_separator` — non-failing; optional hygiene follow-up.
 
 ### §8.2 Artifact chain
 
-| Path | Notes |
-|------|-------|
-| `.dev/plans/m1-state-kernel/context-map.md` | Pre-plan intake |
-| `.dev/plans/m1-state-kernel/plan.md` | This file |
-| `.dev/plans/m1-state-kernel/packets/T1.md` … `T6.md` | Executor packets |
-| `.dev/decision-logs/m1-state-kernel/T1-schema-foundation.md` | Architectural |
-| `.dev/decision-logs/m1-state-kernel/T2-transition-engine.md` | Architectural |
-| `bishop_spec_0_6.md` | Normative binding |
+Read in order. `git show HEAD:<path>` at §8.1 SHA:
 
-### §8.3–§8.6
+| Path | Resolves at HEAD | Notes |
+|------|------------------|-------|
+| `.dev/plans/m1-state-kernel/context-map.md` | Yes | Scout SHA `8d339ee` — **stale** vs handoff SHA `2ac1e3c` |
+| `.dev/plans/m1-state-kernel/plan.md` | Yes | v1.1 — this file |
+| `.dev/plans/m1-state-kernel/packets/T1.md` | Yes | |
+| `.dev/plans/m1-state-kernel/packets/T2.md` | Yes | |
+| `.dev/plans/m1-state-kernel/packets/T3.md` | Yes | |
+| `.dev/plans/m1-state-kernel/packets/T4.md` | Yes | |
+| `.dev/plans/m1-state-kernel/packets/T5.md` | Yes | |
+| `.dev/plans/m1-state-kernel/packets/T6.md` | Yes | |
+| `.dev/plans/m1-state-kernel/packets/T7.md` | Yes | Amendment — handoff closure |
+| `.dev/plans/m1-state-kernel/packets/T8.md` | Yes | Amendment — alert logging |
+| `.dev/plans/m1-state-kernel/packets/T9.md` | Yes | Amendment — G2 `content_raw` |
+| `.dev/decision-logs/m1-state-kernel/T1-schema-foundation.md` | Yes | Architectural — derived wire models |
+| `.dev/decision-logs/m1-state-kernel/T8-alert-logging.md` | Yes | Architectural — §14.3 alert emission |
+| `.dev/audits/2026-06-11-m1-state-kernel.md` | Yes | Initial audit revision 1 (verdict **fail**); re-audit ready post-T7 |
+| `.dev/decision-logs/m1-state-kernel/T2-transition-engine.md` | Yes | Architectural — sweep timestamp proxy |
+| `CHANGELOG.MD` | Yes | M1 tiered changelog (`m1-state-kernel — 2026-06-11`) |
+| `bishop_spec_0_6.md` | Yes | Normative binding |
+| `scripts/verify-g2.sh` | Yes | G2 CLI gate |
+| `.dev/architecture/bishop/` | Yes | Post-M0 folder present at HEAD (not refreshed post-M1 per charter §7 — auditor hygiene) |
+| `.dev/plans/m1-state-kernel/handoff.md` | **No** | Standalone handoff not emitted; §8 embedded in plan per M0 pattern |
+| `.dev/changelogs/M1-state-kernel.md` | **No** | Charter §7 path absent; root `CHANGELOG.MD` used instead |
 
-_To be completed at M1 handoff._
+### §8.3 §2 evidence
+
+| §2 row | Landed artifact | Proof test |
+|--------|-----------------|------------|
+| `SQLITE_DB_FILENAME` / `SQLITE_DB_PATH` | `bishop_shared/constants.py:L45–47` | `tests/test_constants.py::test_sqlite_db_filename` |
+| `ProcessingState` + §20 enums | `services/state-worker/app/enums.py` | `tests/test_state_worker_enums.py` |
+| Domain models (§7) | `services/state-worker/app/models/domain.py` | `tests/test_state_worker_models.py` |
+| HTTP wire models | `services/state-worker/app/models/http.py` | contract tests per route |
+| `get_db()` / WAL | `services/state-worker/app/db.py` | `tests/test_state_worker_db.py::test_wal_mode_enabled` |
+| `run_migrations()` | `services/state-worker/app/db.py` | `tests/test_state_worker_db.py::test_migrations_create_six_tables`, `test_alembic_migration_clean_from_empty_db` |
+| `RETRY_MAX_ATTEMPTS`, sweep config | `services/state-worker/app/config.py` | `tests/test_state_worker_config.py` |
+| Transition functions | `services/state-worker/app/transitions.py` | `tests/test_state_worker_transitions.py` (16 tests) |
+| Lock-state + retry sweeps | `services/state-worker/app/sweeps.py` + `main.py` lifespan | `test_lock_state_sweep_resets_stuck_relevance_queued`, `tests/test_state_worker_sweeps.py` |
+| Error envelope (409/404/400) | `routers/entries.py`, `transitions.py` | `tests/test_state_worker_entries_router.py`, contract tests |
+| All §9.1 routes | `app/routers/*.py` + `main.py` includes | `test_route_surface_matches_spec` + per-route contract tests |
+| `GET /health` M0 compat | `main.py:L50+` | `tests/test_state_worker_health.py` (5 tests; `test_only_health_route_exposed` removed) |
+| Image tag `:m1` | `docker-compose.yml:L6` | `tests/test_compose.py` |
+| `start_period: 30s` | `docker-compose.yml:L17` | `tests/test_compose.py` |
+| G2 CLI | `scripts/verify-g2.sh` | `tests/test_verify_g2.py` |
+| `emit_alert()` | `services/state-worker/app/alerts.py` | `tests/test_state_worker_alerts.py::test_record_failure_escalation_emits_critical_alert` |
+| Log level contracts | `transitions.py`, `sweeps.py` | `tests/test_state_worker_alerts.py::test_manifest_ingest_skip_logs_warning`, `test_record_failure_logs_error_not_info` |
+| `content_raw` omission (G2) | `routers/poll.py` response serializer | `tests/test_state_worker_contract.py::test_entries_poll_vector_write_queued_omits_content_raw` |
+| `invalid_batch_status` | `routers/batches.py:L36–38` | `tests/test_state_worker_routers_batches.py` (invalid status filter) |
+
+**G2 charter exit criteria (charter L154–156):**
+
+| Criterion | Test |
+|-----------|------|
+| `POST /manifest/batch` idempotency | `test_manifest_batch_idempotent` |
+| `GET /manifest/poll` atomic double-poll empty | `test_manifest_poll_atomic_double_poll_empty` |
+| `POST /entries/enrichment-stage1-results` H3 atomicity | `test_enrichment_stage1_results_rolls_back_on_mid_sequence_failure` |
+| Lock-state sweep resets `RELEVANCE_QUEUED` | `test_lock_state_sweep_resets_stuck_relevance_queued` |
+| Alembic clean from empty DB | `test_alembic_migration_clean_from_empty_db` |
+
+### §8.4 §5 disposition
+
+**§5.2 load-bearing assumptions**
+
+| Tuple | Disposition | Evidence |
+|-------|-------------|----------|
+| SQLite single-writer via REST claims | **closed** | Poll routes delegate to `transitions.claim_*`; no direct SQLite claim path in codebase |
+| `bishop.db` frozen in bishop_shared | **closed** | `constants.py` + `test_sqlite_db_filename` |
+| Derived wire models match future consumers | **treat-as-prediction** | T1 decision log + contract tests; M3/M5 must conform or amend |
+| TestClient + temp SQLite ≡ production aiosqlite | **treat-as-prediction** | Same `db.py`/`transitions.py` code paths; WAL tested; no Docker integration test |
+| M0 `/health` non-blocking | **closed** | `health()` sync, no DB access in handler |
+
+**§5.4 hidden couplings**
+
+| Tuple | Disposition | Evidence |
+|-------|-------------|----------|
+| T3/T4 parallel safe | **closed** | Disjoint router files; merged in T5 `main.py` |
+| T5 router include order | **closed** | No path collisions; contract route surface test passes |
+| JSON list column encoding | **closed** | `domain.py` `to_db_row`/`from_db_row`; T1 decision log documents reader coupling |
+| compose `start_period` vs migration | **closed** | `start_period: 30s`; lifespan runs `run_migrations()` before `yield` |
+| `processing_state` string values | **closed** | Enum `.value` used; enum member test matches spec |
+| `test_only_health_route_exposed` | **closed** | Removed; `test_route_surface_matches_spec` in contract suite |
+
+**Context-map flags (§0):** all eight orch defaults landed as planned (enum placement, `bishop.db`, `content_raw` omission, derived schemas, provenance assertion, health test relocation, `:m1` tag, lifespan startup).
+
+**Audit finding disposition (`.dev/audits/2026-06-11-m1-state-kernel.md`):**
+
+| Finding | Severity | Disposition | Evidence |
+|---------|----------|-------------|----------|
+| F-001 | major (stale context map) | **treat-as-prediction** | Scout SHA `8d339ee` predates implementation; M2 pre-plan should re-scout |
+| F-002 | major (§8 uncommitted) | **closed** | §8 committed at `57d95bc` |
+| F-003 | major (dirty tree claim) | **closed** | §8.1 clean-tree verification at handoff SHA |
+| F-004 | major (no `emit_alert`) | **closed** | T8 `alerts.py` + `tests/test_state_worker_alerts.py` |
+| F-005 | minor (WARNING level) | **closed** | T8 log-level tests |
+| F-006 | minor (ERROR level) | **closed** | T8 `test_record_failure_logs_error_not_info` |
+| F-007 | minor (G2 `content_raw`) | **closed** | T9 contract test in `verify-g2.sh` slice |
+| F-008 | minor (CHANGELOG T3 gap) | **closed** | T7 CHANGELOG backfill |
+| F-009 | minor (`invalid_batch_status` narrative) | **closed** | T7 §2 error envelope row |
+
+**Auditor hygiene notes (non-blocking unless policy requires):**
+
+- No architectural decision logs for T3–T6, T9 (standard tier — expected).
+- `.dev/architecture/bishop/` not post-M1 refreshed (charter §7 housekeeping).
+- T2 deferred `state_entered_at` for sweep precision — documented in decision log; operational risk accepted.
+
+### §8.5 Cold-read seeds
+
+Recommended narrative-blind Phase 0 read (contract-vs-code drift surfaces):
+
+1. `services/state-worker/app/transitions.py` — claim maps, H3, N3, retry/sweep logic
+2. `services/state-worker/app/models/http.py` — derived wire contracts for undocumented endpoints
+3. `bishop_shared/constants.py` — `SQLITE_DB_PATH` coupling surface for M2+ direct readers
+4. `alembic/versions/m1_001_initial_schema.py` — six-table schema ground truth
+5. `tests/test_state_worker_contract.py` — G2 gate and route surface authority
+6. `services/state-worker/app/main.py` — lifespan ordering (migrations → pool → sweeps)
+
+### §8.6 Audit remediation cross-link
+
+**Audit:** `.dev/audits/2026-06-11-m1-state-kernel.md` (revision 1, verdict **fail** at `2ac1e3c`).
+
+| Finding | Severity | Amendment | Packet | Status |
+|---------|----------|-----------|--------|--------|
+| F-002 | major | T7 | `packets/T7.md` | **closed** — §8 at `57d95bc` |
+| F-003 | major | T7 | `packets/T7.md` | **closed** — clean-tree §8.1 |
+| F-004 | major | T8 | `packets/T8.md` | **closed** — `emit_alert()` landed |
+| F-005 | minor | T8 | `packets/T8.md` | **closed** |
+| F-006 | minor | T8 | `packets/T8.md` | **closed** |
+| F-007 | minor | T9 | `packets/T9.md` | **closed** — G2 contract test |
+| F-008 | minor | T7 | `packets/T7.md` | **closed** — CHANGELOG T3 |
+| F-009 | minor | T7 | `packets/T7.md` | **closed** — §2 error row |
+| F-001 | major (stale map) | — | — | **treat-as-prediction** — M2 pre-plan re-scout |
+
+**Re-audit gate:** **Ready** — run auditor on `57d95bc` with plan v1.2 **Complete + amendment landed**.
+
+### Landed contracts summary (M2 pre-plan seed)
+
+**Symbols extended:** `ProcessingState`, all §20 enums, `ManifestEntry`, `Entry`, `BatchRecord`, `ErrorLog`, `OovTagsLog`, `ScraperState`, `SQLITE_DB_FILENAME`, `SQLITE_DB_PATH`, all §9.1 REST endpoints (16 routes).
+
+**Key paths:** `services/state-worker/app/{enums,db,config,transitions,sweeps,main}.py`, `services/state-worker/app/models/{domain,http}.py`, `services/state-worker/app/routers/{manifest,poll,entries,batches,scraper_state,escalations}.py`, `alembic/`, `bishop_shared/constants.py`, `docker-compose.yml` (state-worker `:m1`, `start_period: 30s`).
+
+**G2 entry gate for M2:** `pytest tests/test_state_worker_contract.py` passes; `scripts/verify-g2.sh` passes on bash host.
 
 ---
 
