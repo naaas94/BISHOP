@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: services/state-worker/Dockerfile
-    image: bishop/state-worker:m0
+    image: bishop/state-worker:m1
     networks:
       - bishop-internal
     volumes:
@@ -14,7 +14,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
 
   scraper:
     build:
