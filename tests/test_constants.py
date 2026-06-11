@@ -9,6 +9,8 @@ from bishop_shared.constants import (
     BISHOP_SERVICES,
     BISHOP_VOLUME_MOUNTS,
     QUERY_API_HOST_PORT,
+    SQLITE_DB_FILENAME,
+    SQLITE_DB_PATH,
     STATE_WORKER_INTERNAL_PORT,
     UI_HOST_PORT,
     VolumeMount,
@@ -67,3 +69,8 @@ def test_host_ports() -> None:
 def test_service_names_are_unique() -> None:
     """Falsifier: duplicate compose key would break DNS for dependents."""
     assert len(set(BISHOP_SERVICES)) == len(BISHOP_SERVICES)
+
+
+def test_sqlite_db_filename() -> None:
+    assert SQLITE_DB_FILENAME == "bishop.db"
+    assert SQLITE_DB_PATH == "/app/data/sqlite/bishop.db"

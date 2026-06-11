@@ -9,6 +9,8 @@ WORKDIR /app
 COPY services/state-worker/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY alembic.ini alembic.ini
+COPY alembic alembic
 COPY bishop_shared ./bishop_shared
 COPY services/state-worker/app ./app
 

@@ -40,3 +40,8 @@ BISHOP_DATA_ROOT_DEFAULT = "~/bishop_data"
 STATE_WORKER_INTERNAL_PORT = 8000
 QUERY_API_HOST_PORT = 8080
 UI_HOST_PORT = 8081
+
+# M1 — frozen SQLite filename and absolute container path (plan flag 2 resolution).
+SQLITE_DB_FILENAME = "bishop.db"
+_SQLITE_MOUNT = next(m for m in BISHOP_VOLUME_MOUNTS if m.host_suffix == "sqlite").container_path
+SQLITE_DB_PATH = f"{_SQLITE_MOUNT}/{SQLITE_DB_FILENAME}"
