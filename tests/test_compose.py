@@ -65,7 +65,7 @@ def test_state_worker_has_healthcheck_and_no_host_ports(compose_text: str) -> No
     assert "healthcheck:" in block
     assert "curl" in block
     assert "http://localhost:8000/health" in block
-    assert "start_period: 10s" in block
+    assert "start_period: 30s" in block
     assert "ports:" not in block
 
 
@@ -109,10 +109,11 @@ def test_only_query_api_and_ui_expose_host_ports(compose_text: str) -> None:
             assert "ports:" not in block
 
 
-def test_image_tags_use_m0_convention(compose_text: str) -> None:
+def test_image_tags_use_milestone_convention(compose_text: str) -> None:
     for service in BISHOP_SERVICES:
         block = _service_block(compose_text, service)
-        assert f"image: bishop/{service}:m0" in block
+        tag = "m1" if service == "state-worker" else "m0"
+        assert f"image: bishop/{service}:{tag}" in block
 
 
 def test_repo_root_build_context_for_bishop_shared(compose_text: str) -> None:

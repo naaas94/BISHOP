@@ -58,12 +58,6 @@ def test_run_binds_internal_port(monkeypatch: pytest.MonkeyPatch) -> None:
     assert captured["port"] == STATE_WORKER_INTERNAL_PORT
 
 
-def test_only_health_route_exposed(client: TestClient) -> None:
-    """Falsifier: routes besides /health are registered at M0."""
-    assert client.get("/").status_code == 404
-    assert client.get("/documents").status_code == 404
-
-
 def test_health_rejects_non_get(client: TestClient) -> None:
     """Falsifier: /health accepts mutating methods."""
     assert client.post("/health").status_code == 405
