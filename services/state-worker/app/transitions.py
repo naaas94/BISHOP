@@ -29,6 +29,8 @@ from app.models.http import (
     PreFilterResultEntryWire,
 )
 
+from app.alerts import emit_alert
+
 logger = logging.getLogger(__name__)
 
 TERMINAL_STATES = frozenset(
@@ -331,6 +333,10 @@ async def ingest_manifest_batch(
         )
         if await cursor.fetchone():
             skipped += 1
+            logger.warning(
+                "manifest ingest skip",
+                extra={"source_id": wire.source_id},
+            )
             continue
         manifest = ManifestEntry(
             source_id=wire.source_id,
@@ -887,6 +893,10 @@ async def mark_indexed(conn: aiosqlite.Connection, source_id: str) -> None:
     if entry is None:
         raise NotFoundError(source_id)
     if entry.processing_state == ProcessingState.INDEXED:
+        logger.warning(
+            "mark_indexed idempotent no-op",
+            extra={"source_id": source_id},
+        )
         return
     if entry.processing_state != ProcessingState.VECTOR_WRITE_QUEUED:
         raise InvalidTransitionError(
@@ -920,18 +930,22 @@ async def record_failure(
         state_at_failure, normalized
     )
 
+    alert_type: str | None = None
     if http_status in FATAL_HTTP_STATUSES:
         target = ProcessingState.PERMANENTLY_FAILED
         next_retry_at = None
         new_retry_count = manifest.retry_count
+        alert_type = "permanent_failure"
     elif not is_retriable or http_status in ESCALATION_HTTP_STATUSES:
         target = ProcessingState.ESCALATION_FLAGGED
         next_retry_at = None
         new_retry_count = manifest.retry_count
+        alert_type = "escalation_flagged"
     elif manifest.retry_count + 1 >= RETRY_MAX_ATTEMPTS:
         target = ProcessingState.ESCALATION_FLAGGED
         next_retry_at = None
         new_retry_count = manifest.retry_count + 1
+        alert_type = "retry_budget_exhausted"
     else:
         target = failed_state
         new_retry_count = manifest.retry_count + 1
@@ -982,9 +996,18 @@ async def record_failure(
                 source_id,
             ),
         )
+    if alert_type is not None:
+        await emit_alert(
+            conn,
+            source_id=source_id,
+            alert_type=alert_type,
+            message=message,
+            state_at_failure=normalized,
+            attempt_number=new_retry_count,
+        )
     await conn.commit()
-    logger.info(
-        "transition",
+    logger.error(
+        "transition failure",
         extra={
             "source_id": source_id,
             "from_state": state_at_failure.value,
