@@ -154,6 +154,7 @@ def vector_write_db(temp_db: Path) -> Path:
 def test_entries_poll_vector_write_queued_omits_content_raw(
     vector_write_db: Path,
 ) -> None:
+    """Unit-level poll router check; G2 gate assertion lives in test_state_worker_contract."""
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
         await init_pool(str(vector_write_db), size=2)

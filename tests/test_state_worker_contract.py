@@ -584,6 +584,87 @@ def test_post_entries_retry_contract(
     assert response.json()["processing_state"] == ProcessingState.SCRAPED.value
 
 
+async def _seed_vector_write_queued(db_path: Path, source_id: str = _SOURCE) -> None:
+    """Seed an entry in VECTOR_WRITE_QUEUED with content_raw stored in SQLite."""
+    conn = await aiosqlite.connect(str(db_path))
+    await conn.execute("PRAGMA journal_mode=WAL")
+    try:
+        await ingest_manifest_batch(
+            conn,
+            [
+                ManifestBatchEntryWire(
+                    source_id=source_id,
+                    source=SourceEnum.ARXIV,
+                    url="https://arxiv.org/abs/2301.00001",
+                    title="Contract Paper",
+                    abstract="An abstract",
+                    published_at=_NOW,
+                    domain=DomainEnum.PROFESSIONAL.value,
+                )
+            ],
+        )
+        await claim_manifest_poll(conn, ProcessingState.DISCOVERED)
+        await apply_pre_filter_results(
+            conn,
+            "batch-1",
+            "1.0.0",
+            [
+                PreFilterResultEntryWire(
+                    source_id=source_id,
+                    decision=1,
+                    pre_filter_rationale="Relevant",
+                )
+            ],
+        )
+        await claim_manifest_poll(conn, ProcessingState.RELEVANCE_PASSED)
+        await create_entry_from_content(conn, source_id, "full paper body")
+        await conn.execute(
+            "UPDATE entries SET processing_state = ? WHERE source_id = ?",
+            (ProcessingState.VECTOR_WRITE_QUEUED.value, source_id),
+        )
+        await conn.execute(
+            "UPDATE manifest SET processing_state = ? WHERE source_id = ?",
+            (ProcessingState.VECTOR_WRITE_QUEUED.value, source_id),
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
+
+
+def test_entries_poll_vector_write_queued_omits_content_raw(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """G2 gate: VECTOR_WRITE_QUEUED poll omits content_raw and does not claim (Flag 3)."""
+    db_path = tmp_path / "bishop.db"
+    _patch_db_path(monkeypatch, db_path)
+    monkeypatch.setattr("app.sweeps.SWEEP_INTERVAL_SEC", 0.05)
+    run_migrations(str(db_path))
+    asyncio.run(_seed_vector_write_queued(db_path))
+
+    conn = sqlite3.connect(db_path)
+    try:
+        row = conn.execute(
+            "SELECT content_raw FROM entries WHERE source_id = ?",
+            (_SOURCE,),
+        ).fetchone()
+    finally:
+        conn.close()
+    assert row is not None and row[0] is not None
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/entries/poll",
+            params={"state": ProcessingState.VECTOR_WRITE_QUEUED.value},
+        )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["claimed_count"] >= 1
+    assert body["transitioned_to"] is None
+    assert "content_raw" not in body["entries"][0]
+    assert body["entries"][0]["source_id"] == _SOURCE
+
+
 def test_get_entries_poll_contract(contract_client: tuple[TestClient, Path]) -> None:
     client, _ = contract_client
     _http_advance_to_scraped(client)
