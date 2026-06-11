@@ -3,7 +3,6 @@
 ## m1-state-kernel — 2026-06-11
 
 - T4 (entry write routers): Added `routers/entries.py` with `POST /manifest/pre-filter-results` and all `POST /entries/*` endpoints delegating to `transitions.py` with contract error envelopes. + added `tests/test_state_worker_entries_router.py`. Router registration deferred to T5 `main.py`.
-- T3 (poll and manifest ingest routers): Added `routers/manifest.py` (`POST /manifest/batch`, `GET /manifest/poll`) and `routers/poll.py` (`GET /entries/poll` with `content_raw` omitted for `VECTOR_WRITE_QUEUED`). Router tests cover idempotent ingest, HTTP-level double-poll emptiness, and vector-write payload omission. Domain-filter poll behavior deferred to T6 contract suite.
 - T2 (transition engine): Added `transitions.py` with atomic poll-and-claim, idempotent manifest ingest, H3 enrichment write transactions, N3 ErrorLog normalization, provenance assertion helper, failure/retry/manual-retry paths, and lock-state/retry sweep helpers. Unit tests cover double-poll emptiness, H3 rollback, and sweep recovery. See `.dev/decision-logs/m1-state-kernel/T2-transition-engine.md`.
 - T1 (schema foundation): Added Alembic initial migration for six §7 tables, `ProcessingState` and §20 enums, Pydantic domain and HTTP wire models, sync `run_migrations()` plus async aiosqlite pool with WAL, state-worker config constants, frozen `SQLITE_DB_PATH` in `bishop_shared`, and Dockerfile Alembic COPY. Establishes the typed contract surface T2–T6 consume before routers land. See `.dev/decision-logs/m1-state-kernel/T1-schema-foundation.md`.
 
