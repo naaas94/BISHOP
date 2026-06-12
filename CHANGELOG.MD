@@ -1,5 +1,9 @@
 # Changelog
 
+## m2-discovery — 2026-06-12
+
+- T1 (scraper foundation): Added `bishop_shared/enums.py` (`SourceEnum`, `DomainEnum`), scraper `app/config.py`, wire DTOs, async `StateWorkerClient`, requirements, and Dockerfile skeleton copying `bishop_shared` + `app/` (stub CMD retained for T5). Establishes cross-service enum drift guard and state-worker HTTP client surface for T2–T5. See `.dev/decision-logs/m2-discovery/T1-scraper-foundation.md`. + added `tests/test_shared_enums.py`, `tests/test_scraper_config.py`, `tests/test_scraper_models.py`, `tests/test_scraper_client.py`. Non-2xx batch POST propagation covered in `test_post_manifest_batch_raises_on_non_2xx`; live docker compose smoke deferred to T5.
+
 ## m1-state-kernel — 2026-06-11
 
 - T7 (handoff closure and narrative sync): Refreshed §8 auditor handoff at amendment SHA on clean tree, back-annotated §2 contracts (removed pending placeholders), added missing CHANGELOG T3 line, and finalized §8.6 audit cross-link. Closes audit F-002, F-003, F-008, F-009.
