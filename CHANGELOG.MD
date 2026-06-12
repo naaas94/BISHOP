@@ -2,6 +2,7 @@
 
 ## m2-discovery — 2026-06-12
 
+- T2 (adapter ABC, registry, rate limits): Added `SourceAdapter` ABC with default `fetch_content` → `NotImplementedError("M4")`, `make_source_id`, `ADAPTER_REGISTRY` (Arxiv-only bootstrap), `RateLimit`, arxiv `SOURCE_RATE_LIMITS` per §15.1, and async `TokenBucketRateLimiter`. M2 charter limits registry to one adapter despite spec §10.2. See `.dev/decision-logs/m2-discovery/T2-adapter-registry.md`. + added `tests/test_scraper_adapters.py`, `tests/test_scraper_rate_limit.py`. Multi-token burst throttle deferred per decision log.
 - T1 (scraper foundation): Added `bishop_shared/enums.py` (`SourceEnum`, `DomainEnum`), scraper `app/config.py`, wire DTOs, async `StateWorkerClient`, requirements, and Dockerfile skeleton copying `bishop_shared` + `app/` (stub CMD retained for T5). Establishes cross-service enum drift guard and state-worker HTTP client surface for T2–T5. See `.dev/decision-logs/m2-discovery/T1-scraper-foundation.md`. + added `tests/test_shared_enums.py`, `tests/test_scraper_config.py`, `tests/test_scraper_models.py`, `tests/test_scraper_client.py`. Non-2xx batch POST propagation covered in `test_post_manifest_batch_raises_on_non_2xx`; live docker compose smoke deferred to T5.
 
 ## m1-state-kernel — 2026-06-11
