@@ -620,3 +620,126 @@ Recommended narrative-blind Phase 0 read (contract-vs-code drift surfaces):
 | Health route test | Relocate to contract suite | Preserves M0 health invariants without blocking §9.1 | Two test files to maintain |
 | Image tag | `bishop/state-worker:m1` only | Signals state-worker rebuild without churning eight stubs | Mixed `:m0`/`:m1` tags until later milestone |
 | Startup sequence | Lifespan migrations before listen; `start_period: 30s` | Resolves surface 2 without 503 health semantics | Slow first start on large migration history |
+
+---
+
+## 8A. Amendment re-audit auditor handoff (plan v1.3)
+
+> **Traceability:** §8 above is frozen as the v1.2 executor handoff (T1–T7 amendment landing). This section is appended for the **re-audit cycle** triggered after initial audit `.dev/audits/2026-06-11-m1-state-kernel.md` (revision 1, verdict **fail** at `2ac1e3c`). Do not merge or replace §8 — auditors read §8 for first-cycle context, then §8A for re-audit scope.
+
+**Plan version:** 1.3 (re-audit handoff only — header metadata remains v1.2 until separately bumped)  
+**Status:** Re-audit ready — amendment code landed (T8–T9–T7); one full-suite regression outside G2 slice  
+**Triggers audit:** `.dev/audits/2026-06-11-m1-state-kernel.md` F-004…F-009 remediation packets `T7`–`T9`  
+**Baseline audit SHA:** `2ac1e3cb3da1e4fb427ff19776a9ae77ba7e230c` (pre-amendment)  
+**Amendment executor handoff SHA (§8):** `bb1365d64bc9b399459101bb46c50144e2d74fc1` (T7 commit; §8.1 in §8 may cite `57d95bc` — use `git log` for canonical chain)
+
+### §8A.1 Completion snapshot
+
+**Tree SHA:** `3d1ee2e720eae21d2169eee7c15b279634acf47a`
+
+**Tracked-tree cleanliness:** `git status` reports `M .dev/plans/m1-state-kernel/plan.md` at handoff recording (line-ending / append-only delta for §8A; no implementation files modified). Re-audit should run pytest on a **clean checkout** of `3d1ee2e` before merge sign-off; this §8A append may land as a follow-up commit on top.
+
+**Amendment commit chain** (`2ac1e3c`…`3d1ee2e`):
+
+| Commit | Subtask | Summary |
+|--------|---------|---------|
+| `6581ed7` | T9 | G2 `test_entries_poll_vector_write_queued_omits_content_raw` in contract suite |
+| `b7bd8a1` | T8 | `alerts.py` `emit_alert()` dual-write; log-level corrections in `transitions.py` |
+| `bb1365d` | T7 | §8 v1.2 handoff refresh, CHANGELOG T3 line, §2/§8.6 narrative sync |
+| `3d1ee2e` | orch | Amendment packets T7–T9 + initial audit artifact committed |
+
+**Primary automated verification (G2 + amendment slice — run at handoff recording):**
+
+```
+Command: pytest tests/test_state_worker_contract.py tests/test_state_worker_health.py tests/test_constants.py tests/test_state_worker_alerts.py -v --tb=short
+Environment: win32, Python 3.12.3, pytest 8.4.2
+Result: 39 passed in 8.85s, exit code 0
+```
+
+**Full regression slice (recommended re-audit sanity check):**
+
+```
+Command: pytest tests/ -q
+Environment: win32, Python 3.12.3, pytest 8.4.2
+Result: 153 passed, 1 failed in 18.43s, exit code 1
+Failure: tests/test_state_worker_routers_escalations.py::test_escalations_returns_flagged_entry_with_error_log
+  — expects len(error_log)==1; T8 dual-write inserts ALERT row alongside failure row (len==2)
+```
+
+**Live Docker gate:** Not executed at handoff recording. Unchanged from §8.
+
+### §8A.2 Artifact chain (re-audit read order)
+
+Read after §8 artifact chain. `git show HEAD:<path>` at §8A.1 SHA `3d1ee2e`:
+
+| Path | Resolves at HEAD | Notes |
+|------|------------------|-------|
+| `.dev/audits/2026-06-11-m1-state-kernel.md` | Yes | Revision 1 — initial **fail**; re-audit supersedes verdict |
+| `.dev/plans/m1-state-kernel/plan.md` | Yes | v1.2 §8 + this §8A append |
+| `.dev/plans/m1-state-kernel/packets/T7.md` | Yes | Amendment handoff closure |
+| `.dev/plans/m1-state-kernel/packets/T8.md` | Yes | Amendment alert logging |
+| `.dev/plans/m1-state-kernel/packets/T9.md` | Yes | Amendment G2 `content_raw` |
+| `services/state-worker/app/alerts.py` | Yes | T8 landed |
+| `tests/test_state_worker_alerts.py` | Yes | T8 — 6 tests |
+| `.dev/decision-logs/m1-state-kernel/T8-alert-logging.md` | Yes | Deferred alert conditions + transaction choice |
+| `tests/test_state_worker_contract.py` | Yes | T9 G2 test at ~L634 |
+| `CHANGELOG.MD` | Yes | T7–T9 lines present |
+
+### §8A.3 Amendment §2 evidence
+
+| Amendment row | Landed artifact | Proof test |
+|---------------|-----------------|------------|
+| `emit_alert()` | `services/state-worker/app/alerts.py:L31+` | `test_record_failure_escalation_emits_critical_alert`, `test_emit_alert_writes_error_log_row` |
+| M1 `alert_type` triggers | `transitions.py` `record_failure` → `emit_alert` | `test_record_failure_permanent_failure_emits_alert` |
+| Log WARNING (idempotent) | `transitions.py` ingest skip / `mark_indexed` | `test_manifest_ingest_skip_logs_warning` |
+| Log ERROR (failure) | `transitions.py` `record_failure` | `test_record_failure_logs_error_not_info` |
+| No alert on retriable failure | `transitions.py` branch guard | `test_retriable_failure_without_alert_does_not_emit_critical` |
+| `content_raw` omission (G2) | `routers/poll.py` + contract harness | `test_entries_poll_vector_write_queued_omits_content_raw` in contract file |
+| `invalid_batch_status` (§2 narrative) | `routers/batches.py:L36–38` | `tests/test_state_worker_routers_batches.py` |
+| CHANGELOG T3 line | `CHANGELOG.MD` L9 | narrative only |
+
+### §8A.4 Amendment disposition (audit findings F-001…F-009)
+
+| Finding | Severity | Executor | Re-audit disposition | Evidence / note |
+|---------|----------|----------|----------------------|-----------------|
+| F-004 | major | T8 | **verify closed** | `alerts.py` + alert tests pass |
+| F-005 | minor | T8 | **verify closed** | WARNING test passes |
+| F-006 | minor | T8 | **verify closed** | ERROR test passes |
+| F-007 | minor | T9 | **verify closed** | G2 contract test in `verify-g2.sh` slice |
+| F-002 | major | T7 | **verify closed** | §8 committed at `bb1365d` |
+| F-003 | major | T7 | **verify closed** | §8.1 clean at T7 commit; §8A append may dirty tree |
+| F-008 | minor | T7 | **verify closed** | CHANGELOG T3 line L9 |
+| F-009 | minor | T7 | **verify closed** | §2 error envelope row in plan |
+| F-001 | major | — | **treat-as-prediction** | context-map stale; M2 pre-plan re-scout |
+| — | **new** | T8 side-effect | **open** | `test_escalations_returns_flagged_entry_with_error_log` fails full suite — ALERT sibling row; update test or document escalation panel includes ALERT rows |
+
+**§7R.4 amendment couplings (re-audit):**
+
+| Tuple | Re-audit disposition |
+|-------|------------------------|
+| `(T8 record_failure transaction \| emit_alert INSERT \| partial commit \| T8)` | **closed** — same-transaction insert per T8 decision log |
+| `(T9 contract vs routers_poll duplicate \| T9)` | **closed** — both tests pass; contract owns G2 |
+| `(T8 ALERT row \| GET /escalations error_log length \| T8,T5)` | **open** — full-suite failure; auditor decides test fix vs panel contract |
+
+### §8A.5 Cold-read seeds (re-audit Phase 0)
+
+1. `services/state-worker/app/alerts.py` — dual-write shape, `ALERT_ERROR_CLASS`
+2. `services/state-worker/app/transitions.py` — `record_failure` alert branches (~L1000+)
+3. `tests/test_state_worker_alerts.py` — F-004/F-005/F-006 proof
+4. `tests/test_state_worker_contract.py` — G2 gate including T9 `content_raw` test
+5. `tests/test_state_worker_routers_escalations.py` — open regression surface post-T8
+6. `.dev/decision-logs/m1-state-kernel/T8-alert-logging.md` — deferred §14.3 conditions
+
+### §8A.6 Re-audit kickoff
+
+**Prior audit:** `.dev/audits/2026-06-11-m1-state-kernel.md` (revision 1, **fail** at `2ac1e3c`).
+
+**Re-audit scope:**
+1. Confirm F-004…F-009 closed per §8A.4 (code + narrative).
+2. Adjudicate open escalations `error_log` length finding (§8A.4).
+3. Re-run G2 slice and full `pytest tests/` on clean checkout of §8A.1 SHA.
+4. Cold-read §8A.5 before reading §8 narrative or amendment packets.
+
+**Expected upgrade path:** `pass` or `pass-with-conditions` if only escalations test update required.
+
+**M2 entry gate (unchanged):** `scripts/verify-g2.sh` / G2 pytest slice green.

@@ -302,3 +302,258 @@ python -m pytest tests/ -k "state_worker or verify_g2 or test_sqlite" -q  → 10
 ```
 
 Diff scope reviewed: `git diff 7d38c89..HEAD` (44 files, +5636 lines).
+
+---
+
+# Audit Report — m1-state-kernel (Revision 2 — Re-audit)
+
+**Audit document revision:** 2 (re-audit)  
+**Supersedes verdict of:** Revision 1 (initial, **fail** at `2ac1e3c`)  
+**Date:** 2026-06-11  
+**Plan version:** 1.2 (HEAD) + §8A append (working tree, uncommitted)  
+**Audit HEAD:** `3d1ee2e720eae21d2169eee7c15b279634acf47a`  
+**Amendment scope:** T7–T9 (`6581ed7`…`3d1ee2e`) closing revision-1 findings F-002…F-009  
+**Auditor focus areas:**
+1. **Integration seams** (mandatory) — T8 `record_failure` ↔ `emit_alert` transaction boundary; T8 ALERT row ↔ `GET /escalations` wire shape.
+2. **Failure paths** — §14.3 alert dual-write closure (F-004); log-level contracts (F-005/F-006).
+3. **Regression surface** — full `pytest tests/` after amendment; adjudicate §8A.4 open escalations coupling.
+
+**Omission-free artifact checklist (revision-1 fail surfaces reviewed):**
+
+| Surface | Opened at re-audit |
+|---------|-------------------|
+| `.dev/audits/2026-06-11-m1-state-kernel.md` (rev 1) | Yes |
+| `.dev/plans/m1-state-kernel/plan.md` (§8 + §8A) | Yes |
+| Packets T1–T9 | Yes |
+| Decision logs T1, T2, T8 | Yes |
+| `services/state-worker/app/alerts.py`, `transitions.py` | Yes |
+| `tests/test_state_worker_alerts.py`, `test_state_worker_contract.py` | Yes |
+| `tests/test_state_worker_routers_escalations.py` | Yes |
+| `CHANGELOG.MD`, `scripts/verify-g2.sh` | Yes |
+| Context map | Yes (stale-qualified) |
+
+---
+
+## R2.1 Audit metadata
+
+| Field | Value |
+|-------|-------|
+| Task | M1 — State Kernel + amendment T7–T9 |
+| Context map | `.dev/plans/m1-state-kernel/context-map.md` — **CONDITIONAL**, scout SHA `8d339ee` (stale) |
+| Baseline audit SHA | `2ac1e3cb3da1e4fb427ff19776a9ae77ba7e230c` |
+| Re-audit SHA | `3d1ee2e720eae21d2169eee7c15b279634acf47a` |
+| Provenance | **Diverged** from scout (unchanged from F-001); amendment commits landed |
+| Working tree | **dirty** — `M .dev/plans/m1-state-kernel/plan.md` (§8A append only; implementation clean at HEAD) |
+| Phase 0 discipline | Cold-read on `alerts.py`, `transitions.py` `record_failure`, alert tests, contract T9 test, escalations router test **before** §8/§8A narrative and amendment packets |
+| Pytest (auditor run) | G2+amendment slice: **43 passed**; full suite: **153 passed, 1 failed** |
+
+---
+
+## R2.2 Provenance log
+
+### SHA comparison
+
+| Check | Result |
+|-------|--------|
+| Scout SHA vs re-audit HEAD | **Diverged** (`8d339ee` → `3d1ee2e`) |
+| Baseline audit SHA vs re-audit HEAD | **Diverged** (`2ac1e3c` → `3d1ee2e`) — expected; amendment landed |
+
+**F-001 (`context-map-stale`):** **open** (treat-as-prediction). Scout inventory obsolete; no re-scout in amendment scope. M2 pre-plan should re-explore at `3d1ee2e`.
+
+### Working-tree state
+
+| Check | Result |
+|-------|--------|
+| Implementation files at HEAD | **clean** |
+| Dirty paths | `.dev/plans/m1-state-kernel/plan.md` — §8A re-audit handoff append (126 lines) not in HEAD |
+
+### Plan-artifact provenance (`git show HEAD:<path>` at `3d1ee2e`)
+
+| Artifact | HEAD | On disk | Notes |
+|----------|------|---------|-------|
+| `.dev/plans/m1-state-kernel/plan.md` v1.2 §8 | present | **modified** | §8A append disk-only → F-015 |
+| Packets T7–T9 | present | present | Amendment packets committed at `3d1ee2e` |
+| `.dev/decision-logs/m1-state-kernel/T8-alert-logging.md` | present | present | |
+| `services/state-worker/app/alerts.py` | present | present | T8 |
+| `tests/test_state_worker_alerts.py` | present | present | 6 tests |
+| `.dev/audits/2026-06-11-m1-state-kernel.md` rev 1 | present | present | This append adds rev 2 |
+| `CHANGELOG.MD` T3/T7/T8/T9 lines | present | present | F-008 closed |
+
+**New findings filed:** F-013, F-014, F-015
+
+---
+
+## R2.3 Context chain completeness
+
+| Artifact | Provided | Limits |
+|----------|----------|--------|
+| Context map | Yes | Stale (pre-M1 SHA) |
+| Plan §2 + §8A cold-read seeds | Yes | §8A on disk only until committed |
+| Packets T1–T9 | Yes | |
+| Decision logs T1, T2, T8 | Yes | |
+| Changelog | Yes | T3 line present |
+| Revision-1 audit | Yes | Preserved above |
+| Codebase | Yes | `2ac1e3c..3d1ee2e` (+ orch commit) |
+| Tests | Yes | Full suite run by auditor |
+
+Phase 0 completed before §8/§8A narrative, T7–T9 packets, and T8 decision log.
+
+---
+
+## R2.4 Cold-read log (Phase 0 — pinned, fresh)
+
+| ID | Severity guess | Finding |
+|----|----------------|---------|
+| CR2-01 | major | `test_escalations_returns_flagged_entry_with_error_log` asserts `len(error_log)==1`; T8 dual-write produces operational + ALERT rows → full suite fails |
+| CR2-02 | minor | `verify-g2.sh` runs contract + health + constants only; does not include `test_state_worker_alerts.py` despite plan §8A.1 command listing alerts in amendment slice |
+| CR2-03 | observation | `GET /escalations` returns all `error_log` rows unfiltered — consistent with spec §14.2 "all attempts" + §14.3 ALERT rows; stale test is the defect |
+| CR2-04 | observation | `manual_retry` selects `ORDER BY timestamp DESC LIMIT 1` without excluding `error_class='ALERT'`; ALERT rows carry same `state_at_failure` — likely benign but tie-order undefined when timestamps equal |
+| CR2-05 | resolved vs rev1 | `alerts.py` implements `logger.critical` + `error_class=ALERT` insert — addresses CR-01/F-004 |
+| CR2-06 | resolved vs rev1 | `transitions.py` has `logger.warning` (ingest skip) and `logger.error` (`transition failure`) — addresses CR-03/CR-04/F-005/F-006 |
+
+---
+
+## R2.5 Finding status vs revision 1
+
+| Prior ID | Prior severity | Prior type | Status | Evidence at `3d1ee2e` |
+|----------|----------------|------------|--------|------------------------|
+| F-001 | major | context-map-stale | **open** | Scout SHA unchanged; expected M2 re-scout |
+| F-002 | major | artifact-not-in-HEAD | **resolved** | §8 v1.2 committed at `bb1365d`; `git show HEAD:plan.md` has filled §8 |
+| F-003 | major | process-violation | **resolved** | Clean tree at T7 handoff; dirty path now only §8A append (F-015) |
+| F-004 | major | contract-violation | **resolved** | `alerts.py` + 6 alert tests pass |
+| F-005 | minor | contract-violation | **resolved** | `test_manifest_ingest_skip_logs_warning` passes |
+| F-006 | minor | contract-violation | **resolved** | `test_record_failure_logs_error_not_info` passes |
+| F-007 | minor | coverage-gap | **resolved** | `test_entries_poll_vector_write_queued_omits_content_raw` in contract file |
+| F-008 | minor | intent-drift | **resolved** | `CHANGELOG.MD` L9 T3 line |
+| F-009 | minor | contract-violation | **resolved** | Plan §2 L100 `invalid_batch_status` row |
+| F-010 | observation | prediction-divergence | **open** | Benign; T1 log documents `models/` package |
+| F-011 | observation | prediction-divergence | **open** | Benign test expansion |
+| F-012 | observation | coverage-gap | **open** | Docker compose kill criterion still manual |
+
+---
+
+## R2.6 Findings table (revision 2 — new and changed)
+
+| ID | Severity | Type | Phase | Subtask | Description |
+|----|----------|------|-------|---------|-------------|
+| F-013 | major | coverage-gap | 4, 5 | T8, T5 | `test_escalations_returns_flagged_entry_with_error_log` expects 1 error_log row; T8 inserts ALERT sibling — full suite 153/154 |
+| F-014 | minor | process-violation | 2 | T8/T6 | `verify-g2.sh` omits `tests/test_state_worker_alerts.py`; F-004 proof outside G2 script path |
+| F-015 | minor | artifact-not-in-HEAD | 0.5 | orch | Plan §8A re-audit handoff append exists only in working tree |
+
+---
+
+## R2.7 Detailed findings (above minor — revision 2)
+
+### F-013 — coverage-gap (major)
+
+**Expected:** After T8 amendment, automated test suite green; escalation panel reflects spec §14.2/§14.3 error history including ALERT rows.  
+**Found:** `tests/test_state_worker_routers_escalations.py::test_escalations_returns_flagged_entry_with_error_log` asserts `len(entries[0]["error_log"]) == 1`. `record_failure` with escalation HTTP 404 inserts operational row (`HTTPStatusError`, message "Not found") then `emit_alert` inserts `error_class=ALERT` row — router correctly returns both (`escalations.py` L42–51, unfiltered). Test fails: `assert 2 == 1`.  
+**Evidence:** Auditor `pytest tests/ -q` → 153 passed, 1 failed; plan §8A.1 documents same failure.  
+**Classification:** Stale T5 unit test not updated in T8 scope — implementation matches spec; test is wrong.  
+**Action:** Update test to expect 2 rows (or assert operational row message + ALERT row presence). Optional: filter ALERT from panel wire if UI contract differs — not indicated by spec.
+
+### F-015 — artifact-not-in-HEAD (minor)
+
+**Expected:** Re-audit handoff §8A committed for merge archaeology.  
+**Found:** `git diff HEAD -- plan.md` shows 126-line §8A append only on disk. HEAD plan ends at orch decision log table (v1.2 §8 committed).  
+**Action:** Commit §8A + this audit revision 2 append.
+
+---
+
+## R2.8 Adversarial test log (revision 2)
+
+### Focus 1 — Integration seams (amendment couplings)
+
+| Surface | Scenario | Expected | Actual | Result |
+|---------|----------|----------|--------|--------|
+| T8 transaction | `record_failure` + `emit_alert` same commit | Both rows or neither | Operational INSERT → manifest UPDATE → `emit_alert` INSERT → `commit` in `transitions.py` L968–1008 | **passes** |
+| T8 ↔ escalations | Panel shows post-escalation error history | All error_log rows per §14.2 | Router returns 2 rows for escalated entry | **passes** (wire correct) |
+| T8 ↔ escalations test | Unit test matches wire | Test passes | `len==1` assertion fails | **fails** (F-013) |
+| T9 ↔ G2 gate | `content_raw` omission in contract file | In `verify-g2.sh` slice | `test_state_worker_contract.py` L634; `verify-g2.sh` includes contract file | **passes** |
+| T8 ↔ manual_retry | Retry target from most recent error_log | Correct predecessor state | ALERT row has same `state_at_failure`; tie on timestamp possible | **unknown** (no adversarial test) |
+
+### Focus 2 — Failure paths / §14.3
+
+| Scenario | Expected | Actual | Result |
+|----------|----------|--------|--------|
+| Retry budget exhaustion alert | CRITICAL + `alert_type=retry_budget_exhausted` + ALERT row | `test_record_failure_escalation_emits_critical_alert` | **passes** |
+| Permanent failure alert | `permanent_failure` | `test_record_failure_permanent_failure_emits_alert` | **passes** |
+| Sub-threshold retriable failure | No alert | `test_retriable_failure_without_alert_does_not_emit_critical` | **passes** |
+| Idempotent skip WARNING | `logger.warning` | `test_manifest_ingest_skip_logs_warning` | **passes** |
+| Failure ERROR not INFO | `logger.error("transition failure")` | `test_record_failure_logs_error_not_info` | **passes** |
+
+### Focus 3 — Regression surface
+
+| Scenario | Expected | Actual | Result |
+|----------|----------|--------|--------|
+| G2 charter contract suite | All pass | 33 contract tests + health + constants | **passes** (40 in verify-g2 slice) |
+| Amendment proof slice | Alerts + contract | 43 passed (auditor command) | **passes** |
+| Full `pytest tests/` | Green before M1 sign-off | 153 passed, 1 failed | **fails** (F-013) |
+
+---
+
+## R2.9 Coverage gap list (revision 2)
+
+| Priority | Gap | Tests exist? | Notes |
+|----------|-----|--------------|-------|
+| **P1** | Escalations router test stale post-T8 | Yes — failing | F-013; blocks full suite |
+| **P2** | Alert tests outside `verify-g2.sh` | Yes, not in script | F-014 |
+| **P3** | `manual_retry` with ALERT row tie-break | No adversarial test | CR2-04 observation |
+| **P4** | Docker compose healthcheck | No | F-012 unchanged |
+
+G2 charter kill criteria: **all covered and passing** in `test_state_worker_contract.py`.
+
+---
+
+## R2.10 Intent traceability (Phase 1 summary)
+
+**Amendment intent → code:** T8 alert dual-write and log levels — **landed**. T9 G2 `content_raw` — **landed**. T7 handoff/CHANGELOG/§2 sync — **landed** at `bb1365d`.
+
+**T8 decision log vs code:** Chosen module `alerts.py`, same-transaction insert, M1 trigger taxonomy, deferred M3/M5 conditions — **matches** implementation. Rejected post-commit alert — **avoided**.
+
+**Narrative vs cold-read:** §8A.4 correctly flags escalations test as open; does not claim full suite green. No narrative-concealment on F-004 closure — alert code verified independently.
+
+**Non-goals:** M3/M5 alert conditions not wired — **respected** per T8 decision log deferrals.
+
+---
+
+## R2.11 Scout-prediction reconciliation (amendment delta)
+
+No new scout predictions. Prior table (§10 revision 1) stands stale-qualified. Amendment confirms Flag 3 (`content_raw`) now **verified** in G2 contract file (F-007 resolved).
+
+---
+
+## R2.12 Verdict (revision 2)
+
+**`pass-with-conditions`**
+
+Amendment successfully closes revision-1 **blocking** findings **F-002, F-003, F-004** (and minors F-005–F-009). G2 charter gate and amendment proof slice are green (**43/43**). Integration seams for T8 dual-write compose correctly; spec-aligned escalation wire exposes both operational and ALERT rows.
+
+**Conditions before M1 merge sign-off:**
+
+1. **F-013 (major)** — Fix `test_escalations_returns_flagged_entry_with_error_log` to expect dual error_log rows (or document/filter if product intent differs). Full `pytest tests/` must pass.
+2. **F-015 (minor)** — Commit plan §8A and audit revision 2 for archaeology.
+
+**Accepted without blocking:**
+
+- F-001 context-map staleness — M2 re-scout
+- F-014 — extend `verify-g2.sh` to include alert tests, or document intentional split (contract gate vs logging gate)
+- F-010, F-011, F-012 — observations from revision 1
+
+**Upgrade to `pass`:** Resolve F-013 + commit §8A/audit rev 2 (F-015).
+
+---
+
+## R2.13 Auditor execution notes (revision 2)
+
+Commands run at re-audit time:
+
+```
+git rev-parse HEAD  → 3d1ee2e720eae21d2169eee7c15b279634acf47a
+git status --short  → M .dev/plans/m1-state-kernel/plan.md
+python -m pytest tests/test_state_worker_contract.py tests/test_state_worker_health.py tests/test_constants.py tests/test_state_worker_alerts.py tests/test_verify_g2.py -q  → 43 passed
+python -m pytest tests/ -q  → 153 passed, 1 failed (test_state_worker_routers_escalations.py)
+python -m pytest tests/ -k "state_worker or verify_g2 or test_sqlite" -q  → 108 passed, 1 failed
+```
+
+Diff scope reviewed: `git diff 2ac1e3c..3d1ee2e` (amendment commits T7–T9 + orch metadata).
