@@ -21,7 +21,6 @@ from bishop_shared.constants import (
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 T2_WORKER_SERVICES = (
-    "scraper",
     "pre-filter-worker",
     "content-scraper",
     "enrichment-batcher",
@@ -144,3 +143,13 @@ def test_dockerfiles_use_python_slim_base() -> None:
             encoding="utf-8",
         )
         assert "python:3.12-slim" in dockerfile
+
+
+def test_scraper_uses_real_main_entrypoint() -> None:
+    """Falsifier: scraper must run app.main, not the M0 stub loop."""
+    dockerfile = (REPO_ROOT / "services" / "scraper" / "Dockerfile").read_text(
+        encoding="utf-8",
+    )
+    assert 'CMD ["python", "-m", "app.main"]' in dockerfile
+    assert "stub_main.py" not in dockerfile
+    assert (REPO_ROOT / "services" / "scraper" / "app" / "main.py").is_file()

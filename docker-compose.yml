@@ -20,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: services/scraper/Dockerfile
-    image: bishop/scraper:m0
+    image: bishop/scraper:m2
     networks:
       - bishop-internal
     volumes:

@@ -7,8 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bishop_shared ./bishop_shared
 COPY services/scraper/app ./app
-COPY services/scraper/stub_main.py ./stub_main.py
 
 ENV PYTHONPATH=/app
 
-CMD ["python", "stub_main.py"]
+CMD ["python", "-m", "app.main"]

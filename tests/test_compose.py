@@ -112,7 +112,12 @@ def test_only_query_api_and_ui_expose_host_ports(compose_text: str) -> None:
 def test_image_tags_use_milestone_convention(compose_text: str) -> None:
     for service in BISHOP_SERVICES:
         block = _service_block(compose_text, service)
-        tag = "m1" if service == "state-worker" else "m0"
+        if service == "state-worker":
+            tag = "m1"
+        elif service == "scraper":
+            tag = "m2"
+        else:
+            tag = "m0"
         assert f"image: bishop/{service}:{tag}" in block
 
 
