@@ -12,6 +12,7 @@ import httpx
 import pytest
 
 from bishop_shared.enums import DomainEnum, SourceEnum
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _ENRICHMENT_ROOT = _REPO_ROOT / "services" / "enrichment-batcher"
@@ -165,7 +166,7 @@ def test_stage1_cycle_happy_path_registers_enrichment_stage1_batch() -> None:
     ]
     requests = anthropic_client.build_requests(entries=batch_entries)
     for req, source_id in zip(requests, source_ids, strict=True):
-        assert req["custom_id"] == source_id
+        assert req["custom_id"] == source_id_to_batch_custom_id(source_id)
         assert req["params"]["model"] == "claude-haiku-4-5-20251001"
 
 

@@ -16,6 +16,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from bishop_shared.enums import DomainEnum, SourceEnum
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _STATE_WORKER_ROOT = _REPO_ROOT / "services" / "state-worker"
@@ -303,7 +304,7 @@ def test_m5_e2e_five_entries_reach_vector_write_queued_with_enrichment_fields(
             stage1_batch = _in_flight_enrichment_batch(client, "enrichment_stage1")
             stage1_results = [
                 poller_models_mod.AnthropicBatchResultItem(
-                    custom_id=source_id,
+                    custom_id=source_id_to_batch_custom_id(source_id),
                     text=_call1_payload(oov=(index == 0)),
                 )
                 for index, source_id in enumerate(source_ids)
@@ -325,7 +326,7 @@ def test_m5_e2e_five_entries_reach_vector_write_queued_with_enrichment_fields(
             stage2_batch = _in_flight_enrichment_batch(client, "enrichment_stage2")
             stage2_results = [
                 poller_models_mod.AnthropicBatchResultItem(
-                    custom_id=source_id,
+                    custom_id=source_id_to_batch_custom_id(source_id),
                     text=_call2_payload(),
                 )
                 for source_id in source_ids

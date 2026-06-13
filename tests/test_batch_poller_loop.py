@@ -12,6 +12,8 @@ from types import ModuleType
 import httpx
 import pytest
 
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
+
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _BATCH_POLLER_ROOT = _REPO_ROOT / "services" / "batch-poller"
 
@@ -139,11 +141,11 @@ def test_poll_once_posts_results_and_patches_complete() -> None:
 
     fake_results = [
         models_mod.AnthropicBatchResultItem(
-            custom_id=_SOURCE_PASS,
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
             text='{"decision": 1, "rationale": "Strong RAG content."}',
         ),
         models_mod.AnthropicBatchResultItem(
-            custom_id=_SOURCE_FAIL,
+            custom_id=source_id_to_batch_custom_id(_SOURCE_FAIL),
             text='{"decision": 0, "rationale": "Off topic."}',
         ),
     ]
@@ -226,7 +228,7 @@ def test_poll_once_pre_filter_results_non_2xx_skips_patch_complete() -> None:
 
     fake_results = [
         models_mod.AnthropicBatchResultItem(
-            custom_id=_SOURCE_PASS,
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
             text='{"decision": 1, "rationale": "ok"}',
         ),
     ]

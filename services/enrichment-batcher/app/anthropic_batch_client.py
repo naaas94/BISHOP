@@ -8,7 +8,9 @@ from typing import Any
 from anthropic import Anthropic, BadRequestError
 
 from app.models import AnthropicBatchSubmitResult, Stage1BatchEntry, Stage2BatchEntry
+from bishop_shared.anthropic_batch_errors import anthropic_batch_400_event
 from bishop_shared.anthropic_config import ANTHROPIC_MODEL_ENRICHMENT, get_anthropic_api_key
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
 from bishop_shared.enrichment_prompts import (
     build_call1_system_prompt,
     build_call1_user_message,
@@ -25,7 +27,7 @@ _CALL2_MAX_TOKENS = 512
 
 
 class AnthropicBatchClient:
-    """Submit enrichment stage1 batch requests with custom_id = source_id."""
+    """Submit enrichment batch requests with encoded source_id custom_ids."""
 
     def __init__(
         self,
@@ -44,13 +46,13 @@ class AnthropicBatchClient:
         *,
         entries: list[Stage1BatchEntry],
     ) -> list[dict[str, Any]]:
-        """Build wire payload; exposed for contract tests asserting custom_id."""
+        """Build wire payload; exposed for contract tests asserting custom_id encoding."""
         system_prompt = build_call1_system_prompt()
         requests: list[dict[str, Any]] = []
         for entry in entries:
             requests.append(
                 {
-                    "custom_id": entry.source_id,
+                    "custom_id": source_id_to_batch_custom_id(entry.source_id),
                     "params": {
                         "model": ANTHROPIC_MODEL_ENRICHMENT,
                         "max_tokens": _CALL1_MAX_TOKENS,
@@ -94,7 +96,7 @@ class AnthropicBatchClient:
         for entry in entries:
             requests.append(
                 {
-                    "custom_id": entry.source_id,
+                    "custom_id": source_id_to_batch_custom_id(entry.source_id),
                     "params": {
                         "model": ANTHROPIC_MODEL_ENRICHMENT,
                         "max_tokens": _CALL2_MAX_TOKENS,
@@ -133,13 +135,14 @@ def submit_stage1_batch_or_fatal(
     *,
     entries: list[Stage1BatchEntry],
 ) -> AnthropicBatchSubmitResult | None:
-    """Submit batch; log model_string_fatal and return None on HTTP 400."""
+    """Submit batch; log structured 400 event and return None on HTTP 400."""
     try:
         return client.submit_stage1_batch(entries=entries)
     except BadRequestError as exc:
+        event = anthropic_batch_400_event(exc)
         logger.error(
-            "anthropic batch submit rejected model string",
-            extra={"event": "model_string_fatal", "detail": str(exc)},
+            "anthropic batch submit rejected",
+            extra={"event": event, "detail": str(exc)},
         )
         return None
 
@@ -150,12 +153,13 @@ def submit_stage2_batch_or_fatal(
     profile_prompt: str,
     entries: list[Stage2BatchEntry],
 ) -> AnthropicBatchSubmitResult | None:
-    """Submit Call 2 batch; log model_string_fatal and return None on HTTP 400."""
+    """Submit Call 2 batch; log structured 400 event and return None on HTTP 400."""
     try:
         return client.submit_stage2_batch(profile_prompt=profile_prompt, entries=entries)
     except BadRequestError as exc:
+        event = anthropic_batch_400_event(exc)
         logger.error(
-            "anthropic batch submit rejected model string",
-            extra={"event": "model_string_fatal", "detail": str(exc)},
+            "anthropic batch submit rejected",
+            extra={"event": event, "detail": str(exc)},
         )
         return None

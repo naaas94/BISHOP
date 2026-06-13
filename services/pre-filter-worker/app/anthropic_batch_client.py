@@ -8,7 +8,9 @@ from typing import Any
 from anthropic import Anthropic, BadRequestError
 
 from app.models import AnthropicBatchSubmitResult, PreFilterBatchEntry
+from bishop_shared.anthropic_batch_errors import anthropic_batch_400_event
 from bishop_shared.anthropic_config import ANTHROPIC_MODEL_PREFILTER, get_anthropic_api_key
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ _PREFILTER_MAX_TOKENS = 256
 
 
 class AnthropicBatchClient:
-    """Submit pre-filter batch requests with custom_id = source_id."""
+    """Submit pre-filter batch requests with encoded source_id custom_ids."""
 
     def __init__(
         self,
@@ -37,12 +39,12 @@ class AnthropicBatchClient:
         system_prompt: str,
         entries: list[PreFilterBatchEntry],
     ) -> list[dict[str, Any]]:
-        """Build wire payload; exposed for contract tests asserting custom_id."""
+        """Build wire payload; exposed for contract tests asserting custom_id encoding."""
         requests: list[dict[str, Any]] = []
         for entry in entries:
             requests.append(
                 {
-                    "custom_id": entry.source_id,
+                    "custom_id": source_id_to_batch_custom_id(entry.source_id),
                     "params": {
                         "model": ANTHROPIC_MODEL_PREFILTER,
                         "max_tokens": _PREFILTER_MAX_TOKENS,
@@ -80,12 +82,13 @@ def submit_pre_filter_batch_or_fatal(
     system_prompt: str,
     entries: list[PreFilterBatchEntry],
 ) -> AnthropicBatchSubmitResult | None:
-    """Submit batch; log model_string_fatal and return None on HTTP 400."""
+    """Submit batch; log structured 400 event and return None on HTTP 400."""
     try:
         return client.submit_pre_filter_batch(system_prompt=system_prompt, entries=entries)
     except BadRequestError as exc:
+        event = anthropic_batch_400_event(exc)
         logger.error(
-            "anthropic batch submit rejected model string",
-            extra={"event": "model_string_fatal", "detail": str(exc)},
+            "anthropic batch submit rejected",
+            extra={"event": event, "detail": str(exc)},
         )
         return None

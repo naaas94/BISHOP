@@ -10,6 +10,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from anthropic import BadRequestError
 
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
+
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _PREFILTER_ROOT = _REPO_ROOT / "services" / "pre-filter-worker"
 
@@ -45,7 +47,7 @@ def _load_anthropic_client_stack() -> tuple[ModuleType, ModuleType]:
     return anthropic_mod, models
 
 
-def test_build_requests_custom_id_equals_source_id() -> None:
+def test_build_requests_custom_id_encodes_source_id() -> None:
     anthropic_mod, models = _load_anthropic_client_stack()
     mock_sdk = MagicMock()
     client = anthropic_mod.AnthropicBatchClient(client=mock_sdk)
@@ -65,8 +67,8 @@ def test_build_requests_custom_id_equals_source_id() -> None:
     requests = client.build_requests(system_prompt="system text", entries=entries)
 
     assert len(requests) == 2
-    assert requests[0]["custom_id"] == "arxiv:2406.00001"
-    assert requests[1]["custom_id"] == "arxiv:2406.00002"
+    assert requests[0]["custom_id"] == source_id_to_batch_custom_id("arxiv:2406.00001")
+    assert requests[1]["custom_id"] == source_id_to_batch_custom_id("arxiv:2406.00002")
     assert requests[0]["params"]["model"] == "claude-haiku-4-5-20251001"
     assert requests[0]["params"]["system"] == "system text"
     assert requests[0]["params"]["messages"][0]["content"] == "Paper A\nAbstract A"
@@ -91,10 +93,12 @@ def test_submit_pre_filter_batch_returns_external_id() -> None:
     assert result.external_batch_id == "msgbatch_abc123"
     mock_sdk.messages.batches.create.assert_called_once()
     call_kwargs = mock_sdk.messages.batches.create.call_args.kwargs
-    assert call_kwargs["requests"][0]["custom_id"] == "arxiv:2406.00001"
+    assert call_kwargs["requests"][0]["custom_id"] == source_id_to_batch_custom_id(
+        "arxiv:2406.00001",
+    )
 
 
-def test_submit_pre_filter_batch_or_fatal_logs_model_string_fatal_on_400() -> None:
+def test_submit_pre_filter_batch_or_fatal_logs_model_string_fatal_on_model_400() -> None:
     anthropic_mod, models = _load_anthropic_client_stack()
     mock_sdk = MagicMock()
     mock_sdk.messages.batches.create.side_effect = BadRequestError(
@@ -121,3 +125,32 @@ def test_submit_pre_filter_batch_or_fatal_logs_model_string_fatal_on_400() -> No
     assert result is None
     mock_log.assert_called_once()
     assert mock_log.call_args.kwargs["extra"]["event"] == "model_string_fatal"
+
+
+def test_submit_pre_filter_batch_or_fatal_logs_custom_id_rejected_on_custom_id_400() -> None:
+    anthropic_mod, models = _load_anthropic_client_stack()
+    mock_sdk = MagicMock()
+    mock_sdk.messages.batches.create.side_effect = BadRequestError(
+        message="custom_id invalid",
+        response=MagicMock(status_code=400),
+        body={"error": {"message": "requests.0.custom_id: pattern"}},
+    )
+    client = anthropic_mod.AnthropicBatchClient(client=mock_sdk)
+
+    entries = [
+        models.PreFilterBatchEntry(
+            source_id="arxiv:2406.00001",
+            title="Paper A",
+            abstract="Abstract A",
+        )
+    ]
+    with patch.object(anthropic_mod.logger, "error") as mock_log:
+        result = anthropic_mod.submit_pre_filter_batch_or_fatal(
+            client,
+            system_prompt="system",
+            entries=entries,
+        )
+
+    assert result is None
+    mock_log.assert_called_once()
+    assert mock_log.call_args.kwargs["extra"]["event"] == "batch_custom_id_rejected"

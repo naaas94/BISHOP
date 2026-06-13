@@ -1,5 +1,9 @@
 # Changelog
 
+## batch-custom-id hotfix — 2026-06-13
+
+- **Batch API custom_id encoding:** Pre-filter and enrichment batch submitters were sending canonical `source_id` values (e.g. `arxiv:2406.00001`) as Anthropic `custom_id`, which violates `^[a-zA-Z0-9_-]{1,64}$` and produced HTTP 400s mislogged as `model_string_fatal`. Added `bishop_shared/batch_custom_id.py` (base64url encode/decode) and `bishop_shared/anthropic_batch_errors.py` (structured 400 classification); wired encode at submit and lookup at poll for pre-filter, enrichment stage1/stage2. See `.dev/decision-logs/m3-batch-pipeline/batch-custom-id-encoding.md`. + added `tests/test_batch_custom_id.py`; updated pre-filter, enrichment-batcher, batch-poller, M3, and M5 tests. G3 batch probe and QUEUED-claim release on submit 400 deferred per decision log.
+
 ## Manual arxvix change 2026-06-13
 
 from ARXIV_EXPORT_API_URL = "http://export.arxiv.org/api/query" to ARXIV_EXPORT_API_URL = "https://export.arxiv.org/api/query" In services/scraper/app/adapters/arxiv.py

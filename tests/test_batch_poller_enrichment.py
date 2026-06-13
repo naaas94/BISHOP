@@ -11,6 +11,8 @@ from types import ModuleType
 
 import httpx
 
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
+
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _BATCH_POLLER_ROOT = _REPO_ROOT / "services" / "batch-poller"
 
@@ -166,11 +168,11 @@ def test_poll_once_enrichment_stage1_posts_results_and_patches_complete() -> Non
 
     fake_results = [
         models_mod.AnthropicBatchResultItem(
-            custom_id=_SOURCE_PASS,
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
             text=_call1_payload(),
         ),
         models_mod.AnthropicBatchResultItem(
-            custom_id=_SOURCE_FAIL,
+            custom_id=source_id_to_batch_custom_id(_SOURCE_FAIL),
             text="not json",
         ),
     ]
@@ -235,7 +237,7 @@ def test_poll_once_enrichment_stage2_posts_results_and_patches_complete() -> Non
 
     fake_results = [
         models_mod.AnthropicBatchResultItem(
-            custom_id=_SOURCE_PASS,
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
             text=_call2_payload(),
         ),
     ]
@@ -288,7 +290,7 @@ def test_poll_once_enrichment_stage1_results_non_2xx_skips_patch_complete() -> N
 
     fake_results = [
         models_mod.AnthropicBatchResultItem(
-            custom_id=_SOURCE_PASS,
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
             text=_call1_payload(),
         ),
     ]
@@ -390,7 +392,7 @@ def test_poll_once_stage1_includes_oov_tags_stripped_in_wire() -> None:
 
     fake_results = [
         models_mod.AnthropicBatchResultItem(
-            custom_id=_SOURCE_PASS,
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
             text=_call1_payload(tags=["RAG", "not-in-taxonomy"]),
         ),
     ]

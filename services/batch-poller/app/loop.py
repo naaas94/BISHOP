@@ -11,6 +11,7 @@ from typing import Callable
 
 import httpx
 
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
 from bishop_shared.enrichment_parsers import (
     ParsedCall1Response,
     ParsedCall2Response,
@@ -267,7 +268,7 @@ async def _handle_pre_filter_complete(
     failed_count = 0
 
     for source_id in batch.source_ids:
-        item = results_by_id.get(source_id)
+        item = results_by_id.get(source_id_to_batch_custom_id(source_id))
         if item is None or item.errored:
             parsed = ParsedPreFilterDecision(
                 source_id=source_id,
@@ -347,7 +348,10 @@ async def _handle_enrichment_stage1_complete(
     failed_count = 0
 
     for source_id in batch.source_ids:
-        parsed = _parse_call1_from_item(source_id, results_by_id.get(source_id))
+        parsed = _parse_call1_from_item(
+            source_id,
+            results_by_id.get(source_id_to_batch_custom_id(source_id)),
+        )
         if parsed.parse_failed or not parsed.success:
             failed_count += 1
         else:
@@ -407,7 +411,10 @@ async def _handle_enrichment_stage2_complete(
     failed_count = 0
 
     for source_id in batch.source_ids:
-        parsed = _parse_call2_from_item(source_id, results_by_id.get(source_id))
+        parsed = _parse_call2_from_item(
+            source_id,
+            results_by_id.get(source_id_to_batch_custom_id(source_id)),
+        )
         if parsed.parse_failed or not parsed.success:
             failed_count += 1
         else:

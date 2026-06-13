@@ -45,7 +45,7 @@ class BatchRegisterResponse(BaseModel):
 
 
 class PreFilterBatchEntry(BaseModel):
-    """One Anthropic batch request row — custom_id must equal source_id."""
+    """One Anthropic batch request row — custom_id encodes source_id for Batch API."""
 
     source_id: str
     title: str

@@ -13,6 +13,8 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
+
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _STATE_WORKER_ROOT = _REPO_ROOT / "services" / "state-worker"
 _BATCH_POLLER_ROOT = _REPO_ROOT / "services" / "batch-poller"
@@ -196,7 +198,7 @@ def test_m3_e2e_twenty_entry_batch_pass_and_reject(
     state_worker_mod, loop_mod, models_mod = _load_batch_poller_loop_stack()
     fake_results = [
         models_mod.AnthropicBatchResultItem(
-            custom_id=source_id,
+            custom_id=source_id_to_batch_custom_id(source_id),
             text=(
                 '{"decision": 1, "rationale": "Relevant RAG content."}'
                 if index < 10

@@ -50,7 +50,7 @@ class BatchRegisterResponse(BaseModel):
 
 
 class Stage1BatchEntry(BaseModel):
-    """One Anthropic batch request row — custom_id must equal source_id."""
+    """One Anthropic batch request row — custom_id encodes source_id for Batch API."""
 
     source_id: str
     source: SourceEnum

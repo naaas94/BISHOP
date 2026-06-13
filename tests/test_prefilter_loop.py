@@ -11,6 +11,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
+from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
+
 from bishop_shared.enums import DomainEnum, SourceEnum
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -181,7 +183,7 @@ def test_prefilter_cycle_happy_path_registers_batch() -> None:
         ],
     )
     for req, source_id in zip(requests, source_ids, strict=True):
-        assert req["custom_id"] == source_id
+        assert req["custom_id"] == source_id_to_batch_custom_id(source_id)
 
 
 def test_prefilter_cycle_twenty_entry_batch_assembly() -> None:
