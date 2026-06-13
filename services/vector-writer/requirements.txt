@@ -1,1 +1,5 @@
 duckdb>=1.0
+filelock>=3.13
+rank-bm25>=0.2.2
+lancedb>=0.17.0
+sentence-transformers>=2.7.0
