@@ -2,6 +2,7 @@
 
 ## m7-read-path — 2026-06-13
 
+- T2 (BM25 query reader): Added `services/query-api/app/stores/bm25_reader.py` with per-domain `Bm25QueryIndex` loading main + challenge_hooks pickles, `search(query, k, channel=...)`, COW `reload_cow()`, and asyncio background reload; pinned `rank-bm25` in query-api requirements. Copy-on-write swap prevents concurrent readers seeing partial reload state per spec §8.4 G5. See `.dev/decision-logs/m7-read-path/T2-bm25-reader.md`. + added `tests/test_query_api_bm25_reader.py`. Lifespan wiring for background reload deferred to T5.
 - T1 (query shared contracts and query-api scaffold): Added `bishop_shared/query_config.py` (pinned `RRF_K=60`, `DEFAULT_SEARCH_DOMAIN=professional`, env-backed `BM25_RELOAD_INTERVAL_SEC`), `bishop_shared/bm25_tokenize.py` with shared `tokenize_bm25`, and query-api FastAPI scaffold (`main.py`, `config.py`, `lifespan.py` G7 cold-start WARN probes, `GET /health`, Dockerfile CMD `python -m app.main`). Vector-writer `bm25_store` imports shared tokenize to prevent BM25 rank drift. See `.dev/decision-logs/m7-read-path/T1-query-shared-contracts.md`. + added `tests/test_query_config.py`, `tests/test_bm25_tokenize.py`, `tests/test_query_api_cold_start.py`. DuckDB table-exists probe deferred to T3; `test_service_stubs` query-api graduation deferred to T8.
 
 ## m6-indexing — 2026-06-13
