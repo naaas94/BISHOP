@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import httpx
 
-from app.config import ENRICHMENT_STAGE1_BATCH_SIZE, STATE_WORKER_BASE_URL
+from app.config import ENRICHMENT_STAGE1_BATCH_SIZE, ENRICHMENT_STAGE2_BATCH_SIZE, STATE_WORKER_BASE_URL
 from app.models import BatchRegisterRequest, BatchRegisterResponse, EntryPollResponse
 
 SCRAPED_POLL_STATE = "SCRAPED"
+STAGE2_POLL_STATE = "ENRICHMENT_STAGE2_QUEUED"
 
 
 class StateWorkerClient:
@@ -35,6 +36,19 @@ class StateWorkerClient:
         response = await self._client.get(
             "/entries/poll",
             params={"state": SCRAPED_POLL_STATE, "limit": batch_limit},
+        )
+        response.raise_for_status()
+        return EntryPollResponse.model_validate(response.json())
+
+    async def poll_stage2_queued_entries(
+        self,
+        *,
+        limit: int | None = None,
+    ) -> EntryPollResponse:
+        batch_limit = limit if limit is not None else ENRICHMENT_STAGE2_BATCH_SIZE
+        response = await self._client.get(
+            "/entries/poll",
+            params={"state": STAGE2_POLL_STATE, "limit": batch_limit},
         )
         response.raise_for_status()
         return EntryPollResponse.model_validate(response.json())

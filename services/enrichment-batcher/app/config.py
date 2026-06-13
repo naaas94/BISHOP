@@ -15,6 +15,7 @@ def _int_from_env(name: str, default: int) -> int:
 
 
 ENRICHMENT_STAGE1_BATCH_SIZE = _int_from_env("BISHOP_ENRICHMENT_STAGE1_BATCH_SIZE", 10)
+ENRICHMENT_STAGE2_BATCH_SIZE = _int_from_env("BISHOP_ENRICHMENT_STAGE2_BATCH_SIZE", 10)
 ENRICHMENT_POLL_INTERVAL_SEC = _int_from_env("BISHOP_ENRICHMENT_POLL_INTERVAL_SEC", 120)
 
 # Dev-only bypass for G3 gate when live probe is impractical (e.g. local mocks).

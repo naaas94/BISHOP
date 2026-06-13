@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from bishop_shared.enums import DomainEnum, SourceEnum
 
 ENRICHMENT_STAGE1_BATCH_TYPE = "enrichment_stage1"
+ENRICHMENT_STAGE2_BATCH_TYPE = "enrichment_stage2"
 
 
 class EntryPollEntry(BaseModel):
@@ -17,7 +18,8 @@ class EntryPollEntry(BaseModel):
     source: SourceEnum
     url: str
     title: str
-    content_raw: str
+    content_raw: str | None = None
+    summary: str | None = None
     published_at: datetime | None = None
     ingested_at: datetime | None = None
     domain: DomainEnum
@@ -33,7 +35,7 @@ class EntryPollResponse(BaseModel):
 
 class BatchRegisterRequest(BaseModel):
     batch_id: str
-    batch_type: Literal["enrichment_stage1"] = ENRICHMENT_STAGE1_BATCH_TYPE
+    batch_type: Literal["enrichment_stage1", "enrichment_stage2"] = ENRICHMENT_STAGE1_BATCH_TYPE
     domain: DomainEnum
     profile_version: str
     profile_render_hash: str
@@ -54,6 +56,14 @@ class Stage1BatchEntry(BaseModel):
     source: SourceEnum
     title: str
     truncated_content: str
+
+
+class Stage2BatchEntry(BaseModel):
+    """Call 2 batch row — user message is title + summary only (not content_raw)."""
+
+    source_id: str
+    title: str
+    summary: str
 
 
 class AnthropicBatchSubmitResult(BaseModel):
