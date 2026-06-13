@@ -110,15 +110,16 @@ def test_only_query_api_and_ui_expose_host_ports(compose_text: str) -> None:
 
 
 def test_image_tags_use_milestone_convention(compose_text: str) -> None:
-    for service in BISHOP_SERVICES:
-        block = _service_block(compose_text, service)
-        if service == "state-worker":
-            tag = "m1"
-        elif service == "scraper":
-            tag = "m2"
-        else:
-            tag = "m0"
-        assert f"image: bishop/{service}:{tag}" in block
+  milestone_tags: dict[str, str] = {
+      "state-worker": "m1",
+      "scraper": "m2",
+      "pre-filter-worker": "m3",
+      "batch-poller": "m3",
+  }
+  for service in BISHOP_SERVICES:
+      block = _service_block(compose_text, service)
+      tag = milestone_tags.get(service, "m0")
+      assert f"image: bishop/{service}:{tag}" in block
 
 
 def test_repo_root_build_context_for_bishop_shared(compose_text: str) -> None:

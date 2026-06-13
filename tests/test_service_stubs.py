@@ -20,17 +20,20 @@ from bishop_shared.constants import (
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-T2_WORKER_SERVICES = (
-    "pre-filter-worker",
+T2_WORKER_STUB_SERVICES = (
     "content-scraper",
     "enrichment-batcher",
-    "batch-poller",
     "vector-writer",
+)
+
+T2_M3_REAL_WORKER_SERVICES = (
+    "pre-filter-worker",
+    "batch-poller",
 )
 
 T2_HTTP_SERVICES = ("query-api", "ui")
 
-T2_SERVICES = T2_WORKER_SERVICES + T2_HTTP_SERVICES
+T2_SERVICES = T2_WORKER_STUB_SERVICES + T2_M3_REAL_WORKER_SERVICES + T2_HTTP_SERVICES
 
 PORT_LITERAL_PATTERN = re.compile(
     r"\b(?:8000|8080|8081|80)\b",
@@ -73,7 +76,7 @@ def test_service_directory_matches_compose_key(service_name: str) -> None:
     assert (service_dir / "stub_main.py").is_file()
 
 
-@pytest.mark.parametrize("service_name", T2_WORKER_SERVICES)
+@pytest.mark.parametrize("service_name", T2_WORKER_STUB_SERVICES)
 def test_worker_stub_is_long_running(service_name: str) -> None:
     source = (REPO_ROOT / "services" / service_name / "stub_main.py").read_text(
         encoding="utf-8",
@@ -153,3 +156,14 @@ def test_scraper_uses_real_main_entrypoint() -> None:
     assert 'CMD ["python", "-m", "app.main"]' in dockerfile
     assert "stub_main.py" not in dockerfile
     assert (REPO_ROOT / "services" / "scraper" / "app" / "main.py").is_file()
+
+
+@pytest.mark.parametrize("service_name", T2_M3_REAL_WORKER_SERVICES)
+def test_m3_worker_uses_real_main_entrypoint(service_name: str) -> None:
+    """Falsifier: M3 workers must run app.main, not the M0 stub loop."""
+    dockerfile = (REPO_ROOT / "services" / service_name / "Dockerfile").read_text(
+        encoding="utf-8",
+    )
+    assert 'CMD ["python", "-m", "app.main"]' in dockerfile
+    assert "stub_main.py" not in dockerfile
+    assert (REPO_ROOT / "services" / service_name / "app" / "main.py").is_file()

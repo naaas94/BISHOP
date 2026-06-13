@@ -35,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: services/pre-filter-worker/Dockerfile
-    image: bishop/pre-filter-worker:m0
+    image: bishop/pre-filter-worker:m3
     networks:
       - bishop-internal
     volumes:
@@ -82,7 +82,7 @@ services:
     build:
       context: .
       dockerfile: services/batch-poller/Dockerfile
-    image: bishop/batch-poller:m0
+    image: bishop/batch-poller:m3
     networks:
       - bishop-internal
     volumes:
