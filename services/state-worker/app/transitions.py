@@ -17,11 +17,13 @@ from app.enums import (
     BatchStatusEnum,
     BatchTypeEnum,
     DomainEnum,
+    EntryTypeEnum,
+    OovReviewStatusEnum,
     ProcessingState,
     ReadingStatusEnum,
     SourceEnum,
 )
-from app.models.domain import BatchRecord, Entry, ErrorLog, ManifestEntry
+from app.models.domain import BatchRecord, Entry, ErrorLog, ManifestEntry, OovTagsLog
 from app.models.http import (
     BatchPatchRequest,
     BatchRegisterRequest,
@@ -382,8 +384,21 @@ async def register_batch(
         source_ids=list(request.source_ids),
         external_batch_id=request.external_batch_id,
     )
-    await _insert_row(conn, "batches", record.to_db_row())
-    await conn.commit()
+    await conn.execute("BEGIN")
+    try:
+        await _insert_row(conn, "batches", record.to_db_row())
+        if request.batch_type == BatchTypeEnum.ENRICHMENT_STAGE1:
+            await _apply_enrichment_stage1_submitted(
+                conn, list(request.source_ids), request.batch_id
+            )
+        elif request.batch_type == BatchTypeEnum.ENRICHMENT_STAGE2:
+            await _apply_enrichment_stage2_submitted(
+                conn, list(request.source_ids), request.batch_id
+            )
+        await conn.commit()
+    except Exception:
+        await conn.rollback()
+        raise
     logger.info(
         "batch registered",
         extra={
@@ -441,8 +456,10 @@ async def apply_batch_timeout(
     batch_id: str,
 ) -> BatchTimeoutResult:
     """
-    Mark batch batch_timed_out and reset RELEVANCE_QUEUED manifest rows
-    whose source_id is in the batch source_ids list to DISCOVERED.
+    Mark batch batch_timed_out and reset entries per batch_type:
+    pre_filter: RELEVANCE_QUEUED → DISCOVERED;
+    enrichment_stage1: ENRICHMENT_STAGE1_SUBMITTED → ENRICHMENT_STAGE1_FAILED;
+    enrichment_stage2: ENRICHMENT_STAGE2_SUBMITTED → ENRICHMENT_STAGE2_FAILED.
     """
     batch = await _fetch_batch(conn, batch_id)
     if batch is None:
@@ -463,28 +480,61 @@ async def apply_batch_timeout(
         raise BatchInvalidStateError(batch_id, batch.status.value)
 
     entries_reset = 0
-    for source_id in batch.source_ids:
-        manifest = await _fetch_manifest(conn, source_id)
-        if manifest is None:
-            continue
-        if manifest.processing_state != ProcessingState.RELEVANCE_QUEUED:
-            continue
-        await _set_manifest_state(
-            conn,
-            source_id,
-            ProcessingState.DISCOVERED,
-            expected=ProcessingState.RELEVANCE_QUEUED,
-        )
-        entries_reset += 1
-        logger.info(
-            "batch timeout entry reset",
-            extra={
-                "batch_id": batch_id,
-                "source_id": source_id,
-                "event": "batch_timeout_reset",
-                "entries_reset": entries_reset,
-            },
-        )
+    if batch.batch_type == BatchTypeEnum.PRE_FILTER:
+        for source_id in batch.source_ids:
+            manifest = await _fetch_manifest(conn, source_id)
+            if manifest is None:
+                continue
+            if manifest.processing_state != ProcessingState.RELEVANCE_QUEUED:
+                continue
+            await _set_manifest_state(
+                conn,
+                source_id,
+                ProcessingState.DISCOVERED,
+                expected=ProcessingState.RELEVANCE_QUEUED,
+            )
+            entries_reset += 1
+            logger.info(
+                "batch timeout entry reset",
+                extra={
+                    "batch_id": batch_id,
+                    "source_id": source_id,
+                    "event": "batch_timeout_reset",
+                    "entries_reset": entries_reset,
+                },
+            )
+    elif batch.batch_type == BatchTypeEnum.ENRICHMENT_STAGE1:
+        for source_id in batch.source_ids:
+            entry = await _fetch_entry(conn, source_id)
+            if entry is None:
+                continue
+            if entry.processing_state != ProcessingState.ENRICHMENT_STAGE1_SUBMITTED:
+                continue
+            await _record_enrichment_failure(
+                conn,
+                source_id,
+                ProcessingState.ENRICHMENT_STAGE1_SUBMITTED,
+                "batch timed out",
+                batch_id=batch_id,
+                commit=False,
+            )
+            entries_reset += 1
+    elif batch.batch_type == BatchTypeEnum.ENRICHMENT_STAGE2:
+        for source_id in batch.source_ids:
+            entry = await _fetch_entry(conn, source_id)
+            if entry is None:
+                continue
+            if entry.processing_state != ProcessingState.ENRICHMENT_STAGE2_SUBMITTED:
+                continue
+            await _record_enrichment_failure(
+                conn,
+                source_id,
+                ProcessingState.ENRICHMENT_STAGE2_SUBMITTED,
+                "batch timed out",
+                batch_id=batch_id,
+                commit=False,
+            )
+            entries_reset += 1
 
     await conn.execute(
         "UPDATE batches SET status = ? WHERE batch_id = ?",
@@ -495,7 +545,7 @@ async def apply_batch_timeout(
         "batch timed out",
         extra={
             "batch_id": batch_id,
-            "event": "batch_timed_out",
+            "event": "batch_timeout",
             "entries_reset": entries_reset,
         },
     )
@@ -806,12 +856,12 @@ async def create_entry_from_content(
     return entry_id, ProcessingState.SCRAPED
 
 
-async def mark_enrichment_stage1_submitted(
+async def _apply_enrichment_stage1_submitted(
     conn: aiosqlite.Connection,
     source_ids: list[str],
     batch_id: str,
 ) -> int:
-    """Transition claimed entries to ENRICHMENT_STAGE1_SUBMITTED after batch submit."""
+    """Transition claimed entries to ENRICHMENT_STAGE1_SUBMITTED (no commit)."""
     count = 0
     for source_id in source_ids:
         entry = await _fetch_entry(conn, source_id)
@@ -843,16 +893,26 @@ async def mark_enrichment_stage1_submitted(
             conn, source_id, ProcessingState.ENRICHMENT_STAGE1_SUBMITTED
         )
         count += 1
-    await conn.commit()
     return count
 
 
-async def mark_enrichment_stage2_submitted(
+async def mark_enrichment_stage1_submitted(
     conn: aiosqlite.Connection,
     source_ids: list[str],
     batch_id: str,
 ) -> int:
-    """Transition claimed entries to ENRICHMENT_STAGE2_SUBMITTED after batch submit."""
+    """Transition claimed entries to ENRICHMENT_STAGE1_SUBMITTED after batch submit."""
+    count = await _apply_enrichment_stage1_submitted(conn, source_ids, batch_id)
+    await conn.commit()
+    return count
+
+
+async def _apply_enrichment_stage2_submitted(
+    conn: aiosqlite.Connection,
+    source_ids: list[str],
+    batch_id: str,
+) -> int:
+    """Transition claimed entries to ENRICHMENT_STAGE2_SUBMITTED (no commit)."""
     count = 0
     for source_id in source_ids:
         entry = await _fetch_entry(conn, source_id)
@@ -884,8 +944,45 @@ async def mark_enrichment_stage2_submitted(
             conn, source_id, ProcessingState.ENRICHMENT_STAGE2_SUBMITTED
         )
         count += 1
+    return count
+
+
+async def mark_enrichment_stage2_submitted(
+    conn: aiosqlite.Connection,
+    source_ids: list[str],
+    batch_id: str,
+) -> int:
+    """Transition claimed entries to ENRICHMENT_STAGE2_SUBMITTED after batch submit."""
+    count = await _apply_enrichment_stage2_submitted(conn, source_ids, batch_id)
     await conn.commit()
     return count
+
+
+async def _insert_oov_tags_log(
+    conn: aiosqlite.Connection,
+    source_id: str,
+    tag_values: list[str],
+    entry_type: EntryTypeEnum,
+    enrichment_batch_id: str,
+    *,
+    timestamp: datetime | None = None,
+) -> int:
+    """Persist stripped OOV tags for taxonomy governance review."""
+    now = timestamp or datetime.now(UTC)
+    inserted = 0
+    for tag_value in tag_values:
+        row = OovTagsLog(
+            id=str(uuid.uuid4()),
+            source_id=source_id,
+            tag_value=tag_value,
+            entry_type=entry_type,
+            enrichment_batch_id=enrichment_batch_id,
+            timestamp=now,
+            review_status=OovReviewStatusEnum.PENDING,
+        )
+        await _insert_row(conn, "oov_tags_log", row.to_db_row())
+        inserted += 1
+    return inserted
 
 
 async def apply_enrichment_stage1_results(
@@ -970,6 +1067,14 @@ async def _h3_enrichment_stage1_success(
             "UPDATE manifest SET processing_state = ? WHERE source_id = ?",
             (ProcessingState.ENRICHMENT_STAGE2_QUEUED.value, item.source_id),
         )
+        if item.oov_tags_stripped and item.entry_type is not None:
+            await _insert_oov_tags_log(
+                conn,
+                item.source_id,
+                item.oov_tags_stripped,
+                item.entry_type,
+                batch_id,
+            )
         await conn.commit()
     except Exception:
         await conn.rollback()
@@ -1059,6 +1164,7 @@ async def _record_enrichment_failure(
     message: str,
     *,
     batch_id: str,
+    commit: bool = True,
 ) -> None:
     normalized = normalize_failure_state(submitted_state)
     failed_state = FAILURE_TARGET_MAP.get(
@@ -1074,6 +1180,7 @@ async def _record_enrichment_failure(
         is_retriable=True,
         target_failed_state=failed_state,
         batch_id=batch_id,
+        commit=commit,
     )
 
 
@@ -1109,6 +1216,7 @@ async def record_failure(
     is_retriable: bool,
     target_failed_state: ProcessingState | None = None,
     batch_id: str | None = None,
+    commit: bool = True,
 ) -> None:
     manifest = await _fetch_manifest(conn, source_id)
     if manifest is None:
@@ -1195,7 +1303,8 @@ async def record_failure(
             state_at_failure=normalized,
             attempt_number=new_retry_count,
         )
-    await conn.commit()
+    if commit:
+        await conn.commit()
     logger.error(
         "transition failure",
         extra={

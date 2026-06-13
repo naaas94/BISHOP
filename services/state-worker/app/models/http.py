@@ -51,6 +51,7 @@ class EnrichmentStage1EntryWire(BaseModel):
     tags: list[str] | None = None
     entry_type: EntryTypeEnum | None = None
     challenge_hooks: list[str] | None = None
+    oov_tags_stripped: list[str] | None = None
     error_message: str | None = None
 
 

@@ -2,6 +2,7 @@
 
 ## m5-enrichment — 2026-06-13
 
+- T2 (state-worker enrichment hub): Wired `register_batch` to atomically mark enrichment entries `_SUBMITTED` by `batch_type`, extended `apply_batch_timeout` dispatch for enrichment stages (`_SUBMITTED` → `_FAILED`), added `oov_tags_stripped` wire field and `_insert_oov_tags_log` on stage1 H3 success. Closes context-map Flags 1–2 for submit and OOV persistence. See `.dev/decision-logs/m5-enrichment/T2-state-worker-enrichment-hub.md`. + added `tests/test_state_worker_enrichment_hub.py`. Batches router `invalid_transition` HTTP envelope deferred per decision log.
 - T1 (enrichment shared utilities): Added `bishop_shared` enrichment modules — tiktoken truncation per §13.1, §20.8 tag taxonomy with OOV validation, Appendix A Call 1/2 prompt builders (Call 2 profile block with ephemeral `cache_control`), JSON parsers for batch-poller, and `ANTHROPIC_MODEL_ENRICHMENT` alias. Establishes typed contract surface for enrichment-batcher and batch-poller v2. See `.dev/decision-logs/m5-enrichment/T1-enrichment-shared-utilities.md`. + added `tests/test_enrichment_truncation.py`, `tests/test_tag_taxonomy.py`, `tests/test_enrichment_prompts.py`, `tests/test_enrichment_parsers.py`. Markdown code-fence JSON extraction deferred per decision log.
 
 ## m4-content — 2026-06-13
