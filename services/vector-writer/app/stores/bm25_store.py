@@ -12,6 +12,7 @@ from filelock import FileLock, Timeout
 from rank_bm25 import BM25Okapi
 
 from bishop_shared.atomic_persist import atomic_persist
+from bishop_shared.bm25_tokenize import tokenize_bm25
 from bishop_shared.indexing_config import (
     BM25_CHALLENGE_HOOKS_SUBDIR,
     BM25_LOCK_NAME,
@@ -22,10 +23,6 @@ from bishop_shared.indexing_config import (
 logger = logging.getLogger(__name__)
 
 INDEX_FILENAME = "index.pkl"
-
-
-def _tokenize(text: str) -> list[str]:
-    return text.lower().split()
 
 
 def _build_main_corpus_text(
@@ -127,7 +124,7 @@ class Bm25DualIndex:
                 if self._main.has_document(source_id):
                     raise ValueError(f"duplicate source_id: {source_id}")
                 text = _build_main_corpus_text(title, summary, concepts, tags, challenge_hooks)
-                self._main.add_document(source_id, _tokenize(text))
+                self._main.add_document(source_id, tokenize_bm25(text))
         except Timeout as exc:
             logger.error(
                 "bm25 lock timeout on main add",
@@ -151,7 +148,7 @@ class Bm25DualIndex:
                 if self._hooks.has_document(source_id):
                     raise ValueError(f"duplicate source_id: {source_id}")
                 text = _build_hooks_corpus_text(challenge_hooks)
-                self._hooks.add_document(source_id, _tokenize(text))
+                self._hooks.add_document(source_id, tokenize_bm25(text))
         except Timeout as exc:
             logger.error(
                 "bm25 lock timeout on challenge_hooks add",

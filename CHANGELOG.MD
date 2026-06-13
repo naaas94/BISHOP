@@ -1,5 +1,9 @@
 # Changelog
 
+## m7-read-path — 2026-06-13
+
+- T1 (query shared contracts and query-api scaffold): Added `bishop_shared/query_config.py` (pinned `RRF_K=60`, `DEFAULT_SEARCH_DOMAIN=professional`, env-backed `BM25_RELOAD_INTERVAL_SEC`), `bishop_shared/bm25_tokenize.py` with shared `tokenize_bm25`, and query-api FastAPI scaffold (`main.py`, `config.py`, `lifespan.py` G7 cold-start WARN probes, `GET /health`, Dockerfile CMD `python -m app.main`). Vector-writer `bm25_store` imports shared tokenize to prevent BM25 rank drift. See `.dev/decision-logs/m7-read-path/T1-query-shared-contracts.md`. + added `tests/test_query_config.py`, `tests/test_bm25_tokenize.py`, `tests/test_query_api_cold_start.py`. DuckDB table-exists probe deferred to T3; `test_service_stubs` query-api graduation deferred to T8.
+
 ## m6-indexing — 2026-06-13
 
 - T6 (M6 integration gate): Bumped compose image tag to `bishop/vector-writer:m6` with `stop_grace_period: 30s`; added `scripts/verify-m6.sh` (G2 slice + M6 pytest, heavy G5 live excluded), stub graduation for vector-writer, and mocked e2e integration from `VECTOR_WRITE_QUEUED` to `INDEXED` with LanceDB/BM25/DuckDB artifacts plus idempotent re-index falsifier. Closes M6 exit gate per charter. + added `tests/test_m6_integration.py`, `tests/test_g5_quality_gate.py`, `tests/fixtures/g5_quality_gate.py`, `tests/test_verify_m6.py`, `tests/test_bm25_lock_contention.py`, `tests/test_duckdb_concurrent_read.py`. DuckDB read_only while read-write connection held deferred — DuckDB allows multiple RW or multiple RO connections, not mixed; M7 query-api read_only path covered after mirror releases file. Live docker compose smoke deferred per M3/M4/M5 pattern.
