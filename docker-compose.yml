@@ -51,7 +51,7 @@ services:
     build:
       context: .
       dockerfile: services/content-scraper/Dockerfile
-    image: bishop/content-scraper:m0
+    image: bishop/content-scraper:m4
     networks:
       - bishop-internal
     volumes:

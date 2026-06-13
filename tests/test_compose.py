@@ -115,6 +115,7 @@ def test_image_tags_use_milestone_convention(compose_text: str) -> None:
       "scraper": "m2",
       "pre-filter-worker": "m3",
       "batch-poller": "m3",
+      "content-scraper": "m4",
   }
   for service in BISHOP_SERVICES:
       block = _service_block(compose_text, service)
