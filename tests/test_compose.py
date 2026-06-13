@@ -117,11 +117,18 @@ def test_image_tags_use_milestone_convention(compose_text: str) -> None:
       "batch-poller": "m5",
       "content-scraper": "m4",
       "enrichment-batcher": "m5",
+      "vector-writer": "m6",
   }
   for service in BISHOP_SERVICES:
       block = _service_block(compose_text, service)
       tag = milestone_tags.get(service, "m0")
       assert f"image: bishop/{service}:{tag}" in block
+
+
+def test_vector_writer_stop_grace_period(compose_text: str) -> None:
+    """Falsifier: spec §6.2 G1 requires stop_grace_period on vector-writer."""
+    block = _service_block(compose_text, "vector-writer")
+    assert "stop_grace_period: 30s" in block
 
 
 def test_repo_root_build_context_for_bishop_shared(compose_text: str) -> None:

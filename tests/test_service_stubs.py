@@ -22,6 +22,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 T2_WORKER_STUB_SERVICES = (
     "enrichment-batcher",
+)
+
+T2_M6_REAL_WORKER_SERVICES = (
     "vector-writer",
 )
 
@@ -40,6 +43,7 @@ T2_SERVICES = (
     T2_WORKER_STUB_SERVICES
     + T2_M3_REAL_WORKER_SERVICES
     + T2_M4_REAL_WORKER_SERVICES
+    + T2_M6_REAL_WORKER_SERVICES
     + T2_HTTP_SERVICES
 )
 
@@ -180,6 +184,17 @@ def test_m3_worker_uses_real_main_entrypoint(service_name: str) -> None:
 @pytest.mark.parametrize("service_name", T2_M4_REAL_WORKER_SERVICES)
 def test_m4_worker_uses_real_main_entrypoint(service_name: str) -> None:
     """Falsifier: M4 content-scraper must run app.main, not the M0 stub loop."""
+    dockerfile = (REPO_ROOT / "services" / service_name / "Dockerfile").read_text(
+        encoding="utf-8",
+    )
+    assert 'CMD ["python", "-m", "app.main"]' in dockerfile
+    assert "stub_main.py" not in dockerfile
+    assert (REPO_ROOT / "services" / service_name / "app" / "main.py").is_file()
+
+
+@pytest.mark.parametrize("service_name", T2_M6_REAL_WORKER_SERVICES)
+def test_m6_worker_uses_real_main_entrypoint(service_name: str) -> None:
+    """Falsifier: M6 vector-writer must run app.main, not the M0 stub loop."""
     dockerfile = (REPO_ROOT / "services" / service_name / "Dockerfile").read_text(
         encoding="utf-8",
     )

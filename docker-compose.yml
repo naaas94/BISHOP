@@ -98,7 +98,8 @@ services:
     build:
       context: .
       dockerfile: services/vector-writer/Dockerfile
-    image: bishop/vector-writer:m0
+    image: bishop/vector-writer:m6
+    stop_grace_period: 30s
     networks:
       - bishop-internal
     volumes:
