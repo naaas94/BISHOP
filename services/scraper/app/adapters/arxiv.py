@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import re
 from datetime import UTC, datetime, timedelta
+from html.parser import HTMLParser
 from xml.etree import ElementTree as ET
 
 import httpx
@@ -17,6 +18,7 @@ from app.models import ManifestIngestEntry
 from app.rate_limit import SOURCE_RATE_LIMITS, TokenBucketRateLimiter
 
 ARXIV_EXPORT_API_URL = "http://export.arxiv.org/api/query"
+ARXIV_HTML_BASE_URL = "https://arxiv.org/html"
 
 ATOM_NS = "http://www.w3.org/2005/Atom"
 _ATOM = f"{{{ATOM_NS}}}"
@@ -136,6 +138,69 @@ def parse_atom_feed(xml: bytes | str, *, adapter: SourceAdapter) -> list[Manifes
     return entries
 
 
+def parse_raw_id_from_source_id(source_id: str) -> str:
+    """Extract ArXiv raw id from canonical ``source_name:raw_id`` form."""
+    if ":" in source_id:
+        return source_id.split(":", 1)[1]
+    return source_id
+
+
+class _HTMLTextExtractor(HTMLParser):
+    """Collect visible text from HTML, skipping script/style blocks."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._parts: list[str] = []
+        self._skip_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in ("script", "style"):
+            self._skip_depth += 1
+        elif self._skip_depth == 0 and tag in ("p", "div", "br", "li", "h1", "h2", "h3", "tr"):
+            self._parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in ("script", "style") and self._skip_depth > 0:
+            self._skip_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if self._skip_depth == 0:
+            self._parts.append(data)
+
+    def get_text(self) -> str:
+        raw = "".join(self._parts)
+        return re.sub(r"\s+", " ", raw).strip()
+
+
+def strip_html_to_text(html: str) -> str:
+    """Strip HTML markup to plain text using stdlib only."""
+    parser = _HTMLTextExtractor()
+    parser.feed(html)
+    return parser.get_text()
+
+
+def compose_fallback_content(entry: ManifestIngestEntry) -> str:
+    """Compose title + abstract when HTML full-text is unavailable."""
+    abstract = entry.abstract or ""
+    return f"{entry.title}\n\n{abstract}"
+
+
+async def fetch_arxiv_html_text(
+    raw_id: str,
+    *,
+    http_client: httpx.AsyncClient,
+) -> str | None:
+    """GET ArXiv HTML endpoint and return stripped text, or None if unusable."""
+    url = f"{ARXIV_HTML_BASE_URL}/{raw_id}"
+    response = await http_client.get(url)
+    if response.status_code < 200 or response.status_code >= 300:
+        return None
+    text = strip_html_to_text(response.text)
+    if not text:
+        return None
+    return text
+
+
 class ArxivAdapter(SourceAdapter):
     """Fetches lightweight manifest rows from the ArXiv Atom export API."""
 
@@ -166,6 +231,19 @@ class ArxivAdapter(SourceAdapter):
             response = await client.get(ARXIV_EXPORT_API_URL, params=params)
             response.raise_for_status()
             return parse_atom_feed(response.content, adapter=self)
+        finally:
+            if self._owns_client:
+                await client.aclose()
+
+    async def fetch_content(self, entry: ManifestIngestEntry) -> str:
+        raw_id = parse_raw_id_from_source_id(entry.source_id)
+        client = self._http_client or httpx.AsyncClient()
+        try:
+            await self._rate_limiter.acquire()
+            html_text = await fetch_arxiv_html_text(raw_id, http_client=client)
+            if html_text is not None:
+                return html_text
+            return compose_fallback_content(entry)
         finally:
             if self._owns_client:
                 await client.aclose()

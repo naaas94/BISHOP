@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
+import httpx
 import pytest
 
 from bishop_shared.enums import DomainEnum, SourceEnum
@@ -67,8 +68,15 @@ async def test_source_adapter_contract() -> None:
         domain=DomainEnum.PROFESSIONAL,
     )
 
-    with pytest.raises(NotImplementedError, match="M4"):
-        await adapter.fetch_content(entry)
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(404, text="not found")
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        adapter_with_client = registry.ArxivAdapter(http_client=client)
+        content = await adapter_with_client.fetch_content(entry)
+
+    assert content == "Example\n\n"
 
 
 def test_registry_contains_only_arxiv() -> None:

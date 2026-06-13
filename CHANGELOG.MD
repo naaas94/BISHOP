@@ -1,5 +1,9 @@
 # Changelog
 
+## m4-content — 2026-06-13
+
+- T1 (ArXiv fetch_content): Implemented `ArxivAdapter.fetch_content` with HTML GET at `https://arxiv.org/html/{raw_id}`, stdlib HTML-to-text stripping, and title+abstract fallback on non-2xx or empty body; added helpers `parse_raw_id_from_source_id`, `fetch_arxiv_html_text`, `compose_fallback_content`. Updated adapter contract test to expect real content instead of `NotImplementedError("M4")`. See `.dev/decision-logs/m4-content/T1-arxiv-fetch-content.md`. + added `tests/test_arxiv_fetch_content.py`. Malformed `source_id` without colon separator deferred — pipeline assumes canonical `make_source_id` form.
+
 ## m3-prefilter — 2026-06-13
 
 - T6 (M3 integration gate): Bumped compose image tags to `bishop/pre-filter-worker:m3` and `bishop/batch-poller:m3`; added `scripts/verify-m3.sh` (G2 slice + G3 + M3 pytest), stub-removal tests for M3 workers, and mocked 20-entry e2e plus startup-scan restart integration tests against live state-worker routes. Closes M3 exit gate per charter. + added `tests/test_verify_m3.py`, `tests/test_m3_integration.py`. Live docker compose smoke deferred per M2 pattern.
