@@ -2,7 +2,7 @@
 
 **Plan name:** `m3-prefilter`  
 **Version:** 1.0  
-**Status:** Complete (planning)  
+**Status:** Complete — ready for adversarial audit  
 **Charter slice:** `.dev/bishop_program_charter.md` L235–282  
 **Normative spec:** `bishop_spec_0_6.md` v1.5.0 @ `6d36e7355044a76158dea1bf5f641f780c490c60` (tracked)
 
@@ -380,12 +380,14 @@ None at plan v1.0.
 
 ## 8. Auditor handoff
 
-**Deferred** until execution completes and tree is clean. §8.1 requires verification on clean checkout at landed SHA — not emitted at planning time.
+Full §8 emitted at `.dev/plans/m3-prefilter/handoff.md` against implementation SHA `1d2a89d2d2d734880a88eb145092da74254cefca` (clean tree).
 
-**Planned §8.2 artifact chain (post-execution):** this plan, context-map, packets T1–T6, decision logs T2/T3, `bishop_spec_0_6.md`, `CHANGELOG.MD`, `scripts/verify-m3.sh`, `scripts/verify-g3.sh`.
+**§8.1 snapshot:** M3 gate — 90 passed (`verify-m3.sh` pytest parity), exit 0. Full suite 262 passed / 1 failed (pre-existing M1 escalations test).
 
-**Planned verification command:** `scripts/verify-m3.sh` / `pytest tests/test_verify_m3.py tests/test_profile_renderer.py tests/test_prefilter_*.py tests/test_batch_poller_*.py tests/test_state_worker_batches_register.py -v`
+**§8.2 artifact chain:** all plan artifacts, packets T1–T6, decision logs T2/T3, and implementation paths resolve at `1d2a89d`. Context map scout SHA `6d36e73` is stale vs implementation.
+
+**§8.6:** absent — no §7 amendments.
 
 ---
 
-*Plan v1.0 — 2026-06-12 — charter-governed M3 pre-filter slice*
+*Plan v1.0 Complete — 2026-06-13 — charter-governed M3 pre-filter slice*
