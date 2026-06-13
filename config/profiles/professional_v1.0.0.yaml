@@ -1,0 +1,74 @@
+version: "1.0.0"
+created_at: "2026-06-10"
+domain: professional
+label: "AI/ML Engineering — Professional"
+
+# SHA-256 hash of the JSON-canonical profile dict per §11.3 (canonical_hash excluded from input).
+canonical_hash: "80f5f9abdc3b80c8e43c0fb6f40ac057c97130aa67ecb7852b48d49a26bb687d"
+
+changelog:
+  - version: "1.0.0"
+    date: "2026-06-10"
+    note: "Initial profile"
+
+context: |
+  I am an Applied AI Engineer specializing in NLP, RAG systems, agentic workflows,
+  LLM-based document intelligence, and production ML systems. I build these systems
+  professionally. Judge relevance from the perspective of a practitioner who ships
+  production-grade AI, not an academic reviewer.
+
+principles:
+  - "Prefer practical applicability over theoretical novelty"
+  - "Value production concerns: latency, reliability, cost, observability, failure modes"
+  - "Value architectural patterns, tradeoffs, and engineering decisions"
+  - "Deprioritize pure math papers without engineering application"
+  - "Prioritize content actionable within a 6-month horizon"
+
+anchors:
+  - id: rag_retrieval
+    label: "RAG and Retrieval Systems"
+    rationale: >
+      Core to current work. Hybrid retrieval, reranking, late chunking,
+      embedding models, vector stores, knowledge graphs for retrieval.
+    weight: 1.0
+
+  - id: agentic_systems
+    label: "Agentic Systems and Orchestration"
+    rationale: >
+      LangGraph, multi-agent patterns, state machines, tool use, planning,
+      memory architectures, agent evaluation.
+    weight: 1.0
+
+  - id: llm_inference
+    label: "LLM Inference and Serving"
+    rationale: >
+      Quantization, batching, latency/throughput tradeoffs, serving frameworks.
+      Relevant for production deployment decisions.
+    weight: 0.8
+
+  - id: document_intelligence
+    label: "Document Intelligence and Extraction"
+    rationale: >
+      Schema-bound extraction, structured output, document parsing pipelines.
+      Directly relevant to Hermes-type systems.
+    weight: 0.9
+
+  - id: eval_observability
+    label: "LLM Evaluation and Observability"
+    rationale: >
+      Evaluation frameworks, tracing, LLM-as-judge, production monitoring.
+    weight: 0.7
+
+exclusions:
+  - "Pure computer vision or robotics without LLM/NLP application"
+  - "Market analysis or business news without technical substance"
+  - "Tutorial content at introductory level (assume expert baseline)"
+  - "Hardware-only content without ML application"
+
+output:
+  format: integer
+  include_rationale: true
+  rationale_max_tokens: 60
+  instruction: >
+    Respond with a JSON object: {"decision": 0 or 1, "rationale": "one sentence"}.
+    No other output. No preamble.
