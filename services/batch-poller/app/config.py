@@ -16,3 +16,4 @@ def _int_from_env(name: str, default: int) -> int:
 
 BATCH_POLL_INTERVAL_SEC = _int_from_env("BISHOP_BATCH_POLL_INTERVAL_SEC", 120)
 BATCH_TIMEOUT_HOURS = _int_from_env("BISHOP_BATCH_TIMEOUT_HOURS", 48)
+STATE_WORKER_HTTP_TIMEOUT_SEC = _int_from_env("BISHOP_STATE_WORKER_HTTP_TIMEOUT_SEC", 60)

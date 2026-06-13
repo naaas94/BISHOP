@@ -16,6 +16,7 @@ def _load_config_module(monkeypatch: pytest.MonkeyPatch, *, clear_env: bool = Tr
     if clear_env:
         monkeypatch.delenv("BISHOP_BATCH_POLL_INTERVAL_SEC", raising=False)
         monkeypatch.delenv("BISHOP_BATCH_TIMEOUT_HOURS", raising=False)
+        monkeypatch.delenv("BISHOP_STATE_WORKER_HTTP_TIMEOUT_SEC", raising=False)
         monkeypatch.delenv("STATE_WORKER_URL", raising=False)
 
     saved = {name: mod for name, mod in sys.modules.items() if name == "app" or name.startswith("app.")}
@@ -41,6 +42,17 @@ def _load_config_module(monkeypatch: pytest.MonkeyPatch, *, clear_env: bool = Tr
         sys.modules.update(saved)
         for path_str in path_state:
             sys.path.remove(path_str)
+
+
+def test_state_worker_http_timeout_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    config = _load_config_module(monkeypatch)
+    assert config.STATE_WORKER_HTTP_TIMEOUT_SEC == 60
+
+
+def test_state_worker_http_timeout_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BISHOP_STATE_WORKER_HTTP_TIMEOUT_SEC", "120")
+    config = _load_config_module(monkeypatch, clear_env=False)
+    assert config.STATE_WORKER_HTTP_TIMEOUT_SEC == 120
 
 
 def test_batch_poll_interval_default(monkeypatch: pytest.MonkeyPatch) -> None:

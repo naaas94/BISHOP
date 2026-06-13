@@ -52,7 +52,7 @@ class AnthropicBatchPollerClient:
     ) -> tuple[str, str | None]:
         """Return (processing_status, terminal_outcome_or_none)."""
         client = self._ensure_client()
-        batch = client.batches.retrieve(external_batch_id)
+        batch = client.messages.batches.retrieve(external_batch_id)
         processing_status = getattr(batch, "processing_status", None) or batch.get(
             "processing_status",
         )
@@ -70,7 +70,7 @@ class AnthropicBatchPollerClient:
     ) -> list[AnthropicBatchResultItem]:
         client = self._ensure_client()
         items: list[AnthropicBatchResultItem] = []
-        for entry in client.batches.results(external_batch_id):
+        for entry in client.messages.batches.results(external_batch_id):
             custom_id = getattr(entry, "custom_id", None) or entry.get("custom_id", "")
             result = getattr(entry, "result", None) or entry.get("result")
             if result is None:

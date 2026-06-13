@@ -161,6 +161,15 @@ class BatchInvalidStateError(TransitionError):
         super().__init__(f"invalid batch state for timeout: {batch_id} ({status})")
 
 
+class BatchSourceStateError(TransitionError):
+    def __init__(self, source_id: str, state: str) -> None:
+        self.source_id = source_id
+        self.state = state
+        super().__init__(
+            f"source_id not RELEVANCE_QUEUED for pre_filter batch: {source_id} ({state})"
+        )
+
+
 @dataclass(frozen=True)
 class BatchTimeoutResult:
     batch_id: str
@@ -357,6 +366,33 @@ async def _fetch_batch(
     return BatchRecord.from_db_row(dict(row)) if row else None
 
 
+_ACTIVE_BATCH_STATUSES = (
+    BatchStatusEnum.SUBMITTED,
+    BatchStatusEnum.PROCESSING,
+    BatchStatusEnum.PENDING,
+)
+
+
+async def _source_ids_in_active_batches(conn: aiosqlite.Connection) -> frozenset[str]:
+    """source_ids referenced by in-flight batch rows (submitted/processing/pending)."""
+    placeholders = ",".join("?" for _ in _ACTIVE_BATCH_STATUSES)
+    cursor = await conn.execute(
+        f"""
+        SELECT source_ids FROM batches
+        WHERE status IN ({placeholders})
+        """,
+        tuple(status.value for status in _ACTIVE_BATCH_STATUSES),
+    )
+    rows = await cursor.fetchall()
+    claimed: set[str] = set()
+    for row in rows:
+        raw = row[0]
+        if not raw:
+            continue
+        claimed.update(json.loads(raw))
+    return frozenset(claimed)
+
+
 async def register_batch(
     conn: aiosqlite.Connection,
     request: BatchRegisterRequest,
@@ -367,6 +403,14 @@ async def register_batch(
     existing = await _fetch_batch(conn, request.batch_id)
     if existing is not None:
         raise BatchConflictError(request.batch_id)
+
+    if request.batch_type == BatchTypeEnum.PRE_FILTER:
+        for source_id in request.source_ids:
+            manifest = await _fetch_manifest(conn, source_id)
+            if manifest is None:
+                raise NotFoundError(source_id)
+            if manifest.processing_state != ProcessingState.RELEVANCE_QUEUED:
+                raise BatchSourceStateError(source_id, manifest.processing_state.value)
 
     now = created_at or datetime.now(UTC)
     record = BatchRecord(
@@ -1372,6 +1416,7 @@ async def run_lock_state_recovery_sweep(
     reference = now or datetime.now(UTC)
     cutoff = (reference - timedelta(seconds=threshold_sec)).isoformat()
     reset_count = 0
+    active_batch_source_ids = await _source_ids_in_active_batches(conn)
 
     for lock_state, work_ready in LOCK_STATE_SWEEP_RESETS.items():
         if lock_state in MANIFEST_LOCK_STATES:
@@ -1384,6 +1429,11 @@ async def run_lock_state_recovery_sweep(
             )
             source_ids = [row[0] for row in await cursor.fetchall()]
             for source_id in source_ids:
+                if (
+                    lock_state == ProcessingState.RELEVANCE_QUEUED
+                    and source_id in active_batch_source_ids
+                ):
+                    continue
                 await _set_manifest_state(conn, source_id, work_ready, expected=lock_state)
                 reset_count += 1
                 logger.info(

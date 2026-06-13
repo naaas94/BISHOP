@@ -6,7 +6,7 @@ from datetime import datetime
 
 import httpx
 
-from app.config import STATE_WORKER_BASE_URL
+from app.config import STATE_WORKER_BASE_URL, STATE_WORKER_HTTP_TIMEOUT_SEC
 from app.models import (
     BatchPatchRequest,
     BatchRecordWire,
@@ -29,7 +29,10 @@ class StateWorkerClient:
     ) -> None:
         self._base_url = (base_url or STATE_WORKER_BASE_URL).rstrip("/")
         self._owns_client = client is None
-        self._client = client or httpx.AsyncClient(base_url=self._base_url)
+        self._client = client or httpx.AsyncClient(
+            base_url=self._base_url,
+            timeout=httpx.Timeout(STATE_WORKER_HTTP_TIMEOUT_SEC),
+        )
 
     async def aclose(self) -> None:
         if self._owns_client:

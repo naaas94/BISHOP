@@ -19,8 +19,9 @@ for path in (_STATE_WORKER_ROOT, _REPO_ROOT):
         sys.path.insert(0, path_str)
 
 from app.db import close_pool, get_db, init_pool, run_migrations  # noqa: E402
-from app.enums import DomainEnum, EntryTypeEnum, ProcessingState, SourceEnum  # noqa: E402
+from app.enums import BatchTypeEnum, DomainEnum, EntryTypeEnum, ProcessingState, SourceEnum  # noqa: E402
 from app.models.http import (  # noqa: E402
+    BatchRegisterRequest,
     EnrichmentStage1EntryWire,
     EnrichmentStage1ResultsRequest,
     ManifestBatchEntryWire,
@@ -45,6 +46,7 @@ from app.transitions import (  # noqa: E402
     mark_indexed,
     normalize_failure_state,
     record_failure,
+    register_batch,
     resolve_retry_target,
     run_lock_state_recovery_sweep,
     run_retry_sweep,
@@ -357,6 +359,50 @@ def test_lock_state_sweep_resets_stuck_relevance_queued(temp_db: Path) -> None:
                 )
                 row = await cursor.fetchone()
                 assert row[0] == ProcessingState.DISCOVERED.value
+        finally:
+            await close_pool()
+
+    asyncio.run(_run())
+
+
+def test_lock_state_sweep_skips_relevance_queued_in_active_batch(temp_db: Path) -> None:
+    async def _run() -> None:
+        await init_pool(str(temp_db), size=1)
+        try:
+            async with get_db() as conn:
+                await _seed_discovered(conn)
+                await claim_manifest_poll(conn, ProcessingState.DISCOVERED)
+                await register_batch(
+                    conn,
+                    BatchRegisterRequest(
+                        batch_id="batch-active-1",
+                        batch_type=BatchTypeEnum.PRE_FILTER,
+                        domain=DomainEnum.PROFESSIONAL,
+                        profile_version="1.0.0",
+                        profile_render_hash="a" * 64,
+                        source_ids=[_SOURCE],
+                        external_batch_id="msgbatch_active_1",
+                        entry_count=1,
+                    ),
+                )
+                await conn.execute(
+                    """
+                    UPDATE manifest SET discovered_at = ?
+                    WHERE source_id = ?
+                    """,
+                    (_OLD.isoformat(), _SOURCE),
+                )
+                await conn.commit()
+                reset_count = await run_lock_state_recovery_sweep(
+                    conn, threshold_sec=900, now=_NOW
+                )
+                assert reset_count == 0
+                cursor = await conn.execute(
+                    "SELECT processing_state FROM manifest WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                row = await cursor.fetchone()
+                assert row[0] == ProcessingState.RELEVANCE_QUEUED.value
         finally:
             await close_pool()
 

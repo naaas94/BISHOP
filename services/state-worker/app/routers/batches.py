@@ -23,6 +23,8 @@ from app.transitions import (
     BatchConflictError,
     BatchInvalidStateError,
     BatchNotFoundError,
+    BatchSourceStateError,
+    NotFoundError,
     TransitionError,
     apply_batch_timeout,
     patch_batch,
@@ -41,6 +43,11 @@ DbConn = Annotated[aiosqlite.Connection, Depends(_db_conn)]
 
 
 def _batch_error_response(exc: TransitionError) -> JSONResponse:
+    if isinstance(exc, NotFoundError):
+        return JSONResponse(
+            status_code=404,
+            content={"error": "not_found", "source_id": exc.source_id},
+        )
     if isinstance(exc, BatchNotFoundError):
         return JSONResponse(
             status_code=404,
@@ -50,6 +57,15 @@ def _batch_error_response(exc: TransitionError) -> JSONResponse:
         return JSONResponse(
             status_code=409,
             content={"error": "batch_conflict", "batch_id": exc.batch_id},
+        )
+    if isinstance(exc, BatchSourceStateError):
+        return JSONResponse(
+            status_code=409,
+            content={
+                "error": "invalid_source_state",
+                "source_id": exc.source_id,
+                "state": exc.state,
+            },
         )
     if isinstance(exc, BatchInvalidStateError):
         return JSONResponse(

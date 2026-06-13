@@ -229,6 +229,82 @@ async def _handle_anthropic_failed(
     tracked.pop(batch.batch_id, None)
 
 
+async def _fail_stale_batch(
+    state_client: StateWorkerClient,
+    batch: BatchRecordWire,
+    tracked: dict[str, BatchRecordWire],
+    *,
+    event: str,
+    error: str,
+) -> None:
+    await state_client.patch_batch(
+        batch.batch_id,
+        BatchPatchRequest(status="failed"),
+    )
+    logger.error(
+        "stale batch marked failed",
+        extra={
+            "batch_id": batch.batch_id,
+            "external_batch_id": batch.external_batch_id,
+            "event": event,
+            "error": error,
+        },
+    )
+    tracked.pop(batch.batch_id, None)
+
+
+def _is_stale_results_conflict(exc: httpx.HTTPStatusError) -> bool:
+    if exc.response.status_code != 409:
+        return False
+    try:
+        body = exc.response.json()
+    except (json.JSONDecodeError, ValueError):
+        return False
+    return body.get("error") == "invalid_transition"
+
+
+async def _handle_results_post_error(
+    exc: Exception,
+    state_client: StateWorkerClient,
+    batch: BatchRecordWire,
+    tracked: dict[str, BatchRecordWire],
+    *,
+    failure_event: str,
+) -> None:
+    if isinstance(exc, httpx.HTTPStatusError):
+        if _is_stale_results_conflict(exc):
+            await _fail_stale_batch(
+                state_client,
+                batch,
+                tracked,
+                event="stale_batch_results_rejected",
+                error="invalid_transition",
+            )
+            return
+        logger.error(
+            "results post failed",
+            extra={
+                "batch_id": batch.batch_id,
+                "external_batch_id": batch.external_batch_id,
+                "event": failure_event,
+                "http_status": exc.response.status_code,
+            },
+        )
+        return
+    if isinstance(exc, httpx.RequestError):
+        logger.error(
+            "results post transport error",
+            extra={
+                "batch_id": batch.batch_id,
+                "external_batch_id": batch.external_batch_id,
+                "event": failure_event,
+                "detail": str(exc),
+            },
+        )
+        return
+    raise exc
+
+
 async def _patch_batch_complete(
     state_client: StateWorkerClient,
     batch: BatchRecordWire,
@@ -298,14 +374,13 @@ async def _handle_pre_filter_complete(
     )
     try:
         response = await state_client.post_pre_filter_results(request)
-    except httpx.HTTPStatusError:
-        logger.error(
-            "pre-filter-results post failed",
-            extra={
-                "batch_id": batch.batch_id,
-                "external_batch_id": batch.external_batch_id,
-                "event": "pre_filter_results_failed",
-            },
+    except (httpx.HTTPStatusError, httpx.RequestError) as exc:
+        await _handle_results_post_error(
+            exc,
+            state_client,
+            batch,
+            tracked,
+            failure_event="pre_filter_results_failed",
         )
         return
 
@@ -361,14 +436,13 @@ async def _handle_enrichment_stage1_complete(
     request = EnrichmentStage1ResultsRequest(batch_id=batch.batch_id, entries=entries)
     try:
         await state_client.post_enrichment_stage1_results(request)
-    except httpx.HTTPStatusError:
-        logger.error(
-            "enrichment-stage1-results post failed",
-            extra={
-                "batch_id": batch.batch_id,
-                "external_batch_id": batch.external_batch_id,
-                "event": "enrichment_stage1_results_failed",
-            },
+    except (httpx.HTTPStatusError, httpx.RequestError) as exc:
+        await _handle_results_post_error(
+            exc,
+            state_client,
+            batch,
+            tracked,
+            failure_event="enrichment_stage1_results_failed",
         )
         return
 
@@ -424,14 +498,13 @@ async def _handle_enrichment_stage2_complete(
     request = EnrichmentStage2ResultsRequest(batch_id=batch.batch_id, entries=entries)
     try:
         await state_client.post_enrichment_stage2_results(request)
-    except httpx.HTTPStatusError:
-        logger.error(
-            "enrichment-stage2-results post failed",
-            extra={
-                "batch_id": batch.batch_id,
-                "external_batch_id": batch.external_batch_id,
-                "event": "enrichment_stage2_results_failed",
-            },
+    except (httpx.HTTPStatusError, httpx.RequestError) as exc:
+        await _handle_results_post_error(
+            exc,
+            state_client,
+            batch,
+            tracked,
+            failure_event="enrichment_stage2_results_failed",
         )
         return
 

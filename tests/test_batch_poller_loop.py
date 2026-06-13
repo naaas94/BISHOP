@@ -249,6 +249,81 @@ def test_poll_once_pre_filter_results_non_2xx_skips_patch_complete() -> None:
     asyncio.run(_run())
 
 
+def test_poll_once_pre_filter_invalid_transition_marks_batch_failed() -> None:
+    state_worker_mod, loop_mod, models_mod = _load_loop_stack()
+    patch_calls: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/batches":
+            return httpx.Response(200, json={"batches": [_batch_wire()]})
+        if request.url.path == "/manifest/pre-filter-results":
+            return httpx.Response(
+                409,
+                json={
+                    "error": "invalid_transition",
+                    "source_id": _SOURCE_PASS,
+                    "from_state": "DISCOVERED",
+                    "to_state": "pre_filter_result",
+                },
+            )
+        if request.url.path == f"/batches/{_BATCH_ID}" and request.method == "PATCH":
+            patch_calls.append(json.loads(request.content))
+            return httpx.Response(200, json={"batch": _batch_wire(status="failed")})
+        return httpx.Response(404)
+
+    fake_results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
+            text='{"decision": 1, "rationale": "ok"}',
+        ),
+    ]
+    anthropic = FakeAnthropicClient(results=fake_results)
+
+    async def _run() -> None:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            client = state_worker_mod.StateWorkerClient(client=http)
+            batch = models_mod.BatchRecordWire.model_validate(_batch_wire())
+            tracked = {batch.batch_id: batch}
+            await loop_mod.poll_once(client, anthropic, tracked, now=_NOW)
+
+        assert patch_calls == [{"status": "failed"}]
+        assert tracked == {}
+
+    asyncio.run(_run())
+
+
+def test_poll_once_pre_filter_results_timeout_keeps_batch_tracked() -> None:
+    state_worker_mod, loop_mod, models_mod = _load_loop_stack()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/batches":
+            return httpx.Response(200, json={"batches": [_batch_wire()]})
+        if request.url.path == "/manifest/pre-filter-results":
+            raise httpx.ReadTimeout("timed out")
+        return httpx.Response(404)
+
+    fake_results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
+            text='{"decision": 1, "rationale": "ok"}',
+        ),
+    ]
+    anthropic = FakeAnthropicClient(results=fake_results)
+
+    async def _run() -> None:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            client = state_worker_mod.StateWorkerClient(client=http)
+            batch = models_mod.BatchRecordWire.model_validate(_batch_wire())
+            tracked = {batch.batch_id: batch}
+            await loop_mod.poll_once(client, anthropic, tracked, now=_NOW)
+
+        assert _BATCH_ID in tracked
+
+    asyncio.run(_run())
+
+
 def test_poll_once_anthropic_failed_patches_batch_failed() -> None:
     state_worker_mod, loop_mod, models_mod = _load_loop_stack()
     patch_calls: list[dict] = []

@@ -79,6 +79,25 @@ def _register_payload(
     }
 
 
+async def _seed_discovered_only(db_path: Path, source_ids: list[str]) -> None:
+    async with aiosqlite.connect(db_path) as conn:
+        await conn.execute("PRAGMA journal_mode=WAL")
+        entries = [
+            ManifestBatchEntryWire(
+                source_id=source_id,
+                source=SourceEnum.ARXIV,
+                url=f"https://arxiv.org/abs/{source_id}",
+                title=f"Paper {source_id}",
+                abstract="An abstract",
+                published_at=_NOW,
+                domain=DomainEnum.PROFESSIONAL.value,
+            )
+            for source_id in source_ids
+        ]
+        await ingest_manifest_batch(conn, entries, discovered_at=_NOW)
+        await conn.commit()
+
+
 async def _seed_relevance_queued(db_path: Path, source_ids: list[str]) -> None:
     async with aiosqlite.connect(db_path) as conn:
         await conn.execute("PRAGMA journal_mode=WAL")
@@ -137,7 +156,8 @@ def test_post_batches_registers_submitted(client: TestClient, temp_db: Path) -> 
     assert batch["entry_count"] == 2
 
 
-def test_post_batches_duplicate_returns_409(client: TestClient) -> None:
+def test_post_batches_duplicate_returns_409(client: TestClient, temp_db: Path) -> None:
+    asyncio.run(_seed_relevance_queued(temp_db, [_SOURCE_A, _SOURCE_B]))
     first = client.post("/batches", json=_register_payload())
     second = client.post("/batches", json=_register_payload())
     assert first.status_code == 201
@@ -145,7 +165,20 @@ def test_post_batches_duplicate_returns_409(client: TestClient) -> None:
     assert second.json() == {"error": "batch_conflict", "batch_id": _BATCH_ID}
 
 
-def test_patch_batches_updates_status_and_counts(client: TestClient) -> None:
+def test_post_batches_rejects_non_queued_source(client: TestClient, temp_db: Path) -> None:
+    asyncio.run(_seed_relevance_queued(temp_db, [_SOURCE_A]))
+    asyncio.run(_seed_discovered_only(temp_db, [_SOURCE_B]))
+    response = client.post("/batches", json=_register_payload())
+    assert response.status_code == 409
+    assert response.json() == {
+        "error": "invalid_source_state",
+        "source_id": _SOURCE_B,
+        "state": ProcessingState.DISCOVERED.value,
+    }
+
+
+def test_patch_batches_updates_status_and_counts(client: TestClient, temp_db: Path) -> None:
+    asyncio.run(_seed_relevance_queued(temp_db, [_SOURCE_A, _SOURCE_B]))
     client.post("/batches", json=_register_payload())
     completed_at = _NOW.isoformat().replace("+00:00", "Z")
     response = client.patch(
@@ -216,7 +249,8 @@ def test_post_batch_timeout_idempotent_when_already_timed_out(
     assert second.json()["entries_reset"] == 0
 
 
-def test_post_batch_timeout_rejects_complete_batch(client: TestClient) -> None:
+def test_post_batch_timeout_rejects_complete_batch(client: TestClient, temp_db: Path) -> None:
+    asyncio.run(_seed_relevance_queued(temp_db, [_SOURCE_A, _SOURCE_B]))
     client.post("/batches", json=_register_payload())
     client.patch(
         f"/batches/{_BATCH_ID}",
@@ -232,7 +266,8 @@ def test_post_batch_timeout_skips_non_queued_source_ids(
 ) -> None:
     """Falsifier: timeout must not reset entries outside RELEVANCE_QUEUED."""
     asyncio.run(_seed_relevance_queued(temp_db, [_SOURCE_A]))
-    client.post("/batches", json=_register_payload(source_ids=[_SOURCE_A, _SOURCE_B]))
+    asyncio.run(_seed_discovered_only(temp_db, [_SOURCE_B]))
+    client.post("/batches", json=_register_payload(source_ids=[_SOURCE_A]))
     response = client.post(f"/batches/{_BATCH_ID}/timeout")
     assert response.status_code == 200
     assert response.json()["entries_reset"] == 1
