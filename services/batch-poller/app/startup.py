@@ -1,17 +1,17 @@
-"""Startup scan — recover in-flight pre-filter batches from state-worker."""
+"""Startup scan — recover in-flight batches from state-worker."""
 
 from __future__ import annotations
 
 import logging
 
 from app.clients.state_worker import StateWorkerClient
-from app.models import PRE_FILTER_BATCH_TYPE, BatchRecordWire
+from app.models import TRACKED_BATCH_TYPES, BatchRecordWire
 
 logger = logging.getLogger(__name__)
 
 
-def _is_pre_filter_batch(batch: BatchRecordWire) -> bool:
-    if batch.batch_type == PRE_FILTER_BATCH_TYPE:
+def _is_tracked_batch(batch: BatchRecordWire) -> bool:
+    if batch.batch_type in TRACKED_BATCH_TYPES:
         return True
     logger.warning(
         "batch_type rejected",
@@ -25,9 +25,9 @@ def _is_pre_filter_batch(batch: BatchRecordWire) -> bool:
 
 
 async def startup_scan(state_client: StateWorkerClient) -> list[BatchRecordWire]:
-    """GET /batches?status=submitted,processing and return pre_filter batches only."""
+    """GET /batches?status=submitted,processing and return tracked batch types."""
     batches = await state_client.get_in_flight_batches()
-    tracked = [batch for batch in batches if _is_pre_filter_batch(batch)]
+    tracked = [batch for batch in batches if _is_tracked_batch(batch)]
     logger.info(
         "startup scan complete",
         extra={

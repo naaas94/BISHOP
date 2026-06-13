@@ -12,6 +12,8 @@ from app.models import (
     BatchRecordWire,
     BatchTimeoutResponse,
     BatchesListResponse,
+    EnrichmentStage1ResultsRequest,
+    EnrichmentStage2ResultsRequest,
     PreFilterResultsRequest,
     PreFilterResultsResponse,
 )
@@ -51,6 +53,26 @@ class StateWorkerClient:
         )
         response.raise_for_status()
         return PreFilterResultsResponse.model_validate(response.json())
+
+    async def post_enrichment_stage1_results(
+        self,
+        request: EnrichmentStage1ResultsRequest,
+    ) -> None:
+        response = await self._client.post(
+            "/entries/enrichment-stage1-results",
+            json=request.model_dump(mode="json"),
+        )
+        response.raise_for_status()
+
+    async def post_enrichment_stage2_results(
+        self,
+        request: EnrichmentStage2ResultsRequest,
+    ) -> None:
+        response = await self._client.post(
+            "/entries/enrichment-stage2-results",
+            json=request.model_dump(mode="json"),
+        )
+        response.raise_for_status()
 
     async def patch_batch(self, batch_id: str, request: BatchPatchRequest) -> None:
         response = await self._client.patch(

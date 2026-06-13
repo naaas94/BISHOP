@@ -8,6 +8,15 @@ from pydantic import BaseModel, Field
 
 
 PRE_FILTER_BATCH_TYPE = "pre_filter"
+ENRICHMENT_STAGE1_BATCH_TYPE = "enrichment_stage1"
+ENRICHMENT_STAGE2_BATCH_TYPE = "enrichment_stage2"
+TRACKED_BATCH_TYPES = frozenset(
+    {
+        PRE_FILTER_BATCH_TYPE,
+        ENRICHMENT_STAGE1_BATCH_TYPE,
+        ENRICHMENT_STAGE2_BATCH_TYPE,
+    },
+)
 
 
 class BatchRecordWire(BaseModel):
@@ -73,3 +82,34 @@ class ParsedPreFilterDecision(BaseModel):
     decision: int
     pre_filter_rationale: str
     parse_failed: bool = False
+
+
+class EnrichmentStage1ResultEntryWire(BaseModel):
+    source_id: str
+    success: bool
+    summary: str | None = None
+    concepts: list[str] | None = None
+    tags: list[str] | None = None
+    entry_type: str | None = None
+    challenge_hooks: list[str] | None = None
+    oov_tags_stripped: list[str] | None = None
+    error_message: str | None = None
+
+
+class EnrichmentStage1ResultsRequest(BaseModel):
+    batch_id: str
+    entries: list[EnrichmentStage1ResultEntryWire]
+
+
+class EnrichmentStage2ResultEntryWire(BaseModel):
+    source_id: str
+    success: bool
+    relevance_score: float | None = None
+    relevance_reason: str | None = None
+    value_rationale: str | None = None
+    error_message: str | None = None
+
+
+class EnrichmentStage2ResultsRequest(BaseModel):
+    batch_id: str
+    entries: list[EnrichmentStage2ResultEntryWire]

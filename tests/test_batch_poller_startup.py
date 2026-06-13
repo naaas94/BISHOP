@@ -66,7 +66,7 @@ def _batch_payload(
     }
 
 
-def test_startup_scan_filters_pre_filter_only() -> None:
+def test_startup_scan_tracks_all_batch_types() -> None:
     state_worker_mod, startup_mod = _load_batch_poller_modules()
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -77,7 +77,8 @@ def test_startup_scan_filters_pre_filter_only() -> None:
             json={
                 "batches": [
                     _batch_payload(batch_id="pf-1", batch_type="pre_filter"),
-                    _batch_payload(batch_id="enr-1", batch_type="enrichment_stage1"),
+                    _batch_payload(batch_id="enr1-1", batch_type="enrichment_stage1"),
+                    _batch_payload(batch_id="enr2-1", batch_type="enrichment_stage2"),
                 ],
             },
         )
@@ -88,9 +89,44 @@ def test_startup_scan_filters_pre_filter_only() -> None:
             client = state_worker_mod.StateWorkerClient(client=http)
             tracked = await startup_mod.startup_scan(client)
 
-        assert len(tracked) == 1
-        assert tracked[0].batch_id == "pf-1"
-        assert tracked[0].batch_type == "pre_filter"
+        assert {batch.batch_id for batch in tracked} == {"pf-1", "enr1-1", "enr2-1"}
+        assert {batch.batch_type for batch in tracked} == {
+            "pre_filter",
+            "enrichment_stage1",
+            "enrichment_stage2",
+        }
+
+    asyncio.run(_run())
+
+
+def test_startup_scan_registers_enrichment_stage1_in_flight() -> None:
+    """Falsifier: restart without startup scan orphans enrichment_stage1 batches."""
+    state_worker_mod, startup_mod = _load_batch_poller_modules()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "batches": [
+                    _batch_payload(
+                        batch_id="enr-restart-1",
+                        batch_type="enrichment_stage1",
+                        status="processing",
+                    ),
+                ],
+            },
+        )
+
+    async def _run() -> None:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            client = state_worker_mod.StateWorkerClient(client=http)
+            tracked = await startup_mod.startup_scan(client)
+
+        assert [batch.batch_id for batch in tracked] == ["enr-restart-1"]
+        assert tracked[0].batch_type == "enrichment_stage1"
+        assert tracked[0].status == "processing"
+        assert tracked[0].external_batch_id == "msgbatch_ext_1"
 
     asyncio.run(_run())
 

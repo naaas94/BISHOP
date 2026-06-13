@@ -11,17 +11,32 @@ from typing import Callable
 
 import httpx
 
+from bishop_shared.enrichment_parsers import (
+    ParsedCall1Response,
+    ParsedCall2Response,
+    parse_call1_response,
+    parse_call2_response,
+)
+
 from app.clients.anthropic import (
     AnthropicBatchOutcome,
     AnthropicBatchPollerProtocol,
     AnthropicBatchStatus,
 )
-from app.clients.state_worker import StateWorkerClient, iso_timestamp
+from app.clients.state_worker import StateWorkerClient
 from app.config import BATCH_POLL_INTERVAL_SEC, BATCH_TIMEOUT_HOURS
 from app.models import (
+    ENRICHMENT_STAGE1_BATCH_TYPE,
+    ENRICHMENT_STAGE2_BATCH_TYPE,
     PRE_FILTER_BATCH_TYPE,
+    TRACKED_BATCH_TYPES,
+    AnthropicBatchResultItem,
     BatchPatchRequest,
     BatchRecordWire,
+    EnrichmentStage1ResultEntryWire,
+    EnrichmentStage1ResultsRequest,
+    EnrichmentStage2ResultEntryWire,
+    EnrichmentStage2ResultsRequest,
     ParsedPreFilterDecision,
     PreFilterResultEntryWire,
     PreFilterResultsRequest,
@@ -40,7 +55,7 @@ def _merge_tracked(
     batches: list[BatchRecordWire],
 ) -> None:
     for batch in batches:
-        if batch.batch_type != PRE_FILTER_BATCH_TYPE:
+        if batch.batch_type not in TRACKED_BATCH_TYPES:
             logger.warning(
                 "batch_type rejected",
                 extra={
@@ -120,6 +135,61 @@ def parse_pre_filter_response(source_id: str, text: str | None) -> ParsedPreFilt
     )
 
 
+def _parse_call1_from_item(
+    source_id: str,
+    item: AnthropicBatchResultItem | None,
+) -> ParsedCall1Response:
+    if item is None or item.errored:
+        return ParsedCall1Response(
+            source_id=source_id,
+            success=False,
+            error_message="missing or errored anthropic result",
+            parse_failed=True,
+        )
+    return parse_call1_response(source_id, item.text)
+
+
+def _parse_call2_from_item(
+    source_id: str,
+    item: AnthropicBatchResultItem | None,
+) -> ParsedCall2Response:
+    if item is None or item.errored:
+        return ParsedCall2Response(
+            source_id=source_id,
+            success=False,
+            error_message="missing or errored anthropic result",
+            parse_failed=True,
+        )
+    return parse_call2_response(source_id, item.text)
+
+
+def _call1_entry_wire(parsed: ParsedCall1Response) -> EnrichmentStage1ResultEntryWire:
+    success = parsed.success and not parsed.parse_failed
+    return EnrichmentStage1ResultEntryWire(
+        source_id=parsed.source_id,
+        success=success,
+        summary=parsed.summary,
+        concepts=parsed.concepts,
+        tags=parsed.tags,
+        entry_type=parsed.entry_type,
+        challenge_hooks=parsed.challenge_hooks,
+        oov_tags_stripped=parsed.oov_tags_stripped,
+        error_message=parsed.error_message,
+    )
+
+
+def _call2_entry_wire(parsed: ParsedCall2Response) -> EnrichmentStage2ResultEntryWire:
+    success = parsed.success and not parsed.parse_failed
+    return EnrichmentStage2ResultEntryWire(
+        source_id=parsed.source_id,
+        success=success,
+        relevance_score=parsed.relevance_score,
+        relevance_reason=parsed.relevance_reason,
+        value_rationale=parsed.value_rationale,
+        error_message=parsed.error_message,
+    )
+
+
 async def _handle_timeout(
     state_client: StateWorkerClient,
     batch: BatchRecordWire,
@@ -158,7 +228,26 @@ async def _handle_anthropic_failed(
     tracked.pop(batch.batch_id, None)
 
 
-async def _handle_batch_complete(
+async def _patch_batch_complete(
+    state_client: StateWorkerClient,
+    batch: BatchRecordWire,
+    *,
+    passed_count: int,
+    failed_count: int,
+) -> None:
+    completed_at = datetime.now(UTC)
+    await state_client.patch_batch(
+        batch.batch_id,
+        BatchPatchRequest(
+            status="complete",
+            passed_count=passed_count,
+            failed_count=failed_count,
+            completed_at=completed_at,
+        ),
+    )
+
+
+async def _handle_pre_filter_complete(
     state_client: StateWorkerClient,
     anthropic_client: AnthropicBatchPollerProtocol,
     batch: BatchRecordWire,
@@ -219,15 +308,11 @@ async def _handle_batch_complete(
         )
         return
 
-    completed_at = datetime.now(UTC)
-    await state_client.patch_batch(
-        batch.batch_id,
-        BatchPatchRequest(
-            status="complete",
-            passed_count=passed_count,
-            failed_count=failed_count,
-            completed_at=completed_at,
-        ),
+    await _patch_batch_complete(
+        state_client,
+        batch,
+        passed_count=passed_count,
+        failed_count=failed_count,
     )
     logger.info(
         "batch complete",
@@ -240,6 +325,149 @@ async def _handle_batch_complete(
         },
     )
     tracked.pop(batch.batch_id, None)
+
+
+async def _handle_enrichment_stage1_complete(
+    state_client: StateWorkerClient,
+    anthropic_client: AnthropicBatchPollerProtocol,
+    batch: BatchRecordWire,
+    tracked: dict[str, BatchRecordWire],
+) -> None:
+    if not batch.external_batch_id:
+        logger.error(
+            "missing external_batch_id",
+            extra={"batch_id": batch.batch_id, "event": "missing_external_batch_id"},
+        )
+        return
+
+    raw_results = await anthropic_client.fetch_batch_results(batch.external_batch_id)
+    results_by_id = {item.custom_id: item for item in raw_results}
+    entries: list[EnrichmentStage1ResultEntryWire] = []
+    passed_count = 0
+    failed_count = 0
+
+    for source_id in batch.source_ids:
+        parsed = _parse_call1_from_item(source_id, results_by_id.get(source_id))
+        if parsed.parse_failed or not parsed.success:
+            failed_count += 1
+        else:
+            passed_count += 1
+        entries.append(_call1_entry_wire(parsed))
+
+    request = EnrichmentStage1ResultsRequest(batch_id=batch.batch_id, entries=entries)
+    try:
+        await state_client.post_enrichment_stage1_results(request)
+    except httpx.HTTPStatusError:
+        logger.error(
+            "enrichment-stage1-results post failed",
+            extra={
+                "batch_id": batch.batch_id,
+                "external_batch_id": batch.external_batch_id,
+                "event": "enrichment_stage1_results_failed",
+            },
+        )
+        return
+
+    await _patch_batch_complete(
+        state_client,
+        batch,
+        passed_count=passed_count,
+        failed_count=failed_count,
+    )
+    logger.info(
+        "enrichment stage1 batch complete",
+        extra={
+            "batch_id": batch.batch_id,
+            "external_batch_id": batch.external_batch_id,
+            "event": "enrichment_batch_complete",
+            "passed": passed_count,
+            "failed": failed_count,
+        },
+    )
+    tracked.pop(batch.batch_id, None)
+
+
+async def _handle_enrichment_stage2_complete(
+    state_client: StateWorkerClient,
+    anthropic_client: AnthropicBatchPollerProtocol,
+    batch: BatchRecordWire,
+    tracked: dict[str, BatchRecordWire],
+) -> None:
+    if not batch.external_batch_id:
+        logger.error(
+            "missing external_batch_id",
+            extra={"batch_id": batch.batch_id, "event": "missing_external_batch_id"},
+        )
+        return
+
+    raw_results = await anthropic_client.fetch_batch_results(batch.external_batch_id)
+    results_by_id = {item.custom_id: item for item in raw_results}
+    entries: list[EnrichmentStage2ResultEntryWire] = []
+    passed_count = 0
+    failed_count = 0
+
+    for source_id in batch.source_ids:
+        parsed = _parse_call2_from_item(source_id, results_by_id.get(source_id))
+        if parsed.parse_failed or not parsed.success:
+            failed_count += 1
+        else:
+            passed_count += 1
+        entries.append(_call2_entry_wire(parsed))
+
+    request = EnrichmentStage2ResultsRequest(batch_id=batch.batch_id, entries=entries)
+    try:
+        await state_client.post_enrichment_stage2_results(request)
+    except httpx.HTTPStatusError:
+        logger.error(
+            "enrichment-stage2-results post failed",
+            extra={
+                "batch_id": batch.batch_id,
+                "external_batch_id": batch.external_batch_id,
+                "event": "enrichment_stage2_results_failed",
+            },
+        )
+        return
+
+    await _patch_batch_complete(
+        state_client,
+        batch,
+        passed_count=passed_count,
+        failed_count=failed_count,
+    )
+    logger.info(
+        "enrichment stage2 batch complete",
+        extra={
+            "batch_id": batch.batch_id,
+            "external_batch_id": batch.external_batch_id,
+            "event": "enrichment_batch_complete",
+            "passed": passed_count,
+            "failed": failed_count,
+        },
+    )
+    tracked.pop(batch.batch_id, None)
+
+
+async def _handle_batch_complete(
+    state_client: StateWorkerClient,
+    anthropic_client: AnthropicBatchPollerProtocol,
+    batch: BatchRecordWire,
+    tracked: dict[str, BatchRecordWire],
+) -> None:
+    if batch.batch_type == PRE_FILTER_BATCH_TYPE:
+        await _handle_pre_filter_complete(state_client, anthropic_client, batch, tracked)
+    elif batch.batch_type == ENRICHMENT_STAGE1_BATCH_TYPE:
+        await _handle_enrichment_stage1_complete(state_client, anthropic_client, batch, tracked)
+    elif batch.batch_type == ENRICHMENT_STAGE2_BATCH_TYPE:
+        await _handle_enrichment_stage2_complete(state_client, anthropic_client, batch, tracked)
+    else:
+        logger.warning(
+            "batch_type rejected",
+            extra={
+                "batch_id": batch.batch_id,
+                "batch_type": batch.batch_type,
+                "event": "enrichment_batch_rejected",
+            },
+        )
 
 
 async def poll_once(
