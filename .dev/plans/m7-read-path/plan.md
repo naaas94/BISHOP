@@ -2,7 +2,7 @@
 
 **Plan name:** `m7-read-path`  
 **Version:** 1.0  
-**Status:** Ready for executor dispatch  
+**Status:** Complete — auditor handoff at `.dev/plans/m7-read-path/handoff.md`  
 **Charter slice:** `.dev/bishop_program_charter.md` L440–488  
 **Normative spec:** `bishop_spec_0_6.md` v1.5.0 (tracked @ HEAD)  
 **Subtask budget:** 8 (within 4–10)
@@ -411,14 +411,6 @@ None — initial plan v1.0.
 
 ## 8. Auditor handoff
 
-**Status:** Pending — populate when plan marked *Complete* after T1–T8 execution.
+**Status:** Complete — see [handoff.md](handoff.md) (tree SHA `1be89cbf480fc7d7c3da450933fca17efc8dac71`).
 
-§8.1–§8.6 will be filled at handoff with clean-tree SHA, `scripts/verify-m7.sh` result, artifact chain, §2 evidence map, §5 disposition, and cold-read seeds.
-
-**Recommended cold-read seeds (preview):**
-1. `services/query-api/app/retrieval/search.py`
-2. `services/query-api/app/stores/bm25_reader.py`
-3. `bishop_shared/query_config.py`
-4. `services/query-api/app/lifespan.py`
-5. `tests/test_m7_integration.py`
-6. `bishop_cli/main.py`
+§8.1–§8.6 populated in handoff artifact. Primary gate: `scripts/verify-m7.sh` — 136 passed across G2 + M7 slices (models/integration in isolated subprocesses).

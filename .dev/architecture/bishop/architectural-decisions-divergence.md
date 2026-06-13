@@ -13,3 +13,15 @@ Runtime counterpart to program rationale: absorbed intent drift from milestone e
 **Rationale:** T3 decision log documents single lock file (not single critical section); acceptable for single-writer MVP; handoff §8.4 waiver F-006.
 
 **Status:** absorbed
+
+---
+
+## M7 — 2026-06-13
+
+**Spec intent:** Plan §0 Flag 2 binds entry reads on query-api to a read-only `aiosqlite` connection at `SQLITE_DB_PATH`.
+
+**Execution decision:** `sqlite_reader.py` uses stdlib `sqlite3.connect` with `file:…?mode=ro` URI; no `aiosqlite` dependency in query-api.
+
+**Rationale:** Sync SQLite reads match FastAPI sync route handlers; `test_read_entry_opens_sqlite_read_only` falsifies writable connections. Read-only behavioral contract honored.
+
+**Status:** absorbed
