@@ -6,6 +6,7 @@ import os
 
 # Spec §12.1 / charter G3 — pinned dated snapshot; do not use undated aliases.
 ANTHROPIC_MODEL_PREFILTER = "claude-haiku-4-5-20251001"
+ANTHROPIC_MODEL_ENRICHMENT = "claude-haiku-4-5-20251001"
 
 _G3_PROBE_MESSAGE = "ping"
 

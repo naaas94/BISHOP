@@ -1,5 +1,9 @@
 # Changelog
 
+## m5-enrichment — 2026-06-13
+
+- T1 (enrichment shared utilities): Added `bishop_shared` enrichment modules — tiktoken truncation per §13.1, §20.8 tag taxonomy with OOV validation, Appendix A Call 1/2 prompt builders (Call 2 profile block with ephemeral `cache_control`), JSON parsers for batch-poller, and `ANTHROPIC_MODEL_ENRICHMENT` alias. Establishes typed contract surface for enrichment-batcher and batch-poller v2. See `.dev/decision-logs/m5-enrichment/T1-enrichment-shared-utilities.md`. + added `tests/test_enrichment_truncation.py`, `tests/test_tag_taxonomy.py`, `tests/test_enrichment_prompts.py`, `tests/test_enrichment_parsers.py`. Markdown code-fence JSON extraction deferred per decision log.
+
 ## m4-content — 2026-06-13
 
 - T4 (M4 integration gate): Bumped compose image tag to `bishop/content-scraper:m4`; added `scripts/verify-m4.sh` (G2 slice + M4 pytest), stub-removal test for content-scraper, and mocked e2e integration for SCRAPED happy path plus retriable `RetryExhaustedError` → `SCRAPE_FAILED` with `error_log.is_retriable=1`. Closes M4 exit gate per charter. + added `tests/test_verify_m4.py`, `tests/test_m4_integration.py`. Live docker compose smoke deferred per M3 pattern.
