@@ -43,3 +43,9 @@ Question:     Should bishop_shared re-export profile_renderer and anthropic_conf
 Impact:       import conventions across pre-filter-worker, batch-poller, tests
 Closes when:  Refactor or explicit decision to keep direct submodule imports only
 ```
+
+```
+Question:     When will test_escalations_returns_flagged_entry_with_error_log be updated for T8 ALERT sibling rows?
+Impact:       Full-suite pytest (368/369 green); escalations panel contract tests
+Closes when:  Test updated per OPEN-001 option A in .dev/known-test-failures.md, or router filtering decided per option B
+```
