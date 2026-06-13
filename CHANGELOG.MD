@@ -1,5 +1,9 @@
 # Changelog
 
+## m6-indexing — 2026-06-13
+
+- T1 (indexing shared contracts): Added `bishop_shared/indexing_config.py` (pinned `all-MiniLM-L6-v2`, N1 `build_embed_text`, store path constants from `BISHOP_VOLUME_MOUNTS`) and `bishop_shared/atomic_persist.py` (temp → fsync → `os.replace` per spec S4). Establishes typed contract surface for vector-writer stores T2–T5. See `.dev/decision-logs/m6-indexing/T1-indexing-shared-contracts.md`. + added `tests/test_indexing_config.py`, `tests/test_atomic_persist.py`. Parent-directory fsync deferred per decision log.
+
 ## m5-enrichment — 2026-06-13
 
 - T6 (M5 integration gate): Bumped compose image tags to `bishop/enrichment-batcher:m5` and `bishop/batch-poller:m5`; added `scripts/verify-m5.sh` (G2 slice + M5 pytest), `tests/test_verify_m5.py`, and mocked e2e integration for five SCRAPED entries through both enrichment stages to `VECTOR_WRITE_QUEUED` with OOV log assertion, `ENRICHMENT_STAGE2_QUEUED` double-poll falsifier, and enrichment startup-scan restart test. Closes M5 exit gate per charter. + added `tests/test_m5_integration.py`. Malformed Call 2 partial-failure in full e2e deferred — covered by `test_batch_poller_enrichment` unit falsifiers. Live docker compose smoke deferred per M3/M4 pattern.
