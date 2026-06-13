@@ -17,3 +17,4 @@
 [PATCH] architectural-patterns.md 1.0.2 — 2026-06-13 — Added M3 code-derived pattern candidates (G3 gate, profile hash, custom_id join). Trigger: staleness window elapsed (partial).
 [MINOR] known-coupling-surfaces.md 1.2.0 — 2026-06-13 — Added m3 image tags, G3/model string, profile hash, custom_id, batch_type, verify-m3 chain. Trigger: schema change, new module or package.
 [MINOR] open-questions.md 1.2.0 — 2026-06-13 — Added personal domain deferral and bishop_shared re-export questions. Trigger: new module or package.
+[PATCH] open-questions.md 1.3.0 — 2026-06-13 — Added OPEN-001 escalations test hygiene question; see .dev/known-test-failures.md. Trigger: full-suite verification.
