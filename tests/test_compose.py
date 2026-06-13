@@ -118,11 +118,19 @@ def test_image_tags_use_milestone_convention(compose_text: str) -> None:
       "content-scraper": "m4",
       "enrichment-batcher": "m5",
       "vector-writer": "m6",
+      "query-api": "m7",
+      "ui": "m7",
   }
   for service in BISHOP_SERVICES:
       block = _service_block(compose_text, service)
       tag = milestone_tags.get(service, "m0")
       assert f"image: bishop/{service}:{tag}" in block
+
+
+def test_ui_query_api_url_env(compose_text: str) -> None:
+    """Falsifier: ui compose block lacks QUERY_API_URL for in-network query-api."""
+    block = _service_block(compose_text, "ui")
+    assert "QUERY_API_URL: http://query-api:8000" in block
 
 
 def test_vector_writer_stop_grace_period(compose_text: str) -> None:

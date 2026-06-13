@@ -2,21 +2,11 @@
 
 from __future__ import annotations
 
-import importlib.util
-import re
-import socket
-import threading
-from http.client import HTTPConnection
 from pathlib import Path
 
 import pytest
 
-from bishop_shared.constants import (
-    BISHOP_SERVICES,
-    QUERY_API_HOST_PORT,
-    STATE_WORKER_INTERNAL_PORT,
-    UI_HOST_PORT,
-)
+from bishop_shared.constants import BISHOP_SERVICES
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -28,6 +18,11 @@ T2_M6_REAL_WORKER_SERVICES = (
     "vector-writer",
 )
 
+T2_M7_REAL_HTTP_SERVICES = (
+    "query-api",
+    "ui",
+)
+
 T2_M3_REAL_WORKER_SERVICES = (
     "pre-filter-worker",
     "batch-poller",
@@ -37,45 +32,13 @@ T2_M4_REAL_WORKER_SERVICES = (
     "content-scraper",
 )
 
-T2_HTTP_SERVICES = ("query-api", "ui")
-
 T2_SERVICES = (
     T2_WORKER_STUB_SERVICES
     + T2_M3_REAL_WORKER_SERVICES
     + T2_M4_REAL_WORKER_SERVICES
     + T2_M6_REAL_WORKER_SERVICES
-    + T2_HTTP_SERVICES
+    + T2_M7_REAL_HTTP_SERVICES
 )
-
-PORT_LITERAL_PATTERN = re.compile(
-    r"\b(?:8000|8080|8081|80)\b",
-)
-
-
-def _load_stub_module(service_name: str):
-    stub_path = REPO_ROOT / "services" / service_name / "stub_main.py"
-    spec = importlib.util.spec_from_file_location(f"{service_name}_stub", stub_path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def _free_port() -> int:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.bind(("127.0.0.1", 0))
-        return sock.getsockname()[1]
-
-
-def _fetch_root(port: int) -> tuple[int, str]:
-    conn = HTTPConnection("127.0.0.1", port, timeout=2)
-    try:
-        conn.request("GET", "/")
-        response = conn.getresponse()
-        body = response.read().decode("utf-8")
-        return response.status, body
-    finally:
-        conn.close()
 
 
 @pytest.mark.parametrize("service_name", T2_SERVICES)
@@ -96,60 +59,6 @@ def test_worker_stub_is_long_running(service_name: str) -> None:
     assert "while True" in source
     assert "time.sleep" in source
     assert f'SERVICE_NAME = "{service_name}"' in source
-
-
-def test_query_api_binds_port_from_constants() -> None:
-    module = _load_stub_module("query-api")
-    source = (REPO_ROOT / "services" / "query-api" / "stub_main.py").read_text(
-        encoding="utf-8",
-    )
-    assert "STATE_WORKER_INTERNAL_PORT" in source
-    assert not PORT_LITERAL_PATTERN.search(source)
-
-    port = _free_port()
-    server = module.HTTPServer(("127.0.0.1", port), module.RootHandler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        status, body = _fetch_root(port)
-        assert status == 200
-        assert body == "ok"
-    finally:
-        server.shutdown()
-
-
-def test_query_api_listen_port_matches_internal_constant() -> None:
-    module = _load_stub_module("query-api")
-    assert module.STATE_WORKER_INTERNAL_PORT == STATE_WORKER_INTERNAL_PORT
-
-
-def test_ui_binds_port_from_constants() -> None:
-    module = _load_stub_module("ui")
-    source = (REPO_ROOT / "services" / "ui" / "stub_main.py").read_text(
-        encoding="utf-8",
-    )
-    assert "QUERY_API_HOST_PORT" in source
-    assert "STATE_WORKER_INTERNAL_PORT" in source
-    assert not PORT_LITERAL_PATTERN.search(source)
-    assert module.UI_CONTAINER_PORT == QUERY_API_HOST_PORT - STATE_WORKER_INTERNAL_PORT
-
-    port = _free_port()
-    server = module.HTTPServer(("127.0.0.1", port), module.RootHandler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        status, body = _fetch_root(port)
-        assert status == 200
-        assert body == "ok"
-    finally:
-        server.shutdown()
-
-
-def test_ui_container_port_is_wire_eighty() -> None:
-    """Falsifier: ui container must listen on 80 per plan §2 Wire."""
-    module = _load_stub_module("ui")
-    assert module.UI_CONTAINER_PORT == 80
-    assert UI_HOST_PORT == 8081
 
 
 def test_dockerfiles_use_python_slim_base() -> None:
@@ -195,6 +104,17 @@ def test_m4_worker_uses_real_main_entrypoint(service_name: str) -> None:
 @pytest.mark.parametrize("service_name", T2_M6_REAL_WORKER_SERVICES)
 def test_m6_worker_uses_real_main_entrypoint(service_name: str) -> None:
     """Falsifier: M6 vector-writer must run app.main, not the M0 stub loop."""
+    dockerfile = (REPO_ROOT / "services" / service_name / "Dockerfile").read_text(
+        encoding="utf-8",
+    )
+    assert 'CMD ["python", "-m", "app.main"]' in dockerfile
+    assert "stub_main.py" not in dockerfile
+    assert (REPO_ROOT / "services" / service_name / "app" / "main.py").is_file()
+
+
+@pytest.mark.parametrize("service_name", T2_M7_REAL_HTTP_SERVICES)
+def test_m7_http_service_uses_real_main_entrypoint(service_name: str) -> None:
+    """Falsifier: M7 query-api/ui must run app.main, not the M0 stub loop."""
     dockerfile = (REPO_ROOT / "services" / service_name / "Dockerfile").read_text(
         encoding="utf-8",
     )
