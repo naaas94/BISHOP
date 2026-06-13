@@ -1,0 +1,27 @@
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+{% if q and not error %}
+<p class="muted">
+  {{ search_meta.total }} result(s)
+  {% if search_meta.problem_shaped %}· problem-shaped · channels: {{ search_meta.channels_active | join(", ") }}{% endif %}
+</p>
+{% endif %}
+{% if hits %}
+<ol class="hit-list">
+  {% for hit in hits %}
+  <li class="hit-card">
+    <h3><a href="/entries/{{ hit.source_id }}">{{ hit.title }}</a></h3>
+    <p class="hit-meta">
+      RRF {{ "%.4f" | format(hit.rrf_score) }}
+      {% if hit.relevance_score is not none %}· relevance {{ hit.relevance_score }}{% endif %}
+      {% if hit.entry_type %}· {{ hit.entry_type }}{% endif %}
+    </p>
+    {% if hit.summary %}<p>{{ hit.summary }}</p>{% endif %}
+    {% if hit.tags %}<p class="tags">{{ hit.tags | join(", ") }}</p>{% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% elif q and not error %}
+<p class="muted">No results.</p>
+{% endif %}

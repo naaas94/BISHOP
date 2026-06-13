@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Batches — BISHOP{% endblock %}
+{% block content %}
+<h1>Completed batches</h1>
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+{% if batches %}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Batch ID</th>
+      <th>Type</th>
+      <th>Domain</th>
+      <th>Profile</th>
+      <th>Completed</th>
+      <th>Entries</th>
+      <th>Passed</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for batch in batches %}
+    <tr>
+      <td><a href="/batches/{{ batch.batch_id }}">{{ batch.batch_id }}</a></td>
+      <td>{{ batch.batch_type }}</td>
+      <td>{{ batch.domain }}</td>
+      <td>{{ batch.profile_version }}</td>
+      <td>{{ batch.completed_at or "—" }}</td>
+      <td>{{ batch.entry_count }}</td>
+      <td>{{ batch.passed_count }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% elif not error %}
+<p class="muted">No completed batches yet.</p>
+{% endif %}
+{% endblock %}

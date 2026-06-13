@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ entry.title if entry else "Entry" }} — BISHOP{% endblock %}
+{% block content %}
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+{% if entry %}
+<h1>{{ entry.title }}</h1>
+<p class="muted"><a href="{{ entry.url }}" rel="noopener">{{ entry.source_id }}</a></p>
+<dl class="meta-grid">
+  <dt>Source</dt><dd>{{ entry.source }}</dd>
+  <dt>Domain</dt><dd>{{ entry.domain }}</dd>
+  <dt>Type</dt><dd>{{ entry.entry_type or "—" }}</dd>
+  <dt>Relevance</dt><dd>{{ entry.relevance_score if entry.relevance_score is not none else "—" }}</dd>
+  <dt>Reading status</dt><dd>{{ entry.reading_status }}</dd>
+  <dt>Processing state</dt><dd>{{ entry.processing_state }}</dd>
+  <dt>Ingested</dt><dd>{{ entry.ingested_at }}</dd>
+  <dt>Published</dt><dd>{{ entry.published_at or "—" }}</dd>
+</dl>
+{% if entry.summary %}
+<section>
+  <h2>Summary</h2>
+  <p>{{ entry.summary }}</p>
+</section>
+{% endif %}
+{% if entry.tags %}
+<section>
+  <h2>Tags</h2>
+  <p>{{ entry.tags | join(", ") }}</p>
+</section>
+{% endif %}
+{% if entry.challenge_hooks %}
+<section>
+  <h2>Challenge hooks</h2>
+  <ul>{% for hook in entry.challenge_hooks %}<li>{{ hook }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+{% if entry.pre_filter_rationale %}
+<section>
+  <h2>Pre-filter rationale</h2>
+  <p>{{ entry.pre_filter_rationale }}</p>
+</section>
+{% endif %}
+{% if entry.value_rationale %}
+<section>
+  <h2>Value rationale</h2>
+  <p>{{ entry.value_rationale }}</p>
+</section>
+{% endif %}
+<details class="collapsible">
+  <summary>Raw content</summary>
+  <pre class="raw-content">{{ entry.content_raw }}</pre>
+</details>
+{% endif %}
+{% endblock %}

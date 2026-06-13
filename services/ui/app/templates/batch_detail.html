@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Batch {{ batch.batch_id if batch else "detail" }} — BISHOP{% endblock %}
+{% block content %}
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+{% if batch %}
+<h1>Batch {{ batch.batch_id }}</h1>
+<dl class="meta-grid">
+  <dt>Type</dt><dd>{{ batch.batch_type }}</dd>
+  <dt>Domain</dt><dd>{{ batch.domain }}</dd>
+  <dt>Profile</dt><dd>{{ batch.profile_version }}</dd>
+  <dt>Status</dt><dd>{{ batch.status }}</dd>
+  <dt>Completed</dt><dd>{{ batch.completed_at or "—" }}</dd>
+  <dt>Entries</dt><dd>{{ batch.entry_count }}</dd>
+  <dt>Passed</dt><dd>{{ batch.passed_count }}</dd>
+  <dt>Failed</dt><dd>{{ batch.failed_count }}</dd>
+</dl>
+<h2>Top entries by relevance</h2>
+{% if entries %}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Relevance</th>
+      <th>Type</th>
+      <th>Tags</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in entries %}
+    <tr>
+      <td><a href="/entries/{{ entry.source_id }}">{{ entry.title }}</a></td>
+      <td>{{ entry.relevance_score if entry.relevance_score is not none else "—" }}</td>
+      <td>{{ entry.entry_type or "—" }}</td>
+      <td>{% if entry.tags %}{{ entry.tags | join(", ") }}{% else %}—{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">No ranked entries for this batch.</p>
+{% endif %}
+{% endif %}
+<p><a href="/batches">← Back to batches</a></p>
+{% endblock %}
