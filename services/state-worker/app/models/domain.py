@@ -20,7 +20,15 @@ from app.enums import (
 )
 
 JSON_LIST_FIELDS = frozenset(
-    {"concepts", "tags", "challenge_hooks", "references", "cited_by", "top_entries"}
+    {
+        "concepts",
+        "tags",
+        "challenge_hooks",
+        "references",
+        "cited_by",
+        "top_entries",
+        "source_ids",
+    }
 )
 
 
@@ -152,6 +160,7 @@ class BatchRecord(BaseModel):
     passed_count: int
     failed_count: int
     top_entries: list[str] = Field(default_factory=list)
+    source_ids: list[str] = Field(default_factory=list)
     external_batch_id: str | None = None
 
     def to_db_row(self) -> dict[str, Any]:

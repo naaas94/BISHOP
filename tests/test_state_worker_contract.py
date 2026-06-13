@@ -67,6 +67,9 @@ SPEC_ROUTE_METHOD_PATHS: frozenset[tuple[str, str]] = frozenset(
         ("POST", "/scraper-state/{source}"),
         ("GET", "/batches"),
         ("GET", "/batches/{batch_id}"),
+        ("POST", "/batches"),
+        ("PATCH", "/batches/{batch_id}"),
+        ("POST", "/batches/{batch_id}/timeout"),
         ("GET", "/health"),
         ("GET", "/escalations"),
     }

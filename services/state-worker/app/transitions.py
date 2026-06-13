@@ -21,8 +21,10 @@ from app.enums import (
     ReadingStatusEnum,
     SourceEnum,
 )
-from app.models.domain import Entry, ErrorLog, ManifestEntry
+from app.models.domain import BatchRecord, Entry, ErrorLog, ManifestEntry
 from app.models.http import (
+    BatchPatchRequest,
+    BatchRegisterRequest,
     EnrichmentStage1EntryWire,
     EnrichmentStage2EntryWire,
     ManifestBatchEntryWire,
@@ -136,6 +138,32 @@ class ProvenanceIncompleteError(TransitionError):
     def __init__(self, source_id: str) -> None:
         self.source_id = source_id
         super().__init__(f"provenance incomplete for {source_id}")
+
+
+class BatchNotFoundError(TransitionError):
+    def __init__(self, batch_id: str) -> None:
+        self.batch_id = batch_id
+        super().__init__(f"batch not found: {batch_id}")
+
+
+class BatchConflictError(TransitionError):
+    def __init__(self, batch_id: str) -> None:
+        self.batch_id = batch_id
+        super().__init__(f"batch already exists: {batch_id}")
+
+
+class BatchInvalidStateError(TransitionError):
+    def __init__(self, batch_id: str, status: str) -> None:
+        self.batch_id = batch_id
+        self.status = status
+        super().__init__(f"invalid batch state for timeout: {batch_id} ({status})")
+
+
+@dataclass(frozen=True)
+class BatchTimeoutResult:
+    batch_id: str
+    status: BatchStatusEnum
+    entries_reset: int
 
 
 @dataclass(frozen=True)
@@ -314,6 +342,168 @@ async def _sync_pipeline_state(
     entry = await _fetch_entry(conn, source_id)
     if entry is not None:
         await _set_entry_state(conn, source_id, new_state)
+
+
+async def _fetch_batch(
+    conn: aiosqlite.Connection, batch_id: str
+) -> BatchRecord | None:
+    _prepare_conn(conn)
+    cursor = await conn.execute(
+        "SELECT * FROM batches WHERE batch_id = ?", (batch_id,)
+    )
+    row = await cursor.fetchone()
+    return BatchRecord.from_db_row(dict(row)) if row else None
+
+
+async def register_batch(
+    conn: aiosqlite.Connection,
+    request: BatchRegisterRequest,
+    *,
+    created_at: datetime | None = None,
+) -> BatchRecord:
+    """Insert BatchRecord at Anthropic submit time; 409 on duplicate batch_id."""
+    existing = await _fetch_batch(conn, request.batch_id)
+    if existing is not None:
+        raise BatchConflictError(request.batch_id)
+
+    now = created_at or datetime.now(UTC)
+    record = BatchRecord(
+        batch_id=request.batch_id,
+        batch_type=request.batch_type,
+        domain=request.domain,
+        profile_version=request.profile_version,
+        profile_render_hash=request.profile_render_hash,
+        status=BatchStatusEnum.SUBMITTED,
+        created_at=now,
+        submitted_at=now,
+        entry_count=request.entry_count,
+        passed_count=0,
+        failed_count=0,
+        source_ids=list(request.source_ids),
+        external_batch_id=request.external_batch_id,
+    )
+    await _insert_row(conn, "batches", record.to_db_row())
+    await conn.commit()
+    logger.info(
+        "batch registered",
+        extra={
+            "batch_id": request.batch_id,
+            "external_batch_id": request.external_batch_id,
+            "event": "batch_registered",
+        },
+    )
+    return record
+
+
+async def patch_batch(
+    conn: aiosqlite.Connection,
+    batch_id: str,
+    request: BatchPatchRequest,
+) -> BatchRecord:
+    """Update batch lifecycle fields; 404 if batch_id missing."""
+    existing = await _fetch_batch(conn, batch_id)
+    if existing is None:
+        raise BatchNotFoundError(batch_id)
+
+    updates: dict[str, Any] = {"status": request.status.value}
+    if request.passed_count is not None:
+        updates["passed_count"] = request.passed_count
+    if request.failed_count is not None:
+        updates["failed_count"] = request.failed_count
+    if request.completed_at is not None:
+        updates["completed_at"] = request.completed_at.isoformat()
+    if request.external_batch_id is not None:
+        updates["external_batch_id"] = request.external_batch_id
+
+    set_clause = ", ".join(f'"{key}" = ?' for key in updates)
+    await conn.execute(
+        f"UPDATE batches SET {set_clause} WHERE batch_id = ?",
+        (*updates.values(), batch_id),
+    )
+    await conn.commit()
+
+    updated = await _fetch_batch(conn, batch_id)
+    assert updated is not None
+    logger.info(
+        "batch patched",
+        extra={
+            "batch_id": batch_id,
+            "event": "batch_patched",
+            "passed": request.passed_count,
+            "rejected": request.failed_count,
+        },
+    )
+    return updated
+
+
+async def apply_batch_timeout(
+    conn: aiosqlite.Connection,
+    batch_id: str,
+) -> BatchTimeoutResult:
+    """
+    Mark batch batch_timed_out and reset RELEVANCE_QUEUED manifest rows
+    whose source_id is in the batch source_ids list to DISCOVERED.
+    """
+    batch = await _fetch_batch(conn, batch_id)
+    if batch is None:
+        raise BatchNotFoundError(batch_id)
+
+    if batch.status == BatchStatusEnum.BATCH_TIMED_OUT:
+        return BatchTimeoutResult(
+            batch_id=batch_id,
+            status=BatchStatusEnum.BATCH_TIMED_OUT,
+            entries_reset=0,
+        )
+
+    if batch.status not in {
+        BatchStatusEnum.SUBMITTED,
+        BatchStatusEnum.PROCESSING,
+        BatchStatusEnum.PENDING,
+    }:
+        raise BatchInvalidStateError(batch_id, batch.status.value)
+
+    entries_reset = 0
+    for source_id in batch.source_ids:
+        manifest = await _fetch_manifest(conn, source_id)
+        if manifest is None:
+            continue
+        if manifest.processing_state != ProcessingState.RELEVANCE_QUEUED:
+            continue
+        await _set_manifest_state(
+            conn,
+            source_id,
+            ProcessingState.DISCOVERED,
+            expected=ProcessingState.RELEVANCE_QUEUED,
+        )
+        entries_reset += 1
+        logger.info(
+            "batch timeout entry reset",
+            extra={
+                "batch_id": batch_id,
+                "source_id": source_id,
+                "event": "batch_timeout_reset",
+                "entries_reset": entries_reset,
+            },
+        )
+
+    await conn.execute(
+        "UPDATE batches SET status = ? WHERE batch_id = ?",
+        (BatchStatusEnum.BATCH_TIMED_OUT.value, batch_id),
+    )
+    await conn.commit()
+    logger.warning(
+        "batch timed out",
+        extra={
+            "batch_id": batch_id,
+            "event": "batch_timed_out",
+            "entries_reset": entries_reset,
+        },
+    )
+    return BatchTimeoutResult(
+        batch_id=batch_id,
+        status=BatchStatusEnum.BATCH_TIMED_OUT,
+        entries_reset=entries_reset,
+    )
 
 
 async def ingest_manifest_batch(

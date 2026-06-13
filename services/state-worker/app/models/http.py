@@ -7,7 +7,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from app.enums import EntryTypeEnum, ProcessingState, SourceEnum
+from app.enums import BatchStatusEnum, BatchTypeEnum, DomainEnum, EntryTypeEnum, ProcessingState, SourceEnum
 from app.models.domain import BatchRecord, Entry, ErrorLog, ManifestEntry
 
 
@@ -146,6 +146,40 @@ class BatchDetailResponse(BaseModel):
     """Derived from §9.1 GET /batches/{batch_id} — single BatchRecord."""
 
     batch: BatchRecord
+
+
+class BatchRegisterRequest(BaseModel):
+    """Derived from M3 batch registration at Anthropic submit time."""
+
+    batch_id: str
+    batch_type: BatchTypeEnum
+    domain: DomainEnum
+    profile_version: str
+    profile_render_hash: str
+    source_ids: list[str]
+    external_batch_id: str | None = None
+    entry_count: int
+
+
+class BatchRegisterResponse(BaseModel):
+    batch_id: str
+    status: BatchStatusEnum
+
+
+class BatchPatchRequest(BaseModel):
+    """Derived from M3 batch lifecycle status updates."""
+
+    status: BatchStatusEnum
+    passed_count: int | None = None
+    failed_count: int | None = None
+    completed_at: datetime | None = None
+    external_batch_id: str | None = None
+
+
+class BatchTimeoutResponse(BaseModel):
+    batch_id: str
+    status: BatchStatusEnum
+    entries_reset: int
 
 
 class EscalationEntryWire(BaseModel):
