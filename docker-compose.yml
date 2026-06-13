@@ -66,7 +66,7 @@ services:
     build:
       context: .
       dockerfile: services/enrichment-batcher/Dockerfile
-    image: bishop/enrichment-batcher:m0
+    image: bishop/enrichment-batcher:m5
     networks:
       - bishop-internal
     volumes:
@@ -82,7 +82,7 @@ services:
     build:
       context: .
       dockerfile: services/batch-poller/Dockerfile
-    image: bishop/batch-poller:m3
+    image: bishop/batch-poller:m5
     networks:
       - bishop-internal
     volumes:
