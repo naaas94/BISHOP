@@ -1,6 +1,6 @@
 Section:      known-coupling-surfaces
-Version:      1.1.0
-Last updated: 2026-06-12
+Version:      1.2.0
+Last updated: 2026-06-13
 
 ```
 Surface:      BISHOP_SERVICES tuple ↔ docker-compose.yml service keys ↔ services/<name>/ directory names
@@ -40,8 +40,8 @@ Confirmed:    yes — source: T1/T4 decision logs, tests
 ```
 Surface:      Docker image tags bishop/<service>:<milestone>
 Shared by:    docker-compose.yml image lines ↔ tests/test_compose.py::test_image_tags_use_milestone_convention
-Failure mode: state-worker must be m1, scraper m2, others m0 — tag change breaks compose test
-Confirmed:    yes — source: docker-compose.yml, tests/test_compose.py (M2 audit C2)
+Failure mode: state-worker m1, scraper m2, pre-filter-worker m3, batch-poller m3, others m0 — tag change breaks compose test
+Confirmed:    yes — source: docker-compose.yml, tests/test_compose.py (M3 T6)
 ```
 
 ```
@@ -94,10 +94,59 @@ Confirmed:    yes — source: M2 audit C1 (domain wire)
 ```
 
 ```
-Surface:      G2 pytest module list in verify-g2.sh and verify-m2.sh
-Shared by:    scripts/verify-g2.sh ↔ scripts/verify-m2.sh ↔ tests/test_verify_g2.py, test_verify_m2.py
+Surface:      G2 pytest module list in verify-g2.sh, verify-m2.sh, and verify-m3.sh
+Shared by:    scripts/verify-g2.sh ↔ scripts/verify-m2.sh ↔ scripts/verify-m3.sh ↔ tests/test_verify_g2.py, test_verify_m2.py, test_verify_m3.py
 Failure mode: New contract tests not in gate script give false confidence (M1 audit F-014: alerts test outside G2 script)
-Confirmed:    yes — source: dev_log.md F-014, scripts/verify-g2.sh
+Confirmed:    yes — source: dev_log.md F-014, scripts/verify-g2.sh, scripts/verify-m3.sh
+```
+
+```
+Surface:      ANTHROPIC_MODEL_PREFILTER model string
+Shared by:    bishop_shared/anthropic_config.py ↔ pre-filter-worker submit payload ↔ batch-poller ↔ verify-g3.sh ↔ G3 probe
+Failure mode: HTTP 400 model_string_fatal if Anthropic deprecates dated snapshot without coordinated bump
+Confirmed:    yes — source: M3 T1 G3 gate, anthropic_config.py
+```
+
+```
+Surface:      Profile canonical_hash ↔ runtime compute_profile_hash
+Shared by:    config/profiles/professional_v1.0.0.yaml ↔ bishop_shared/profile_renderer.py ↔ pre-filter-worker loop
+Failure mode: Batch submit blocked; CRITICAL profile_hash_mismatch alert if YAML edited without hash recompute
+Confirmed:    yes — source: M3 T2 decision log, test_profile_renderer.py
+```
+
+```
+Surface:      Profile version "1.0.0" and filename professional_v1.0.0.yaml
+Shared by:    YAML version field ↔ _PROFILE_FILENAME map ↔ BatchRegisterRequest.profile_version ↔ PreFilterResultsRequest
+Failure mode: Results rejected or wrong profile attribution if version string diverges across registration and results POST
+Confirmed:    yes — source: profile_renderer.py, state-worker batch registration
+```
+
+```
+Surface:      Anthropic batch custom_id = manifest source_id
+Shared by:    pre-filter-worker anthropic_batch_client ↔ batch-poller result join ↔ batches.source_ids column
+Failure mode: Results cannot be matched to manifests if custom_id format changes
+Confirmed:    yes — source: M3 T4/T5 decision logs, test_m3_integration.py
+```
+
+```
+Surface:      batch_type "pre_filter" filter
+Shared by:    BatchTypeEnum.PRE_FILTER ↔ batch-poller PRE_FILTER_BATCH_TYPE ↔ enrichment batches (future)
+Failure mode: Enrichment batches incorrectly processed by M3 poller if type string drifts
+Confirmed:    yes — source: batch-poller/app/models.py, batch-poller loop
+```
+
+```
+Surface:      G3 verification gate chain (verify-m3 → verify-g3)
+Shared by:    scripts/verify-m3.sh ↔ scripts/verify-g3.sh ↔ pre-filter-worker ensure_g3_verified ↔ BISHOP_G3_VERIFIED bypass
+Failure mode: CI passes with bypass env set; live deploy fails without API key or on model deprecation
+Confirmed:    yes — source: M3 T1/T6, verify-m3.sh
+```
+
+```
+Surface:      Host profiles volume mount path
+Shared by:    docker-compose.yml ${BISHOP_DATA_ROOT}/profiles ↔ PROFILES_CONTAINER_DIR ↔ seed-profiles scripts
+Failure mode: pre-filter-worker cannot load profile if mount path or seed script diverges from renderer constant
+Confirmed:    yes — source: docker-compose.yml, profile_renderer.py, seed-profiles.sh
 ```
 
 ```

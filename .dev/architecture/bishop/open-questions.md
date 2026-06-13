@@ -1,6 +1,6 @@
 Section:      open-questions
-Version:      1.1.0
-Last updated: 2026-06-12
+Version:      1.2.0
+Last updated: 2026-06-13
 
 ```
 Question:     Should QUERY_API_HOST_PORT and UI_HOST_PORT be documented in .env.example alongside BISHOP_DATA_ROOT?
@@ -30,4 +30,16 @@ Closes when:  Gate script updated or explicit waiver recorded in committed hando
 Question:     When will bishop_shared.enums subsume all §20 enums currently duplicated in state-worker/app/enums.py?
 Impact:       bishop_shared, state-worker models, drift guard scope
 Closes when:  Refactor lands or decision records intentional split (ProcessingState stays state-worker-local)
+```
+
+```
+Question:     When will personal domain profile YAML and pre-filter routing be added (M3 is professional-only)?
+Impact:       config/profiles/, pre-filter-worker domain gate, charter M3 scope boundary
+Closes when:  M4+ charter slice or explicit deferral recorded in decision log
+```
+
+```
+Question:     Should bishop_shared re-export profile_renderer and anthropic_config from __init__.py?
+Impact:       import conventions across pre-filter-worker, batch-poller, tests
+Closes when:  Refactor or explicit decision to keep direct submodule imports only
 ```

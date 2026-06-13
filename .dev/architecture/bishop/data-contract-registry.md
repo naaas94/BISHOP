@@ -1,6 +1,6 @@
 Section:      data-contract-registry
-Version:      1.1.0
-Last updated: 2026-06-12
+Version:      1.2.0
+Last updated: 2026-06-13
 
 ## M0 contracts (retained)
 
@@ -246,4 +246,114 @@ Consumers:      services/scraper/app/adapters/arxiv.py::parse_atom_feed
 Last changed:   2026-06-12
 ```
 
-**Deferred contracts (not present in code):** LanceDB/DuckDB/BM25 payloads, enrichment batch API wire formats, NL profile YAML schema, `fetch_content` response body — per charter §M3+.
+## M3 — pre-filter batch lifecycle and NL profiles
+
+```
+Contract:       batches.source_ids (column)
+Module:         alembic/versions/m3_001_batch_source_ids.py
+Serialization:  SQLite TEXT column storing JSON array of source_id strings
+Version:        m3_001_batch_source_ids
+Purpose:        Track manifest source_ids per batch for timeout recovery and result join
+Fields:
+  - source_ids: list[str] serialized as JSON text; default '[]'
+Validators:     decoded in BatchRecord.from_db_row
+Consumers:      register_batch, apply_batch_timeout, batch-poller result join
+Last changed:   2026-06-13
+```
+
+```
+Contract:       BatchRegisterRequest / BatchRegisterResponse
+Module:         services/state-worker/app/models/http.py
+Serialization:  Pydantic model
+Version:        unversioned — tracked by git blame
+Purpose:        HTTP wire format for POST /batches at Anthropic submit time
+Fields:
+  - request: batch_id, batch_type, domain, profile_version, profile_render_hash, source_ids, external_batch_id?, entry_count
+  - response: batch_id, status (initial submitted)
+Validators:     duplicate batch_id → 409 batch_conflict
+Consumers:      batches router, pre-filter-worker StateWorkerClient
+Last changed:   2026-06-13
+```
+
+```
+Contract:       BatchPatchRequest / BatchDetailResponse / BatchTimeoutResponse
+Module:         services/state-worker/app/models/http.py
+Serialization:  Pydantic model
+Version:        unversioned — tracked by git blame
+Purpose:        HTTP wire format for PATCH /batches/{id} and POST /batches/{id}/timeout
+Fields:
+  - patch: status, passed_count?, failed_count?, completed_at?, external_batch_id?
+  - timeout response: batch_id, status, entries_reset
+Validators:     invalid state transitions → 409 invalid_batch_state
+Consumers:      batches router, batch-poller StateWorkerClient
+Last changed:   2026-06-13
+```
+
+```
+Contract:       PreFilterResultsRequest / PreFilterResultsResponse
+Module:         services/state-worker/app/models/http.py
+Serialization:  Pydantic model
+Version:        unversioned — tracked by git blame
+Purpose:        HTTP wire format for POST /manifest/pre-filter-results
+Fields:
+  - request: batch_id, profile_version, entries[{source_id, decision (0|1), pre_filter_rationale}]
+  - response: updated, passed, rejected counts
+Validators:     decision ∈ {0, 1}; transitions RELEVANCE_QUEUED → RELEVANCE_PASSED/REJECTED
+Consumers:      entries router, batch-poller StateWorkerClient
+Last changed:   2026-06-13
+```
+
+```
+Contract:       ProfileDocument
+Module:         bishop_shared/profile_renderer.py
+Serialization:  Pydantic model (loaded from YAML via PyYAML)
+Version:        1.0.0 (profile file professional_v1.0.0.yaml)
+Purpose:        NL profile core fields per §11.2 for pre-filter system prompt rendering
+Fields:
+  - version, domain, canonical_hash, context, principles, anchors[], exclusions, output
+Validators:     compute_profile_hash must match canonical_hash; extra YAML keys ignored
+Consumers:      pre-filter-worker loop, tests/test_profile_renderer.py
+Last changed:   2026-06-13
+```
+
+```
+Contract:       professional_v1.0.0.yaml
+Module:         config/profiles/
+Serialization:  YAML file (host-seeded to /app/config/profiles)
+Version:        1.0.0
+Purpose:        Sole M3 NL profile asset for professional domain pre-filter
+Fields:
+  - canonical_hash: 80f5f9abdc3b80c8e43c0fb6f40ac057c97130aa67ecb7852b48d49a26bb687d
+  - metadata ignored by ProfileDocument: created_at, label, changelog
+Validators:     seed-profiles scripts; hash mismatch blocks batch submit
+Consumers:      bishop_shared.profile_renderer, pre-filter-worker
+Last changed:   2026-06-13
+```
+
+```
+Contract:       ANTHROPIC_MODEL_PREFILTER
+Module:         bishop_shared/anthropic_config.py
+Serialization:  constant string
+Version:        unversioned — tracked by git blame
+Purpose:        Pinned Anthropic model for pre-filter batches and G3 gate
+Fields:
+  - value: claude-haiku-4-5-20251001
+Validators:     verify_model_string() live probe; HTTP 400 → fatal model_string_fatal
+Consumers:      pre-filter-worker, batch-poller, verify-g3.sh
+Last changed:   2026-06-13
+```
+
+```
+Contract:       Anthropic batch custom_id
+Module:         (external) Anthropic Messages Batches API
+Serialization:  API string field on batch request item
+Version:        unversioned — external API
+Purpose:        Join Anthropic batch results back to manifest source_id
+Fields:
+  - custom_id: must equal manifest source_id ("{source}:{raw_id}")
+Validators:     batch-poller joins results against batches.source_ids list
+Consumers:      pre-filter-worker anthropic_batch_client, batch-poller loop
+Last changed:   2026-06-13
+```
+
+**Deferred contracts (not present in code):** LanceDB/DuckDB/BM25 payloads, enrichment batch API wire formats, `personal` domain profile YAML, `fetch_content` response body — per charter §M4+.
