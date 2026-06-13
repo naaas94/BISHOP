@@ -17,7 +17,7 @@ from app.config import ARXIV_BACKFILL_WINDOW_DAYS, ARXIV_CATEGORIES
 from app.models import ManifestIngestEntry
 from app.rate_limit import SOURCE_RATE_LIMITS, TokenBucketRateLimiter
 
-ARXIV_EXPORT_API_URL = "http://export.arxiv.org/api/query"
+ARXIV_EXPORT_API_URL = "https://export.arxiv.org/api/query"
 ARXIV_HTML_BASE_URL = "https://arxiv.org/html"
 
 ATOM_NS = "http://www.w3.org/2005/Atom"

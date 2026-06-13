@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -14,6 +15,8 @@ from sqlalchemy import create_engine, text
 
 from bishop_shared.constants import SQLITE_DB_PATH
 
+logger = logging.getLogger(__name__)
+
 _pool: asyncio.Queue[aiosqlite.Connection] | None = None
 _pool_size: int = 5
 
@@ -21,8 +24,12 @@ _pool_size: int = 5
 def _repo_root() -> Path:
     """Resolve directory containing alembic.ini (repo root locally, /app in Docker)."""
     here = Path(__file__).resolve()
-    for candidate in (here.parents[3], here.parents[1], Path("/app")):
-        if (candidate / "alembic.ini").is_file():
+    candidates: list[Path] = [Path("/app")]
+    candidates.extend(here.parents)
+    for candidate in candidates:
+        ini = candidate / "alembic.ini"
+        if ini.is_file():
+            logger.info("alembic config root: %s", candidate)
             return candidate
     raise FileNotFoundError("alembic.ini not found relative to app.db")
 

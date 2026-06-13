@@ -72,6 +72,7 @@ def test_verify_model_string_http_400_returns_false() -> None:
         assert verify_model_string(api_key="sk-test") is False
 
 
-def test_verify_model_string_requires_api_key() -> None:
+def test_verify_model_string_requires_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     with pytest.raises(ValueError, match="ANTHROPIC_API_KEY"):
         verify_model_string(api_key=None)

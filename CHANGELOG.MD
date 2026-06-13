@@ -1,5 +1,14 @@
 # Changelog
 
+## Manual arxvix change 2026-06-13
+
+from ARXIV_EXPORT_API_URL = "http://export.arxiv.org/api/query" to ARXIV_EXPORT_API_URL = "https://export.arxiv.org/api/query" In services/scraper/app/adapters/arxiv.py
+
+
+## m1-state-kernel — 2026-06-13 (docker amendment)
+
+- T1 docker alembic root: Fixed `_repo_root()` to walk `Path.parents` safely instead of indexing `parents[3]` eagerly, which raised `IndexError` in the state-worker container (`/app/app/db.py`) and blocked `docker compose up` at the M1 lifespan migration step. Added INFO log when the alembic root resolves. See `.dev/decision-logs/m1-state-kernel/T1-docker-alembic-root.md`. + added `tests/test_state_worker_db.py::test_repo_root_resolves_shallow_app_layout`.
+
 ## m7-read-path — 2026-06-13
 
 - T8 (M7 integration gate): Bumped compose image tags to `bishop/query-api:m7` and `bishop/ui:m7`; added `QUERY_API_URL: http://query-api:8000` on ui; added `scripts/verify-m7.sh` (G2 slice + M7 pytest in isolated subprocesses for models/integration to avoid `app` package collisions, optional `BISHOP_M7_REQUIRE_GATES=1` live G5), stub graduation for query-api/ui, and mocked e2e integration from M6-indexed stores through `/search` with problem-shaped `bm25_hooks` channel plus G7 cold-start empty-store falsifier. Closes M7 exit gate per charter. Charter G4/G5/G6 require manual sign-off before production. + added `tests/test_m7_integration.py`, `tests/test_verify_m7.py`. Per-channel score attribution deferred — fused hits and `channels_active` are integration falsifiers; isolated channel behavior covered in T2–T4 unit tests. Live docker compose smoke deferred per M3–M6 pattern.

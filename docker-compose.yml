@@ -43,6 +43,7 @@ services:
       - ${BISHOP_DATA_ROOT}/logs:/app/logs
     environment:
       STATE_WORKER_URL: http://state-worker:8000
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     depends_on:
       state-worker:
         condition: service_healthy
@@ -74,6 +75,7 @@ services:
       - ${BISHOP_DATA_ROOT}/logs:/app/logs
     environment:
       STATE_WORKER_URL: http://state-worker:8000
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     depends_on:
       state-worker:
         condition: service_healthy
@@ -90,6 +92,7 @@ services:
       - ${BISHOP_DATA_ROOT}/logs:/app/logs
     environment:
       STATE_WORKER_URL: http://state-worker:8000
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     depends_on:
       state-worker:
         condition: service_healthy
