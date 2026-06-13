@@ -2,6 +2,7 @@
 
 ## m4-content — 2026-06-13
 
+- T2 (content-scraper service): Implemented `services/content-scraper/app/` with config, models, `StateWorkerClient` (poll `RELEVANCE_PASSED`, POST content/failed), adapter resolution, `failure_envelope`-wrapped `content_scrape_cycle`, and asyncio scheduler; Dockerfile vendors `services/scraper/app` as `scraper_app/` with import rewrite and CMD `python -m app.main`. See `.dev/decision-logs/m4-content/T2-content-scraper-vendor-layout.md`. + added `tests/test_content_scraper_config.py`, `tests/test_content_scraper_client.py`, `tests/test_content_scraper_failure_mapping.py`, `tests/test_content_scraper_loop.py`. State-worker content POST 409 branches deferred to T4 integration.
 - T1 (ArXiv fetch_content): Implemented `ArxivAdapter.fetch_content` with HTML GET at `https://arxiv.org/html/{raw_id}`, stdlib HTML-to-text stripping, and title+abstract fallback on non-2xx or empty body; added helpers `parse_raw_id_from_source_id`, `fetch_arxiv_html_text`, `compose_fallback_content`. Updated adapter contract test to expect real content instead of `NotImplementedError("M4")`. See `.dev/decision-logs/m4-content/T1-arxiv-fetch-content.md`. + added `tests/test_arxiv_fetch_content.py`. Malformed `source_id` without colon separator deferred — pipeline assumes canonical `make_source_id` form.
 
 ## m3-prefilter — 2026-06-13
