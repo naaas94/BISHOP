@@ -1,5 +1,9 @@
 # Changelog
 
+## bishop.db corrupt volume — clean reset (Path B) — 2026-06-13
+
+- **Ops recovery:** Host `~/bishop_data/sqlite/bishop.db` was corrupted with embedded ArXiv HTML (`database disk image is malformed`); all state-worker DB endpoints returned HTTP 500. No backup available — quarantined corrupt `sqlite/`, `lancedb/`, `duckdb/`, and `bm25/` under `~/bishop_data/_quarantine_2026-06-13_corrupt-reset/`, recreated empty volume dirs, `docker compose up -d` for fresh Alembic schema. Pipeline re-ingest from empty `scraper_state`. See `.dev/decision-logs/ops/bishop-db-corrupt-clean-reset.md`. No code changes. Post-reset 409/orphan-batch triage from pre-outage session moot.
+
 ## batch-poller orphan-batch resilience — 2026-06-13
 
 - **Poller transport + stale batch handling:** Catch `httpx.RequestError` (including `ReadTimeout`) on results POST so poll loop survives state-worker slowness; on `409 invalid_transition` PATCH batch `failed` to stop orphan retry loops after sweep released `RELEVANCE_QUEUED` claims while batch rows stayed in-flight. `StateWorkerClient` timeout 60s (`BISHOP_STATE_WORKER_HTTP_TIMEOUT_SEC`); compose `restart: unless-stopped` on batch-poller. **state-worker:** `register_batch` for `pre_filter` requires all `source_id` ∈ `RELEVANCE_QUEUED` (`409 invalid_source_state`); lock-state sweep skips `RELEVANCE_QUEUED` entries referenced by active batches. See `.dev/decision-logs/m3-batch-pipeline/batch-poller-orphan-batch-resilience.md`. + updated `tests/test_batch_poller_loop.py`, `tests/test_batch_poller_config.py`, `tests/test_state_worker_batches_register.py`, `tests/test_state_worker_transitions.py`. Pre-filter claim release on registration 409 deferred per decision log.
