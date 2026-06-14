@@ -25,3 +25,15 @@ Runtime counterpart to program rationale: absorbed intent drift from milestone e
 **Rationale:** Sync SQLite reads match FastAPI sync route handlers; `test_read_entry_opens_sqlite_read_only` falsifies writable connections. Read-only behavioral contract honored.
 
 **Status:** absorbed
+
+---
+
+## M7 — 2026-06-13 (DuckDB connection lifetime)
+
+**Spec intent:** §8.3 — `query-api` opens DuckDB `read_only=True` so metadata reads can run concurrently while `vector-writer` holds the read-write lock on `bishop.duckdb`.
+
+**Execution decision:** Both services use short-lived connections only (RW per `upsert`, RO per read). Writer retries lock conflicts; query-api degrades reads (partial search metadata, skipped pre-filter, empty `/recent`) rather than HTTP 500.
+
+**Rationale:** DuckDB disallows mixed read-write + read-only on one file (M6 `test_duckdb_concurrent_read.py`); process-lifetime mirror connection caused live search 500s. Deferred at M6 T6 / M7 T3; implemented post-M7 per `.dev/decision-logs/m7-read-path/duckdb-search-concurrency.md`. Spec §8.3 prose not amended — normative correction deferred.
+
+**Status:** absorbed

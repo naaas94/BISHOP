@@ -65,16 +65,19 @@ def test_entries_mirror_table_name_and_ddl(tmp_path: Path) -> None:
 
     db_path = tmp_path / "bishop.duckdb"
     mirror = module.DuckDbMirror(db_path)
+    mirror.upsert(_sample_row(module))
+
+    conn = duckdb.connect(str(db_path), read_only=True)
     try:
         tables = {
             row[0]
-            for row in mirror._conn.execute(
+            for row in conn.execute(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = 'main'"
             ).fetchall()
         }
         assert tables == {"entries_mirror"}
     finally:
-        mirror.close()
+        conn.close()
 
 
 def test_upsert_inserts_metadata_row(tmp_path: Path) -> None:

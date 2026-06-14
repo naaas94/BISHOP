@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import importlib.util
 import sys
-import threading
 from datetime import UTC, datetime
 from pathlib import Path
 from types import ModuleType
@@ -45,38 +44,40 @@ def _sample_row(module: ModuleType) -> object:
     )
 
 
-def test_separate_connection_reads_while_mirror_holds_write(tmp_path: Path) -> None:
-    """Falsifier: a second DuckDB connection must read while mirror keeps write open.
-
-    DuckDB disallows mixing read_only and read-write on one file; M7 query-api uses
-    read_only only when vector-writer has released the file between upserts.
-  """
+def test_read_only_succeeds_between_mirror_upserts(tmp_path: Path) -> None:
+    """M7 steady-state: read_only succeeds once mirror releases the file between upserts."""
     module = _load_duckdb_mirror_module()
     db_path = tmp_path / "bishop.duckdb"
     mirror = module.DuckDbMirror(db_path)
-    results: dict[str, object] = {}
+    mirror.upsert(_sample_row(module))
 
+    reader = duckdb.connect(str(db_path), read_only=True)
     try:
-        mirror.upsert(_sample_row(module))
-
-        def _reader() -> None:
-            reader = duckdb.connect(str(db_path))
-            try:
-                row = reader.execute(
-                    "SELECT title FROM entries_mirror WHERE source_id = ?",
-                    ["arxiv:2506.00001"],
-                ).fetchone()
-                results["title"] = row[0] if row else None
-            finally:
-                reader.close()
-
-        thread = threading.Thread(target=_reader)
-        thread.start()
-        thread.join(timeout=2.0)
-        assert not thread.is_alive()
-        assert results.get("title") == "Concurrent Read Test"
+        row = reader.execute(
+            "SELECT title FROM entries_mirror WHERE source_id = ?",
+            ["arxiv:2506.00001"],
+        ).fetchone()
+        assert row is not None and row[0] == "Concurrent Read Test"
     finally:
-        mirror.close()
+        reader.close()
+
+
+def test_read_only_conflicts_with_open_read_write_connection(tmp_path: Path) -> None:
+    """DuckDB disallows read_only while another connection holds read-write lock."""
+    module = _load_duckdb_mirror_module()
+    db_path = tmp_path / "bishop.duckdb"
+    mirror = module.DuckDbMirror(db_path)
+    mirror.upsert(_sample_row(module))
+
+    writer = duckdb.connect(str(db_path))
+    try:
+        with pytest.raises(
+            (duckdb.IOException, duckdb.ConnectionException),
+            match="Conflicting lock|different configuration",
+        ):
+            duckdb.connect(str(db_path), read_only=True)
+    finally:
+        writer.close()
 
 
 def test_read_only_connection_after_mirror_releases_write(tmp_path: Path) -> None:

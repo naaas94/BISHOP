@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Query, Request
 
 from app.models import RecentHit, RecentResponse
+from app.stores.duckdb_reader import DuckDbLockUnavailableError
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["recent"])
 
@@ -17,7 +22,14 @@ def get_recent(
     domain: str | None = None,
 ) -> RecentResponse:
     stores = request.app.state.stores
-    rows = stores.metadata.recent(source=source, days=days, domain=domain)
+    try:
+        rows = stores.metadata.recent(source=source, days=days, domain=domain)
+    except DuckDbLockUnavailableError:
+        logger.warning(
+            "duckdb recent read skipped — writer holds file lock",
+            extra={"event": "duckdb_recent_lock_skip"},
+        )
+        rows = []
     entries = [
         RecentHit(
             source_id=row.source_id,

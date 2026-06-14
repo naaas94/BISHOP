@@ -84,8 +84,17 @@ def batches_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         monkeypatch.setattr(batches_router, "_state_worker_get", _fake_get)
 
         stores = MagicMock()
-        stores.metadata.connect.return_value.execute.return_value.fetchall.return_value = [
-            ("arxiv:1", "Top Paper", "Sum", 0.95, "paper", '["AI"]'),
+        from app.stores.duckdb_reader import EntryMetadataRow  # noqa: WPS433
+
+        stores.metadata.fetch_top_entry_metadata.return_value = [
+            EntryMetadataRow(
+                source_id="arxiv:1",
+                title="Top Paper",
+                summary="Sum",
+                relevance_score=0.95,
+                entry_type="paper",
+                tags=["AI"],
+            ),
         ]
 
         app = FastAPI()

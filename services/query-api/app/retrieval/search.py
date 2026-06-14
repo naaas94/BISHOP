@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Literal
 
@@ -9,8 +10,10 @@ from app.embedding import QueryEmbeddingEncoder
 from app.retrieval.problem_shaped import is_problem_shaped
 from app.retrieval.rrf import rrf_fuse
 from app.stores.bm25_reader import Bm25QueryIndex
-from app.stores.duckdb_reader import DuckDbReader
+from app.stores.duckdb_reader import DuckDbLockUnavailableError, DuckDbReader
 from app.stores.lancedb_reader import LanceDbSearcher
+
+logger = logging.getLogger(__name__)
 
 ChannelName = Literal["bm25_main", "dense", "bm25_hooks"]
 
@@ -89,23 +92,32 @@ def run_search(
         entry_type=entry_type,
         reading_status=reading_status,
     ):
-        candidate_ids = metadata.filter_source_ids(
-            domain=domain,
-            source=source,
-            tags=tags,
-            min_relevance=min_relevance,
-            days=days,
-            entry_type=entry_type,
-            reading_status=reading_status,
-        )
-        if not candidate_ids:
-            return SearchOrchestrationResult(
-                query=query,
-                problem_shaped=problem_shaped,
-                channels_active=channels_active,
-                hits=[],
+        try:
+            candidate_ids = metadata.filter_source_ids(
+                domain=domain,
+                source=source,
+                tags=tags,
+                min_relevance=min_relevance,
+                days=days,
+                entry_type=entry_type,
+                reading_status=reading_status,
             )
-        allowed = set(candidate_ids)
+        except DuckDbLockUnavailableError:
+            logger.warning(
+                "duckdb metadata pre-filter skipped — writer holds file lock",
+                extra={"event": "duckdb_prefilter_lock_skip"},
+            )
+            candidate_ids = None
+
+        if candidate_ids is not None:
+            if not candidate_ids:
+                return SearchOrchestrationResult(
+                    query=query,
+                    problem_shaped=problem_shaped,
+                    channels_active=channels_active,
+                    hits=[],
+                )
+            allowed = set(candidate_ids)
 
     bm25_main = _ranked_ids(
         bm25.search(query, channel_k, channel="main"),

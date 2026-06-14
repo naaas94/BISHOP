@@ -17,7 +17,6 @@ from app.stores.duckdb_reader import DuckDbReader
 
 router = APIRouter(tags=["batches"])
 
-TABLE_NAME = "entries_mirror"
 _TOP_ENTRIES_LIMIT = 20
 
 
@@ -46,39 +45,18 @@ def _fetch_top_entries_duckdb(
     *,
     limit: int = _TOP_ENTRIES_LIMIT,
 ) -> list[BatchEntrySummary]:
-    if not source_ids:
-        return []
-
-    placeholders = ",".join("?" for _ in source_ids)
-    sql = f"""
-        SELECT source_id, title, summary, relevance_score, entry_type, tags
-        FROM {TABLE_NAME}
-        WHERE source_id IN ({placeholders})
-        ORDER BY relevance_score DESC NULLS LAST
-        LIMIT ?
-    """
-    conn = metadata.connect()
-    rows = conn.execute(sql, [*source_ids, limit]).fetchall()
-    results: list[BatchEntrySummary] = []
-    for row in rows:
-        tags_raw = row[5]
-        tags: list[str] | None = None
-        if tags_raw is not None:
-            if isinstance(tags_raw, str):
-                tags = json.loads(tags_raw)
-            else:
-                tags = list(tags_raw)
-        results.append(
-            BatchEntrySummary(
-                source_id=str(row[0]),
-                title=str(row[1]),
-                summary=str(row[2]) if row[2] is not None else None,
-                relevance_score=float(row[3]) if row[3] is not None else None,
-                entry_type=str(row[4]) if row[4] is not None else None,
-                tags=tags,
-            )
+    rows = metadata.fetch_top_entry_metadata(source_ids, limit=limit)
+    return [
+        BatchEntrySummary(
+            source_id=row.source_id,
+            title=row.title,
+            summary=row.summary,
+            relevance_score=row.relevance_score,
+            entry_type=row.entry_type,
+            tags=row.tags,
         )
-    return results
+        for row in rows
+    ]
 
 
 @router.get("/batches")

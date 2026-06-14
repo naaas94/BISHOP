@@ -2,63 +2,24 @@
 
 from __future__ import annotations
 
-import json
 import logging
-from typing import Any
 
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 
 from app.models import SearchHit, SearchResponse
 from app.retrieval.search import run_search
-from app.stores.duckdb_reader import DuckDbReader
 from bishop_shared.query_config import DEFAULT_SEARCH_DOMAIN
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["search"])
 
-TABLE_NAME = "entries_mirror"
-
 
 def _parse_tags(raw: str | None) -> list[str] | None:
     if raw is None or not raw.strip():
         return None
     return [part.strip() for part in raw.split(",") if part.strip()]
-
-
-def _fetch_hit_metadata(
-    metadata: DuckDbReader,
-    source_ids: list[str],
-) -> dict[str, dict[str, Any]]:
-    if not source_ids:
-        return {}
-    placeholders = ",".join("?" for _ in source_ids)
-    sql = f"""
-        SELECT source_id, title, summary, relevance_score, entry_type, tags
-        FROM {TABLE_NAME}
-        WHERE source_id IN ({placeholders})
-    """
-    conn = metadata.connect()
-    rows = conn.execute(sql, source_ids).fetchall()
-    result: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        source_id = str(row[0])
-        tags_raw = row[5]
-        tags: list[str] | None = None
-        if tags_raw is not None:
-            if isinstance(tags_raw, str):
-                tags = json.loads(tags_raw)
-            else:
-                tags = list(tags_raw)
-        result[source_id] = {
-            "title": str(row[1]),
-            "summary": str(row[2]) if row[2] is not None else None,
-            "relevance_score": float(row[3]) if row[3] is not None else None,
-            "entry_type": str(row[4]) if row[4] is not None else None,
-            "tags": tags,
-        }
-    return result
 
 
 @router.get("/search", response_model=SearchResponse)
@@ -108,8 +69,7 @@ def get_search(
             content={"error": "invalid_query", "detail": str(exc)},
         )
 
-    metadata_map = _fetch_hit_metadata(
-        stores.metadata,
+    metadata_map = stores.metadata.fetch_hit_metadata(
         [source_id for source_id, _ in orchestration.hits],
     )
 

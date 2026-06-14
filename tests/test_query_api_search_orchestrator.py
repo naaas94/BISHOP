@@ -219,3 +219,29 @@ def test_run_search_metadata_pre_filter_restricts_channel_candidates() -> None:
 
     assert result.hits == [("arxiv:2", pytest.approx(1.0 / (60 + 1) + 1.0 / (60 + 1)))]
     metadata.filter_source_ids.assert_called_once()
+
+
+def test_run_search_skips_metadata_pre_filter_on_duckdb_lock() -> None:
+    search_mod = _load_search_module()
+    DuckDbLockUnavailableError = search_mod.DuckDbLockUnavailableError
+
+    bm25 = _make_bm25_mock(main=[("arxiv:1", 1.0)], hooks=[])
+    dense = MagicMock()
+    dense.search.return_value = [("arxiv:1", 0.9)]
+    metadata = MagicMock()
+    metadata.filter_source_ids.side_effect = DuckDbLockUnavailableError("Conflicting lock")
+    encoder = MagicMock()
+    encoder.encode_query.return_value = [0.1] * 384
+
+    result = search_mod.run_search(
+        query="LangGraph",
+        bm25=bm25,
+        dense=dense,
+        metadata=metadata,
+        encoder=encoder,
+        min_relevance=0.5,
+    )
+
+    assert result.hits
+    bm25.search.assert_called_once()
+    dense.search.assert_called_once()

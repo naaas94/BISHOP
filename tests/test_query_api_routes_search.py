@@ -66,9 +66,15 @@ def _make_stores(
     else:
         metadata.filter_source_ids.return_value = ["arxiv:1"]
 
-    metadata.connect.return_value.execute.return_value.fetchall.return_value = [
-        ("arxiv:1", "Title One", "Summary", 0.9, "paper", '["RAG"]'),
-    ]
+    metadata.fetch_hit_metadata.return_value = {
+        "arxiv:1": {
+            "title": "Title One",
+            "summary": "Summary",
+            "relevance_score": 0.9,
+            "entry_type": "paper",
+            "tags": ["RAG"],
+        },
+    }
 
     stores.bm25 = bm25
     stores.dense = dense

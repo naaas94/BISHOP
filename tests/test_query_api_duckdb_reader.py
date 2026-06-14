@@ -114,7 +114,7 @@ def test_connect_uses_read_only_true(tmp_path: Path, monkeypatch: pytest.MonkeyP
 
     monkeypatch.setattr(reader_mod.duckdb, "connect", _fake_connect)
     reader = reader_mod.DuckDbReader(tmp_path / "bishop.duckdb")
-    reader.connect()
+    reader.filter_source_ids(min_relevance=0.5)
 
     assert captured["read_only"] is True
 
@@ -160,3 +160,18 @@ def test_recent_empty_when_table_missing(tmp_path: Path) -> None:
     reader = reader_mod.DuckDbReader(tmp_path / "bishop.duckdb")
 
     assert reader.recent(days=7) == []
+
+
+def test_fetch_hit_metadata_returns_empty_on_lock_conflict(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reader_mod = _load_duckdb_reader_module()
+    reader = reader_mod.DuckDbReader(tmp_path / "bishop.duckdb")
+
+    def _always_locked(*_args: object, **_kwargs: object) -> duckdb.DuckDBPyConnection:
+        raise duckdb.IOException("Could not set lock: Conflicting lock is held")
+
+    monkeypatch.setattr(reader_mod.duckdb, "connect", _always_locked)
+
+    assert reader.fetch_hit_metadata(["arxiv:1"]) == {}

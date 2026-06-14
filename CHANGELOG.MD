@@ -1,5 +1,9 @@
 # Changelog
 
+## DuckDB search concurrency — short-lived connections — 2026-06-13
+
+- **DuckDB lock model (vector-writer + query-api):** `DuckDbMirror` opens read-write only per `upsert()` with writer-priority lock retries; `DuckDbReader` uses per-operation `read_only=True` (no cached connection) with brief read retries and search/read degradation instead of HTTP 500 when vector-writer holds the file. Fixes live `bishop search` 500 (`Conflicting lock`) while both services run. See `.dev/decision-logs/m7-read-path/duckdb-search-concurrency.md` and `.dev/duckdb-search-concurrency.md`. + updated `tests/test_duckdb_mirror.py`, `tests/test_duckdb_concurrent_read.py`, `tests/test_query_api_duckdb_reader.py`, `tests/test_query_api_routes_search.py`, `tests/test_query_api_routes_batches.py`. Closes M6 T6 / M7 T3 deferred concurrent-read note. Live compose smoke deferred per M3–M7 pattern.
+
 ## bishop.db corrupt volume — clean reset (Path B) — 2026-06-13
 
 - **Ops recovery:** Host `~/bishop_data/sqlite/bishop.db` was corrupted with embedded ArXiv HTML (`database disk image is malformed`); all state-worker DB endpoints returned HTTP 500. No backup available — quarantined corrupt `sqlite/`, `lancedb/`, `duckdb/`, and `bm25/` under `~/bishop_data/_quarantine_2026-06-13_corrupt-reset/`, recreated empty volume dirs, `docker compose up -d` for fresh Alembic schema. Pipeline re-ingest from empty `scraper_state`. See `.dev/decision-logs/ops/bishop-db-corrupt-clean-reset.md`. No code changes. Post-reset 409/orphan-batch triage from pre-outage session moot.

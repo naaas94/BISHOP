@@ -3,16 +3,21 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Sequence
+import time
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import TypeVar
 
 import duckdb
 
 from bishop_shared.indexing_config import DUCKDB_PATH
 
 TABLE_NAME = "entries_mirror"
+
+_WRITE_LOCK_RETRIES = 8
+_WRITE_LOCK_BACKOFF_SEC = 0.05
 
 _DDL = f"""
 CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
@@ -40,6 +45,8 @@ INSERT OR REPLACE INTO {TABLE_NAME} (
     tags, concepts, challenge_hooks
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
+
+_T = TypeVar("_T")
 
 
 @dataclass(frozen=True)
@@ -70,35 +77,67 @@ def _json_col(values: Sequence[str] | None) -> str | None:
     return json.dumps(list(values))
 
 
+def _is_lock_conflict(exc: BaseException) -> bool:
+    return isinstance(exc, duckdb.IOException) and "Conflicting lock" in str(exc)
+
+
 class DuckDbMirror:
     """Upserts entry metadata into DuckDB for M7 query-api metadata filters."""
 
     def __init__(self, db_path: str | Path | None = None) -> None:
         self._db_path = str(db_path or DUCKDB_PATH)
         Path(self._db_path).parent.mkdir(parents=True, exist_ok=True)
-        self._conn = duckdb.connect(self._db_path)
-        self._conn.execute(_DDL)
 
     def upsert(self, entry: EntryMirrorRow) -> None:
-        self._conn.execute(
-            _UPSERT_SQL,
-            [
-                entry.source_id,
-                entry.source,
-                entry.url,
-                entry.title,
-                _iso(entry.published_at),
-                _iso(entry.ingested_at),
-                entry.domain,
-                entry.entry_type,
-                entry.relevance_score,
-                entry.reading_status,
-                entry.summary,
-                _json_col(entry.tags),
-                _json_col(entry.concepts),
-                _json_col(entry.challenge_hooks),
-            ],
-        )
+        def _write(conn: duckdb.DuckDBPyConnection) -> None:
+            conn.execute(_DDL)
+            conn.execute(
+                _UPSERT_SQL,
+                [
+                    entry.source_id,
+                    entry.source,
+                    entry.url,
+                    entry.title,
+                    _iso(entry.published_at),
+                    _iso(entry.ingested_at),
+                    entry.domain,
+                    entry.entry_type,
+                    entry.relevance_score,
+                    entry.reading_status,
+                    entry.summary,
+                    _json_col(entry.tags),
+                    _json_col(entry.concepts),
+                    _json_col(entry.challenge_hooks),
+                ],
+            )
+
+        self._with_write_retry(_write)
+
+    def _with_write_retry(
+        self,
+        operation: Callable[[duckdb.DuckDBPyConnection], _T],
+    ) -> _T:
+        last_exc: duckdb.IOException | None = None
+        for attempt in range(_WRITE_LOCK_RETRIES):
+            conn: duckdb.DuckDBPyConnection | None = None
+            try:
+                conn = duckdb.connect(self._db_path)
+                return operation(conn)
+            except duckdb.IOException as exc:
+                if conn is not None:
+                    conn.close()
+                    conn = None
+                if _is_lock_conflict(exc) and attempt < _WRITE_LOCK_RETRIES - 1:
+                    last_exc = exc
+                    time.sleep(_WRITE_LOCK_BACKOFF_SEC)
+                    continue
+                raise
+            finally:
+                if conn is not None:
+                    conn.close()
+        if last_exc is not None:
+            raise last_exc
+        raise RuntimeError("DuckDB write retry exhausted without exception")
 
     def close(self) -> None:
-        self._conn.close()
+        """No-op — connections are scoped per upsert."""
