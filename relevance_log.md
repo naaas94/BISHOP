@@ -18,3 +18,5 @@
 ### meta
 
 - I think the issue is the source as well - the nature of arxiv is too paper coded and experimental and not applied based but more fine tuning and weights and stuff
+- basically I want more applied stuff, systems, what people are doing and how they're doing it, what systems and businesses, and features, etc- people are making with ai and or software 
+- also include skills (dev flow enhancement or techniques)
