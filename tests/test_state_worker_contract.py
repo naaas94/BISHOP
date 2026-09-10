@@ -29,6 +29,7 @@ from app.enums import (  # noqa: E402
     DomainEnum,
     EntryTypeEnum,
     ProcessingState,
+    ReadingStatusEnum,
     SourceEnum,
 )
 from app.main import app  # noqa: E402
@@ -61,6 +62,8 @@ SPEC_ROUTE_METHOD_PATHS: frozenset[tuple[str, str]] = frozenset(
         ("POST", "/entries/indexed"),
         ("POST", "/entries/failed"),
         ("POST", "/entries/retry"),
+        ("PATCH", "/entries/{source_id}/reading-status"),
+        ("POST", "/entries/permanent-fail"),
         ("GET", "/manifest/poll"),
         ("GET", "/entries/poll"),
         ("GET", "/scraper-state/{source}"),
@@ -581,6 +584,101 @@ def test_post_entries_failed_contract(contract_client: tuple[TestClient, Path]) 
         },
     )
     assert response.status_code == 204
+
+
+def test_patch_reading_status_contract(
+    contract_client: tuple[TestClient, Path],
+) -> None:
+    """G2 gate: PATCH /entries/{source_id}/reading-status updates entries.reading_status only."""
+    client, db_path = contract_client
+    _http_advance_to_scraped(client)
+    response = client.patch(
+        f"/entries/{_SOURCE}/reading-status",
+        json={"reading_status": ReadingStatusEnum.READ.value},
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "source_id": _SOURCE,
+        "reading_status": ReadingStatusEnum.READ.value,
+    }
+    conn = sqlite3.connect(db_path)
+    try:
+        row = conn.execute(
+            "SELECT reading_status, processing_state FROM entries WHERE source_id = ?",
+            (_SOURCE,),
+        ).fetchone()
+        manifest_state = conn.execute(
+            "SELECT processing_state FROM manifest WHERE source_id = ?",
+            (_SOURCE,),
+        ).fetchone()
+    finally:
+        conn.close()
+    assert row == (ReadingStatusEnum.READ.value, ProcessingState.SCRAPED.value)
+    assert manifest_state == (ProcessingState.SCRAPED.value,)
+
+
+def test_post_entries_permanent_fail_contract(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """G2 gate: POST /entries/permanent-fail moves ESCALATION_FLAGGED to PERMANENTLY_FAILED."""
+    db_path = tmp_path / "bishop.db"
+    _patch_db_path(monkeypatch, db_path)
+    monkeypatch.setattr("app.sweeps.SWEEP_INTERVAL_SEC", 0.05)
+    run_migrations(str(db_path))
+
+    async def _seed() -> None:
+        conn = await aiosqlite.connect(str(db_path))
+        await conn.execute("PRAGMA journal_mode=WAL")
+        try:
+            await ingest_manifest_batch(
+                conn,
+                [
+                    ManifestBatchEntryWire(
+                        source_id=_SOURCE,
+                        source=SourceEnum.ARXIV,
+                        url="https://arxiv.org/abs/2301.00001",
+                        title="Escalated Paper",
+                        abstract="An abstract",
+                        published_at=_NOW,
+                        domain=DomainEnum.PROFESSIONAL.value,
+                    )
+                ],
+            )
+            await record_failure(
+                conn,
+                source_id=_SOURCE,
+                state_at_failure=ProcessingState.SCRAPE_QUEUED,
+                error_class="HTTPStatusError",
+                http_status=404,
+                message="Not found",
+                is_retriable=True,
+            )
+            await conn.commit()
+        finally:
+            await conn.close()
+
+    asyncio.run(_seed())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/entries/permanent-fail",
+            json={"source_id": _SOURCE},
+        )
+    assert response.status_code == 200
+    assert response.json() == {
+        "source_id": _SOURCE,
+        "processing_state": ProcessingState.PERMANENTLY_FAILED.value,
+    }
+    conn = sqlite3.connect(db_path)
+    try:
+        row = conn.execute(
+            "SELECT processing_state FROM manifest WHERE source_id = ?",
+            (_SOURCE,),
+        ).fetchone()
+    finally:
+        conn.close()
+    assert row == (ProcessingState.PERMANENTLY_FAILED.value,)
 
 
 def test_post_entries_retry_contract(

@@ -170,6 +170,14 @@ class BatchSourceStateError(TransitionError):
         )
 
 
+class EntryMissingError(TransitionError):
+    """T5: source_id exists in manifest but has no entries row yet (manifest-only)."""
+
+    def __init__(self, source_id: str) -> None:
+        self.source_id = source_id
+        super().__init__(f"no entries row for {source_id}")
+
+
 @dataclass(frozen=True)
 class BatchTimeoutResult:
     batch_id: str
@@ -1402,6 +1410,75 @@ async def manual_retry(conn: aiosqlite.Connection, source_id: str) -> Processing
         )
     await conn.commit()
     return target
+
+
+async def update_reading_status(
+    conn: aiosqlite.Connection,
+    source_id: str,
+    reading_status: ReadingStatusEnum,
+) -> ReadingStatusEnum:
+    """T5 / §0 flag 1: PATCH reading-status — entries.reading_status only, manifest unchanged.
+
+    404 if source_id absent from manifest; 409 (EntryMissingError) if source_id is
+    manifest-only (no entries row yet) — the read path has nothing to mark read.
+    """
+    manifest = await _fetch_manifest(conn, source_id)
+    if manifest is None:
+        raise NotFoundError(source_id)
+    entry = await _fetch_entry(conn, source_id)
+    if entry is None:
+        raise EntryMissingError(source_id)
+    await conn.execute(
+        "UPDATE entries SET reading_status = ? WHERE source_id = ?",
+        (reading_status.value, source_id),
+    )
+    await conn.commit()
+    logger.info(
+        "reading_status_updated",
+        extra={
+            "event": "manual_reading_status",
+            "source_id": source_id,
+            "reading_status": reading_status.value,
+        },
+    )
+    return reading_status
+
+
+async def mark_permanently_failed(
+    conn: aiosqlite.Connection, source_id: str
+) -> ProcessingState:
+    """T5 / §0 flag 2: manual escalation resolution — ESCALATION_FLAGGED -> PERMANENTLY_FAILED.
+
+    404 if source_id not found; 409 (InvalidTransitionError) if the current
+    processing_state is not ESCALATION_FLAGGED.
+    """
+    manifest = await _fetch_manifest(conn, source_id)
+    if manifest is None:
+        raise NotFoundError(source_id)
+    if manifest.processing_state != ProcessingState.ESCALATION_FLAGGED:
+        raise InvalidTransitionError(
+            source_id,
+            manifest.processing_state.value,
+            ProcessingState.PERMANENTLY_FAILED.value,
+        )
+    await _set_manifest_state(
+        conn,
+        source_id,
+        ProcessingState.PERMANENTLY_FAILED,
+        expected=ProcessingState.ESCALATION_FLAGGED,
+    )
+    entry = await _fetch_entry(conn, source_id)
+    if entry is not None:
+        await conn.execute(
+            "UPDATE entries SET processing_state = ?, flagged_for_review = 0 WHERE source_id = ?",
+            (ProcessingState.PERMANENTLY_FAILED.value, source_id),
+        )
+    await conn.commit()
+    logger.info(
+        "manual_permanent_fail",
+        extra={"event": "manual_permanent_fail", "source_id": source_id},
+    )
+    return ProcessingState.PERMANENTLY_FAILED
 
 
 async def run_lock_state_recovery_sweep(

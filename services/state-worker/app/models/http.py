@@ -7,7 +7,15 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from app.enums import BatchStatusEnum, BatchTypeEnum, DomainEnum, EntryTypeEnum, ProcessingState, SourceEnum
+from app.enums import (
+    BatchStatusEnum,
+    BatchTypeEnum,
+    DomainEnum,
+    EntryTypeEnum,
+    ProcessingState,
+    ReadingStatusEnum,
+    SourceEnum,
+)
 from app.models.domain import BatchRecord, Entry, ErrorLog, ManifestEntry
 
 
@@ -137,6 +145,28 @@ class RetryPostRequest(BaseModel):
 
 
 class RetryPostResponse(BaseModel):
+    source_id: str
+    processing_state: ProcessingState
+
+
+class ReadingStatusPatchRequest(BaseModel):
+    """Derived from §0 flag 1 (m8-hardening-scale) — reading status write path."""
+
+    reading_status: ReadingStatusEnum
+
+
+class ReadingStatusPatchResponse(BaseModel):
+    source_id: str
+    reading_status: ReadingStatusEnum
+
+
+class PermanentFailPostRequest(BaseModel):
+    """Derived from §0 flag 2 (m8-hardening-scale) — manual permanent-fail action."""
+
+    source_id: str
+
+
+class PermanentFailPostResponse(BaseModel):
     source_id: str
     processing_state: ProcessingState
 

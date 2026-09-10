@@ -16,12 +16,17 @@ from app.models.http import (
     EnrichmentStage2ResultsRequest,
     FailedPostRequest,
     IndexedPostRequest,
+    PermanentFailPostRequest,
+    PermanentFailPostResponse,
     PreFilterResultsRequest,
     PreFilterResultsResponse,
+    ReadingStatusPatchRequest,
+    ReadingStatusPatchResponse,
     RetryPostRequest,
     RetryPostResponse,
 )
 from app.transitions import (
+    EntryMissingError,
     InvalidTransitionError,
     NotFoundError,
     ProvenanceIncompleteError,
@@ -33,7 +38,9 @@ from app.transitions import (
     create_entry_from_content,
     manual_retry,
     mark_indexed,
+    mark_permanently_failed,
     record_failure,
+    update_reading_status,
 )
 
 router = APIRouter(tags=["entries"])
@@ -72,6 +79,11 @@ def _transition_error_response(exc: TransitionError) -> JSONResponse:
         return JSONResponse(
             status_code=409,
             content={"error": "terminal_state", "source_id": exc.source_id},
+        )
+    if isinstance(exc, EntryMissingError):
+        return JSONResponse(
+            status_code=409,
+            content={"error": "entry_missing", "source_id": exc.source_id},
         )
     raise exc
 
@@ -193,6 +205,42 @@ async def post_entries_retry(
     except TransitionError as exc:
         return _transition_error_response(exc)
     return RetryPostResponse(
+        source_id=body.source_id,
+        processing_state=processing_state,
+    )
+
+
+@router.patch(
+    "/entries/{source_id}/reading-status",
+    response_model=ReadingStatusPatchResponse,
+)
+async def patch_reading_status(
+    source_id: str,
+    body: ReadingStatusPatchRequest,
+    conn: DbConn,
+) -> ReadingStatusPatchResponse | JSONResponse:
+    try:
+        reading_status = await update_reading_status(
+            conn, source_id, body.reading_status
+        )
+    except TransitionError as exc:
+        return _transition_error_response(exc)
+    return ReadingStatusPatchResponse(
+        source_id=source_id,
+        reading_status=reading_status,
+    )
+
+
+@router.post("/entries/permanent-fail", response_model=PermanentFailPostResponse)
+async def post_entries_permanent_fail(
+    body: PermanentFailPostRequest,
+    conn: DbConn,
+) -> PermanentFailPostResponse | JSONResponse:
+    try:
+        processing_state = await mark_permanently_failed(conn, body.source_id)
+    except TransitionError as exc:
+        return _transition_error_response(exc)
+    return PermanentFailPostResponse(
         source_id=body.source_id,
         processing_state=processing_state,
     )
