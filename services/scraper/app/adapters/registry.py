@@ -11,6 +11,16 @@ from app.models import ManifestIngestEntry
 from app.rate_limit import SOURCE_RATE_LIMITS
 
 try:
+    from app.adapters.huggingface import HuggingFaceAdapter  # noqa: F401
+except ImportError:
+    pass
+
+try:
+    from app.adapters.paperswithcode import PapersWithCodeAdapter  # noqa: F401
+except ImportError:
+    pass
+
+try:
     from app.adapters.arxiv import ArxivAdapter
 except ImportError:
     class ArxivAdapter(SourceAdapter):
