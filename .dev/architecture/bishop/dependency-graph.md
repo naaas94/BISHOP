@@ -1,6 +1,6 @@
 Section:      dependency-graph
-Version:      1.2.0
-Last updated: 2026-06-13
+Version:      1.3.0
+Last updated: 2026-09-10
 
 ## Internal dependencies
 
@@ -17,7 +17,8 @@ Last updated: 2026-06-13
 | `services/pre-filter-worker` | `services/state-worker` (runtime HTTP) | Poll DISCOVERED manifests; register batches | Pre-filter loop stalls; manifests stuck in DISCOVERED |
 | `services/batch-poller` | `services/state-worker` (runtime HTTP) | List/patch/timeout batches; post pre-filter results | In-flight batches never complete; manifests stuck RELEVANCE_QUEUED |
 | `services/pre-filter-worker` | `config/profiles` (host volume) | Profiles mounted at `/app/config/profiles` | Missing profile file blocks batch submit |
-| `services/scraper/app/loop.py` | `services/scraper/app/adapters/registry.py` | Iterates `ADAPTER_REGISTRY` — charter limits to Arxiv only at M2 | New sources require registry + rate limit + tests |
+| `services/scraper/app/loop.py` | `services/scraper/app/adapters/registry.py` | Iterates `ADAPTER_REGISTRY` — M8 T8-bis merges all seven sources (ArXiv, GitHub, HuggingFace, LessWrong, OpenReview, PapersWithCode, Semantic Scholar) | New sources require registry + rate limit + tests |
+| `services/scraper/app/loop.py` | `bishop_shared/scraper_config.BACKFILL_CONFIG` | Reads per-source `window_days` for §18.4 chunked backfill on cold start (`BISHOP_BACKFILL_ENABLED`) | Backfill window silently wrong if source key missing from `BACKFILL_CONFIG` |
 | `services/state-worker/app/routers/*` | `services/state-worker/app/transitions.py` | Routers delegate all state mutations to transition engine | Business logic drift if routers bypass transitions |
 | `services/state-worker/app/transitions.py` | `services/state-worker/app/alerts.py` | M1 alert triggers call `emit_alert` on specific failure paths | Missing alerts or duplicate error_log rows |
 | `services/state-worker/app/main.py` | `app/db.py`, `app/sweeps.py` | Lifespan ordering: migrations → pool → sweep task | Race or missing sweeps if startup order changes; m3_001 must run before workers poll |
@@ -48,6 +49,12 @@ Last updated: 2026-06-13
 | stdlib `http.server` | Python stdlib | query-api and ui M0 stubs | low |
 | stdlib `xml.etree.ElementTree` | Python stdlib | ArXiv Atom XML parsing | low |
 | export.arxiv.org | external service (unpinned) | ArXiv Atom export API | high |
-| api.anthropic.com | external service (unpinned) | Pre-filter batch submit and poll | high |
+| api.anthropic.com | external service (unpinned) | Pre-filter and enrichment batch submit and poll | high |
+| huggingface.co | external service (unpinned) | HuggingFace Hub REST API (models/datasets manifest + content) — M8 T2 | medium |
+| paperswithcode.com | external service (unpinned) | Papers With Code REST API — M8 T2 | medium |
+| api.semanticscholar.org | external service (unpinned) | Semantic Scholar Graph API — M8 T3 | medium |
+| api.github.com | external service (unpinned) | GitHub Search API — M8 T3; unauthenticated rate limit is low, `GITHUB_TOKEN` recommended for backfill scale | medium |
+| api2.openreview.net | external service (unpinned) | OpenReview `/notes/search` term-search (venue/invitation-filtered endpoints are bot-gated, unauthenticated) — M8 T4 | medium |
+| www.lesswrong.com/graphql | external service (unpinned) | LessWrong GraphQL-over-GET (POST returns HTTP 500 on this host — GET only) — M8 T4 | medium |
 
 **Not yet introduced (planned M4+):** LanceDB, DuckDB, BM25 libraries, content-scraper fetch stack — per bishop_spec_0_6.md and charter milestone registry.

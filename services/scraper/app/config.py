@@ -20,6 +20,19 @@ ARXIV_BACKFILL_WINDOW_DAYS = _int_from_env("BISHOP_ARXIV_BACKFILL_WINDOW_DAYS", 
 SCRAPER_SCHEDULE_INTERVAL_SEC = _int_from_env("BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC", 21600)
 
 
+def _bool_from_env(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
+# §18.4 backfill chunking — off by default; T8-bis enables via compose once G4/G5/G6 gates pass.
+BISHOP_BACKFILL_ENABLED = _bool_from_env("BISHOP_BACKFILL_ENABLED", False)
+BISHOP_BACKFILL_CHUNK_DAYS = _int_from_env("BISHOP_BACKFILL_CHUNK_DAYS", 7)
+BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC = _int_from_env("BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC", 300)
+
+
 def _optional_str_from_env(name: str) -> str | None:
     raw = os.environ.get(name)
     if raw is None or raw == "":

@@ -1,40 +1,27 @@
-"""Adapter registry — M2 contains ArxivAdapter only (charter override of §10.2)."""
+"""Adapter registry - M8 T8-bis merges all seven registered sources (contract sole merger).
+
+LessWrongAdapter is included: the T4-openreview-lesswrong.md decision log
+records a successful live GraphQL-over-GET probe (2026-09-10), which is the
+condition the plan's context-map flag 3 gates registration on.
+"""
 
 from __future__ import annotations
 
-from datetime import datetime
-
-from bishop_shared.enums import DomainEnum, SourceEnum
-
+from app.adapters.arxiv import ArxivAdapter
 from app.adapters.base import SourceAdapter
-from app.models import ManifestIngestEntry
-from app.rate_limit import SOURCE_RATE_LIMITS
+from app.adapters.github import GitHubAdapter
+from app.adapters.huggingface import HuggingFaceAdapter
+from app.adapters.lesswrong import LessWrongAdapter
+from app.adapters.openreview import OpenReviewAdapter
+from app.adapters.paperswithcode import PapersWithCodeAdapter
+from app.adapters.semantic_scholar import SemanticScholarAdapter
 
-try:
-    from app.adapters.huggingface import HuggingFaceAdapter  # noqa: F401
-except ImportError:
-    pass
-
-try:
-    from app.adapters.paperswithcode import PapersWithCodeAdapter  # noqa: F401
-except ImportError:
-    pass
-
-try:
-    from app.adapters.arxiv import ArxivAdapter
-except ImportError:
-    class ArxivAdapter(SourceAdapter):
-        """Bootstrap stub until T4 lands ``adapters/arxiv.py``."""
-
-        source = SourceEnum.ARXIV
-        domain = DomainEnum.PROFESSIONAL
-        rate_limit = SOURCE_RATE_LIMITS[SourceEnum.ARXIV.value]
-
-        async def fetch_manifest(
-            self,
-            since: datetime | None = None,
-        ) -> list[ManifestIngestEntry]:
-            raise NotImplementedError("T4")
-
-
-ADAPTER_REGISTRY: list[type[SourceAdapter]] = [ArxivAdapter]
+ADAPTER_REGISTRY: list[type[SourceAdapter]] = [
+    ArxivAdapter,
+    GitHubAdapter,
+    HuggingFaceAdapter,
+    LessWrongAdapter,
+    OpenReviewAdapter,
+    PapersWithCodeAdapter,
+    SemanticScholarAdapter,
+]

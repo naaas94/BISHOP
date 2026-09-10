@@ -152,3 +152,46 @@ def test_semantic_scholar_key_default_none(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.delenv("SEMANTIC_SCHOLAR_API_KEY", raising=False)
     config = _load_config_module()
     assert config.SEMANTIC_SCHOLAR_API_KEY is None
+
+
+def test_backfill_enabled_default_false(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("BISHOP_BACKFILL_ENABLED", raising=False)
+    config = _load_config_module()
+    assert config.BISHOP_BACKFILL_ENABLED is False
+
+
+def test_backfill_enabled_env_override_true(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BISHOP_BACKFILL_ENABLED", "1")
+    config = _load_config_module()
+    assert config.BISHOP_BACKFILL_ENABLED is True
+
+
+def test_backfill_enabled_env_override_false_string(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Falsifier: a falsy-looking string must not coerce to True via bare truthiness."""
+    monkeypatch.setenv("BISHOP_BACKFILL_ENABLED", "0")
+    config = _load_config_module()
+    assert config.BISHOP_BACKFILL_ENABLED is False
+
+
+def test_backfill_chunk_days_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("BISHOP_BACKFILL_CHUNK_DAYS", raising=False)
+    config = _load_config_module()
+    assert config.BISHOP_BACKFILL_CHUNK_DAYS == 7
+
+
+def test_backfill_chunk_days_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BISHOP_BACKFILL_CHUNK_DAYS", "10")
+    config = _load_config_module()
+    assert config.BISHOP_BACKFILL_CHUNK_DAYS == 10
+
+
+def test_backfill_inter_chunk_delay_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC", raising=False)
+    config = _load_config_module()
+    assert config.BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC == 300
+
+
+def test_backfill_inter_chunk_delay_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC", "60")
+    config = _load_config_module()
+    assert config.BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC == 60

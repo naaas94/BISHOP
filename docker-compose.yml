@@ -27,6 +27,12 @@ services:
       - ${BISHOP_DATA_ROOT}/logs:/app/logs
     environment:
       STATE_WORKER_URL: http://state-worker:8000
+      BISHOP_BACKFILL_ENABLED: ${BISHOP_BACKFILL_ENABLED:-0}
+      BISHOP_BACKFILL_CHUNK_DAYS: ${BISHOP_BACKFILL_CHUNK_DAYS:-7}
+      BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC: ${BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC:-300}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      SEMANTIC_SCHOLAR_API_KEY: ${SEMANTIC_SCHOLAR_API_KEY:-}
+      HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
     depends_on:
       state-worker:
         condition: service_healthy

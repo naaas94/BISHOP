@@ -1,6 +1,6 @@
 Section:      module-map
-Version:      1.2.0
-Last updated: 2026-06-13
+Version:      1.3.0
+Last updated: 2026-09-10
 
 | Module path | Role | Key files | Stability |
 |-------------|------|-----------|-----------|
@@ -18,8 +18,8 @@ Last updated: 2026-06-13
 | `services/state-worker.app.models` | Domain Pydantic models (§7 tables) and HTTP wire DTOs | `domain.py`, `http.py`, `__init__.py` | active |
 | `services/state-worker.app.enums` | `ProcessingState` and remaining §20 enums (authoritative in-process copy) | `enums.py` | active |
 | `services/scraper` | Discovery scraper — scheduled manifest fetch and state-worker POST | `Dockerfile`, `requirements.txt`, `app/` | active |
-| `services/scraper.app` | Scrape loop scheduler and orchestration | `main.py`, `loop.py`, `config.py` | active |
-| `services/scraper.app.adapters` | `SourceAdapter` ABC, registry, ArXiv Atom implementation | `base.py`, `registry.py`, `arxiv.py` | active |
+| `services/scraper.app` | Scrape loop scheduler; M8 adds §18.4 chunked backfill on cold start behind `BISHOP_BACKFILL_ENABLED` | `main.py`, `loop.py`, `config.py` | active |
+| `services/scraper.app.adapters` | `SourceAdapter` ABC + seven-source registry (M8): ArXiv, GitHub, HuggingFace, LessWrong, OpenReview, PapersWithCode, Semantic Scholar | `base.py`, `registry.py`, `arxiv.py`, `github.py`, `huggingface.py`, `lesswrong.py`, `openreview.py`, `paperswithcode.py`, `semantic_scholar.py` | active |
 | `services/scraper.app.failure_envelope` | Async retry wrapper with §6.3 HTTP classification | `failure_envelope.py`, `exceptions.py` | active |
 | `services/scraper.app.state_worker_client` | httpx client for manifest batch and scraper-state routes | `state_worker_client.py` | active |
 | `services/scraper.app.rate_limit` | Per-source rate limits (§15.1) and token-bucket limiter | `rate_limit.py` | active |
@@ -32,9 +32,13 @@ Last updated: 2026-06-13
 | `services/vector-writer` | Vector/BM25 index writer; M0 stub | `stub_main.py`, `Dockerfile` | experimental |
 | `services/query-api` | Read-path HTTP API; M0 HTTP stub on internal port 8000 | `stub_main.py`, `Dockerfile` | experimental |
 | `services/ui` | Web UI; M0 HTTP stub listening on container port 80 | `stub_main.py`, `Dockerfile` | experimental |
-| `tests` | Contract tests for constants, compose, G2/G3/M3 gates, state-worker, scraper, pre-filter, batch-poller | `test_*.py` | active |
-| `scripts` | Host volume bootstrap, profile seeding, milestone verification gates | `init-volumes.*`, `seed-profiles.*`, `verify-g1.sh`, `verify-g2.sh`, `verify-g3.sh`, `verify-m2.sh`, `verify-m3.sh` | active |
-| `docker-compose.yml` (repo root) | Nine-service stack; `state-worker:m1`, `scraper:m2`, `pre-filter-worker:m3`, `batch-poller:m3`, others `m0` | `docker-compose.yml` | active |
+| `tests` | Contract tests for constants, compose, G2/G3/M3/M7/M8 gates, state-worker, query-api, ui, scraper, pre-filter, batch-poller | `test_*.py` | active |
+| `scripts` | Host volume bootstrap, profile seeding, milestone verification gates, G5/G6 quality wrappers | `init-volumes.*`, `seed-profiles.*`, `verify-g1.sh`…`verify-m8.sh`, `run-g5-quality-gate.sh`, `run-g6-prefilter-replay.sh`, `run-g6-enrichment-sampling.sh`, `replay_prefilter.py`, `build_eval_v1.py`, `apply_adjudication.py` | active |
+| `docker-compose.yml` (repo root) | Nine-service stack; `state-worker:m1`, `scraper:m2`, `pre-filter-worker:m3`, `batch-poller:m5`, `content-scraper:m4`, `enrichment-batcher:m5`, `vector-writer:m6`, `query-api:m7`, `ui:m7`. M8 Naming contract calls for `scraper:m8`/`ui:m8`; deferred — see known-coupling-surfaces.md image-tag row | `docker-compose.yml` | active |
 | `.env.example` | Documented host data root default for compose interpolation | `.env.example` | stable |
+| `eval/prefilter_v1` | Frozen pre-filter gold set (129 adjudicated items) consumed by `scripts/replay_prefilter.py` and `tests/test_g6_prefilter_gold.py` — not the live DB | `contract.json`, `items.json`, `labels.json` | frozen |
+| `.dev/quality` | G6 enrichment manual-sampling artifact (10-entry template, operator-filled) | `g6-enrichment-template.md` | active |
 
-**Milestone notes:** Five pipeline services remain M0 stubs. `state-worker` is the contract anchor for the full §6.1 state machine. `scraper` runs `python -m app.main` with asyncio scheduler. `pre-filter-worker` and `batch-poller` run `python -m app.main` (M0 `stub_main.py` retained but unused by Dockerfiles). Post-M2 charter scope: ArXiv-only `ADAPTER_REGISTRY`. M3 scope: `professional` domain only; `personal` profile deferred.
+**Milestone notes:** M8 (Hardening and Scale, this refresh) lands the remaining six non-ArXiv source adapters behind a single `ADAPTER_REGISTRY` (T8-bis is the sole merger per plan contract), chunked backfill (§18.4) gated by `BISHOP_BACKFILL_ENABLED`/`BISHOP_BACKFILL_CHUNK_DAYS`/`BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC`, and `scripts/verify-m8.sh`. `content-scraper`, `enrichment-batcher`, `vector-writer` are no longer M0 stubs as of M4–M6 (see their own milestone image tags); `query-api` (M7) and `ui` (M7/M8) are live FastAPI/Flask-style services, not stubs — this module-map's stub language from the M0–M3 era is stale for those five services and is corrected here. `state-worker` remains the contract anchor for the full §6.1 state machine. G4 (live INDEXED corpus), G5 (embedding fixture gate), and G6 (pre-filter gold + enrichment sampling, assessed 7/10 with three documented `challenge_hooks` rejects) are the M8 entry gates for enabling backfill (G7); see `.dev/decision-logs/m8-hardening-scale/T8-backfill-enable.md`.
+
+**Deferred in this refresh:** `public-interface-inventory.md`, `data-contract-registry.md`, `integration-seams.md`, `external-input-sources.md`, `architectural-patterns.md`, `open-questions.md`, and `architectural-decisions-divergence.md` were not re-audited for M4–M8 (content-scraper, enrichment-batcher, vector-writer, query-api, ui, and the M8 adapter/backfill/quality-gate surface described above). `module-map.md`, `known-coupling-surfaces.md`, `dependency-graph.md`, and `INDEX.md` were refreshed. Landing gate: next `project-architecture` skill pass or M9 kickoff, whichever comes first — do not treat the un-refreshed files as current for M4+ surfaces.

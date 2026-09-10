@@ -1,6 +1,6 @@
 Section:      known-coupling-surfaces
-Version:      1.2.0
-Last updated: 2026-06-13
+Version:      1.3.0
+Last updated: 2026-09-10
 
 ```
 Surface:      BISHOP_SERVICES tuple ↔ docker-compose.yml service keys ↔ services/<name>/ directory names
@@ -39,9 +39,23 @@ Confirmed:    yes — source: T1/T4 decision logs, tests
 
 ```
 Surface:      Docker image tags bishop/<service>:<milestone>
-Shared by:    docker-compose.yml image lines ↔ tests/test_compose.py::test_image_tags_use_milestone_convention
-Failure mode: state-worker m1, scraper m2, pre-filter-worker m3, batch-poller m3, others m0 — tag change breaks compose test
-Confirmed:    yes — source: docker-compose.yml, tests/test_compose.py (M3 T6)
+Shared by:    docker-compose.yml image lines ↔ tests/test_compose.py::test_image_tags_use_milestone_convention (hardcoded milestone_tags dict, one entry per service)
+Failure mode: state-worker m1, scraper m2, pre-filter-worker m3, batch-poller m5, content-scraper m4, enrichment-batcher m5, vector-writer m6, query-api m7, ui m7 — tag and test dict must move together (each prior milestone bumped both in the same packet)
+Confirmed:    yes — source: docker-compose.yml, tests/test_compose.py. M8 T8-bis Naming contract calls for scraper→m8 / ui→m8 but tests/test_compose.py was not in T8-bis Files-to-touch, so this pair is DEFERRED (not bumped) — see .dev/decision-logs/m8-hardening-scale/T8-backfill-enable.md Items deferred; landing gate: a follow-up packet naming both files.
+```
+
+```
+Surface:      ADAPTER_REGISTRY — seven-source list, single merge point
+Shared by:    services/scraper/app/adapters/registry.py ↔ services/scraper/app/loop.py (iterates it) ↔ content-scraper's own adapter_resolver.py (separately imports per-source fetch_content, not this registry)
+Failure mode: A source landed in adapters/<source>.py but omitted from ADAPTER_REGISTRY silently never scrapes; content-scraper's parallel resolver can drift from this list independently
+Confirmed:    yes — source: M8 T8-bis, .dev/decision-logs/m8-hardening-scale/T8-backfill-enable.md
+```
+
+```
+Surface:      BISHOP_BACKFILL_ENABLED / BISHOP_BACKFILL_CHUNK_DAYS / BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC
+Shared by:    services/scraper/app/config.py ↔ services/scraper/app/loop.py (_scrape_adapter cold-start branch) ↔ docker-compose.yml scraper environment ↔ bishop_shared/scraper_config.py BACKFILL_CONFIG (per-source window_days, read-only from loop.py)
+Failure mode: Flipping BISHOP_BACKFILL_ENABLED=1 in compose without a scraper image that has the chunking code (pre-T8-bis) silently falls back to unchunked single-shot fetch on cold start (env var not yet honored) — a compose/image-tag mismatch, not a crash
+Confirmed:    yes — source: M8 T8-bis, tests/test_scraper_backfill_chunking.py
 ```
 
 ```
