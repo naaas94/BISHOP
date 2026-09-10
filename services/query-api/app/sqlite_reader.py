@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -141,3 +141,63 @@ def read_entries_by_source_ids(
             )
         )
     return results
+
+
+def filter_source_ids(
+    *,
+    domain: str | None = None,
+    source: str | None = None,
+    tags: list[str] | None = None,
+    min_relevance: float | None = None,
+    days: int | None = None,
+    entry_type: str | None = None,
+    reading_status: str | None = None,
+    db_path: str | Path | None = None,
+) -> list[str]:
+    """Return source_ids matching metadata filters on SQLite entries (M8 T6 flag 1)."""
+    path = Path(str(db_path or SQLITE_DB_PATH))
+    if not path.is_file():
+        return []
+
+    clauses: list[str] = []
+    params: list[Any] = []
+
+    if domain is not None:
+        clauses.append("domain = ?")
+        params.append(domain)
+    if source is not None:
+        clauses.append("source = ?")
+        params.append(source)
+    if entry_type is not None:
+        clauses.append("entry_type = ?")
+        params.append(entry_type)
+    if reading_status is not None:
+        clauses.append("reading_status = ?")
+        params.append(reading_status)
+    if min_relevance is not None:
+        clauses.append("relevance_score >= ?")
+        params.append(min_relevance)
+    if days is not None:
+        cutoff = (datetime.now(tz=UTC) - timedelta(days=days)).isoformat()
+        clauses.append("ingested_at >= ?")
+        params.append(cutoff)
+    if tags:
+        tag_clauses = []
+        for tag in tags:
+            tag_clauses.append(
+                "EXISTS (SELECT 1 FROM json_each(tags) je WHERE je.value = ?)"
+            )
+            params.append(tag)
+        clauses.append("(tags IS NOT NULL AND (" + " OR ".join(tag_clauses) + "))")
+
+    where_sql = f" WHERE {' AND '.join(clauses)}" if clauses else ""
+    sql = f"SELECT source_id FROM entries{where_sql} ORDER BY ingested_at DESC"
+
+    uri = f"file:{path}?mode=ro"
+    conn = sqlite3.connect(uri, uri=True)
+    try:
+        cursor = conn.execute(sql, params)
+        rows = cursor.fetchall()
+    finally:
+        conn.close()
+    return [str(row[0]) for row in rows]

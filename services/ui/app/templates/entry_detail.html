@@ -4,6 +4,9 @@
 {% if error %}
 <p class="error">{{ error }}</p>
 {% endif %}
+{% if status_message %}
+<p class="success">{{ status_message }}</p>
+{% endif %}
 {% if entry %}
 <h1>{{ entry.title }}</h1>
 <p class="muted"><a href="{{ entry.url }}" rel="noopener">{{ entry.source_id }}</a></p>
@@ -13,7 +16,17 @@
   <dt>Type</dt><dd>{{ entry.entry_type or "—" }}</dd>
   <dt>Pre-filter tier</dt><dd>{{ entry.pre_filter_tier or "—" }}</dd>
   <dt>Relevance</dt><dd>{{ entry.relevance_score if entry.relevance_score is not none else "—" }}</dd>
-  <dt>Reading status</dt><dd>{{ entry.reading_status }}</dd>
+  <dt>Reading status</dt>
+  <dd>
+    <form method="post" action="/entries/{{ entry.source_id }}/reading-status" class="inline-form">
+      <select name="reading_status">
+        {% for status in reading_status_options %}
+        <option value="{{ status }}"{% if entry.reading_status == status %} selected{% endif %}>{{ status }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Update</button>
+    </form>
+  </dd>
   <dt>Processing state</dt><dd>{{ entry.processing_state }}</dd>
   <dt>Ingested</dt><dd>{{ entry.ingested_at }}</dd>
   <dt>Published</dt><dd>{{ entry.published_at or "—" }}</dd>

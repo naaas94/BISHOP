@@ -221,6 +221,40 @@ def test_run_search_metadata_pre_filter_restricts_channel_candidates() -> None:
     metadata.filter_source_ids.assert_called_once()
 
 
+def test_run_search_reading_status_uses_sqlite_not_duckdb(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    search_mod = _load_search_module()
+    bm25 = _make_bm25_mock(main=[("arxiv:1", 1.0)], hooks=[])
+    dense = MagicMock()
+    dense.search.return_value = [("arxiv:1", 0.9)]
+    metadata = MagicMock()
+    encoder = MagicMock()
+    encoder.encode_query.return_value = [0.1] * 384
+
+    sqlite_calls: list[dict[str, object]] = []
+
+    def _sqlite_filter(**kwargs):
+        sqlite_calls.append(kwargs)
+        return ["arxiv:1"]
+
+    monkeypatch.setattr(search_mod, "sqlite_filter_source_ids", _sqlite_filter)
+
+    result = search_mod.run_search(
+        query="LangGraph",
+        bm25=bm25,
+        dense=dense,
+        metadata=metadata,
+        encoder=encoder,
+        reading_status="read",
+    )
+
+    assert result.hits
+    assert sqlite_calls
+    assert sqlite_calls[0]["reading_status"] == "read"
+    metadata.filter_source_ids.assert_not_called()
+
+
 def test_run_search_skips_metadata_pre_filter_on_duckdb_lock() -> None:
     search_mod = _load_search_module()
     DuckDbLockUnavailableError = search_mod.DuckDbLockUnavailableError

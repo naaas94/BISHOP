@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}DB Explorer — BISHOP{% endblock %}
+{% block content %}
+<h1>DB Explorer</h1>
+<p class="muted">Filter indexed entries via query-api search metadata params.</p>
+<form class="explorer-form" method="get" action="/explorer">
+  <label for="explorer-q">Query (required)</label>
+  <input id="explorer-q" name="q" type="search" value="{{ filters.q }}" placeholder="retrieval" required>
+
+  <label for="explorer-source">Source</label>
+  <input id="explorer-source" name="source" type="text" value="{{ filters.source }}" placeholder="arxiv">
+
+  <label for="explorer-type">Entry type</label>
+  <input id="explorer-type" name="type" type="text" value="{{ filters.type }}" placeholder="paper">
+
+  <label for="explorer-reading-status">Reading status</label>
+  <select id="explorer-reading-status" name="reading_status">
+    <option value="">Any</option>
+    {% for status in reading_status_options %}
+    <option value="{{ status }}"{% if filters.reading_status == status %} selected{% endif %}>{{ status }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="explorer-min-relevance">Min relevance (0–1)</label>
+  <input id="explorer-min-relevance" name="min_relevance" type="text" value="{{ filters.min_relevance }}" placeholder="0.7">
+
+  <label for="explorer-days">Days since ingest</label>
+  <input id="explorer-days" name="days" type="text" value="{{ filters.days }}" placeholder="30">
+
+  <label for="explorer-tags">Tags (comma-separated)</label>
+  <input id="explorer-tags" name="tags" type="text" value="{{ filters.tags }}" placeholder="RAG,ML">
+
+  <button type="submit">Search</button>
+</form>
+
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+
+{% if filters.q.strip() %}
+<p class="muted">
+  {{ search_meta.total or 0 }} hit(s)
+  {% if search_meta.channels_active %} — channels: {{ search_meta.channels_active | join(", ") }}{% endif %}
+</p>
+<ul class="hit-list">
+  {% for hit in hits %}
+  <li class="hit-card">
+    <a href="/entries/{{ hit.source_id }}"><strong>{{ hit.title }}</strong></a>
+    <div class="hit-meta">{{ hit.source_id }} · score {{ "%.3f"|format(hit.rrf_score) }}</div>
+    {% if hit.summary %}<p>{{ hit.summary }}</p>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% if not hits and not error %}
+<p class="muted">No matches for the current filters.</p>
+{% endif %}
+{% endif %}
+{% endblock %}

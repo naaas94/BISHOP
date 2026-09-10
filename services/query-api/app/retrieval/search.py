@@ -9,6 +9,7 @@ from typing import Literal
 from app.embedding import QueryEmbeddingEncoder
 from app.retrieval.problem_shaped import is_problem_shaped
 from app.retrieval.rrf import rrf_fuse
+from app.sqlite_reader import filter_source_ids as sqlite_filter_source_ids
 from app.stores.bm25_reader import Bm25QueryIndex
 from app.stores.duckdb_reader import DuckDbLockUnavailableError, DuckDbReader
 from app.stores.lancedb_reader import LanceDbSearcher
@@ -92,8 +93,10 @@ def run_search(
         entry_type=entry_type,
         reading_status=reading_status,
     ):
-        try:
-            candidate_ids = metadata.filter_source_ids(
+        candidate_ids: list[str] | None
+        if reading_status is not None:
+            # §0 flag 1: reading_status predicate reads SQLite entries, not DuckDB mirror.
+            candidate_ids = sqlite_filter_source_ids(
                 domain=domain,
                 source=source,
                 tags=tags,
@@ -102,12 +105,23 @@ def run_search(
                 entry_type=entry_type,
                 reading_status=reading_status,
             )
-        except DuckDbLockUnavailableError:
-            logger.warning(
-                "duckdb metadata pre-filter skipped — writer holds file lock",
-                extra={"event": "duckdb_prefilter_lock_skip"},
-            )
-            candidate_ids = None
+        else:
+            try:
+                candidate_ids = metadata.filter_source_ids(
+                    domain=domain,
+                    source=source,
+                    tags=tags,
+                    min_relevance=min_relevance,
+                    days=days,
+                    entry_type=entry_type,
+                    reading_status=None,
+                )
+            except DuckDbLockUnavailableError:
+                logger.warning(
+                    "duckdb metadata pre-filter skipped — writer holds file lock",
+                    extra={"event": "duckdb_prefilter_lock_skip"},
+                )
+                candidate_ids = None
 
         if candidate_ids is not None:
             if not candidate_ids:
