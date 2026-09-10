@@ -1,0 +1,1047 @@
+{
+  "eval_id": "prefilter_v1",
+  "replayed_at": "2026-09-10T15:31:53.266100+00:00",
+  "profile_path": "config/profiles/professional_v1.1.1.yaml",
+  "profile_version": "1.1.1",
+  "profile_render_hash": "857d2065f7c104aff8a9c5a40c717afd42b9e26c124e2e8304a8c010907784ad",
+  "model": "claude-haiku-4-5-20251001",
+  "input_field": "replay_abstract",
+  "item_count": 129,
+  "calibration_exemplar_ids": [
+    "arxiv:2606.08044",
+    "arxiv:2606.10740",
+    "arxiv:2606.11033",
+    "arxiv:2606.11189",
+    "arxiv:2606.12138",
+    "arxiv:2606.12730",
+    "arxiv:2606.13126",
+    "arxiv:2606.13647",
+    "arxiv:2608.20318"
+  ],
+  "metrics": {
+    "all_items": {
+      "n": 129,
+      "accuracy": 0.8527131782945736,
+      "precision": 0.9166666666666666,
+      "recall": 0.673469387755102,
+      "confusion": {
+        "tp": 33,
+        "fp": 3,
+        "tn": 77,
+        "fn": 16
+      },
+      "fn_keep_grade": 4,
+      "false_positive_ids": [
+        "arxiv:2606.10279",
+        "arxiv:2608.13167",
+        "arxiv:2608.14792"
+      ],
+      "false_negative_ids": [
+        "arxiv:2606.08153",
+        "arxiv:2606.09659",
+        "arxiv:2606.09672",
+        "arxiv:2606.09701",
+        "arxiv:2606.10554",
+        "arxiv:2606.10736",
+        "arxiv:2606.11119",
+        "arxiv:2606.11270",
+        "arxiv:2606.11375",
+        "arxiv:2606.11459",
+        "arxiv:2606.11893",
+        "arxiv:2606.12032",
+        "arxiv:2607.00924",
+        "arxiv:2607.27232",
+        "arxiv:2608.00123",
+        "arxiv:2608.04980"
+      ],
+      "false_negative_keep_ids": [
+        "arxiv:2606.09659",
+        "arxiv:2606.10736",
+        "arxiv:2606.11119",
+        "arxiv:2606.11459"
+      ],
+      "tier_distribution": {
+        "core": 29,
+        "peripheral": 7
+      },
+      "tier_agreement_on_true_positives": 0.8787878787878788,
+      "tier_scored": 33,
+      "parse_failures": 0
+    },
+    "excluding_calibration_examples": {
+      "n": 120,
+      "accuracy": 0.8416666666666667,
+      "precision": 0.90625,
+      "recall": 0.6444444444444445,
+      "confusion": {
+        "tp": 29,
+        "fp": 3,
+        "tn": 72,
+        "fn": 16
+      },
+      "fn_keep_grade": 4,
+      "false_positive_ids": [
+        "arxiv:2606.10279",
+        "arxiv:2608.13167",
+        "arxiv:2608.14792"
+      ],
+      "false_negative_ids": [
+        "arxiv:2606.08153",
+        "arxiv:2606.09659",
+        "arxiv:2606.09672",
+        "arxiv:2606.09701",
+        "arxiv:2606.10554",
+        "arxiv:2606.10736",
+        "arxiv:2606.11119",
+        "arxiv:2606.11270",
+        "arxiv:2606.11375",
+        "arxiv:2606.11459",
+        "arxiv:2606.11893",
+        "arxiv:2606.12032",
+        "arxiv:2607.00924",
+        "arxiv:2607.27232",
+        "arxiv:2608.00123",
+        "arxiv:2608.04980"
+      ],
+      "false_negative_keep_ids": [
+        "arxiv:2606.09659",
+        "arxiv:2606.10736",
+        "arxiv:2606.11119",
+        "arxiv:2606.11459"
+      ],
+      "tier_distribution": {
+        "core": 26,
+        "peripheral": 6
+      },
+      "tier_agreement_on_true_positives": 0.8620689655172413,
+      "tier_scored": 29,
+      "parse_failures": 0
+    }
+  },
+  "results": {
+    "arxiv:2606.07924": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Training-free video RAG pipeline with practical production patterns: modality-aware semantic-logic decoupling, reranking via LLM agents, and prompt-based output constraints directly transferable to document-intelligence and multi-stage retrieval systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.07951": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Failure-mode analysis of LLM outputs in production use cases (rewriting, summarization); directly informs evaluation harnesses and output guardrails for document-intelligence and RAG systems where certainty preservation matters.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08153": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Primary contribution is a fine-tuning recipe (PPO with position-aware rewards) applied to a base model; excluded as base-model science. Production deployment details are operational engineering, not transferable system design for log anomaly detection.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08200": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Active evaluation of interactive agents through situation-generating probes directly addresses how to measure multi-turn agent behavior and failure modes; this is a transferable evaluation methodology for agentic systems that I would implement.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08529": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Controlled empirical characterization of how agentic scaffolds (ReAct vs. multi-agent vs. planner-executor) interact with model capability, isolating elicitation gap from model capability—directly actionable for agent design and capability benchmarking decisions.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08571": {
+      "decision": 1,
+      "tier": "peripheral",
+      "rationale": "Production-relevant failure-mode knowledge about how LLMs handle out-of-distribution and cross-domain queries, and a concrete schema for steering models toward structured uncertainty rather than hallucination; valuable for agent observability and guardrailing, though the contribution is primarily a training recipe (GRPO + reward design) rather than an inference-time system pattern I would build.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08850": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Inference-time scaling without external verifiers directly addresses production reliability and cost constraints; intrinsic statistics for solution ranking and adaptive compute routing are immediately actionable patterns for agent and reasoning-system design.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08854": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training recipe (RLVR curriculum and rollout allocation strategy) applied to an RL objective; the object of study is improving model training, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09030": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: clinical time-series prediction with domain-specific modeling, no transferable system design for general LLM/NLP applications beyond the vertical.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09046": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Failure-mode auditing and evaluation methodology for LLMs; directly applicable to building reliable production systems and designing evaluation harnesses that avoid spurious findings.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09052": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training recipe (self-evolution framework with GRPO variant) for improving base models; the object of study is the model itself, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09073": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training/optimization recipe for RLHF objectives; the object of study is improving the reward model training procedure itself, not a system built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09131": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Multimodal architecture contribution (modality-adapter and token-routing design) without a production LLM/NLP application payload; the object of study is the model architecture itself, not a system built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09380": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses RL training for reasoning agents when outcome-based rewards fail; the contribution is a practical training framework (trace tournaments + Bradley-Terry ranking) that converts uninformative reward signals into usable gradients, with measured compute and convergence gains—core to how I would build and train agentic reasoning systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09409": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses evaluation methodology for LLM systems—specifically, whether pairwise comparison rankings (Elo) correlate with ground-truth accuracy, and what biases affect ranking stability. This is actionable guidance for building and validating evaluation harnesses for agents and models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09483": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Agent memory architecture for multi-turn reasoning and user modeling directly addresses agentic systems and observability; the dual-process hierarchy with explicit belief revision and schema induction over time is a transferable pattern for building stateful agents that reason over user evolution.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09578": {
+      "decision": 1,
+      "tier": "peripheral",
+      "rationale": "Benchmark contribution that isolates representation effects on table understanding, relevant to document intelligence pipelines, but primarily an evaluation resource rather than a system-design pattern or failure-mode insight I would operationalize.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09659": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a better compression model and pretraining recipe; the object of study is the compressor itself, not a system built with it. Falls under base-model science exclusion.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09672": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is embedding model improvement (contrastive fine-tuning recipe and hard-negative mining for biomedical encoders); the paper's payload is a better model, not a system built atop existing models. The inference-optimization section (OpenVINO, FP16 vs INT8) is operational but secondary to the core embedding-science contribution.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09701": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training recipe (GRPO stabilization for red-teaming via multi-channel rewards and advantage normalization); the object of study is making the training objective work better, not building a system with existing models or understanding deployed failure modes.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09748": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Multi-turn agent evaluation under feedback is directly applicable to building and hardening agent systems; the failure modes (regression on satisfied criteria, non-compounding gains) and the process-level feedback architecture are transferable patterns for agent design and evaluation.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09767": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: a single low-resource language adaptation with no transferable system design patterns for production NLP/RAG work; the payload is linguistic resource creation and task-specific modeling for Q'eqchi', not an architectural or operational pattern I would generalize.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09927": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution improves quantization of the model itself, and the object of study is making the model (via quantization) better, not building a system with an existing model.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09937": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "KV-cache optimization and early-exit mechanics are engine internals I cannot act on from the API boundary; the contribution is to serving-framework internals, not to systems built with models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10064": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Trajectory data as a production constraint for agent post-training, incentive-aligned arena design as a source of supervision, and a concrete pattern (structural-quality filtering) for converting unfiltered agent logs into trainable corpora — all directly applicable to building production agentic systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10099": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "The contribution is a representation-learning and training method (paraphrase inversion for style encoder pretraining) whose object of study is improving the learned representations themselves, not a production detection system, agentic workflow, or evaluation harness I would build from.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10156": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Agentic systems evaluation is core to building agents; this benchmark replaces LLM-as-judge subjectivity with verifiable rewards and multi-turn reliability metrics (pass@k), directly addressing observability and failure-mode measurement for conversational agents.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10279": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Production failure-mode analysis of a widespread practice (rationale-based SFT) in clinical LLM systems, with root-cause diagnosis and actionable guardrails for document-intelligence and healthcare-adjacent workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10381": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Agentic hybrid RAG with query decomposition, evidence expansion, and grounded synthesis directly addresses production agent orchestration and RAG system design; the benchmark contribution enables evaluation of retrieval and multi-turn reasoning in a real domain, making this transferable to non-physics scientific QA and document-intelligence workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10461": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is a training recipe (EBM-based alignment objective) for improving a model architecture (GNN-LLM fusion), not a system built with existing models or a production pattern I would implement.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10481": {
+      "decision": 1,
+      "tier": "peripheral",
+      "rationale": "Privacy auditing methodology with empirical evaluation framework is relevant to compliance and safety auditing of deployed systems, but the contribution is a measurement and audit technique rather than a production system pattern or failure-mode analysis that would directly inform agent or RAG design.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10554": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Knowledge editing is model-internals science: the contribution improves how models store and update knowledge through training or intervention methods, not how to build systems with existing models. The benchmark payload does not transfer to production RAG, agentic, or document-intelligence workflows where I would route to external knowledge sources rather than edit model weights.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10736": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Educational application of NLP classification and knowledge graphs; no production LLM system, agent, retrieval, or agentic-workflow contribution that a practitioner would build from. The pipeline is task-specific to course diagnostics without transferable system design.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10820": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a decoding algorithm and inference acceleration method — sampler and generation-engine internals I cannot act on from the API boundary, outside the scope of inference economics available to API consumers.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10829": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a decoding algorithm for masked diffusion language models—sampler internals and generation mechanics are base-model science excluded from scope; the paper studies how to improve the model's generation procedure, not a system built atop existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10890": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Quantization algorithm and weight-compression scheme; contribution is to the model/inference-engine layer, not to systems built atop existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11033": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Modality adapter architecture (audio encoder integration via LoRA distillation); no production LLM/NLP application payload beyond the adapter method itself.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11119": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a reinforcement learning training recipe for improving agentic reasoning; the object of study is the optimization procedure itself, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11189": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training recipe and loss-objective design for SFT; the object of study is how to train models better, not how to build systems with them.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11270": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is a distillation training recipe and its quantitative characterization; the object of study is how to train models better, not how to build systems with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11290": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Portfolio-based workflow selection and adaptive routing directly address production agent orchestration; the precompute-and-reuse pattern, diversity-driven search, and query-time assignment solve real cost-performance tradeoffs I face when deploying multi-agent systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11375": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: the contribution is a probing methodology for understanding what representations encode during pre-training, not a system or technique I would build with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11459": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a prompt optimization training recipe (evolutionary algorithm with data selection strategy); the object being optimized is the prompt itself via algorithmic search, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11520": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Multi-turn OS-agent trajectory synthesis with execution grounding directly informs agentic system design; the three-stage paradigm (intent structuring, role-locked simulation, live execution) is a transferable dataset-construction pattern for tool-use agents, and the ablation isolating multi-turn contribution's impact is actionable for agent training design.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11680": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Hierarchical memory architecture for long-horizon agents directly addresses production concerns (latency, cost, context budgeting) and proposes a transferable pattern (hierarchy + RL-trained navigation) for memory retrieval in agentic systems; this is a working reference for agent orchestration and observability.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11712": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Production-grade diagnostic framework for a core failure mode in user-personalization systems: parametric vs. retrieval memory make opposite-direction tradeoffs (behavioral consistency vs. factual calibration), with causal mechanistic evidence, real-data validation, and actionable mitigation (substrate routing as classification). Directly informs how to architect user-aware RAG and agentic memory.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11722": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: the contribution is a better method for interpreting LLM representations through activation geometry analysis, aimed at understanding model behaviour at the representational level, not at building systems with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12138": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: the contribution is understanding sparse autoencoders as an interpretability tool applied to model representations, not a system built with existing models or a failure-mode analysis that informs production behavior.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12342": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Safety alignment and defense mechanisms are out of scope; the contribution is an alignment-transfer training recipe and inference-time safety method, not a production system architecture or failure-mode analysis that informs how I build and guard deployed agents.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12476": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Formulates hallucination detection as a streaming quickest-detection problem with delay bounds and practical CUSUM-based monitoring; directly applicable to production RAG observability and failure detection.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12634": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Direct contribution to agentic-system design: a credit-assignment method for long-horizon tool-use RL that solves a specific failure mode (loss of tool use under naive distillation) and yields a transferable design pattern (distillation-guided credit weighting with policy gradient as primary actor). This is something I would implement.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12900": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Zero-source hallucination detection is a production evaluation concern; this paper addresses a practical failure mode (hallucination) in deployed LLMs through an interpretable scoring mechanism that operates at the API boundary without access to internals or external corpora, directly applicable to observability and failure-mode mitigation in agentic systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13126": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "KV-cache engine internals and attention-kernel mechanics are excluded; this is a serving-framework optimization inaccessible from the API boundary.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13177": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Long-term agent memory management is a production concern I directly implement; LLM-guided compression decisions for bounded storage and retrieval quality are architectural patterns I would adopt and adapt.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13598": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Reward modeling for multi-agent orchestration is directly applicable to agentic systems design; the contribution is a training method for orchestrators (how to coordinate agents), not a base model, and yields actionable patterns for building robust multi-agent systems with improved efficiency.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13603": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Failure-mode and reliability analysis of multi-turn reasoning: characterizes when and how CoT steps become epiphenomenal, with direct inference-economics application (early-exit at commitment boundary reduces cost).",
+      "parse_failed": false
+    },
+    "arxiv:2606.13647": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: single-language benchmark and model adaptation for Slovak without transferable system design principles or production RAG/retrieval patterns applicable across languages.",
+      "parse_failed": false
+    },
+    "arxiv:2606.07998": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science (interpretability through architecture) and hardware-only content without actionable LLM/NLP application; not something I would build from at the API boundary.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08044": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "This is failure-mode and robustness analysis of deployed safety evaluation, directly informing how to build and audit production LLM systems; the payload is that static behavioral audits are insufficient, requiring interventional measurement — transferable knowledge for observability and evaluation harness design.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08046": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Geospatial representation learning from OSM data is a domain-specific foundation-model contribution; the payload is a better embedding model and benchmark suite for geographic tasks, not a system built with existing models or production NLP/RAG/agent architecture.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08169": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Robotics manipulation system with no LLM/NLP application payload beyond command parsing; the core contribution is robot skill learning and composition, not an LLM system design or failure-mode characterization.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08218": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution characterizes the prior behaviour of deep GPs as depth grows, studying how layered probabilistic models degenerate or converge. This is model-internals work on the theoretical properties of a generative model, not a system built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08296": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Alignment and safety philosophy without transferable production deployment or failure-mode knowledge; the contribution is conceptual critique of existential-risk arguments, not a system design, evaluation method, or observable failure mode I would guard against.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08327": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "This is base-model science: the contribution is an improved attention mechanism and training recipe for the model itself, not a system built on top of existing models. The routing strategy, spectral entropy, and MetaRouter are all internal model architecture decisions, falling under attention-kernel and sampling-algorithm exclusions.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08347": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution improves how embeddings and n-gram representations are learned within the model architecture itself, not a system built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08653": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training recipe for vision-language-action models; the object of study is improving the model itself through fine-tuning regularization, not a system built with existing models or a failure-mode / observability insight about deployed agent behaviour.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08728": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Survey of mathematical reasoning focuses on base-model science (CoT, process reward models, RLVR training techniques), formal-proof research (autoformalization, tactic prediction, proof search), and mathematical discovery—none of which are systems I build with existing models; the payload is model capabilities and training recipes, not production NLP/agent/RAG architecture.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08770": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: single non-English language (Nepali) benchmark and model adaptation without transferable system design patterns; no production NLP/LLM application payload.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08815": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training recipe (RLVR/RL objective) for improving base-model reasoning capability; the object of study is the model itself, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09658": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is improving pretraining recipes and optimizer behavior, studied through the lens of the model itself, not a system built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09746": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Core contribution is a verification algorithm for neural networks (STBP, bound propagation); the application domain is safety-critical video classification, but the payload is model-internals verification science, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09907": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: clinical-domain model adaptation with no transferable system design beyond standard architectural patterns (MoE, attention, imputation); not a production LLM/NLP application or method I would apply across domains.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09919": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Core contribution is robotics perception and multi-robot coordination; LLM application is instrumental (distillation source) rather than the system being built. Outside scope as primary domain is robot control and active sensing, not LLM/NLP systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09936": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: the contribution is interpretability tooling and mechanistic analysis infrastructure for world models themselves, not a system built with existing models for downstream application.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09959": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Weather forecasting domain-specific modeling; contribution is a specialized architecture (temporal conditioning in U-Nets) for precipitation prediction without transferable system-design payload for LLM/NLP applications.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10029": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: sparse autoencoders, representation analysis, and mechanistic steering of internal activations. The application is TTS, but the contribution is interpretability and steering through SAE features—understanding what the model learns internally, not building a system with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10113": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Literary translation quality analysis with emotion as the evaluation lens, but the contribution is descriptive (MT systems have emotional fingerprints) without actionable system design, architecture, or failure-mode knowledge for production LLM applications. The object of study is translation quality, not how to build or operate translation systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10124": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Federated learning optimization and training recipes are outside scope; this is base-model science applied to a distributed setting, not a system built on top of existing models for production application.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10126": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "The contribution is a training recipe (preference optimization via SFT and DPO) applied to a fairness objective; the payload is alignment methodology, not a system I build with existing models or a production concern I implement.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10159": {
+      "decision": 1,
+      "tier": "peripheral",
+      "rationale": "Evaluation robustness and failure modes of LLM systems in high-stakes settings; demonstrates a concrete adversarial failure mode relevant to observability and guardrailing in production systems, though not directly actionable without domain access to peer-review infrastructure.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10228": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is a policy-optimization algorithm (sharpness-aware gradient updates for RL), which improves the training recipe and objective itself, not a system built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10294": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is a NAS algorithm and training recipe for discovering better architectures; the object of study is the model/architecture itself, not a system built on top of existing models. The LLM component is a mechanism within the search procedure, not an application of LLMs to a downstream task.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10327": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "The contribution is a training recipe (curriculum design for fine-tuning), not a system built with existing models; the object of study is how to train the model better, placing it in base-model science exclusion.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10471": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: task-specific modeling in biomedical text classification without transferable system design or production application payload; the methods (RNTNs, Paragraph Vector) are neither novel nor production-relevant to LLM-era practitioners.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10607": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is a causal discovery algorithm and training/inference procedure (expert reweighting, LLM meta-referee logic) whose object is to improve causal graph inference itself, not a production system built on top of causal discovery.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10740": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Failure-mode analysis of multi-turn reasoning and agent safety through trace-level diagnostics; directly informs how to design and guard multi-turn agentic loops and evaluation harnesses, with transferable methodology for observability.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10835": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is a training recipe (target update mechanism) studied as an algorithmic objective for Q-learning itself, not a system built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10852": {
+      "decision": 1,
+      "tier": "peripheral",
+      "rationale": "Evaluates a failure mode (selective distortion via fact omission and emphasis) that affects production LLM systems, but the contribution is a benchmark and failure-mode measurement rather than a system or architectural pattern I would build from.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11387": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is a pretraining recipe and staged hyperparameter-screening protocol for improving model training efficiency, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11854": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a fine-tuning recipe (optimization of visual inputs via backpropagation); the object of study is how to train the model better, not how to build a system with it. Excluded under base-model science.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11893": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: the contribution is a training recipe (brain-guided fine-tuning) that improves the model itself through a novel objective, not a system built with existing models; the core payload is how to train better reasoning models, not how to build or orchestrate with them.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12032": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "This is alignment training research whose contribution is a fine-tuning method and training objective (Existential Indifference as a target property), not a system built with existing models; it is also mechanistic alignment philosophy without production-deployment substrate or failure-mode analysis from deployed agents.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12169": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Multimodal medical dataset and model fine-tuning contribution; domain is biomedical narrow-corpus vertical without transferable system design patterns for production LLM/NLP applications.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12397": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is a training/initialization recipe that improves the model itself (MoE router design during pretraining), not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12730": {
+      "decision": 1,
+      "tier": "peripheral",
+      "rationale": "Evaluates whether psychometric probes reliably predict LLM behavior across contexts — transferable knowledge about the design and reliability of my own evaluation harnesses, but not a system or pattern I would implement.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12916": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is agent-driven code generation and reward design for molecular dynamics; the scientific application (MD pipeline design) is the object of study, not the lens through which to view an LLM/NLP system. No transferable agentic orchestration, retrieval, or observability pattern applicable to production LLM systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12923": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: the contribution is understanding LLM internal response mechanisms and steering via perturbation analysis, not a system or application built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13473": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is improving mathematical reasoning capability of the model itself through RL training recipes (generative-verifier RL) and test-time scaling procedures (population search, tournament selection). The object of study is the model's proof capability, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13477": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: a domain-specific benchmark for supramolecular chemistry without transferable system design or evaluation methodology applicable beyond this vertical.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13578": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a base VLA model trained on laboratory domain data with a novel training recipe (FAST pretraining + flow matching); the object of study is improving the model itself, not a system built with existing models. Falls under base-model science exclusion.",
+      "parse_failed": false
+    },
+    "arxiv:2606.22402": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training recipe (SFT + GRPO) applied to a domain-specific task; the object of study is how to improve the model itself, not a system or pattern I would build with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.25039": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is scientific discovery methodology (symbolic regression + active learning for ODEs); LLM is a component for search-space partitioning, not the object being built. The paper's payload is improving equation discovery, not building a production LLM/NLP system or understanding LLM behaviour in deployment.",
+      "parse_failed": false
+    },
+    "arxiv:2606.26787": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "The contribution is a training recipe (DPO with offline RL reward modeling for policy alignment), not a system built with existing models; the e-commerce domain application does not change that the payload is model optimization, not production LLM/NLP architecture.",
+      "parse_failed": false
+    },
+    "arxiv:2606.28445": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: task-specific modeling in a clinical vertical (dementia detection) with no transferable system design; the method is LoRA fine-tuning, a training recipe, not a production system I would build.",
+      "parse_failed": false
+    },
+    "arxiv:2607.00924": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "The contribution is a training recipe (GRPO fine-tuning) applied to improve base-model reasoning output; the object of study is the model's reasoning capability, not a system built with existing models. While the framing invokes traceability and hypothesis generation, the actual payload is how to train better reasoning into a model, which is base-model science, not production system design.",
+      "parse_failed": false
+    },
+    "arxiv:2607.02964": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: the contribution is interpretability of individual weight parameters and what representations encode within the model, not a system or application built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2607.04558": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: EEG spike detection is a domain-specific medical application without transferable system-design patterns for the broader LLM+agentic-workflow space; the agentic loop (propose → execute → evaluate → refine) is a known orchestration pattern, not a novel architectural contribution.",
+      "parse_failed": false
+    },
+    "arxiv:2607.08071": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a fine-tuning recipe (prefix control tokens + BART SFT) for a specific task; base-model science exclusion applies. No transferable system design, orchestration, retrieval, agentic, or evaluation methodology for production LLM systems.",
+      "parse_failed": false
+    },
+    "arxiv:2607.09438": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is model adaptation and benchmark performance tuning for a specific vertical (visual MCQ); no transferable system design or failure-mode insight relevant to production LLM/NLP systems.",
+      "parse_failed": false
+    },
+    "arxiv:2607.11948": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "The paper's contribution is a training recipe (ontology-amplified DPO) and an evaluation method; the empirical work is explicitly underpowered and negative-result; no production system design, architectural pattern, or failure-mode insight actionable for building deployed agents or RAG systems emerges.",
+      "parse_failed": false
+    },
+    "arxiv:2607.14512": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Retrosynthesis planning is a vertical chemistry task; the contribution is a domain-specific agent application without transferable agentic or system-design payload beyond what a generic LLM-agent harness already provides.",
+      "parse_failed": false
+    },
+    "arxiv:2607.15200": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training recipe (policy gradient decomposition for MDLMs) and the object of study is improving the model itself through RL, not a system built on top of existing models; falls under base-model science exclusion.",
+      "parse_failed": false
+    },
+    "arxiv:2607.15893": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: mechanistic analysis of how diffusion language models implement induction through circuit analysis. The contribution is understanding internal representations and attention mechanisms of a model class, not building systems with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2607.16872": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Core contribution is a training recipe (trace-based on-policy distillation) for improving diffusion LLMs; the object of study is the model itself, not a system built on top of it. Falls under base-model science exclusion.",
+      "parse_failed": false
+    },
+    "arxiv:2607.20274": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Model-internals science: the contribution is understanding what makes medical foundation model representations converge, achieved through representation analysis and probing across encoders. The paper's payload is characterizing learned representations, not building a system with existing models or designing a production architecture.",
+      "parse_failed": false
+    },
+    "arxiv:2607.27232": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Alignment evaluation framed as behavioural measurement, but the contribution is a benchmark of model emotional perception across demographics without actionable guidance for system design, evaluation methodology transfer, or failure-mode insight for production deployment.",
+      "parse_failed": false
+    },
+    "arxiv:2607.27372": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Core contribution is a training procedure and pretraining recipe for generative models; the object of improvement is the model itself, not a system built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2608.00123": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Mechanism design and auction theory applied to advertising; the contribution is a game-theoretic mechanism, not a production LLM system, agent, retrieval pipeline, or evaluation methodology I would build from.",
+      "parse_failed": false
+    },
+    "arxiv:2608.02087": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a post-training recipe (RL objective + instruction conditioning + self-distillation) for improving LLM reasoning; this is base-model science (improving the model itself), not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2608.03092": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Contribution is a training recipe (multi-reward RL optimization via policy distillation); the object of study is improving model training, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2608.04980": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution is understanding how reasoning emerges in models and studying chain-of-thought as a training/inference phenomenon on toy models; the object of study is model behaviour itself, not a system built on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2608.07411": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Narrow-corpus contribution: a benchmark for a specific non-LLM/NLP vertical (geo-spatial tasks) without transferable system design or agent/retrieval/extraction architectural payload.",
+      "parse_failed": false
+    },
+    "arxiv:2608.13167": {
+      "decision": 1,
+      "tier": "peripheral",
+      "rationale": "Failure-mode analysis of multimodal model behavior (abstention under uncertainty) with observability implications, but outside core NLP/RAG/agent scope; the benchmarking and probing methodology transfers to evaluation harness design for deployed systems.",
+      "parse_failed": false
+    },
+    "arxiv:2608.14626": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Systematic literature review without technical contribution; taxonomy of alignment methods is observational, not actionable guidance for building systems. Safety alignment itself is excluded as training-recipe science.",
+      "parse_failed": false
+    },
+    "arxiv:2608.14792": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses evaluation methodology and failure modes in LLM-based clinical document classification; identifies concrete leakage pathways in nested evaluation that transfer to any production system combining zero-shot and supervised classifiers under grouped data splits.",
+      "parse_failed": false
+    },
+    "arxiv:2608.15869": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Multimodal architecture (video-encoder design and latent-representation learning during training); the contribution is a model training recipe, not a system built with existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2608.20318": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Agent capability benchmarking that measures a specific, high-stakes failure mode (agents avoiding algorithmic reasoning and preferring hyperparameter tuning) with reproducible evaluation infrastructure; directly informs how to design and measure agents for complex reasoning tasks.",
+      "parse_failed": false
+    },
+    "arxiv:2608.29715": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Base-model science: the contribution improves the position embedding mechanism of the transformer itself, a core model component. While framed as a mechanism, the object of study is making the model better, not building a system on top of existing models.",
+      "parse_failed": false
+    },
+    "arxiv:2609.00064": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses evaluation methodology and failure modes for in-context learning preservation during fine-tuning; distinguishes attention-level diagnostics from behavioural outcomes, informing how to measure and guard agent/few-shot adaptation in production systems.",
+      "parse_failed": false
+    }
+  },
+  "metrics_before_rescore": {
+    "all_items": {
+      "n": 129,
+      "accuracy": 0.7596899224806202,
+      "precision": 0.8333333333333334,
+      "recall": 0.5454545454545454,
+      "confusion": {
+        "tp": 30,
+        "fp": 6,
+        "tn": 68,
+        "fn": 25
+      },
+      "fn_keep_grade": 18,
+      "false_positive_ids": [
+        "arxiv:2606.10159",
+        "arxiv:2606.10279",
+        "arxiv:2606.10852",
+        "arxiv:2608.13167",
+        "arxiv:2608.14792",
+        "arxiv:2609.00064"
+      ],
+      "false_negative_ids": [
+        "arxiv:2606.08153",
+        "arxiv:2606.08854",
+        "arxiv:2606.09030",
+        "arxiv:2606.09052",
+        "arxiv:2606.09073",
+        "arxiv:2606.09659",
+        "arxiv:2606.09672",
+        "arxiv:2606.09701",
+        "arxiv:2606.09937",
+        "arxiv:2606.10126",
+        "arxiv:2606.10554",
+        "arxiv:2606.10736",
+        "arxiv:2606.10820",
+        "arxiv:2606.10890",
+        "arxiv:2606.11119",
+        "arxiv:2606.11270",
+        "arxiv:2606.11375",
+        "arxiv:2606.11459",
+        "arxiv:2606.11893",
+        "arxiv:2606.12032",
+        "arxiv:2607.00924",
+        "arxiv:2607.27232",
+        "arxiv:2608.00123",
+        "arxiv:2608.03092",
+        "arxiv:2608.04980"
+      ],
+      "false_negative_keep_ids": [
+        "arxiv:2606.08854",
+        "arxiv:2606.09030",
+        "arxiv:2606.09052",
+        "arxiv:2606.09073",
+        "arxiv:2606.09659",
+        "arxiv:2606.09672",
+        "arxiv:2606.09701",
+        "arxiv:2606.09937",
+        "arxiv:2606.10126",
+        "arxiv:2606.10554",
+        "arxiv:2606.10736",
+        "arxiv:2606.10820",
+        "arxiv:2606.10890",
+        "arxiv:2606.11119",
+        "arxiv:2606.11270",
+        "arxiv:2606.11375",
+        "arxiv:2606.11459",
+        "arxiv:2608.03092"
+      ],
+      "tier_distribution": {
+        "core": 29,
+        "peripheral": 7
+      },
+      "parse_failures": 0
+    },
+    "excluding_calibration_examples": {
+      "n": 120,
+      "accuracy": 0.7416666666666667,
+      "precision": 0.8125,
+      "recall": 0.5098039215686274,
+      "confusion": {
+        "tp": 26,
+        "fp": 6,
+        "tn": 63,
+        "fn": 25
+      },
+      "fn_keep_grade": 18,
+      "false_positive_ids": [
+        "arxiv:2606.10159",
+        "arxiv:2606.10279",
+        "arxiv:2606.10852",
+        "arxiv:2608.13167",
+        "arxiv:2608.14792",
+        "arxiv:2609.00064"
+      ],
+      "false_negative_ids": [
+        "arxiv:2606.08153",
+        "arxiv:2606.08854",
+        "arxiv:2606.09030",
+        "arxiv:2606.09052",
+        "arxiv:2606.09073",
+        "arxiv:2606.09659",
+        "arxiv:2606.09672",
+        "arxiv:2606.09701",
+        "arxiv:2606.09937",
+        "arxiv:2606.10126",
+        "arxiv:2606.10554",
+        "arxiv:2606.10736",
+        "arxiv:2606.10820",
+        "arxiv:2606.10890",
+        "arxiv:2606.11119",
+        "arxiv:2606.11270",
+        "arxiv:2606.11375",
+        "arxiv:2606.11459",
+        "arxiv:2606.11893",
+        "arxiv:2606.12032",
+        "arxiv:2607.00924",
+        "arxiv:2607.27232",
+        "arxiv:2608.00123",
+        "arxiv:2608.03092",
+        "arxiv:2608.04980"
+      ],
+      "false_negative_keep_ids": [
+        "arxiv:2606.08854",
+        "arxiv:2606.09030",
+        "arxiv:2606.09052",
+        "arxiv:2606.09073",
+        "arxiv:2606.09659",
+        "arxiv:2606.09672",
+        "arxiv:2606.09701",
+        "arxiv:2606.09937",
+        "arxiv:2606.10126",
+        "arxiv:2606.10554",
+        "arxiv:2606.10736",
+        "arxiv:2606.10820",
+        "arxiv:2606.10890",
+        "arxiv:2606.11119",
+        "arxiv:2606.11270",
+        "arxiv:2606.11375",
+        "arxiv:2606.11459",
+        "arxiv:2608.03092"
+      ],
+      "tier_distribution": {
+        "core": 26,
+        "peripheral": 6
+      },
+      "parse_failures": 0
+    }
+  },
+  "rescored_at": "2026-09-10T16:58:11.288788+00:00",
+  "rescored_against": "labels.json as of rescore time (adjudicated)"
+}

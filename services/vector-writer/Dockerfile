@@ -6,6 +6,7 @@ COPY services/vector-writer/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bishop_shared ./bishop_shared
+COPY config/index_policy.yaml ./config/index_policy.yaml
 COPY services/vector-writer/app ./app
 
 ENV PYTHONPATH=/app

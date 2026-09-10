@@ -71,7 +71,14 @@ def _seed_mirror(db_path: Path) -> ModuleType:
     mirror_mod = _load_duckdb_mirror_module()
     mirror = mirror_mod.DuckDbMirror(db_path)
     try:
-        mirror.upsert(_sample_row(mirror_mod, source_id="arxiv:2401.00001", title="High relevance"))
+        mirror.upsert(
+            _sample_row(
+                mirror_mod,
+                source_id="arxiv:2401.00001",
+                title="High relevance",
+                ingested_at=datetime.now(tz=UTC) - timedelta(days=10),
+            )
+        )
         mirror.upsert(
             _sample_row(
                 mirror_mod,
@@ -132,12 +139,12 @@ def test_filter_source_ids_applies_metadata_predicates(tmp_path: Path) -> None:
     reader_mod = _load_duckdb_reader_module()
     reader = reader_mod.DuckDbReader(db_path)
 
-    assert reader.filter_source_ids(min_relevance=0.7) == ["arxiv:2401.00001", "arxiv:2401.00003"]
+    assert reader.filter_source_ids(min_relevance=0.7) == ["arxiv:2401.00003", "arxiv:2401.00001"]
     assert reader.filter_source_ids(source="github") == ["arxiv:2401.00002"]
     assert reader.filter_source_ids(domain="personal") == ["arxiv:2401.00002"]
     assert reader.filter_source_ids(entry_type="paper", reading_status="unread") == [
-        "arxiv:2401.00001",
         "arxiv:2401.00003",
+        "arxiv:2401.00001",
     ]
     assert reader.filter_source_ids(tags=["RAG"]) == ["arxiv:2401.00003"]
 
@@ -151,8 +158,8 @@ def test_recent_returns_entries_within_days_window(tmp_path: Path) -> None:
     recent = reader.recent(days=30, source="arxiv", domain="professional")
 
     source_ids = [entry.source_id for entry in recent]
-    assert source_ids == ["arxiv:2401.00001", "arxiv:2401.00003"]
-    assert recent[0].title == "High relevance"
+    assert source_ids == ["arxiv:2401.00003", "arxiv:2401.00001"]
+    assert recent[0].title == "Recent RAG"
 
 
 def test_recent_empty_when_table_missing(tmp_path: Path) -> None:

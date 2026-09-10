@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from datetime import UTC, datetime, timedelta
@@ -11,17 +12,25 @@ from xml.etree import ElementTree as ET
 import httpx
 
 from bishop_shared.enums import DomainEnum, SourceEnum
+from bishop_shared.source_config import SourceCategoryConfig, load_source_config
 
 from app.adapters.base import SourceAdapter
 from app.config import ARXIV_BACKFILL_WINDOW_DAYS, ARXIV_CATEGORIES
 from app.models import ManifestIngestEntry
 from app.rate_limit import SOURCE_RATE_LIMITS, TokenBucketRateLimiter
 
+logger = logging.getLogger(__name__)
+
 ARXIV_EXPORT_API_URL = "https://export.arxiv.org/api/query"
 ARXIV_HTML_BASE_URL = "https://arxiv.org/html"
 
 ATOM_NS = "http://www.w3.org/2005/Atom"
 _ATOM = f"{{{ATOM_NS}}}"
+
+ARXIV_SCHEMA_NS = "http://arxiv.org/schemas/atom"
+_ARXIV = f"{{{ARXIV_SCHEMA_NS}}}"
+
+CATEGORY_GATE_EVENT = "arxiv_category_gate"
 
 _ARXIV_ID_VERSION_RE = re.compile(r"^(.+?)v\d+$")
 
@@ -91,11 +100,29 @@ def _parse_published(value: str | None) -> datetime | None:
     return datetime.fromisoformat(normalized)
 
 
-def parse_atom_feed(xml: bytes | str, *, adapter: SourceAdapter) -> list[ManifestIngestEntry]:
-    """Map Atom export XML to manifest ingest DTOs."""
+def extract_primary_category(entry: ET.Element) -> str | None:
+    """Read the ArXiv-schema ``primary_category`` term, or None when absent."""
+    primary = entry.find(f"{_ARXIV}primary_category")
+    if primary is None:
+        return None
+    term = primary.get("term")
+    return term or None
+
+
+def parse_atom_feed_with_categories(
+    xml: bytes | str,
+    *,
+    adapter: SourceAdapter,
+) -> list[tuple[ManifestIngestEntry, str | None]]:
+    """Map Atom export XML to ``(manifest DTO, primary category)`` pairs.
+
+    The primary category is carried alongside rather than on
+    ``ManifestIngestEntry`` because it is gate-local: it never reaches the
+    state-worker wire and has no persisted column.
+    """
     root = ET.fromstring(xml)
     seen: set[str] = set()
-    entries: list[ManifestIngestEntry] = []
+    entries: list[tuple[ManifestIngestEntry, str | None]] = []
 
     for entry in root.findall(f"{_ATOM}entry"):
         entry_id_el = entry.find(f"{_ATOM}id")
@@ -116,26 +143,56 @@ def parse_atom_feed(xml: bytes | str, *, adapter: SourceAdapter) -> list[Manifes
         url = _entry_link_url(entry) or f"http://arxiv.org/abs/{raw_id}"
 
         entries.append(
-            ManifestIngestEntry(
-                source_id=source_id,
-                source=adapter.source,
-                url=url,
-                title=" ".join(title_el.text.split()),
-                abstract=(
-                    " ".join(summary_el.text.split())
-                    if summary_el is not None and summary_el.text
-                    else None
+            (
+                ManifestIngestEntry(
+                    source_id=source_id,
+                    source=adapter.source,
+                    url=url,
+                    title=" ".join(title_el.text.split()),
+                    abstract=(
+                        " ".join(summary_el.text.split())
+                        if summary_el is not None and summary_el.text
+                        else None
+                    ),
+                    published_at=_parse_published(
+                        published_el.text.strip()
+                        if published_el is not None and published_el.text
+                        else None,
+                    ),
+                    domain=adapter.domain,
                 ),
-                published_at=_parse_published(
-                    published_el.text.strip()
-                    if published_el is not None and published_el.text
-                    else None,
-                ),
-                domain=adapter.domain,
+                extract_primary_category(entry),
             ),
         )
 
     return entries
+
+
+def parse_atom_feed(xml: bytes | str, *, adapter: SourceAdapter) -> list[ManifestIngestEntry]:
+    """Map Atom export XML to manifest ingest DTOs."""
+    return [entry for entry, _category in parse_atom_feed_with_categories(xml, adapter=adapter)]
+
+
+def apply_category_gate(
+    pairs: list[tuple[ManifestIngestEntry, str | None]],
+    config: SourceCategoryConfig | None,
+) -> tuple[list[ManifestIngestEntry], int]:
+    """Return kept entries and the count the gate would skip.
+
+    When ``config`` is absent or ``enforce`` is false, every entry is kept and
+    only the count is reported — the knob is measurable before it is
+    load-bearing.
+    """
+    entries = [entry for entry, _category in pairs]
+    if config is None:
+        return entries, 0
+
+    skipped = sum(1 for _entry, category in pairs if not config.allows(category))
+    if not config.enforce:
+        return entries, skipped
+
+    kept = [entry for entry, category in pairs if config.allows(category)]
+    return kept, skipped
 
 
 def parse_raw_id_from_source_id(source_id: str) -> str:
@@ -230,10 +287,32 @@ class ArxivAdapter(SourceAdapter):
             await self._rate_limiter.acquire()
             response = await client.get(ARXIV_EXPORT_API_URL, params=params)
             response.raise_for_status()
-            return parse_atom_feed(response.content, adapter=self)
+            pairs = parse_atom_feed_with_categories(response.content, adapter=self)
+            return self._gate_by_category(pairs)
         finally:
             if self._owns_client:
                 await client.aclose()
+
+    def _gate_by_category(
+        self,
+        pairs: list[tuple[ManifestIngestEntry, str | None]],
+    ) -> list[ManifestIngestEntry]:
+        """Apply the primary-category gate and log the per-cycle skip count."""
+        config = load_source_config(self.source.value)
+        entries, skipped = apply_category_gate(pairs, config)
+        logger.info(
+            "arxiv category gate evaluated",
+            extra={
+                "event": CATEGORY_GATE_EVENT,
+                "source": self.source.value,
+                "config_version": config.version if config is not None else None,
+                "enforce": config.enforce if config is not None else False,
+                "fetched": len(pairs),
+                "skipped_by_category": skipped,
+                "kept": len(entries),
+            },
+        )
+        return entries
 
     async def fetch_content(self, entry: ManifestIngestEntry) -> str:
         raw_id = parse_raw_id_from_source_id(entry.source_id)

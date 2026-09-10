@@ -1,0 +1,884 @@
+{
+  "eval_id": "prefilter_v1",
+  "replay": "eval/prefilter_v1/replays/20260910T153153Z_1.1.1.json",
+  "profile_version": "1.1.1",
+  "built_at": "2026-09-10T15:33:05.610405+00:00",
+  "count": 31,
+  "bulk_unnoted_count": 16,
+  "how_to_use": "For each row set verdict to label_stands (the model is wrong), label_was_wrong (the original label is wrong; correct it in labels.json), or genuinely_ambiguous (the boundary is undecidable from title plus abstract, so neither side should be scored on it). Rows marked bulk_unnoted came from the fast tail of the labeling pass and carry no written justification, so treat them as unsettled by default.",
+  "items": [
+    {
+      "source_id": "arxiv:2606.08153",
+      "disagreement": "model_rejected_label_pass",
+      "title": "LogNEO: A GPT-Neo Reinforcement Learning Framework for Accurate Real-Time Log Anomaly Detection",
+      "url": "https://arxiv.org/abs/2606.08153v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "wrong_domain"
+        ],
+        "notes": "its ok as reference material but it doesnt directly translate to my real domain or current expertise or work but I should know about rl and rlhf and those and I do not so some ligh reading or including some really good paper and or articles wouldnt really hurt - that can generalize to all core aspects of ai engineering and data science"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Primary contribution is a fine-tuning recipe (PPO with position-aware rewards) applied to a base model; excluded as base-model science. Production deployment details are operational engineering, not transferable system design for log anomaly detection."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.08854",
+      "disagreement": "model_rejected_label_pass",
+      "title": "sGPO: Trading Inference FLOPs for Training Efficiency in RLVR",
+      "url": "https://arxiv.org/abs/2606.08854v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "llm_internals"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training recipe (RLVR curriculum and rollout allocation strategy) applied to an RL objective; the object of study is improving model training, not a system built with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09030",
+      "disagreement": "model_rejected_label_pass",
+      "title": "TRIAGE: Dialectical Reasoning for Explainable Risk Prediction on Irregularly Sampled Medical Time Series with LLMs",
+      "url": "https://arxiv.org/abs/2606.09030v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "agent_orchestration"
+        ],
+        "notes": "prmot engineering - applicable systems - transferrable knowledge and learning - can hold value"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Narrow-corpus contribution: clinical time-series prediction with domain-specific modeling, no transferable system design for general LLM/NLP applications beyond the vertical."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09052",
+      "disagreement": "model_rejected_label_pass",
+      "title": "INFUSER: Influence-Guided Self-Evolution Improves Reasoning",
+      "url": "https://arxiv.org/abs/2606.09052v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "too_academic"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training recipe (self-evolution framework with GRPO variant) for improving base models; the object of study is the model itself, not a system built with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09073",
+      "disagreement": "model_rejected_label_pass",
+      "title": "A Unifying Lens on Reward Uncertainty in RLHF",
+      "url": "https://arxiv.org/abs/2606.09073v2",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": "seems like a good paper on agents and rlhf as the previous one but this one maybe even more potential to hold value"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training/optimization recipe for RLHF objectives; the object of study is improving the reward model training procedure itself, not a system built on top of existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09659",
+      "disagreement": "model_rejected_label_pass",
+      "title": "End-to-End Context Compression at Scale",
+      "url": "https://arxiv.org/abs/2606.09659v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "architecture_tradeoffs"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a better compression model and pretraining recipe; the object of study is the compressor itself, not a system built with it. Falls under base-model science exclusion."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09672",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Correlation Is Not Enough: Embedding Human Metadata for Individual Causal Discovery",
+      "url": "https://arxiv.org/abs/2606.09672v1",
+      "primary_category": "cs.AI",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": "seems a bid adjacent but at the same time value could be extracted from this potentially so prob keep in case"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is embedding model improvement (contrastive fine-tuning recipe and hard-negative mining for biomedical encoders); the paper's payload is a better model, not a system built atop existing models. The inference-optimization section (OpenVINO, FP16 vs INT8) is operational but secondary to the core embedding-science contribution."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09701",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Learning to Attack and Defend: Adaptive Red Teaming of Language Models via GRPO",
+      "url": "https://arxiv.org/abs/2606.09701v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": "although a bit of a stretch there could be some informational or knowledge nuggets to extract from this potentially - this is a maybe + so more on the yes side than on the no side"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training recipe (GRPO stabilization for red-teaming via multi-channel rewards and advantage normalization); the object of study is making the training objective work better, not building a system with existing models or understanding deployed failure modes."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09937",
+      "disagreement": "model_rejected_label_pass",
+      "title": "RKSC: Reasoning-Aware KV Cache Sharing and Confident Early Exit for Multi-Step LLM Inference",
+      "url": "https://arxiv.org/abs/2606.09937v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "inference_serving"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "KV-cache optimization and early-exit mechanics are engine internals I cannot act on from the API boundary; the contribution is to serving-framework internals, not to systems built with models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.10126",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Pareto-Guided Teacher Alignment for Fair Personalized Text Generation",
+      "url": "https://arxiv.org/abs/2606.10126v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "applied_systems",
+          "agent_orchestration",
+          "eval_observability"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "The contribution is a training recipe (preference optimization via SFT and DPO) applied to a fairness objective; the payload is alignment methodology, not a system I build with existing models or a production concern I implement."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.10554",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Benchmarking Knowledge Editing using Logical Rules",
+      "url": "https://arxiv.org/abs/2606.10554v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "doc_intel",
+          "eval_observability"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Knowledge editing is model-internals science: the contribution improves how models store and update knowledge through training or intervention methods, not how to build systems with existing models. The benchmark payload does not transfer to production RAG, agentic, or document-intelligence workflows where I would route to external knowledge sources rather than edit model weights."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.10736",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Detecting Knowledge Gaps from Conversational AI Interactions Using Curriculum Prerequisite Graphs",
+      "url": "https://arxiv.org/abs/2606.10736v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "applied_systems"
+        ],
+        "notes": "seems interesting and also has potential to contain value (even if not directly which is fine for every scrapped piece of content)"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Educational application of NLP classification and knowledge graphs; no production LLM system, agent, retrieval, or agentic-workflow contribution that a practitioner would build from. The pipeline is task-specific to course diagnostics without transferable system design."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.10820",
+      "disagreement": "model_rejected_label_pass",
+      "title": "K-Forcing: Joint Next-K-Token Decoding via Push-Forward Language Modeling",
+      "url": "https://arxiv.org/abs/2606.10820v2",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "rag_retrieval"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a decoding algorithm and inference acceleration method — sampler and generation-engine internals I cannot act on from the API boundary, outside the scope of inference economics available to API consumers."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.10890",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Optimal Post-Training Quantization Scales and Where to Find Them",
+      "url": "https://arxiv.org/abs/2606.10890v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "inference_serving"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Quantization algorithm and weight-compression scheme; contribution is to the model/inference-engine layer, not to systems built atop existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.11119",
+      "disagreement": "model_rejected_label_pass",
+      "title": "TRACE: A Unified Rollout Budget Allocation Framework for Efficient Agentic Reinforcement Learning",
+      "url": "https://arxiv.org/abs/2606.11119v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "agent_orchestration"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a reinforcement learning training recipe for improving agentic reasoning; the object of study is the optimization procedure itself, not a system built with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.11270",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Quantifying Subliminal Behavioral Transfer Ratios in Language Model Distillation",
+      "url": "https://arxiv.org/abs/2606.11270v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "agent_orchestration"
+        ],
+        "notes": "safety and security + llm failure modes and robustness"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Base-model science: the contribution is a distillation training recipe and its quantitative characterization; the object of study is how to train models better, not how to build systems with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.11375",
+      "disagreement": "model_rejected_label_pass",
+      "title": "When Probing Accuracy Saturates, Fragility Resolves: A Complementary Metric for LLM Pre-Training Analysis",
+      "url": "https://arxiv.org/abs/2606.11375v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "too_academic",
+          "llm_internals"
+        ],
+        "notes": "seems informative and interesting and could have some value but most likely is pre training and earns ittle actionable inisght but just in case it can help us understand llms and what we do better"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Model-internals science: the contribution is a probing methodology for understanding what representations encode during pre-training, not a system or technique I would build with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.11459",
+      "disagreement": "model_rejected_label_pass",
+      "title": "APEX: Automated Prompt Engineering eXpert with Dynamic Data Selection",
+      "url": "https://arxiv.org/abs/2606.11459v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "agent_orchestration"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a prompt optimization training recipe (evolutionary algorithm with data selection strategy); the object being optimized is the prompt itself via algorithmic search, not a system built with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.11893",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Beyond representational alignment with brain-guided language models for robust reasoning",
+      "url": "https://arxiv.org/abs/2606.11893v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "too_academic"
+        ],
+        "notes": "seems like it could either be interesting or even have value in form of stimuli or insight perhaps"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Model-internals science: the contribution is a training recipe (brain-guided fine-tuning) that improves the model itself through a novel objective, not a system built with existing models; the core payload is how to train better reasoning models, not how to build or orchestrate with them."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.12032",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Existential Indifference: Self-Nonpreservation as a Necessary Architectural Condition for Aligned Superintelligence (or: The Suicidal AI)",
+      "url": "https://arxiv.org/abs/2606.12032v1",
+      "primary_category": "cs.AI",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "too_academic"
+        ],
+        "notes": "seems like an interesting read"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "This is alignment training research whose contribution is a fine-tuning method and training objective (Existential Indifference as a target property), not a system built with existing models; it is also mechanistic alignment philosophy without production-deployment substrate or failure-mode analysis from deployed agents."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2607.00924",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Graph-Native Reinforcement Learning Enables Traceable Scientific Hypothesis Generation through Conceptual Recombination",
+      "url": "https://arxiv.org/abs/2607.00924v1",
+      "primary_category": "cs.AI",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "too_academic"
+        ],
+        "notes": "seems interesting at least as a read"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "The contribution is a training recipe (GRPO fine-tuning) applied to improve base-model reasoning output; the object of study is the model's reasoning capability, not a system built with existing models. While the framing invokes traceability and hypothesis generation, the actual payload is how to train better reasoning into a model, which is base-model science, not production system design."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2607.27232",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Sympathetic Framing: Evaluating AI Alignment across Sociodemographic Groups",
+      "url": "https://arxiv.org/abs/2607.27232v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": "interesting read and potentially stimulating"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Alignment evaluation framed as behavioural measurement, but the contribution is a benchmark of model emotional perception across demographics without actionable guidance for system design, evaluation methodology transfer, or failure-mode insight for production deployment."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2608.00123",
+      "disagreement": "model_rejected_label_pass",
+      "title": "LLM-OSDA: An Optimal-Stopping Dynamic Auction for Native Advertising in Multi-Turn LLM Conversations",
+      "url": "https://arxiv.org/abs/2608.00123v2",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": "adjacent but interesting - pollemic, controversial, politics, society, etc"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Mechanism design and auction theory applied to advertising; the contribution is a game-theoretic mechanism, not a production LLM system, agent, retrieval pipeline, or evaluation methodology I would build from."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2608.03092",
+      "disagreement": "model_rejected_label_pass",
+      "title": "SMOPD: Multi-Reward Reinforcement Learning via Specialize-and-Merge Online Policy Distillation",
+      "url": "https://arxiv.org/abs/2608.03092v2",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "agent_orchestration"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training recipe (multi-reward RL optimization via policy distillation); the object of study is improving model training, not a system built with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2608.04980",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Protoreasoning in Tiny Transformers",
+      "url": "https://arxiv.org/abs/2608.04980v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "llm_internals"
+        ],
+        "notes": "interesting read informative potentially and good seed material for dialectical sessions w claude"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Base-model science: the contribution is understanding how reasoning emerges in models and studying chain-of-thought as a training/inference phenomenon on toy models; the object of study is model behaviour itself, not a system built on top of existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.10159",
+      "disagreement": "model_passed_label_reject",
+      "title": "Gaming AI-Assisted Peer Reviews Poses New Risks to the Scientific Community",
+      "url": "https://arxiv.org/abs/2606.10159v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Evaluation robustness and failure modes of LLM systems in high-stakes settings; demonstrates a concrete adversarial failure mode relevant to observability and guardrailing in production systems, though not directly actionable without domain access to peer-review infrastructure."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.10279",
+      "disagreement": "model_passed_label_reject",
+      "title": "Supervised Fine-tuning with Synthetic Rationale Data Hurts Real-World Disease Prediction",
+      "url": "https://arxiv.org/abs/2606.10279v1",
+      "primary_category": "cs.AI",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "core",
+        "rationale": "Production failure-mode analysis of a widespread practice (rationale-based SFT) in clinical LLM systems, with root-cause diagnosis and actionable guardrails for document-intelligence and healthcare-adjacent workflows."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.10852",
+      "disagreement": "model_passed_label_reject",
+      "title": "Janus: A Benchmark for Goal-Conditioned Information Distortion in LLMs",
+      "url": "https://arxiv.org/abs/2606.10852v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": "too niche"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Evaluates a failure mode (selective distortion via fact omission and emphasis) that affects production LLM systems, but the contribution is a benchmark and failure-mode measurement rather than a system or architectural pattern I would build from."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2608.13167",
+      "disagreement": "model_passed_label_reject",
+      "title": "TRAPSBench: Vision-Language Models Encode but Fail to Express Epistemic Restraint",
+      "url": "https://arxiv.org/abs/2608.13167v1",
+      "primary_category": "cs.CV",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "adjacent_interesting",
+          "llm_internals"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Failure-mode analysis of multimodal model behavior (abstention under uncertainty) with observability implications, but outside core NLP/RAG/agent scope; the benchmarking and probing methodology transfers to evaluation harness design for deployed systems."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2608.14792",
+      "disagreement": "model_passed_label_reject",
+      "title": "Prompting is not enough: supervised baselines and leakage control for measuring shared decision-making with LLMs in pediatric encounters",
+      "url": "https://arxiv.org/abs/2608.14792v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "core",
+        "rationale": "Directly addresses evaluation methodology and failure modes in LLM-based clinical document classification; identifies concrete leakage pathways in nested evaluation that transfer to any production system combining zero-shot and supervised classifiers under grouped data splits."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2609.00064",
+      "disagreement": "model_passed_label_reject",
+      "title": "Attention Sensitivity Is Not Enough: Dissociating Attention-Level and Behavioural In-Context Learning under Fine-Tuning",
+      "url": "https://arxiv.org/abs/2609.00064v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "too_academic"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "core",
+        "rationale": "Directly addresses evaluation methodology and failure modes for in-context learning preservation during fine-tuning; distinguishes attention-level diagnostics from behavioural outcomes, informing how to measure and guard agent/few-shot adaptation in production systems."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    }
+  ]
+}

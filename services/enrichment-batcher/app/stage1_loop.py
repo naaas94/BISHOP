@@ -71,7 +71,7 @@ def _profile_render_hash(
     *,
     profile_path: Path | None = None,
 ) -> str:
-    path = profile_path or resolve_profile_path(domain)
+    path = profile_path or resolve_profile_path(domain, gate="enrichment")
     profile = load_profile(path)
     return profile.canonical_hash
 

@@ -114,6 +114,46 @@ def test_post_content_creates_entry(client: TestClient) -> None:
     assert body["entry_id"]
 
 
+def test_post_content_carries_pre_filter_tier_into_entry(client: TestClient) -> None:
+    """Contract: POST /entries/content copies the manifest pre_filter_tier onto the entry."""
+
+    async def _seed() -> None:
+        async with get_db() as conn:
+            await _seed_discovered(conn)
+            await claim_manifest_poll(conn, ProcessingState.DISCOVERED)
+            await apply_pre_filter_results(
+                conn,
+                "batch-1",
+                "1.1.0",
+                [
+                    PreFilterResultEntryWire(
+                        source_id=_SOURCE,
+                        decision=1,
+                        pre_filter_rationale="Worth a skim.",
+                        pre_filter_tier="peripheral",
+                    )
+                ],
+            )
+            await claim_manifest_poll(conn, ProcessingState.RELEVANCE_PASSED)
+
+    asyncio.run(_seed())
+    response = client.post(
+        "/entries/content",
+        json={"source_id": _SOURCE, "content_raw": "full paper body"},
+    )
+    assert response.status_code == 200
+
+    async def _read_tier() -> tuple:
+        async with get_db() as conn:
+            cursor = await conn.execute(
+                "SELECT pre_filter_tier FROM entries WHERE source_id = ?",
+                (_SOURCE,),
+            )
+            return await cursor.fetchone()
+
+    assert tuple(asyncio.run(_read_tier())) == ("peripheral",)
+
+
 def test_post_content_provenance_incomplete_returns_409(client: TestClient) -> None:
     async def _seed() -> None:
         async with get_db() as conn:

@@ -243,6 +243,94 @@ def test_m3_e2e_twenty_entry_batch_pass_and_reject(
     assert batch["failed_count"] == 10
 
 
+async def _manifest_tiers(db_path: Path, source_ids: list[str]) -> dict[str, str | None]:
+    placeholders = ", ".join("?" for _ in source_ids)
+    async with aiosqlite.connect(db_path) as conn:
+        cursor = await conn.execute(
+            f"SELECT source_id, pre_filter_tier FROM manifest WHERE source_id IN ({placeholders})",
+            source_ids,
+        )
+        rows = await cursor.fetchall()
+    return {row[0]: row[1] for row in rows}
+
+
+def test_m3_e2e_pre_filter_tier_reaches_manifest(
+    integration_client: tuple[TestClient, Path],
+) -> None:
+    """Contract: core/peripheral passes and tier-less rejects survive the full poll cycle."""
+    client, db_path = integration_client
+    source_ids = _source_ids(3)
+    _seed_relevance_queued_batch(client, source_ids)
+
+    state_worker_mod, loop_mod, models_mod = _load_batch_poller_loop_stack()
+    texts = [
+        '{"decision": 1, "tier": "core", "rationale": "Working reference."}',
+        '{"decision": 1, "tier": "peripheral", "rationale": "Worth a skim."}',
+        '{"decision": 0, "rationale": "Off topic."}',
+    ]
+    fake_results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(source_id),
+            text=text,
+        )
+        for source_id, text in zip(source_ids, texts)
+    ]
+    anthropic = FakeAnthropicClient(results=fake_results)
+
+    async def _run_poll() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            sw_client = state_worker_mod.StateWorkerClient(client=http)
+            batches = await sw_client.get_in_flight_batches()
+            tracked = {batches[0].batch_id: batches[0]}
+            await loop_mod.poll_once(sw_client, anthropic, tracked, now=_NOW)
+
+    asyncio.run(_run_poll())
+
+    tiers = asyncio.run(_manifest_tiers(db_path, source_ids))
+    assert tiers[source_ids[0]] == "core"
+    assert tiers[source_ids[1]] == "peripheral"
+    assert tiers[source_ids[2]] is None
+
+    states = asyncio.run(_manifest_states(db_path, source_ids))
+    assert states[source_ids[1]] == ProcessingState.RELEVANCE_PASSED.value
+    assert states[source_ids[2]] == ProcessingState.RELEVANCE_REJECTED.value
+
+
+def test_m3_e2e_tierless_profile_v1_0_0_pass_normalizes_to_core(
+    integration_client: tuple[TestClient, Path],
+) -> None:
+    """Backward compat: a live v1.0.0 response with no tier lands as core, not a parse failure."""
+    client, db_path = integration_client
+    source_ids = _source_ids(1)
+    _seed_relevance_queued_batch(client, source_ids)
+
+    state_worker_mod, loop_mod, models_mod = _load_batch_poller_loop_stack()
+    anthropic = FakeAnthropicClient(
+        results=[
+            models_mod.AnthropicBatchResultItem(
+                custom_id=source_id_to_batch_custom_id(source_ids[0]),
+                text='{"decision": 1, "rationale": "Relevant RAG content."}',
+            )
+        ],
+    )
+
+    async def _run_poll() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            sw_client = state_worker_mod.StateWorkerClient(client=http)
+            batches = await sw_client.get_in_flight_batches()
+            tracked = {batches[0].batch_id: batches[0]}
+            await loop_mod.poll_once(sw_client, anthropic, tracked, now=_NOW)
+
+    asyncio.run(_run_poll())
+
+    assert asyncio.run(_manifest_tiers(db_path, source_ids))[source_ids[0]] == "core"
+    detail = client.get(f"/batches/{_BATCH_ID}")
+    assert detail.json()["batch"]["passed_count"] == 1
+    assert detail.json()["batch"]["failed_count"] == 0
+
+
 def test_m3_startup_scan_registers_pre_seeded_in_flight_batch(
     integration_client: tuple[TestClient, Path],
 ) -> None:

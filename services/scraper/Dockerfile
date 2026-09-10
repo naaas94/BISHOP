@@ -6,6 +6,7 @@ COPY services/scraper/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bishop_shared ./bishop_shared
+COPY config/sources ./config/sources
 COPY services/scraper/app ./app
 
 ENV PYTHONPATH=/app

@@ -82,7 +82,7 @@ async def stage2_cycle(
             )
             return
 
-        path = profile_path or resolve_profile_path(domain)
+        path = profile_path or resolve_profile_path(domain, gate="enrichment")
         verified = _verify_profile_hash(path)
         if verified is None:
             return

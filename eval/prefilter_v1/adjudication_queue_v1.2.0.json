@@ -1,0 +1,602 @@
+{
+  "eval_id": "prefilter_v1",
+  "replay": "eval/prefilter_v1/replays/20260910T165810Z_1.2.0.json",
+  "profile_version": "1.2.0",
+  "built_at": "2026-09-10T16:58:33.372773+00:00",
+  "count": 21,
+  "bulk_unnoted_count": 12,
+  "how_to_use": "For each row set verdict to label_stands (the model is wrong), label_was_wrong (the original label is wrong; correct it in labels.json), or genuinely_ambiguous (the boundary is undecidable from title plus abstract, so neither side should be scored on it). Rows marked bulk_unnoted came from the fast tail of the labeling pass and carry no written justification, so treat them as unsettled by default.",
+  "items": [
+    {
+      "source_id": "arxiv:2606.08153",
+      "disagreement": "model_rejected_label_pass",
+      "title": "LogNEO: A GPT-Neo Reinforcement Learning Framework for Accurate Real-Time Log Anomaly Detection",
+      "url": "https://arxiv.org/abs/2606.08153v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "applied_systems"
+        ],
+        "notes": "its ok as reference material but it doesnt directly translate to my real domain or current expertise or work but I should know about rl and rlhf and those and I do not so some ligh reading or including some really good paper and or articles wouldnt really hurt - that can generalize to all core aspects of ai engineering and data science"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training recipe (PPO with position-aware rewards) applied to an existing base model; the object of study is the fine-tuning method, not a system or architectural pattern built on top of existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.08571",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Calibration of Structured Ignorance Certificates for Diagnosing Unknown Unknowns in Reasoning Models",
+      "url": "https://arxiv.org/abs/2606.08571v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "eval_observability"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training recipe (GRPO fine-tuning with composite reward) and a dataset for a specific failure mode; the payload is not a system, architecture, or evaluation methodology I would reuse in production."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09659",
+      "disagreement": "model_rejected_label_pass",
+      "title": "End-to-End Context Compression at Scale",
+      "url": "https://arxiv.org/abs/2606.09659v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "inference_economics",
+          "architecture_tradeoffs"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "KV-cache compression mechanics and encoder-decoder architecture search for compression are base-model science: the contribution improves how models handle context internally, and the object of study is the compression model itself, not a system built on top of it."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09672",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Correlation Is Not Enough: Embedding Human Metadata for Individual Causal Discovery",
+      "url": "https://arxiv.org/abs/2606.09672v1",
+      "primary_category": "cs.AI",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "applied_systems"
+        ],
+        "notes": "seems a bid adjacent but at the same time value could be extracted from this potentially so prob keep in case"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a fine-tuning recipe (contrastive learning objective) and a serving optimization (OpenVINO tuning on specific silicon), neither of which is actionable for someone building LLM systems; the biomedical domain is the application, not the transferable insight."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09701",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Learning to Attack and Defend: Adaptive Red Teaming of Language Models via GRPO",
+      "url": "https://arxiv.org/abs/2606.09701v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "failure_modes"
+        ],
+        "notes": "although a bit of a stretch there could be some informational or knowledge nuggets to extract from this potentially - this is a maybe + so more on the yes side than on the no side"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training recipe (GRPO variant with curriculum and co-training design) for safety alignment; excluded as base-model science and alignment training method without transferable failure-mode or deployed-behaviour knowledge."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.10736",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Detecting Knowledge Gaps from Conversational AI Interactions Using Curriculum Prerequisite Graphs",
+      "url": "https://arxiv.org/abs/2606.10736v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "applied_systems"
+        ],
+        "notes": "seems interesting and also has potential to contain value (even if not directly which is fine for every scrapped piece of content)"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Vertical contribution: the payload is educational assessment and pedagogy (detecting student knowledge gaps in a course context), not a transferable LLM system, pipeline, or failure-mode pattern. The fact that GPT-4 and a classifier are used does not change the domain anchor."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.11119",
+      "disagreement": "model_rejected_label_pass",
+      "title": "TRACE: A Unified Rollout Budget Allocation Framework for Efficient Agentic Reinforcement Learning",
+      "url": "https://arxiv.org/abs/2606.11119v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "agent_orchestration"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training recipe for policy optimization via RL; the object of study is how to train better agents, not how to build systems with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.11459",
+      "disagreement": "model_rejected_label_pass",
+      "title": "APEX: Automated Prompt Engineering eXpert with Dynamic Data Selection",
+      "url": "https://arxiv.org/abs/2606.11459v1",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "keep",
+        "reasons": [
+          "agent_orchestration"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a prompt optimization training recipe (evolutionary algorithm variant with data selection); the object of improvement is the prompt-search procedure itself, not a system built with prompts."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.11893",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Beyond representational alignment with brain-guided language models for robust reasoning",
+      "url": "https://arxiv.org/abs/2606.11893v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "adjacent_stimulus"
+        ],
+        "notes": "seems like it could either be interesting or even have value in form of stimuli or insight perhaps"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Model-internals science framed as neuroscience: the contribution is a training method (brain-signal-guided fine-tuning) that improves the base model itself, not a system built on top of existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.12032",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Existential Indifference: Self-Nonpreservation as a Necessary Architectural Condition for Aligned Superintelligence (or: The Suicidal AI)",
+      "url": "https://arxiv.org/abs/2606.12032v1",
+      "primary_category": "cs.AI",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "adjacent_stimulus"
+        ],
+        "notes": "seems like an interesting read"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Alignment philosophy and training-recipe contribution without actionable production application; the object of study is making the base model itself indifferent to self-preservation through fine-tuning, not building a system with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2607.00924",
+      "disagreement": "model_rejected_label_pass",
+      "title": "Graph-Native Reinforcement Learning Enables Traceable Scientific Hypothesis Generation through Conceptual Recombination",
+      "url": "https://arxiv.org/abs/2607.00924v1",
+      "primary_category": "cs.AI",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "adjacent_stimulus"
+        ],
+        "notes": "seems interesting at least as a read"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Contribution is a training recipe (GRPO fine-tuning) and model architecture (graph-native RL) for improving base model reasoning; the object of study is the model itself, not a system built with existing models."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2608.00123",
+      "disagreement": "model_rejected_label_pass",
+      "title": "LLM-OSDA: An Optimal-Stopping Dynamic Auction for Native Advertising in Multi-Turn LLM Conversations",
+      "url": "https://arxiv.org/abs/2608.00123v2",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "pass",
+        "kb_should": "skim",
+        "reasons": [
+          "adjacent_stimulus"
+        ],
+        "notes": "adjacent but interesting - pollemic, controversial, politics, society, etc"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 0,
+        "tier": null,
+        "rationale": "Vertical domain contribution: the payload is optimal-stopping mechanism design and auction theory applied to native advertising, not a transferable system pattern or production architecture for building LLM applications."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.08296",
+      "disagreement": "model_passed_label_reject",
+      "title": "Revisiting the shutdown problem",
+      "url": "https://arxiv.org/abs/2606.08296v1",
+      "primary_category": "cs.AI",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "wrong_domain"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Alignment philosophy and safety critique without transferable failure-mode or robustness knowledge about deployed agent behaviour; the payload is conceptual analysis of existential-risk arguments rather than engineering guidance for production systems."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.08728",
+      "disagreement": "model_passed_label_reject",
+      "title": "Artificial Intelligence for Mathematical Reasoning: An Integrated Survey of Language Models, Neuro-symbolic Systems, and Verified Discovery",
+      "url": "https://arxiv.org/abs/2606.08728v1",
+      "primary_category": "cs.AI",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "wrong_domain"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Comprehensive survey of LLM reasoning and verification techniques with production relevance (CoT, tool use, process rewards, verifier-assisted decoding), but the primary contribution is taxonomic rather than a shipped system, failure-mode analysis, or actionable engineering pattern; reasoning-scale inference and verification-loop design are adjacent to agent orchestration but the survey's framing is mathematical-capability-centered rather than systems-centered."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.09936",
+      "disagreement": "model_passed_label_reject",
+      "title": "One Lens, Many Worlds : A Capability-Typed Interface for World-Model Interpretability",
+      "url": "https://arxiv.org/abs/2606.09936v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "wrong_domain"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Model-internals interpretability tooling: valuable for reasoning about how world models work, but the contribution is an interpretability framework and methodology, not a production system built with existing models or actionable failure-mode knowledge that transfers to LLM/NLP agent design."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.11722",
+      "disagreement": "model_passed_label_reject",
+      "title": "ICA Lens: Interpreting Language Models Without Training Another Dictionary",
+      "url": "https://arxiv.org/abs/2606.11722v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "llm_internals",
+          "too_academic"
+        ],
+        "notes": "LLM internal representations; adjacent but not the niche"
+      },
+      "label_confidence": "noted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Model-internals science: the contribution is interpretability methodology for understanding LLM representations, not a system built with existing models or a failure-mode analysis that informs production design."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2606.12138",
+      "disagreement": "model_passed_label_reject",
+      "title": "Unstable Features, Reproducible Subspaces: Understanding Seed Dependence in Sparse Autoencoders",
+      "url": "https://arxiv.org/abs/2606.12138v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Model-internals science (interpretability and representation analysis via SAEs); not something I would implement in production, but changes how I reason about whether learned features in my systems are trustworthy or artifacts of training noise."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2607.02964",
+      "disagreement": "model_passed_label_reject",
+      "title": "Individual Parameters in Weight-Sparse Transformers Appear Interpretable",
+      "url": "https://arxiv.org/abs/2607.02964v1",
+      "primary_category": "cs.LG",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "llm_internals"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Model-internals science: mechanistic interpretability and circuit analysis of transformer weights; changes how I reason about models I build on but is not actionable for building systems."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2607.15893",
+      "disagreement": "model_passed_label_reject",
+      "title": "Induction in Both Directions: A Mechanistic Analysis of In-Context Learning in Masked Diffusion Language Models",
+      "url": "https://arxiv.org/abs/2607.15893v2",
+      "primary_category": "cs.CL",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "peripheral",
+        "rationale": "Model-internals mechanistic analysis of diffusion language models; not a system I would build from, but interpretability of how an alternative generation paradigm implements in-context learning is thinking material that informs reasoning about model behaviour and capabilities."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2607.20274",
+      "disagreement": "model_passed_label_reject",
+      "title": "Self-supervision drives representational convergence in medical foundation models more than clinical supervision",
+      "url": "https://arxiv.org/abs/2607.20274v1",
+      "primary_category": "cs.CV",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "adjacent_interesting"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "core",
+        "rationale": "Evaluation and failure modes of medical foundation models: characterizes how encoder convergence actually behaves, what produces it, and where interoperability assumptions break down — directly actionable for designing and validating retrieval and embedding systems in production medical AI."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    },
+    {
+      "source_id": "arxiv:2608.13167",
+      "disagreement": "model_passed_label_reject",
+      "title": "TRAPSBench: Vision-Language Models Encode but Fail to Express Epistemic Restraint",
+      "url": "https://arxiv.org/abs/2608.13167v1",
+      "primary_category": "cs.CV",
+      "current_label": {
+        "prefilter_should": "reject",
+        "kb_should": "drop",
+        "reasons": [
+          "wrong_domain",
+          "llm_internals"
+        ],
+        "notes": ""
+      },
+      "label_confidence": "bulk_unnoted",
+      "model": {
+        "decision": 1,
+        "tier": "core",
+        "rationale": "Failure-mode analysis of VLM behavior under distributional shift (occluded/chaotic evidence) with actionable insights about the representation-output gap; directly informs guardrails and calibration design for multimodal agent systems."
+      },
+      "verdict": null,
+      "verdict_options": [
+        "label_stands",
+        "label_was_wrong",
+        "genuinely_ambiguous"
+      ],
+      "adjudicator_note": ""
+    }
+  ]
+}

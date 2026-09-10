@@ -240,6 +240,65 @@ def test_alembic_migration_clean_from_empty_db(tmp_path: Path) -> None:
     assert EXPECTED_TABLES.issubset(tables)
 
 
+def test_alembic_migration_adds_pre_filter_tier_columns(tmp_path: Path) -> None:
+    """Contract: pre_filter_tier exists and is nullable on manifest and entries."""
+    db_path = tmp_path / "tier.db"
+    run_migrations(str(db_path))
+    conn = sqlite3.connect(db_path)
+    try:
+        for table in ("manifest", "entries"):
+            columns = {
+                row[1]: row[3]
+                for row in conn.execute(f"PRAGMA table_info({table})").fetchall()
+            }
+            assert "pre_filter_tier" in columns, table
+            assert columns["pre_filter_tier"] == 0, table
+    finally:
+        conn.close()
+
+
+def test_post_manifest_pre_filter_results_without_tier_still_validates(
+    contract_client: tuple[TestClient, Path],
+) -> None:
+    """Backward compat: an older batch-poller payload omitting pre_filter_tier is accepted."""
+    client, db_path = contract_client
+    client.post("/manifest/batch", json=_batch_payload())
+    client.get("/manifest/poll", params={"state": ProcessingState.DISCOVERED.value})
+    payload = _pre_filter_payload()
+    assert "pre_filter_tier" not in payload["entries"][0]
+    response = client.post("/manifest/pre-filter-results", json=payload)
+    assert response.status_code == 200
+    conn = sqlite3.connect(db_path)
+    try:
+        row = conn.execute(
+            "SELECT pre_filter_tier FROM manifest WHERE source_id = ?", (_SOURCE,)
+        ).fetchone()
+    finally:
+        conn.close()
+    assert row == (None,)
+
+
+def test_post_manifest_pre_filter_results_persists_peripheral_tier(
+    contract_client: tuple[TestClient, Path],
+) -> None:
+    """Contract: pre_filter_tier round-trips from the wire body into manifest."""
+    client, db_path = contract_client
+    client.post("/manifest/batch", json=_batch_payload())
+    client.get("/manifest/poll", params={"state": ProcessingState.DISCOVERED.value})
+    payload = _pre_filter_payload()
+    payload["entries"][0]["pre_filter_tier"] = "peripheral"
+    response = client.post("/manifest/pre-filter-results", json=payload)
+    assert response.status_code == 200
+    conn = sqlite3.connect(db_path)
+    try:
+        row = conn.execute(
+            "SELECT pre_filter_tier FROM manifest WHERE source_id = ?", (_SOURCE,)
+        ).fetchone()
+    finally:
+        conn.close()
+    assert row == ("peripheral",)
+
+
 def test_manifest_batch_idempotent(contract_client: tuple[TestClient, Path]) -> None:
     """G2 gate: POST /manifest/batch skips duplicate source_id."""
     client, _ = contract_client

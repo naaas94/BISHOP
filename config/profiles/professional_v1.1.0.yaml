@@ -1,0 +1,171 @@
+version: "1.1.0"
+created_at: "2026-09-10"
+domain: professional
+label: "AI/ML Engineering — Professional"
+
+# SHA-256 hash of the JSON-canonical profile dict per §11.3 (canonical_hash excluded from input).
+canonical_hash: "29e0fecf3625da7278adfb6e8904405023725807069896a36471551bc3f4cfb8"
+
+changelog:
+  - version: "1.0.0"
+    date: "2026-06-10"
+    note: "Initial profile"
+  - version: "1.1.0"
+    date: "2026-09-10"
+    note: >
+      Calibrated against eval/prefilter_v0 (129 human labels; acc 0.798, prec 0.754, rec 0.782).
+      All 14 false positives were model-improvement research passing as system-building, so
+      llm_inference was rescoped to the API boundary and four model-improvement exclusions added.
+      The keep-grade false negatives were failure-mode, robustness, and agent-benchmark content, so
+      eval_observability was broadened and reweighted 0.7 -> 1.0. Adds the peripheral tier and
+      boundary calibration examples drawn from the labeled disagreements.
+
+context: |
+  I am an Applied AI Engineer specializing in NLP, RAG systems, agentic workflows,
+  LLM-based document intelligence, and production ML systems. I build these systems
+  professionally. Judge relevance from the perspective of a practitioner who ships
+  production-grade AI, not an academic reviewer.
+
+  The distinction that matters most: I build systems *with* existing models. Research
+  whose contribution is a better model, a better training recipe, or a better decoding
+  procedure is not my lane, however strong the result. Research that tells me how such
+  systems behave, fail, or should be structured is my lane, even when it is framed
+  academically.
+
+principles:
+  - "Prefer practical applicability over theoretical novelty"
+  - "Value production concerns: latency, reliability, cost, observability, failure modes"
+  - "Value architectural patterns, tradeoffs, and engineering decisions"
+  - "Deprioritize pure math papers without engineering application"
+  - "Prioritize content actionable within a 6-month horizon"
+  - "Judge the contribution, not the topic: a paper about agents whose contribution is a training recipe is a training paper"
+  - "When genuinely uncertain, pass with tier peripheral rather than reject; a later scoring gate provides precision, and a rejection here is unrecoverable"
+
+anchors:
+  - id: rag_retrieval
+    label: "RAG and Retrieval Systems"
+    rationale: >
+      Core to current work. Hybrid retrieval, reranking, late chunking,
+      embedding models, vector stores, knowledge graphs for retrieval.
+    weight: 1.0
+
+  - id: agentic_systems
+    label: "Agentic Systems and Orchestration"
+    rationale: >
+      LangGraph, multi-agent patterns, state machines, tool use, planning,
+      memory architectures, agent evaluation.
+    weight: 1.0
+
+  - id: eval_failure_modes
+    label: "Evaluation, Failure Modes and Observability"
+    rationale: >
+      Evaluation frameworks, tracing, LLM-as-judge, production monitoring. Equally:
+      analysis of how LLM and agent systems fail — reasoning and multi-turn failure
+      modes, robustness and reliability limits, brittleness under distribution shift,
+      and benchmarks that characterise agent capability. Safety and alignment work
+      counts here when it yields transferable failure-mode or robustness knowledge
+      about deployed behaviour, and does not count when its contribution is an
+      alignment training method.
+    weight: 1.0
+
+  - id: document_intelligence
+    label: "Document Intelligence and Extraction"
+    rationale: >
+      Schema-bound extraction, structured output, document parsing pipelines.
+      Directly relevant to Hermes-type systems.
+    weight: 0.9
+
+  - id: inference_economics
+    label: "Inference Economics at the API Boundary"
+    rationale: >
+      Cost, latency and throughput decisions available to someone consuming model
+      APIs: prompt caching and cache-read economics, batch APIs, context-window
+      budgeting, routing between models, concurrency and retry design. Engine
+      internals I cannot act on — KV-cache mechanics, attention kernels,
+      quantization schemes, serving-framework internals — are out of scope.
+    weight: 0.8
+
+exclusions:
+  - "Pure computer vision or robotics without LLM/NLP application"
+  - "Market analysis or business news without technical substance"
+  - "Tutorial content at introductory level (assume expert baseline)"
+  - "Hardware-only content without ML application"
+  - >
+    Model-improvement research: the contribution is a better model or generation
+    procedure rather than a system built from existing ones. Includes fine-tuning,
+    SFT, RLHF, RLVR, preference optimization, distillation and PEFT recipes;
+    synthetic data generated to train a model; quantization, pruning and compression
+    schemes; sampler, decoder and beam-search algorithms; and KV-cache or attention
+    kernel internals.
+  - >
+    Model-internals science: interpretability, probing, representation analysis,
+    sparse autoencoders, circuit and mechanistic work, and studies of what
+    representations encode. Interesting, but not something I implement.
+  - >
+    Multimodal and modality-adapter architecture: audio or vision encoders, token
+    routing across modalities, cross-modal adapters, and LoRA-style modality
+    grafting, unless the paper's payload is a production LLM/NLP application.
+  - >
+    Narrow-corpus contributions: a benchmark or model adaptation for one specific
+    non-English language, or task-specific modeling inside a vertical (clinical,
+    biomedical, detection, forecasting), without transferable system design.
+
+# Boundary cases drawn from eval/prefilter_v0 human labels. Each is a decision the
+# v1.0.0 profile got wrong; they exist to fix the boundary, not to enumerate topics.
+calibration_examples:
+  - title: "MiniPIC: Flexible Position-Independent Caching in <100LOC"
+    decision: 0
+    tier: null
+    why: >
+      Sounds like caching economics but is KV-cache engine internals; I cannot act on
+      it from the API boundary. Prompt caching and batch-API economics would pass.
+  - title: "A Unifying Lens on Supervised Fine-Tuning Through Target Distribution Design"
+    decision: 0
+    tier: null
+    why: "Contribution is a training recipe, not a system built with existing models."
+  - title: "SkMTEB: Slovak Massive Text Embedding Benchmark and Model Adaptation"
+    decision: 0
+    tier: null
+    why: "Retrieval-adjacent, but a single-language benchmark with no transferable design."
+  - title: "AuRA: Internalizing Audio Understanding into LLMs as LoRA"
+    decision: 0
+    tier: null
+    why: "Modality adapter architecture; no production LLM/NLP application payload."
+  - title: "Unstable Features, Reproducible Subspaces: Understanding Seed Dependence in Sparse Autoencoders"
+    decision: 0
+    tier: null
+    why: "Model-internals science; nothing to implement."
+  - title: "When the Chain of Thought Knows Better: Failure Modes in Multi-Turn Reasoning Models"
+    decision: 1
+    tier: core
+    why: >
+      Failure-mode analysis of multi-turn reasoning. Academic framing, but directly
+      informs how I design and guard agent loops.
+  - title: "When Behavioral Safety Evaluation Fails: A Representation-Level Perspective"
+    decision: 1
+    tier: core
+    why: >
+      Safety framing, but the payload is that a class of behavioural evaluation is
+      unreliable — transferable knowledge about my own eval harnesses.
+  - title: "AI4AI-Bench: Benchmarking LLM Agents in Algorithmic Design for Recursive Self-Improvement"
+    decision: 1
+    tier: core
+    why: "Agent capability benchmarking; how to measure agents is core to building them."
+  - title: "Rethinking Psychometric Evaluation of LLMs: When and Why Self-Reports Predict Behavior"
+    decision: 1
+    tier: peripheral
+    why: >
+      Not something I would build from, but a genuine question about whether stated
+      model behaviour predicts real behaviour. Peripheral, not reject.
+
+output:
+  format: json
+  include_rationale: true
+  rationale_max_tokens: 100
+  instruction: >
+    Respond with a JSON object:
+    {"decision": 0 or 1, "tier": "core" or "peripheral" or null, "rationale": "one sentence"}.
+    Set decision 1 to pass, 0 to reject. When decision is 1, set tier to "core" if this is
+    something I would build from, or "peripheral" if it is worth reading but not a working
+    reference. When decision is 0, set tier to null. The rationale must name the anchor or
+    the exclusion that decided the call. No other output. No preamble.

@@ -14,6 +14,8 @@ import httpx
 import pytest
 
 from bishop_shared.enums import DomainEnum, SourceEnum
+from bishop_shared.index_policy import IndexPolicy
+from bishop_shared.indexing_config import EMBEDDING_DIM
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _VECTOR_WRITER_ROOT = _REPO_ROOT / "services" / "vector-writer"
@@ -52,7 +54,11 @@ def _load_loop_stack() -> tuple[ModuleType, ModuleType, ModuleType, ModuleType]:
     return loop_mod, models_mod, client_mod, index_mod
 
 
-def _sample_poll_entry(models: ModuleType) -> object:
+def _index_policy(*, enforce: bool) -> IndexPolicy:
+    return IndexPolicy(version="0.1.0", keep_min=0.40, skim_min=0.25, enforce=enforce)
+
+
+def _sample_poll_entry(models: ModuleType, *, relevance_score: float | None = 0.92) -> object:
     return models.EntryPollRow(
         source_id="arxiv:2401.00001",
         source=SourceEnum.ARXIV,
@@ -68,7 +74,7 @@ def _sample_poll_entry(models: ModuleType) -> object:
         concepts=["vector search"],
         tags=["retrieval"],
         challenge_hooks=["sparse document graphs"],
-        relevance_score=0.92,
+        relevance_score=relevance_score,
         processing_state="VECTOR_WRITE_QUEUED",
     )
 
@@ -167,7 +173,9 @@ def test_index_cycle_indexes_each_polled_entry() -> None:
     stores = MagicMock(spec=index_mod.IndexStores)
     indexed: list[str] = []
 
-    async def _fake_index(entry: object, _stores: object, _client: object) -> bool:
+    async def _fake_index(
+        entry: object, _stores: object, _client: object, _policy: object = None
+    ) -> bool:
         indexed.append(entry.source_id)  # type: ignore[attr-defined]
         return True
 
@@ -182,6 +190,118 @@ def test_index_cycle_indexes_each_polled_entry() -> None:
         assert indexed == ["arxiv:2401.00001", "arxiv:2401.00002"]
     finally:
         loop_mod.index_entry = original_index_entry  # type: ignore[method-assign]
+
+
+class _FakeEncoder:
+    def encode(self, texts: list[str]) -> list[list[float]]:
+        return [[0.1] * EMBEDDING_DIM for _text in texts]
+
+
+def _mock_stores(index_mod: ModuleType) -> MagicMock:
+    lancedb = MagicMock()
+    lancedb.exists.return_value = False
+
+    bm25 = MagicMock()
+    bm25.has_document.return_value = False
+
+    stores = MagicMock(spec=index_mod.IndexStores)
+    stores.encoder = _FakeEncoder()
+    stores.lancedb = lancedb
+    stores.duckdb = MagicMock()
+    stores.bm25_for.return_value = bm25
+    return stores
+
+
+def _banded_poll_entries(models: ModuleType) -> list[object]:
+    """One entry per score band: keep (0.72), skim (0.30), drop (0.10)."""
+    scores = {"arxiv:2401.00001": 0.72, "arxiv:2401.00002": 0.30, "arxiv:2401.00003": 0.10}
+    entries: list[object] = []
+    for source_id, score in scores.items():
+        base = _sample_poll_entry(models, relevance_score=score)
+        entries.append(
+            models.EntryPollRow.model_validate({**base.model_dump(), "source_id": source_id})
+        )
+    return entries
+
+
+def _capture_policy(loop_mod: ModuleType, models: ModuleType, client_mod: ModuleType, policy: IndexPolicy | None) -> list[object]:
+    seen: list[object] = []
+
+    async def _fake_index(
+        _entry: object, _stores: object, _client: object, entry_policy: object = None
+    ) -> bool:
+        seen.append(entry_policy)
+        return True
+
+    state_client = _mock_state_client(client_mod, models, entries=[_sample_poll_entry(models)])
+    original_index_entry = loop_mod.index_entry
+    loop_mod.index_entry = _fake_index  # type: ignore[method-assign]
+    try:
+        async def _run() -> None:
+            await loop_mod.index_cycle(
+                state_client=state_client, stores=MagicMock(), policy=policy
+            )
+
+        asyncio.run(_run())
+    finally:
+        loop_mod.index_entry = original_index_entry  # type: ignore[method-assign]
+    return seen
+
+
+def test_index_cycle_threads_policy_to_index_entry() -> None:
+    loop_mod, models, client_mod, _ = _load_loop_stack()
+    policy = _index_policy(enforce=True)
+    assert _capture_policy(loop_mod, models, client_mod, policy) == [policy]
+
+
+def test_index_cycle_resolves_permissive_policy_when_config_absent() -> None:
+    """Falsifier: an absent policy config must not resolve to an enforcing policy."""
+    loop_mod, models, client_mod, _ = _load_loop_stack()
+    seen = _capture_policy(loop_mod, models, client_mod, None)
+    assert len(seen) == 1
+    assert seen[0].enforce is False  # type: ignore[union-attr]
+
+
+def test_index_cycle_observe_only_indexes_every_band() -> None:
+    """enforce=false leaves cycle indexing behavior unchanged across all three bands."""
+    loop_mod, models, client_mod, index_mod = _load_loop_stack()
+    entries = _banded_poll_entries(models)
+    state_client = _mock_state_client(client_mod, models, entries=entries)
+    state_client.post_indexed = AsyncMock()
+    state_client.post_failed = AsyncMock()
+    stores = _mock_stores(index_mod)
+
+    async def _run() -> None:
+        await loop_mod.index_cycle(
+            state_client=state_client, stores=stores, policy=_index_policy(enforce=False)
+        )
+
+    asyncio.run(_run())
+
+    written = [call.args[0].source_id for call in stores.lancedb.write.call_args_list]
+    assert written == ["arxiv:2401.00001", "arxiv:2401.00002", "arxiv:2401.00003"]
+    assert state_client.post_indexed.await_count == 3
+
+
+def test_index_cycle_enforce_skips_exactly_the_drop_entries() -> None:
+    loop_mod, models, client_mod, index_mod = _load_loop_stack()
+    entries = _banded_poll_entries(models)
+    state_client = _mock_state_client(client_mod, models, entries=entries)
+    state_client.post_indexed = AsyncMock()
+    state_client.post_failed = AsyncMock()
+    stores = _mock_stores(index_mod)
+
+    async def _run() -> None:
+        await loop_mod.index_cycle(
+            state_client=state_client, stores=stores, policy=_index_policy(enforce=True)
+        )
+
+    asyncio.run(_run())
+
+    written = [call.args[0].source_id for call in stores.lancedb.write.call_args_list]
+    assert written == ["arxiv:2401.00001", "arxiv:2401.00002"]
+    assert state_client.post_indexed.await_count == 2
+    assert state_client.post_failed.await_count == 0
 
 
 def test_post_indexed_posts_wire_payload() -> None:

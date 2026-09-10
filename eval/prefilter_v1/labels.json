@@ -1,0 +1,1924 @@
+{
+  "eval_id": "prefilter_v1",
+  "labeler_default": "ale",
+  "updated_at": "2026-09-10T16:54:34.327552+00:00",
+  "labeled_count": 129,
+  "labels": {
+    "arxiv:2606.11375": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "llm_internals"
+      ],
+      "notes": "seems informative and interesting and could have some value but most likely is pre training and earns ittle actionable inisght but just in case it can help us understand llms and what we do better",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G5",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "too_academic",
+            "llm_internals"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.11722": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "llm_internals",
+        "too_academic"
+      ],
+      "notes": "LLM internal representations; adjacent but not the niche",
+      "labeler": "ale",
+      "labeled_at": "2026-09-09T14:42:11.835580+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.07998": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08529": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration",
+        "eval_observability"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.11290": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.11680": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.13126": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "this is interesting but is more kv cache and that type of ai engineering and not perhaps batch api prompt cache or ache read - so idk what valuable lesson I could lear or how could I proffit from applyig it ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.13177": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "memory management",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.13598": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "orch - reward model",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.08153": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "applied_systems"
+      ],
+      "notes": "its ok as reference material but it doesnt directly translate to my real domain or current expertise or work but I should know about rl and rlhf and those and I do not so some ligh reading or including some really good paper and or articles wouldnt really hurt - that can generalize to all core aspects of ai engineering and data science ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G7",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "skim",
+          "reasons": [
+            "wrong_domain"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.09030": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "prmot engineering - applicable systems - transferrable knowledge and learning - can hold value ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G4",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "agent_orchestration"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.09073": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "base_model_science"
+      ],
+      "notes": "seems like a good paper on agents and rlhf as the previous one but this one maybe even more potential to hold value",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G1",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "adjacent_interesting"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.09131": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "model training efficiency on vison language architecture - cool but unrelated especially for now ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.09672": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "applied_systems"
+      ],
+      "notes": "seems a bid adjacent but at the same time value could be extracted from this potentially so prob keep in case",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G7",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "adjacent_interesting"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.09701": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "failure_modes"
+      ],
+      "notes": "although a bit of a stretch there could be some informational or knowledge nuggets to extract from this potentially - this is a maybe + so more on the yes side than on the no side",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G1",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "adjacent_interesting"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.09767": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "this one seems a bit of a stretch too much, a maybe - minus prob so drop",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.09927": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting",
+        "wrong_domain"
+      ],
+      "notes": "seems cool but not the data I need today prob",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10099": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "seems interesing but drifts and also not super nuanced to me ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10279": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain",
+        "base_model_science"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G4",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "reject",
+          "kb_should": "drop",
+          "reasons": [
+            "adjacent_interesting"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.10461": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "theoretically focused without clear production relevance to RAG, agentic systems, or document intelligence workflows.",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10481": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "adjacent_interesting",
+        "rag_retrieval"
+      ],
+      "notes": "gdpr ccpa and others - could be good to have in hand",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.10554": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "eval_observability"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G3",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "doc_intel",
+            "eval_observability"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.10736": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "applied_systems"
+      ],
+      "notes": "seems interesting and also has potential to contain value (even if not directly which is fine for every scrapped piece of content)",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core",
+      "adjudicated": {
+        "group": "G7",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "applied_systems"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.10829": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "Enrichment: Masked diffusion language models are niche architectures with limited production adoption; the reranking improvement is theoretically interesting but not actionable for mainstream LLM inference workflows.\n\n",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.11033": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "audio understanding is tangential to core applied NLP/RAG work and the approach lacks production deployment considerations",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.11270": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "failure_modes"
+      ],
+      "notes": "safety and security + llm failure modes and robustness",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G1",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "agent_orchestration"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.11520": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.12138": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.12342": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.12476": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "eval_observability",
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.12634": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.13603": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "llm_internals"
+      ],
+      "notes": "tokenomics",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.13647": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "this work is narrowly focused on Slovak-language",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10126": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "base_model_science"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G1",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "applied_systems",
+            "agent_orchestration",
+            "eval_observability"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.10159": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "failure_modes"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G3",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "reject",
+          "kb_should": "drop",
+          "reasons": [
+            "adjacent_interesting"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.10327": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10471": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10607": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "too_academic"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10740": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "doc_intel",
+        "agent_orchestration"
+      ],
+      "notes": "I get that adversarial safety is not what I do but seems it has some good information that could be useful at some point this paper ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.10852": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "failure_modes"
+      ],
+      "notes": "too niche",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G3",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "reject",
+          "kb_should": "drop",
+          "reasons": [
+            "adjacent_interesting"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.12916": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.12923": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.13473": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.22402": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.26787": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "seems more focused on the e commerce than the engineering? maybe im wrong and the architecture and components seem interesting",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.04558": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.11948": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.14512": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2608.00123": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "adjacent_stimulus"
+      ],
+      "notes": "adjacent but interesting - pollemic, controversial, politics, society, etc ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G6",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "skim",
+          "reasons": [
+            "adjacent_interesting"
+          ]
+        }
+      }
+    },
+    "arxiv:2608.03092": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "base_model_science"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G1",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "agent_orchestration"
+          ]
+        }
+      }
+    },
+    "arxiv:2608.13167": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain",
+        "llm_internals"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G5",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "reject",
+          "kb_should": "drop",
+          "reasons": [
+            "adjacent_interesting",
+            "llm_internals"
+          ]
+        }
+      }
+    },
+    "arxiv:2608.20318": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "llm_internals",
+        "agent_orchestration"
+      ],
+      "notes": "RSI is always welcomed - this sems iteresting at least to read for now ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2608.29715": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "too niche",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.07924": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "rag_retrieval"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.07951": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "doc_intel"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.08200": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "eval_observability"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.08571": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "eval_observability"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.08850": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "eval_observability"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.08854": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "base_model_science"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G1",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "llm_internals"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.09046": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "eval_observability"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.09052": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "base_model_science"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G1",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "too_academic"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.09380": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "eval_observability"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.09409": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "eval_observability"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.09483": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "architecture_tradeoffs"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.09578": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "doc_intel"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.09659": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "inference_economics",
+        "architecture_tradeoffs"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core",
+      "adjudicated": {
+        "group": "G2",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "architecture_tradeoffs"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.09748": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.09937": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "base_model_science"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G2",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "inference_serving"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.10064": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.10156": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.10381": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "rag_retrieval"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.10820": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "base_model_science"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G2",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "rag_retrieval"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.10890": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "base_model_science"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G2",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "inference_serving"
+          ]
+        }
+      }
+    },
+    "arxiv:2609.00064": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "eval_observability"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G3",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "reject",
+          "kb_should": "drop",
+          "reasons": [
+            "too_academic"
+          ]
+        }
+      }
+    },
+    "arxiv:2608.15869": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "inference_serving"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2608.14792": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null,
+      "adjudicated": {
+        "group": "G4",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "reject",
+          "kb_should": "drop",
+          "reasons": [
+            "adjacent_interesting"
+          ]
+        }
+      }
+    },
+    "arxiv:2608.14626": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2608.07411": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2608.04980": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "llm_internals"
+      ],
+      "notes": "interesting read informative potentially and good seed material for dialectical sessions w claude",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G5",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "skim",
+          "reasons": [
+            "llm_internals"
+          ]
+        }
+      }
+    },
+    "arxiv:2608.02087": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.27372": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.27232": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "adjacent_stimulus"
+      ],
+      "notes": "interesting read and potentially stimulating",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G6",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "skim",
+          "reasons": [
+            "adjacent_interesting"
+          ]
+        }
+      }
+    },
+    "arxiv:2607.20274": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.16872": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.15893": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.15200": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.09438": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.08071": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.02964": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "llm_internals"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2607.00924": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "adjacent_stimulus"
+      ],
+      "notes": "seems interesting at least as a read ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G6",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "skim",
+          "reasons": [
+            "too_academic"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.28445": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.25039": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.13578": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.13477": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.12730": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "too_academic"
+      ],
+      "notes": "seems cool and interesting ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral"
+    },
+    "arxiv:2606.12397": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "llm_internals"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.12169": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.12032": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "adjacent_stimulus"
+      ],
+      "notes": "seems like an interesting read ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G6",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "skim",
+          "reasons": [
+            "too_academic"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.11893": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "skim",
+      "reasons": [
+        "adjacent_stimulus"
+      ],
+      "notes": "seems like it could either be interesting or even have value in form of stimuli or insight perhaps",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "peripheral",
+      "adjudicated": {
+        "group": "G6",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "skim",
+          "reasons": [
+            "too_academic"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.11854": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "llm_internals"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.11387": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10835": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10294": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10228": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10124": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "adjacent_interesting"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10113": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.10029": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.09959": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.09936": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.09919": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.09907": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.09746": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.09658": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08815": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08770": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08728": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08653": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08347": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "llm_internals"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08327": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "llm_internals"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08296": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08218": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08169": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08046": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.08044": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.12900": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "rag_retrieval"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.11712": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "rag_retrieval"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core"
+    },
+    "arxiv:2606.11459": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core",
+      "adjudicated": {
+        "group": "G1",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "agent_orchestration"
+          ]
+        }
+      }
+    },
+    "arxiv:2606.11189": {
+      "status": "labeled",
+      "prefilter_should": "reject",
+      "kb_should": "drop",
+      "reasons": [
+        "wrong_domain"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": null
+    },
+    "arxiv:2606.11119": {
+      "status": "labeled",
+      "prefilter_should": "pass",
+      "kb_should": "keep",
+      "reasons": [
+        "agent_orchestration"
+      ],
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-10T15:01:49.348535+00:00",
+      "prefilter_tier_should": "core",
+      "adjudicated": {
+        "group": "G1",
+        "at": "2026-09-10T16:54:34.327552+00:00",
+        "was": {
+          "prefilter_should": "pass",
+          "kb_should": "keep",
+          "reasons": [
+            "agent_orchestration"
+          ]
+        }
+      }
+    }
+  },
+  "carried_from": "eval/prefilter_v0/labels.json",
+  "carried_at": "2026-09-10T15:26:09.838949+00:00",
+  "carry_note": "Labels are unchanged and keyed by source_id. They were made against title plus the v0 body (summary for pass-split items, abstract for reject-split items); the verdicts are judgments about the item, not about a specific text rendering.",
+  "adjudication": {
+    "at": "2026-09-10T16:54:34.327552+00:00",
+    "source": "eval/prefilter_v1/adjudication_queue.json",
+    "method": "31 disagreements clustered into 7 policy boundaries, decided as policy",
+    "verdict_count": 31,
+    "decision_flips": 12,
+    "confirmations": 19,
+    "tier_backfilled": 98
+  }
+}

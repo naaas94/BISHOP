@@ -224,6 +224,105 @@ def test_terminal_state_blocks_pre_filter_update(temp_db: Path) -> None:
     asyncio.run(_run())
 
 
+def test_pre_filter_tier_peripheral_round_trips_into_entry(temp_db: Path) -> None:
+    """Contract: a peripheral pass persists on manifest and propagates to the entry row."""
+
+    async def _run() -> None:
+        await init_pool(str(temp_db), size=1)
+        try:
+            async with get_db() as conn:
+                await _seed_discovered(conn)
+                await claim_manifest_poll(conn, ProcessingState.DISCOVERED)
+                await apply_pre_filter_results(
+                    conn,
+                    "batch-1",
+                    "1.1.0",
+                    [
+                        PreFilterResultEntryWire(
+                            source_id=_SOURCE,
+                            decision=1,
+                            pre_filter_rationale="Worth a skim.",
+                            pre_filter_tier="peripheral",
+                        )
+                    ],
+                )
+                cursor = await conn.execute(
+                    "SELECT pre_filter_tier FROM manifest WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                assert tuple(await cursor.fetchone()) == ("peripheral",)
+
+                await claim_manifest_poll(conn, ProcessingState.RELEVANCE_PASSED)
+                await create_entry_from_content(conn, _SOURCE, "full body")
+                cursor = await conn.execute(
+                    "SELECT pre_filter_tier FROM entries WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                assert tuple(await cursor.fetchone()) == ("peripheral",)
+        finally:
+            await close_pool()
+
+    asyncio.run(_run())
+
+
+def test_pre_filter_reject_without_tier_stays_reject_with_null_tier(temp_db: Path) -> None:
+    """Backward compat: a tier-less reject still rejects and stores no tier."""
+
+    async def _run() -> None:
+        await init_pool(str(temp_db), size=1)
+        try:
+            async with get_db() as conn:
+                await _seed_discovered(conn)
+                await claim_manifest_poll(conn, ProcessingState.DISCOVERED)
+                result = await apply_pre_filter_results(
+                    conn,
+                    "batch-1",
+                    "1.0.0",
+                    [
+                        PreFilterResultEntryWire(
+                            source_id=_SOURCE,
+                            decision=0,
+                            pre_filter_rationale="Off topic.",
+                        )
+                    ],
+                )
+                assert (result.passed, result.rejected) == (0, 1)
+                cursor = await conn.execute(
+                    "SELECT processing_state, pre_filter_tier FROM manifest WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                assert tuple(await cursor.fetchone()) == (
+                    ProcessingState.RELEVANCE_REJECTED.value,
+                    None,
+                )
+        finally:
+            await close_pool()
+
+    asyncio.run(_run())
+
+
+def test_pre_filter_pass_without_tier_leaves_tier_null(temp_db: Path) -> None:
+    """Backward compat: profile v1.0.0 passes carry no tier through the transition engine."""
+
+    async def _run() -> None:
+        await init_pool(str(temp_db), size=1)
+        try:
+            async with get_db() as conn:
+                await _advance_to_relevance_passed(conn)
+                cursor = await conn.execute(
+                    "SELECT processing_state, pre_filter_tier FROM manifest WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                assert tuple(await cursor.fetchone()) == (
+                    ProcessingState.RELEVANCE_PASSED.value,
+                    None,
+                )
+        finally:
+            await close_pool()
+
+    asyncio.run(_run())
+
+
 def test_h3_enrichment_stage1_success_atomic(temp_db: Path) -> None:
     async def _run() -> None:
         await init_pool(str(temp_db), size=1)

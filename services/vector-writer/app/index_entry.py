@@ -8,13 +8,14 @@ from dataclasses import dataclass, field
 import httpx
 from filelock import Timeout
 
-from app.config import VECTOR_WRITE_POLL_STATE
+from app.config import INDEX_POLICY_PATH, VECTOR_WRITE_POLL_STATE
 from app.embedding import EmbeddingEncoder
 from app.models import EntryPollRow, FailedPostRequest, IndexedPostRequest
 from app.state_worker_client import StateWorkerClient
 from app.stores.bm25_store import Bm25DualIndex
 from app.stores.duckdb_mirror import DuckDbMirror, EntryMirrorRow
 from app.stores.lancedb_store import LanceDbStore, LanceRow
+from bishop_shared.index_policy import IndexPolicy, load_index_policy
 from bishop_shared.indexing_config import build_embed_text
 
 logger = logging.getLogger(__name__)
@@ -87,9 +88,40 @@ async def index_entry(
     entry: EntryPollRow,
     stores: IndexStores,
     state_client: StateWorkerClient,
+    policy: IndexPolicy | None = None,
 ) -> bool:
     """Write all index stores then POST /entries/indexed. Returns True on indexed signal success."""
     domain = entry.domain.value
+    if policy is None:
+        policy = load_index_policy(INDEX_POLICY_PATH)
+
+    # Gate 2: enrichment_score reaches the wire as EntryPollRow.relevance_score.
+    index_class = policy.classify(entry.relevance_score)
+    logger.info(
+        "index policy classified entry",
+        extra={
+            "source_id": entry.source_id,
+            "domain": domain,
+            "enrichment_score": entry.relevance_score,
+            "index_class": index_class,
+            "policy_version": policy.version,
+            "enforce": policy.enforce,
+            "event": "index_policy_classified",
+        },
+    )
+    if policy.enforce and index_class == "drop":
+        logger.info(
+            "index policy dropped entry",
+            extra={
+                "source_id": entry.source_id,
+                "domain": domain,
+                "enrichment_score": entry.relevance_score,
+                "policy_version": policy.version,
+                "event": "index_policy_skipped",
+            },
+        )
+        return False
+
     try:
         embed_text = build_embed_text(entry.title, entry.summary or "", entry.challenge_hooks)
         vector = stores.encoder.encode([embed_text])[0]

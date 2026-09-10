@@ -1,0 +1,79 @@
+{
+  "eval_id": "prefilter_v0",
+  "version": "0.1.0",
+  "purpose": "Human gold labels for Bishop professional-domain pre-filter (gate 1) and knowledge-base keep (gate 2). First labeled set. Replay after any profile, prompt, or threshold change.",
+  "profile_under_test": "config/profiles/professional_v1.0.0.yaml",
+  "frozen_inputs": "eval/prefilter_v0/items.json",
+  "labels": "eval/prefilter_v0/labels.json",
+  "suggested_prior": "eval/prefilter_v0/suggested.json",
+  "precedent": {
+    "why_this_shape": "Spec §11.1: NL-profile pre-filter exists to generate labeled 0/1 data as the bootstrap for later cosine anchors. This eval set is that labeled data, plus a second label for enrichment-score / KB keep so we can calibrate both gates independently.",
+    "do_not": [
+      "Do not edit items.json after freeze — new snapshots are a new eval_id",
+      "Do not change the profile and claim this set still measures v1.0.0",
+      "Do not treat enrichment_score as the pre-filter gold — they are different gates",
+      "Do not add open-text reason tags; use reasons[] from the closed vocab"
+    ]
+  },
+  "gates": [
+    {
+      "id": "prefilter",
+      "question": "Given title + abstract only, should this pass the cheap binary gate?",
+      "gold_field": "prefilter_should",
+      "values": ["pass", "reject"],
+      "system_field": "system.prefilter_decision",
+      "system_map": { "1": "pass", "0": "reject" },
+      "metrics": ["accuracy", "precision", "recall", "false_positive", "false_negative"]
+    },
+    {
+      "id": "kb_keep",
+      "question": "If this reached the KB (or should have), should it stay as a first-class indexed item?",
+      "gold_field": "kb_should",
+      "values": ["keep", "skim", "drop"],
+      "applies_when": "prefilter_should == pass OR split == prefilter_pass",
+      "system_proxy": "enrichment_score with thresholds decided after this labeling pass",
+      "metrics": ["keep_precision", "score_vs_label_table"]
+    }
+  ],
+  "kb_values": {
+    "keep": "I would want this in the KB and to see it in search. Applied systems, architecture, shipping patterns, or durable skills.",
+    "skim": "Worth a glance or a summary card, not worth a full index slot. Adjacent, newsy, or one-off.",
+    "drop": "Should not have passed, or should be filtered before index. Academic internals, pretraining, weights-as-science, wrong domain."
+  },
+  "reasons": {
+    "applied_systems": "What people or businesses are actually building — products, features, pipelines, ops.",
+    "architecture_tradeoffs": "System design, constraints, failure modes, engineering decisions.",
+    "dev_skills": "Dev-flow techniques, skills, agent/editor workflows I would reuse.",
+    "rag_retrieval": "Retrieval, chunking, rerank, hybrid search, KB design.",
+    "agent_orchestration": "Agents as systems: state machines, tools, memory, eval of agents — applied, not GUI-benchmark-only.",
+    "eval_observability": "Eval harnesses, tracing, judges, production monitoring.",
+    "doc_intel": "Extraction, structured output, document pipelines.",
+    "inference_serving": "Serving, quantization, latency/cost — only if it informs shipping.",
+    "too_academic": "Paper-coded experimental, novelty-first, not something I would implement.",
+    "pretraining_weights": "Pretraining, weight-space, fine-tune-as-science.",
+    "llm_internals": "Representations, interpretability, probing internals.",
+    "wrong_domain": "CV, robotics, market, clinical, hardware, or otherwise off-profile.",
+    "intro_tutorial": "Below expert baseline.",
+    "adjacent_interesting": "Clever but not my lane; maybe a summary, not a keep."
+  },
+  "label_record": {
+    "status": ["unlabeled", "labeled"],
+    "prefilter_should": ["pass", "reject"],
+    "kb_should": ["keep", "skim", "drop", null],
+    "reasons": "list from reasons keys, at least one when labeled",
+    "notes": "free text, optional",
+    "labeler": "string",
+    "labeled_at": "iso8601"
+  },
+  "acceptance_for_replay": {
+    "min_labeled": 40,
+    "min_each_split": 15,
+    "then": "Draft profile v1.1.0 from confusion + reason counts. Replay pre-filter offline on this frozen item set. Do not scrape a new live batch until replay metrics are recorded."
+  },
+  "replay_protocol": {
+    "input": "item.title + item.abstract (pass split: use summary only if abstract missing — flag those)",
+    "prompt": "render_profile_prompt(profile_under_test)",
+    "compare": "parsed decision vs labels[id].prefilter_should",
+    "record": "eval/prefilter_v0/replays/<timestamp>_<profile_version>.json"
+  }
+}

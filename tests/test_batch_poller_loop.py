@@ -120,6 +120,103 @@ def test_parse_pre_filter_response_malformed_json_counts_as_reject() -> None:
     assert "malformed" in parsed.pre_filter_rationale.lower()
 
 
+def test_parse_pre_filter_response_tier_absent_pass_defaults_to_core() -> None:
+    """Backward compat: profile v1.0.0 omits tier, so a pass normalizes to core."""
+    _, loop_mod, _ = _load_loop_stack()
+    parsed = loop_mod.parse_pre_filter_response(
+        _SOURCE_PASS,
+        '{"decision": 1, "rationale": "Relevant RAG paper."}',
+    )
+    assert parsed.decision == 1
+    assert parsed.parse_failed is False
+    assert parsed.pre_filter_tier == "core"
+
+
+def test_parse_pre_filter_response_tier_absent_reject_stays_reject() -> None:
+    """Backward compat: a tier-less reject stays a reject with no tier."""
+    _, loop_mod, _ = _load_loop_stack()
+    parsed = loop_mod.parse_pre_filter_response(
+        _SOURCE_FAIL,
+        '{"decision": 0, "rationale": "Off topic."}',
+    )
+    assert parsed.decision == 0
+    assert parsed.parse_failed is False
+    assert parsed.pre_filter_tier is None
+
+
+def test_parse_pre_filter_response_peripheral_tier_preserved() -> None:
+    _, loop_mod, _ = _load_loop_stack()
+    parsed = loop_mod.parse_pre_filter_response(
+        _SOURCE_PASS,
+        '{"decision": 1, "tier": "peripheral", "rationale": "Worth a skim."}',
+    )
+    assert parsed.decision == 1
+    assert parsed.pre_filter_tier == "peripheral"
+
+
+def test_parse_pre_filter_response_invalid_tier_on_pass_normalizes_to_core() -> None:
+    _, loop_mod, _ = _load_loop_stack()
+    for raw_tier in ('"marginal"', "null", "7"):
+        parsed = loop_mod.parse_pre_filter_response(
+            _SOURCE_PASS,
+            f'{{"decision": 1, "tier": {raw_tier}, "rationale": "Relevant."}}',
+        )
+        assert parsed.decision == 1
+        assert parsed.parse_failed is False
+        assert parsed.pre_filter_tier == "core"
+
+
+def test_parse_pre_filter_response_reject_with_tier_forces_null_tier() -> None:
+    _, loop_mod, _ = _load_loop_stack()
+    parsed = loop_mod.parse_pre_filter_response(
+        _SOURCE_FAIL,
+        '{"decision": 0, "tier": "core", "rationale": "Off topic."}',
+    )
+    assert parsed.decision == 0
+    assert parsed.pre_filter_tier is None
+
+
+def test_poll_once_posts_pre_filter_tier_on_wire() -> None:
+    """Contract: tier reaches the state-worker payload, null for the rejected entry."""
+    state_worker_mod, loop_mod, models_mod = _load_loop_stack()
+    posted_entries: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/batches":
+            return httpx.Response(200, json={"batches": [_batch_wire()]})
+        if request.url.path == "/manifest/pre-filter-results":
+            posted_entries.extend(json.loads(request.content)["entries"])
+            return httpx.Response(200, json={"updated": 2, "passed": 1, "rejected": 1})
+        if request.url.path == f"/batches/{_BATCH_ID}" and request.method == "PATCH":
+            return httpx.Response(200, json={"batch": _batch_wire(status="complete")})
+        return httpx.Response(404)
+
+    fake_results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
+            text='{"decision": 1, "tier": "peripheral", "rationale": "Worth a skim."}',
+        ),
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_FAIL),
+            text='{"decision": 0, "tier": "core", "rationale": "Off topic."}',
+        ),
+    ]
+    anthropic = FakeAnthropicClient(results=fake_results)
+
+    async def _run() -> None:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            client = state_worker_mod.StateWorkerClient(client=http)
+            batch = models_mod.BatchRecordWire.model_validate(_batch_wire())
+            await loop_mod.poll_once(client, anthropic, {batch.batch_id: batch}, now=_NOW)
+
+        by_source = {entry["source_id"]: entry for entry in posted_entries}
+        assert by_source[_SOURCE_PASS]["pre_filter_tier"] == "peripheral"
+        assert by_source[_SOURCE_FAIL]["pre_filter_tier"] is None
+
+    asyncio.run(_run())
+
+
 def test_poll_once_posts_results_and_patches_complete() -> None:
     state_worker_mod, loop_mod, models_mod = _load_loop_stack()
     patch_calls: list[dict] = []

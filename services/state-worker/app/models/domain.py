@@ -66,6 +66,7 @@ class ManifestEntry(BaseModel):
     pre_filter_batch_id: str | None = None
     relevance_decision: int | None = None
     pre_filter_rationale: str | None = None
+    pre_filter_tier: str | None = None
     processing_state: ProcessingState
     retry_count: int = 0
     next_retry_at: datetime | None = None
@@ -107,6 +108,7 @@ class Entry(BaseModel):
     profile_version: str
     pre_filter_batch_id: str
     pre_filter_rationale: str
+    pre_filter_tier: str | None = None
     summary: str | None = None
     concepts: list[str] | None = None
     tags: list[str] | None = None

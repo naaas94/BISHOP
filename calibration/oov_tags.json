@@ -1,0 +1,177 @@
+{
+  "exported_at": "2026-09-09T12:08:33.749149+00:00",
+  "count": 19,
+  "rows": [
+    {
+      "id": "6f72a7e7-e555-4782-8ff0-c9415937b144",
+      "source_id": "arxiv:2606.12634",
+      "tag_value": "reinforcement-learning",
+      "entry_type": "paper",
+      "enrichment_batch_id": "6d0f4600-e36c-4715-aecb-14ac36d89673",
+      "timestamp": "2026-06-14T00:19:46.126721+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "e281464a-ac8f-4f25-99d7-5ee3f95971ec",
+      "source_id": "arxiv:2606.12634",
+      "tag_value": "long-horizon agents",
+      "entry_type": "paper",
+      "enrichment_batch_id": "6d0f4600-e36c-4715-aecb-14ac36d89673",
+      "timestamp": "2026-06-14T00:19:46.126721+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "1ade3960-94f4-44d1-9182-4b4bc3a56b13",
+      "source_id": "arxiv:2606.12634",
+      "tag_value": "credit assignment",
+      "entry_type": "paper",
+      "enrichment_batch_id": "6d0f4600-e36c-4715-aecb-14ac36d89673",
+      "timestamp": "2026-06-14T00:19:46.126721+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "ab2963f9-e4fa-403f-b38a-c720b4ea4ca5",
+      "source_id": "arxiv:2606.12634",
+      "tag_value": "policy gradient",
+      "entry_type": "paper",
+      "enrichment_batch_id": "6d0f4600-e36c-4715-aecb-14ac36d89673",
+      "timestamp": "2026-06-14T00:19:46.126721+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "b0859957-e145-44fb-b516-3b84f672c7a3",
+      "source_id": "arxiv:2606.10890",
+      "tag_value": "quantization",
+      "entry_type": "paper",
+      "enrichment_batch_id": "89dd81a4-2e99-4891-868d-65bb5efbe7be",
+      "timestamp": "2026-06-14T00:09:39.547795+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "cbdf564a-818e-44d6-a907-a98c0e80653b",
+      "source_id": "arxiv:2606.12138",
+      "tag_value": "interpretability",
+      "entry_type": "paper",
+      "enrichment_batch_id": "e158ea73-f11c-4795-9b16-9d35be512407",
+      "timestamp": "2026-06-14T00:03:35.227869+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "f2011d54-2c05-4b22-992c-6f9c15015d9f",
+      "source_id": "arxiv:2606.09052",
+      "tag_value": "reinforcement learning",
+      "entry_type": "paper",
+      "enrichment_batch_id": "c640716e-dabf-457a-9b08-9ccf5567d08d",
+      "timestamp": "2026-06-14T00:01:33.891388+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "c487b891-8d8e-4c33-a059-806a7a38903d",
+      "source_id": "arxiv:2606.09052",
+      "tag_value": "reasoning",
+      "entry_type": "paper",
+      "enrichment_batch_id": "c640716e-dabf-457a-9b08-9ccf5567d08d",
+      "timestamp": "2026-06-14T00:01:33.891388+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "50ad775c-1602-4856-a844-c390960c07a0",
+      "source_id": "arxiv:2606.09052",
+      "tag_value": "curriculum learning",
+      "entry_type": "paper",
+      "enrichment_batch_id": "c640716e-dabf-457a-9b08-9ccf5567d08d",
+      "timestamp": "2026-06-14T00:01:33.891388+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "d5ff5968-733e-423d-b307-02a037c5276e",
+      "source_id": "arxiv:2606.09052",
+      "tag_value": "self-supervised",
+      "entry_type": "paper",
+      "enrichment_batch_id": "c640716e-dabf-457a-9b08-9ccf5567d08d",
+      "timestamp": "2026-06-14T00:01:33.891388+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "b4e60105-2b37-4c9b-9eda-8661657fb9fc",
+      "source_id": "arxiv:2606.09052",
+      "tag_value": "reward modeling",
+      "entry_type": "paper",
+      "enrichment_batch_id": "c640716e-dabf-457a-9b08-9ccf5567d08d",
+      "timestamp": "2026-06-14T00:01:33.891388+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "fd4ba978-db1c-4805-9f06-10b82098d310",
+      "source_id": "arxiv:2606.11119",
+      "tag_value": "reinforcement learning",
+      "entry_type": "paper",
+      "enrichment_batch_id": "c640716e-dabf-457a-9b08-9ccf5567d08d",
+      "timestamp": "2026-06-14T00:01:33.820317+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "705cd8a5-d60f-4784-a1e2-f8d950116661",
+      "source_id": "arxiv:2606.09701",
+      "tag_value": "reinforcement learning",
+      "entry_type": "paper",
+      "enrichment_batch_id": "c635839e-8514-424d-a0da-d4d1cf143123",
+      "timestamp": "2026-06-13T23:59:32.496676+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "41d9caa8-0fd8-401f-9957-66553231beb3",
+      "source_id": "arxiv:2606.11375",
+      "tag_value": "interpretability",
+      "entry_type": "paper",
+      "enrichment_batch_id": "d7cd3cf6-3a9b-489d-9ec3-a5964a2a1015",
+      "timestamp": "2026-06-13T23:57:31.063915+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "3e0b5071-ffd2-4d96-a193-14958c7a4d02",
+      "source_id": "arxiv:2606.11375",
+      "tag_value": "probe-analysis",
+      "entry_type": "paper",
+      "enrichment_batch_id": "d7cd3cf6-3a9b-489d-9ec3-a5964a2a1015",
+      "timestamp": "2026-06-13T23:57:31.063915+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "52d9f022-ab66-4597-b93c-dae8b16d84e7",
+      "source_id": "arxiv:2606.11375",
+      "tag_value": "representation-learning",
+      "entry_type": "paper",
+      "enrichment_batch_id": "d7cd3cf6-3a9b-489d-9ec3-a5964a2a1015",
+      "timestamp": "2026-06-13T23:57:31.063915+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "4ffb1630-dd5f-4639-a228-22807c4eff8a",
+      "source_id": "arxiv:2606.09380",
+      "tag_value": "reward-modeling",
+      "entry_type": "paper",
+      "enrichment_batch_id": "d7cd3cf6-3a9b-489d-9ec3-a5964a2a1015",
+      "timestamp": "2026-06-13T23:57:30.884062+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "5b743ccd-9570-409b-ad20-f8d27b233ec9",
+      "source_id": "arxiv:2606.09927",
+      "tag_value": "quantization",
+      "entry_type": "paper",
+      "enrichment_batch_id": "d7cd3cf6-3a9b-489d-9ec3-a5964a2a1015",
+      "timestamp": "2026-06-13T23:57:30.593592+00:00",
+      "review_status": "pending"
+    },
+    {
+      "id": "2c68416b-afa4-4dd1-b5a4-4d39f39caedc",
+      "source_id": "arxiv:2606.09767",
+      "tag_value": "low-resource",
+      "entry_type": "paper",
+      "enrichment_batch_id": "d7cd3cf6-3a9b-489d-9ec3-a5964a2a1015",
+      "timestamp": "2026-06-13T23:57:30.528335+00:00",
+      "review_status": "pending"
+    }
+  ]
+}

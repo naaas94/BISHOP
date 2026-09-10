@@ -278,7 +278,7 @@ def test_poll_once_enrichment_stage1_results_non_2xx_skips_patch_complete() -> N
                 },
             )
         if request.url.path == "/entries/enrichment-stage1-results":
-            return httpx.Response(409, json={"error": "invalid_transition"})
+            return httpx.Response(409, json={"error": "batch_conflict"})
         if request.url.path == f"/batches/{_STAGE1_BATCH_ID}" and request.method == "PATCH":
             patch_calls.append(json.loads(request.content))
             return httpx.Response(200, json={"batch": _batch_wire(

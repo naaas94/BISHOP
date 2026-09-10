@@ -11,6 +11,7 @@
   <dt>Source</dt><dd>{{ entry.source }}</dd>
   <dt>Domain</dt><dd>{{ entry.domain }}</dd>
   <dt>Type</dt><dd>{{ entry.entry_type or "—" }}</dd>
+  <dt>Pre-filter tier</dt><dd>{{ entry.pre_filter_tier or "—" }}</dd>
   <dt>Relevance</dt><dd>{{ entry.relevance_score if entry.relevance_score is not none else "—" }}</dd>
   <dt>Reading status</dt><dd>{{ entry.reading_status }}</dd>
   <dt>Processing state</dt><dd>{{ entry.processing_state }}</dd>

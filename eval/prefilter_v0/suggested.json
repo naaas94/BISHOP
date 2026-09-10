@@ -1,0 +1,208 @@
+{
+  "eval_id": "prefilter_v0",
+  "status": "suggested_not_gold",
+  "note": "Clustering prior for labeling order only. Do not copy into labels.json unless a human confirms.",
+  "takeaway": {
+    "prefilter": "Over-triggers on 'production' + RAG/agent/safety keywords. Lets through training, internals, and vertical papers.",
+    "enrichment": "The real taste filter. 25/57 indexed score ≤ 0.42.",
+    "rejects": "Correct on CV/robotics/pretrain/pure RL (~42). Misses domain-locked papers that still carry transferable agent/eval/business-system patterns (~20 plausible FN)."
+  },
+  "pass_themes": [
+    {
+      "id": "agent_memory_orchestration",
+      "suggested": "keep",
+      "count": 10,
+      "examples": [
+        "arxiv:2606.11290",
+        "arxiv:2606.11680",
+        "arxiv:2606.13177",
+        "arxiv:2606.13598",
+        "arxiv:2606.09483",
+        "arxiv:2606.11520"
+      ]
+    },
+    {
+      "id": "rag_document_retrieval",
+      "suggested": "keep",
+      "count": 7,
+      "examples": [
+        "arxiv:2606.09659",
+        "arxiv:2606.11712",
+        "arxiv:2606.09578",
+        "arxiv:2606.07924",
+        "arxiv:2606.10381",
+        "arxiv:2606.10461"
+      ]
+    },
+    {
+      "id": "agent_eval_benchmarks",
+      "suggested": "maybe",
+      "count": 6,
+      "examples": [
+        "arxiv:2606.08529",
+        "arxiv:2606.12900",
+        "arxiv:2606.09046",
+        "arxiv:2606.08200",
+        "arxiv:2606.10156",
+        "arxiv:2606.08850"
+      ]
+    },
+    {
+      "id": "inference_serving",
+      "suggested": "maybe",
+      "count": 7,
+      "examples": [
+        "arxiv:2606.13126",
+        "arxiv:2606.09937",
+        "arxiv:2606.10820",
+        "arxiv:2606.10890",
+        "arxiv:2606.10829",
+        "arxiv:2606.09927"
+      ]
+    },
+    {
+      "id": "training_rl_sft",
+      "suggested": "drop",
+      "count": 8,
+      "examples": [
+        "arxiv:2606.09380",
+        "arxiv:2606.11189",
+        "arxiv:2606.08854",
+        "arxiv:2606.09052",
+        "arxiv:2606.10279",
+        "arxiv:2606.11375"
+      ]
+    },
+    {
+      "id": "llm_internals_interpretability",
+      "suggested": "drop",
+      "count": 4,
+      "examples": [
+        "arxiv:2606.11722",
+        "arxiv:2606.11375",
+        "arxiv:2606.12138",
+        "arxiv:2606.13603"
+      ]
+    },
+    {
+      "id": "safety_alignment",
+      "suggested": "maybe",
+      "count": 5,
+      "examples": [
+        "arxiv:2606.08571",
+        "arxiv:2606.09701",
+        "arxiv:2606.12342",
+        "arxiv:2606.09073",
+        "arxiv:2606.10481"
+      ]
+    },
+    {
+      "id": "eval_prompt_observability",
+      "suggested": "maybe",
+      "count": 5,
+      "examples": [
+        "arxiv:2606.11459",
+        "arxiv:2606.09409",
+        "arxiv:2606.07951",
+        "arxiv:2606.12476",
+        "arxiv:2606.10099"
+      ]
+    },
+    {
+      "id": "vertical_domain_apps",
+      "suggested": "drop",
+      "count": 5,
+      "examples": [
+        "arxiv:2606.08153",
+        "arxiv:2606.09030",
+        "arxiv:2606.10736",
+        "arxiv:2606.09672",
+        "arxiv:2606.13647"
+      ]
+    }
+  ],
+  "keep_candidates": [
+    "arxiv:2606.11290",
+    "arxiv:2606.11680",
+    "arxiv:2606.13177",
+    "arxiv:2606.13598",
+    "arxiv:2606.08529",
+    "arxiv:2606.13126"
+  ],
+  "high_score_still_academic": [
+    "arxiv:2606.10890",
+    "arxiv:2606.10820",
+    "arxiv:2606.09937",
+    "arxiv:2606.09380",
+    "arxiv:2606.09659",
+    "arxiv:2606.11712",
+    "arxiv:2606.08571",
+    "arxiv:2606.10156",
+    "arxiv:2606.09578",
+    "arxiv:2606.09046",
+    "arxiv:2606.12900",
+    "arxiv:2606.09483"
+  ],
+  "tension_score_le_042": [
+    "arxiv:2606.10099",
+    "arxiv:2606.10279",
+    "arxiv:2606.09672",
+    "arxiv:2606.11270",
+    "arxiv:2606.11520",
+    "arxiv:2606.12634",
+    "arxiv:2606.10736",
+    "arxiv:2606.10829",
+    "arxiv:2606.13647",
+    "arxiv:2606.09131",
+    "arxiv:2606.12138",
+    "arxiv:2606.12342",
+    "arxiv:2606.09701",
+    "arxiv:2606.10461",
+    "arxiv:2606.09030",
+    "arxiv:2606.11375",
+    "arxiv:2606.11033",
+    "arxiv:2606.10481",
+    "arxiv:2606.09927",
+    "arxiv:2606.09767",
+    "arxiv:2606.13603",
+    "arxiv:2606.08153",
+    "arxiv:2606.10554",
+    "arxiv:2606.09073",
+    "arxiv:2606.12476"
+  ],
+  "likely_false_negatives": {
+    "tier_a": [
+      "arxiv:2606.26787",
+      "arxiv:2607.14512",
+      "arxiv:2608.20318",
+      "arxiv:2606.12916",
+      "arxiv:2606.10607"
+    ],
+    "tier_b": [
+      "arxiv:2607.04558",
+      "arxiv:2606.10852",
+      "arxiv:2606.10740",
+      "arxiv:2606.22402",
+      "arxiv:2606.13473",
+      "arxiv:2608.03092",
+      "arxiv:2608.13167"
+    ],
+    "tier_c": [
+      "arxiv:2607.11948",
+      "arxiv:2608.00123",
+      "arxiv:2606.10471",
+      "arxiv:2606.10327",
+      "arxiv:2606.10159",
+      "arxiv:2606.10126",
+      "arxiv:2608.29715",
+      "arxiv:2606.12923"
+    ]
+  },
+  "label_order": [
+    "tension",
+    "likely_fn_tier_a",
+    "keep_candidates",
+    "high_score_still_academic",
+    "remaining_rejects"
+  ]
+}

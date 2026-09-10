@@ -19,6 +19,9 @@ env/
 # Local Bishop data (host-mounted volumes)
 bishop_data/
 
+# Calibration snapshot with full scraped paper text (copyrighted / large)
+calibration/indexed_relevant.full.json
+
 # IDE
 .idea/
 .vscode/

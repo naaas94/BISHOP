@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict
@@ -14,8 +14,20 @@ from bishop_shared.enums import DomainEnum
 
 PROFILES_CONTAINER_DIR = Path("/app/config/profiles")
 
-_PROFILE_FILENAME: dict[DomainEnum, str] = {
-    DomainEnum.PROFESSIONAL: "professional_v1.0.0.yaml",
+Gate = Literal["prefilter", "enrichment"]
+
+# Gate 1 and enrichment Call 2 are pinned separately on purpose. The rendered prompt
+# includes the profile's output instruction, and that instruction is gate-1 specific
+# (a decision/tier verdict). Profile versions past 1.0.0 were tuned and measured against
+# the gate-1 eval only, so advancing gate 1 must not silently change the enrichment
+# prompt, which has no eval of its own. Advance the enrichment pin deliberately.
+_PROFILE_FILENAME: dict[Gate, dict[DomainEnum, str]] = {
+    "prefilter": {
+        DomainEnum.PROFESSIONAL: "professional_v1.2.0.yaml",
+    },
+    "enrichment": {
+        DomainEnum.PROFESSIONAL: "professional_v1.0.0.yaml",
+    },
 }
 
 
@@ -33,6 +45,15 @@ class ProfileOutput(BaseModel):
     instruction: str
 
 
+class CalibrationExample(BaseModel):
+    """Boundary case from a labeled eval set, rendered as a few-shot exemplar (§11.2)."""
+
+    title: str
+    decision: int
+    tier: str | None = None
+    why: str
+
+
 class ProfileDocument(BaseModel):
     """Contract surface for NL profile YAML (§11.2 core fields)."""
 
@@ -45,14 +66,16 @@ class ProfileDocument(BaseModel):
     principles: list[str]
     anchors: list[ProfileAnchor]
     exclusions: list[str]
+    peripheral_classes: list[str] = []
+    calibration_examples: list[CalibrationExample] = []
     output: ProfileOutput
 
 
-def resolve_profile_path(domain: DomainEnum) -> Path:
-    """Map domain to container profile path; M3 supports professional only."""
-    filename = _PROFILE_FILENAME.get(domain)
+def resolve_profile_path(domain: DomainEnum, gate: Gate = "prefilter") -> Path:
+    """Map domain and gate to container profile path; professional only."""
+    filename = _PROFILE_FILENAME[gate].get(domain)
     if filename is None:
-        msg = f"No profile configured for domain {domain.value!r}"
+        msg = f"No {gate} profile configured for domain {domain.value!r}"
         raise ValueError(msg)
     return PROFILES_CONTAINER_DIR / filename
 
@@ -100,7 +123,23 @@ def render_profile_prompt(profile: ProfileDocument) -> str:
         sections.append(anchor.rationale.rstrip())
 
     sections.append("## Exclusions")
-    sections.extend(f"- {exclusion}" for exclusion in profile.exclusions)
+    sections.extend(f"- {' '.join(exclusion.split())}" for exclusion in profile.exclusions)
+
+    if profile.peripheral_classes:
+        sections.append(
+            "## Peripheral tier\n"
+            "These classes are neither core nor excluded. Pass them with decision 1 and "
+            "tier peripheral. Do not reject them, and do not mark them core."
+        )
+        sections.extend(f"- {' '.join(item.split())}" for item in profile.peripheral_classes)
+
+    if profile.calibration_examples:
+        sections.append("## Calibration examples")
+        for example in profile.calibration_examples:
+            verdict = "reject" if example.decision == 0 else f"pass ({example.tier or 'core'})"
+            sections.append(
+                f'- "{example.title}" -> {verdict}\n  {" ".join(example.why.split())}'
+            )
 
     sections.append("## Output format")
     sections.append(profile.output.instruction.rstrip())

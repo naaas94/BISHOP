@@ -1,0 +1,45 @@
+# ArXiv category gate — zero-cost pre-LLM filter ahead of gate 1.
+#
+# Matching is against the ArXiv PRIMARY category only (see
+# bishop_shared/source_config.py and .dev/plans/m9-source-expansion/proposal.md
+# for the rationale). Cross-listings are noisy: in eval/prefilter_v0 the
+# stat.ML cross-list is 4 human-pass / 1 human-reject and the q-bio cross-list
+# is 2 human-pass / 0 human-reject, so any-category matching destroys value.
+#
+# Counts below are measured over the 129 hand-labeled items in
+# eval/prefilter_v0 (74 human-reject / 55 human-pass), joined to primary
+# categories fetched live from the ArXiv Atom API.
+
+version: "1.0.0"
+
+# Empty means "allow all". Restricting to (cs.AI, cs.CL, cs.LG) — the three
+# categories the adapter already queries — would remove 9 human-reject items
+# but destroy 3 human-pass items (a cs.CV video-RAG pipeline, a cs.IR agentic
+# recommender benchmark, a hep-ex agentic RAG system). 8 of those 9 rejects are
+# already caught by exclude_categories below, so inclusion buys 1 extra reject
+# for 2 extra destroyed passes. Not worth it.
+include_categories: []
+
+# Measured impact, primary-category matching, over eval/prefilter_v0:
+#   cs.CV    6 rejects removed / 1 pass destroyed
+#   cs.RO    1 reject  removed / 0 passes destroyed
+#   cs.SD    1 reject  removed / 0 passes destroyed
+#   eess.*   0 observed items — UNVALIDATED, included by analogy to cs.CV/cs.SD
+#            (image/audio signal processing); zero measured risk, zero measured
+#            benefit on this eval set.
+#   TOTAL    8 rejects removed / 1 pass destroyed
+#
+# Deliberately NOT excluded:
+#   cs.SE    1 reject / 0 passes, but software engineering is the profile's own
+#            target domain; n=1 is noise, not evidence.
+#   stat.ML  0 items as primary; as a cross-list it is 4 passes / 1 reject.
+#   q-bio.*  0 items as primary; as a cross-list it is 2 passes / 0 rejects.
+exclude_categories:
+  - cs.CV
+  - cs.RO
+  - cs.SD
+  - eess.*
+
+# Compute-and-log only. Flip to true once the logged skip counts confirm the
+# measured ratio holds on live traffic.
+enforce: false

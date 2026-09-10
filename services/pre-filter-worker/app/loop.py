@@ -129,7 +129,7 @@ async def prefilter_cycle(
             )
             return
 
-        resolved_path = profile_path or resolve_profile_path(domain)
+        resolved_path = profile_path or resolve_profile_path(domain, gate="prefilter")
         verified = _verify_profile_hash(resolved_path)
         if verified is None:
             return

@@ -13,6 +13,7 @@ import httpx
 import pytest
 
 from bishop_shared.enums import DomainEnum, SourceEnum
+from bishop_shared.index_policy import IndexPolicy
 from bishop_shared.indexing_config import EMBEDDING_DIM
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -51,7 +52,11 @@ def _load_index_entry_stack() -> tuple[ModuleType, ModuleType, ModuleType]:
     return index_mod, models_mod, client_mod
 
 
-def _sample_entry(models: ModuleType) -> object:
+def _index_policy(*, enforce: bool) -> IndexPolicy:
+    return IndexPolicy(version="0.1.0", keep_min=0.40, skim_min=0.25, enforce=enforce)
+
+
+def _sample_entry(models: ModuleType, *, relevance_score: float | None = 0.92) -> object:
     return models.EntryPollRow(
         source_id="arxiv:2401.00001",
         source=SourceEnum.ARXIV,
@@ -67,7 +72,7 @@ def _sample_entry(models: ModuleType) -> object:
         concepts=["vector search"],
         tags=["retrieval"],
         challenge_hooks=["sparse document graphs"],
-        relevance_score=0.92,
+        relevance_score=relevance_score,
         processing_state="VECTOR_WRITE_QUEUED",
     )
 
@@ -229,3 +234,133 @@ def test_index_entry_posts_failed_on_bm25_lock_timeout(bm25_root: Path, monkeypa
     state_client.post_failed.assert_awaited_once()
     failed_body = state_client.post_failed.await_args.args[0]
     assert failed_body.error_class == "Bm25LockTimeout"
+
+
+def _run_index_entry(
+    index_mod: ModuleType,
+    entry: object,
+    stores: MagicMock,
+    client_mod: ModuleType,
+    policy: IndexPolicy | None,
+) -> tuple[bool, MagicMock]:
+    state_client = MagicMock(spec=client_mod.StateWorkerClient)
+    state_client.post_indexed = AsyncMock()
+    state_client.post_failed = AsyncMock()
+
+    async def _run() -> bool:
+        return await index_mod.index_entry(entry, stores, state_client, policy)
+
+    return asyncio.run(_run()), state_client
+
+
+@pytest.mark.parametrize("score", [0.92, 0.40, 0.30, 0.24, 0.0, None])
+def test_index_entry_observe_only_indexes_every_class(score: float | None) -> None:
+    """enforce=false must leave indexing behavior unchanged for every score band."""
+    index_mod, models, client_mod = _load_index_entry_stack()
+    entry = _sample_entry(models, relevance_score=score)
+    stores = _mock_stores(index_mod)
+
+    result, state_client = _run_index_entry(
+        index_mod, entry, stores, client_mod, _index_policy(enforce=False)
+    )
+
+    assert result is True
+    stores.lancedb.write.assert_called_once()
+    stores.bm25_for.return_value.add_main.assert_called_once()
+    stores.duckdb.upsert.assert_called_once()
+    state_client.post_indexed.assert_awaited_once()
+    state_client.post_failed.assert_not_awaited()
+
+
+def test_index_entry_without_policy_argument_indexes_drop_band_score() -> None:
+    """Falsifier: an absent policy config must not start dropping content."""
+    index_mod, models, client_mod = _load_index_entry_stack()
+    entry = _sample_entry(models, relevance_score=0.10)
+    stores = _mock_stores(index_mod)
+
+    result, state_client = _run_index_entry(index_mod, entry, stores, client_mod, None)
+
+    assert result is True
+    stores.lancedb.write.assert_called_once()
+    stores.duckdb.upsert.assert_called_once()
+    state_client.post_indexed.assert_awaited_once()
+
+
+@pytest.mark.parametrize("score", [0.92, 0.40, 0.30, 0.25, None])
+def test_index_entry_enforce_still_indexes_keep_and_skim(score: float | None) -> None:
+    index_mod, models, client_mod = _load_index_entry_stack()
+    entry = _sample_entry(models, relevance_score=score)
+    stores = _mock_stores(index_mod)
+
+    result, state_client = _run_index_entry(
+        index_mod, entry, stores, client_mod, _index_policy(enforce=True)
+    )
+
+    assert result is True
+    stores.lancedb.write.assert_called_once()
+    stores.duckdb.upsert.assert_called_once()
+    state_client.post_indexed.assert_awaited_once()
+
+
+@pytest.mark.parametrize("score", [0.24, 0.10, 0.0])
+def test_index_entry_enforce_skips_drop_band_only(score: float) -> None:
+    index_mod, models, client_mod = _load_index_entry_stack()
+    entry = _sample_entry(models, relevance_score=score)
+    stores = _mock_stores(index_mod)
+
+    result, state_client = _run_index_entry(
+        index_mod, entry, stores, client_mod, _index_policy(enforce=True)
+    )
+
+    assert result is False
+    stores.lancedb.write.assert_not_called()
+    stores.bm25_for.return_value.add_main.assert_not_called()
+    stores.duckdb.upsert.assert_not_called()
+    state_client.post_indexed.assert_not_awaited()
+    state_client.post_failed.assert_not_awaited()
+
+
+def test_index_entry_logs_index_policy_classified_event(caplog: pytest.LogCaptureFixture) -> None:
+    index_mod, models, client_mod = _load_index_entry_stack()
+    entry = _sample_entry(models, relevance_score=0.35)
+    stores = _mock_stores(index_mod)
+
+    with caplog.at_level("INFO"):
+        _run_index_entry(index_mod, entry, stores, client_mod, _index_policy(enforce=False))
+
+    records = [r for r in caplog.records if getattr(r, "event", None) == "index_policy_classified"]
+    assert len(records) == 1
+    assert records[0].source_id == "arxiv:2401.00001"
+    assert records[0].enrichment_score == 0.35
+    assert records[0].index_class == "skim"
+
+
+def test_index_entry_logs_distinct_skip_event_when_enforcing(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    index_mod, models, client_mod = _load_index_entry_stack()
+    entry = _sample_entry(models, relevance_score=0.10)
+    stores = _mock_stores(index_mod)
+
+    with caplog.at_level("INFO"):
+        _run_index_entry(index_mod, entry, stores, client_mod, _index_policy(enforce=True))
+
+    events = [getattr(r, "event", None) for r in caplog.records]
+    assert "index_policy_skipped" in events
+    assert "entry_indexed" not in events
+
+
+def test_index_entry_does_not_log_skip_event_when_observing(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Falsifier: observe-only mode must never emit a skip."""
+    index_mod, models, client_mod = _load_index_entry_stack()
+    entry = _sample_entry(models, relevance_score=0.10)
+    stores = _mock_stores(index_mod)
+
+    with caplog.at_level("INFO"):
+        _run_index_entry(index_mod, entry, stores, client_mod, _index_policy(enforce=False))
+
+    events = [getattr(r, "event", None) for r in caplog.records]
+    assert "index_policy_skipped" not in events
+    assert "entry_indexed" in events

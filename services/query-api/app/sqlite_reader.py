@@ -55,6 +55,7 @@ def _row_to_entry(row: dict[str, Any]) -> EntryResponse:
         profile_version=str(normalized["profile_version"]),
         pre_filter_batch_id=str(normalized["pre_filter_batch_id"]),
         pre_filter_rationale=str(normalized["pre_filter_rationale"]),
+        pre_filter_tier=normalized.get("pre_filter_tier"),
         summary=normalized.get("summary"),
         concepts=normalized.get("concepts"),
         tags=normalized.get("tags"),

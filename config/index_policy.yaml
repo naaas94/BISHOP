@@ -1,0 +1,25 @@
+# Gate 2 — knowledge-base index policy.
+#
+# Bands the enrichment-stage relevance score (`enrichment_score`, persisted as the
+# `relevance_score` column and carried on the wire as EntryPollRow.relevance_score)
+# into keep / skim / drop. Gate 1 is the cheap binary pre-filter; this gate decides
+# whether an item earns a first-class slot in the knowledge base.
+#
+# Provenance of the defaults — threshold sweep over the 129 hand-labeled items in
+# eval/prefilter_v0/, scored against the human "keep" labels:
+#   >= 0.40  ->  precision 0.892 / recall 0.786
+#   >= 0.30  ->  precision 0.755 / recall 0.952
+# Median enrichment_score was 0.65 for items the human wanted vs 0.35 for items they
+# did not, so the score separates the verdicts only imperfectly. keep_min takes the
+# 0.40 operating point. skim_min sits at 0.25 rather than 0.30 because some
+# genuinely-wanted items scored as low as 0.25, and nothing observed-wanted should be
+# able to land in `drop`.
+#
+# `enforce` MUST stay false until gate 2 has independent labels. The gate 1 and gate 2
+# labels in eval/prefilter_v0/ came out perfectly collinear, so there is no trustworthy
+# independent evidence for a hard gate-2 cutoff yet. While `enforce` is false the class
+# is computed and logged only, and indexing behavior is byte-for-byte unchanged.
+version: "0.1.0"
+keep_min: 0.40
+skim_min: 0.25
+enforce: false

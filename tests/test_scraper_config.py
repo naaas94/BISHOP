@@ -1,4 +1,4 @@
-"""Unit tests for scraper configuration env overrides (M2 T1)."""
+"""Unit tests for scraper configuration env overrides (M2 T1) and category gate config."""
 
 from __future__ import annotations
 
@@ -8,6 +8,13 @@ from pathlib import Path
 from types import ModuleType
 
 import pytest
+
+from bishop_shared.source_config import (
+    SourceCategoryConfig,
+    category_matches,
+    load_source_config,
+    resolve_source_config_path,
+)
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _SCRAPER_ROOT = _REPO_ROOT / "services" / "scraper"
@@ -62,3 +69,62 @@ def test_schedule_interval_env_override(monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.setenv("BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC", "3600")
     config = _load_config_module()
     assert config.SCRAPER_SCHEDULE_INTERVAL_SEC == 3600
+
+
+def _gate(**overrides: object) -> SourceCategoryConfig:
+    payload: dict[str, object] = {"version": "test"}
+    payload.update(overrides)
+    return SourceCategoryConfig.model_validate(payload)
+
+
+def test_category_matches_exact() -> None:
+    assert category_matches("cs.CV", "cs.CV")
+    assert not category_matches("cs.CL", "cs.CV")
+
+
+def test_category_matches_wildcard() -> None:
+    assert category_matches("cs.CV", "cs.*")
+    assert category_matches("eess.AS", "eess.*")
+    assert not category_matches("eess.AS", "cs.*")
+    assert not category_matches("cshort.AS", "cs.*")
+
+
+def test_gate_exact_include_allows_only_listed() -> None:
+    gate = _gate(include_categories=["cs.AI", "cs.CL"])
+    assert gate.allows("cs.AI")
+    assert not gate.allows("cs.CV")
+
+
+def test_gate_wildcard_include() -> None:
+    gate = _gate(include_categories=["cs.*"])
+    assert gate.allows("cs.RO")
+    assert not gate.allows("eess.AS")
+
+
+def test_gate_empty_include_allows_all() -> None:
+    gate = _gate(include_categories=[])
+    assert gate.allows("q-bio.NC")
+    assert gate.allows("hep-ex")
+
+
+def test_gate_exclude_overrides_include() -> None:
+    gate = _gate(include_categories=["cs.*"], exclude_categories=["cs.CV"])
+    assert gate.allows("cs.LG")
+    assert not gate.allows("cs.CV")
+
+
+def test_gate_allows_item_without_category_metadata() -> None:
+    gate = _gate(include_categories=["cs.AI"], exclude_categories=["cs.*"])
+    assert gate.allows(None)
+
+
+def test_load_source_config_missing_file_returns_none(tmp_path: Path) -> None:
+    assert load_source_config("arxiv", path=tmp_path / "absent.yaml") is None
+
+
+def test_load_arxiv_source_config_defaults_to_measure_only() -> None:
+    config = load_source_config("arxiv", path=resolve_source_config_path("arxiv"))
+    assert config is not None
+    assert config.enforce is False
+    assert config.include_categories == []
+    assert "cs.CV" in config.exclude_categories

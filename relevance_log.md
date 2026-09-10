@@ -20,3 +20,14 @@
 - I think the issue is the source as well - the nature of arxiv is too paper coded and experimental and not applied based but more fine tuning and weights and stuff
 - basically I want more applied stuff, systems, what people are doing and how they're doing it, what systems and businesses, and features, etc- people are making with ai and or software 
 - also include skills (dev flow enhancement or techniques)
+- overall thinking I want to see more things I can profit off, like skills, wfs, knowledge I dont posses, llm based systems, architectures, review, systems, articles, recommendations, stack or technologies, techniques, agents, agentic systems and wfs, eval, obvs, engineering, backend engineering, quantification of llms and they workings and results and evaluations, communication and explainability of llm systems, stakeholder management, etc - this all relating to the professional or current profile or domain that we have for ai stuff 
+
+
+---
+
+Good ones log: 
+
+- Knowledge-Centric Self-Improvement
+arxiv:2607.19592
+
+- 

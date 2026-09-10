@@ -19,11 +19,21 @@ from bishop_shared.profile_renderer import (
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROFESSIONAL_PROFILE_PATH = REPO_ROOT / "config/profiles/professional_v1.0.0.yaml"
+CALIBRATED_PROFILE_PATH = REPO_ROOT / "config/profiles/professional_v1.1.1.yaml"
 
 
 def test_resolve_profile_path_professional() -> None:
     path = resolve_profile_path(DomainEnum.PROFESSIONAL)
-    assert path.as_posix() == "/app/config/profiles/professional_v1.0.0.yaml"
+    assert path.as_posix() == "/app/config/profiles/professional_v1.2.0.yaml"
+
+
+def test_resolve_profile_path_enrichment_pinned_separately() -> None:
+    """Enrichment must not follow the gate-1 pin: the rendered output instruction is
+    gate-1 specific, and profiles past 1.0.0 were only measured against the gate-1 eval."""
+    prefilter = resolve_profile_path(DomainEnum.PROFESSIONAL, gate="prefilter")
+    enrichment = resolve_profile_path(DomainEnum.PROFESSIONAL, gate="enrichment")
+    assert enrichment.as_posix() == "/app/config/profiles/professional_v1.0.0.yaml"
+    assert prefilter != enrichment
 
 
 def test_resolve_profile_path_personal_not_configured() -> None:
@@ -76,6 +86,51 @@ def test_prompt_deterministic() -> None:
     assert "## Exclusions" in first
     assert "## Output format" in first
     assert profile.output.instruction.strip() in first
+
+
+def test_v1_0_0_has_no_calibration_examples_and_renders_no_section() -> None:
+    profile = load_profile(PROFESSIONAL_PROFILE_PATH)
+    assert profile.calibration_examples == []
+    assert "## Calibration examples" not in render_profile_prompt(profile)
+
+
+def test_calibrated_profile_loads_with_examples_and_matching_hash() -> None:
+    profile = load_profile(CALIBRATED_PROFILE_PATH)
+    assert profile.version == "1.1.1"
+    assert compute_profile_hash(CALIBRATED_PROFILE_PATH) == profile.canonical_hash
+    assert profile.calibration_examples, "calibrated profile must carry boundary exemplars"
+    assert any(example.decision == 0 for example in profile.calibration_examples)
+    assert any(example.decision == 1 for example in profile.calibration_examples)
+
+
+def test_calibration_examples_render_with_verdict_and_reason() -> None:
+    profile = load_profile(CALIBRATED_PROFILE_PATH)
+    rendered = render_profile_prompt(profile)
+    assert "## Calibration examples" in rendered
+    for example in profile.calibration_examples:
+        assert example.title in rendered
+    assert "-> reject" in rendered
+    assert "-> pass (core)" in rendered
+    assert "-> pass (peripheral)" in rendered
+
+
+def test_calibration_examples_change_the_canonical_hash() -> None:
+    data = yaml.safe_load(CALIBRATED_PROFILE_PATH.read_text(encoding="utf-8"))
+    stripped = {key: value for key, value in data.items() if key != "calibration_examples"}
+    assert compute_profile_hash(stripped) != compute_profile_hash(data)
+
+
+def test_calibration_example_section_omitted_when_list_empty() -> None:
+    data = yaml.safe_load(CALIBRATED_PROFILE_PATH.read_text(encoding="utf-8"))
+    data["calibration_examples"] = []
+    profile = ProfileDocument.model_validate(data)
+    assert "## Calibration examples" not in render_profile_prompt(profile)
+
+
+def test_render_is_deterministic_across_profiles() -> None:
+    for path in (PROFESSIONAL_PROFILE_PATH, CALIBRATED_PROFILE_PATH):
+        profile = load_profile(path)
+        assert render_profile_prompt(profile) == render_profile_prompt(profile)
 
 
 def test_hash_mismatch_detected_when_content_tampered() -> None:

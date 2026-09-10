@@ -1,0 +1,122 @@
+{
+  "eval_id": "prefilter_v1",
+  "version": "0.2.0",
+  "supersedes": "eval/prefilter_v0/contract.json",
+  "purpose": "Human gold labels for Bishop's professional-domain pre-filter (gate 1) and knowledge-base keep (gate 2), on a snapshot whose replay input is uniform across both splits. Replay after any profile, prompt, or threshold change.",
+  "profile_under_test": "config/profiles/professional_v1.1.1.yaml",
+  "frozen_inputs": "eval/prefilter_v1/items.json",
+  "labels": "eval/prefilter_v1/labels.json",
+  "replay_input_field": "replay_abstract",
+
+  "why_v1_exists": {
+    "defect_in_v0": "eval/prefilter_v0/items.json froze two different projections of the database. All 57 prefilter_pass items had abstract=null plus an enrichment-generated summary; all 72 prefilter_reject items had a real abstract and no summary. Field presence therefore predicted the original system decision perfectly, and the summary was a post-hoc positive gloss written after the item had already passed.",
+    "consequence": "Any gate-1 replay reading 'abstract else summary' leaks the label, and the metrics computed on v0 were optimistic. Replaying profile v1.0.0 on uniform abstracts scored accuracy 0.736 / precision 0.667 / recall 0.764, against the 0.798 / 0.754 / 0.782 that v0 reported.",
+    "fix": "replay_abstract holds the canonical arXiv abstract for all 129 items, refetched from the arXiv API. primary_category and categories were captured at the same time. Labels carried over unchanged, keyed by source_id."
+  },
+
+  "gates": [
+    {
+      "id": "prefilter",
+      "question": "Given title + replay_abstract only, should this pass the cheap gate?",
+      "gold_field": "prefilter_should",
+      "values": ["pass", "reject"],
+      "tier_field": "prefilter_tier_should",
+      "tier_values": ["core", "peripheral", null],
+      "system_field": "system.prefilter_decision",
+      "metrics": ["accuracy", "precision", "recall", "false_positive", "false_negative", "keep_grade_false_negative"],
+      "cost_asymmetry": "A false positive costs one enrichment call. A false negative is unrecoverable: rejected entries are never enriched, so they can never re-enter the pipeline. Recall is therefore the protected metric and precision is recovered at gate 2."
+    },
+    {
+      "id": "kb_keep",
+      "question": "If this reached the KB, should it hold a first-class indexed slot?",
+      "gold_field": "kb_should",
+      "values": ["keep", "skim", "drop"],
+      "system_proxy": "relevance_score, banded by config/index_policy.yaml",
+      "field_naming_warning": "This eval set and the calibration/ exports call the score 'enrichment_score'. Production does not. Enrichment Call 2 emits 'relevance_score' (bishop_shared/enrichment_parsers.py), it persists as the entries.relevance_score column, and it reaches the vector-writer as EntryPollRow.relevance_score. The two names denote the same value — arxiv:2606.11375 is 0.35 under both. Use relevance_score when reading code and enrichment_score only when reading these eval artifacts.",
+      "metrics": ["keep_precision", "score_vs_label_table"]
+    }
+  ],
+
+  "reasons": {
+    "applied_systems": "What people or businesses are actually building — products, features, pipelines, ops.",
+    "architecture_tradeoffs": "System design, constraints, failure modes, engineering decisions.",
+    "dev_skills": "Dev-flow techniques, skills, agent/editor workflows I would reuse.",
+    "rag_retrieval": "Retrieval, chunking, rerank, hybrid search, KB design.",
+    "agent_orchestration": "Agents as systems: state machines, tools, memory, eval of agents — applied, not GUI-benchmark-only.",
+    "eval_observability": "Eval harnesses, tracing, judges, production monitoring, auditing and measurement methodology.",
+    "failure_modes": "How LLM or agent systems break: reasoning failures, robustness limits, brittleness, unreliable eval proxies.",
+    "doc_intel": "Extraction, structured output, document pipelines.",
+    "inference_economics": "Cost, latency and throughput decisions available at the API boundary: prompt caching, batch APIs, context budgeting, model routing.",
+    "adjacent_stimulus": "Off-lane for building, but genuine thinking material — a good read or a seed for a design conversation. Implies pass at tier peripheral.",
+    "adjacent_offlane": "Adjacent to the domain but carries nothing I would use. Implies reject.",
+    "base_model_science": "The contribution improves the base model or the mathematics of generation: pretraining, training objectives, quantization, compression, decoding algorithms, kernel or KV-cache internals.",
+    "too_academic": "Paper-coded experimental, novelty-first, not something I would implement.",
+    "llm_internals": "Representations, interpretability, probing internals.",
+    "wrong_domain": "CV, robotics, market, clinical, hardware, or otherwise off-profile.",
+    "intro_tutorial": "Below expert baseline.",
+    "narrow_corpus": "Single non-English language, or task-specific modeling in a vertical, without transferable design."
+  },
+
+  "vocab_changes_from_v0": {
+    "removed": {
+      "adjacent_interesting": "Degenerate in v0: it appeared on 41 reject/drop items and 6 pass items, and was the sole reason on 39 rejects. It recorded a shrug, not a cause. Split into adjacent_stimulus (implies pass/peripheral) and adjacent_offlane (implies reject) so the tag carries the decision."
+    },
+    "added": {
+      "base_model_science": "All 14 v0 false positives belonged to this class and the vocab had no home for them, so they were dumped into adjacent_interesting and wrong_domain, hiding the single largest error cluster.",
+      "failure_modes": "The keep-grade false negatives were failure-mode analyses, which v0 could only express as eval_observability or too_academic.",
+      "narrow_corpus": "Separates single-language and vertical-corpus rejections from genuine wrong_domain.",
+      "inference_economics": "Replaces the ambiguous read of inference_serving, which in v0 was applied both to engine internals and to API-boundary concerns."
+    },
+    "renamed": {
+      "inference_serving": "inference_economics"
+    }
+  },
+
+  "labeling_rules": [
+    "Every pass must carry at least one positive reason. In v0, 10 pass items carried only reject-side reasons, which means the vocab was being used to tag topics rather than to justify decisions.",
+    "A pass must carry a tier: core if I would build from it, peripheral if it is worth reading but is not a working reference.",
+    "Any label whose reasons include adjacent_stimulus, adjacent_offlane, or too_academic requires a written note. These are the hedge classes, and they are exactly where v0's unnoted labels turned out to be unreliable.",
+    "Label the two gates independently. In v0 they came out perfectly collinear — pass/keep 47, pass/skim 8, reject/drop 74, with zero crossovers — which made kb_should a restatement of prefilter_should and left gate 2 uncalibratable.",
+    "Do not label more than roughly 30 items in one sitting. v0's unnoted tail contradicts its own noted head on the same topic class."
+  ],
+
+  "known_defects_carried_from_v0": {
+    "gate_collinearity": "kb_should is currently a deterministic function of prefilter_should, so no gate-2 threshold can be validated against this set. config/index_policy.yaml must stay enforce:false until that is fixed.",
+    "unresolved_enforcement_semantics": "When index_policy enforcement is switched on, a drop-band entry currently skips both the store writes and POST /entries/indexed, so it is re-polled and re-skipped every cycle. That is idempotent and never records a false INDEXED state, but it logs forever. The alternative — posting indexed to retire the entry — would claim an item was indexed when it was not. Decide this deliberately before flipping enforce.",
+    "label_contradictions_on_the_model_improvement_axis": "RESOLVED by adjudication. The unnoted passes on quantization, KV-cache and decoding (arxiv:2606.09937, arxiv:2606.10820, arxiv:2606.10890) were confirmed as tail errors and flipped to reject, matching the noted rejects (arxiv:2606.13126, arxiv:2606.09927). Context compression was carved out as a deliberate exception.",
+    "rule_the_gate_model_cannot_execute": "The object-of-study carve-in — pass a training-method paper when its subject is an agent, tool-use loop, prompt or retrieval system — has now been written twice, and increasingly explicitly, and claude-haiku-4-5 still misapplies it. Under v1.2.0 it rejects arxiv:2606.11119 (agentic RL rollout budgets) and arxiv:2606.11459 (prompt optimization) despite both being named policy passes. Further wording iteration on this rule looks exhausted; the untested lever is a stronger model at gate 1.",
+    "unnoted_tail": "95 of 129 v0 labels carry no note, and the tail shows long runs of identical single-tag rejects.",
+    "calibration_example_leakage": "Profile v1.1.x names 9 titles from this set as calibration examples. Replay metrics are reported both over all items and excluding those 9; the excluding number is the honest one."
+  },
+
+  "acceptance_for_replay": {
+    "pre_registered_bar": "Against the profile v1.0.0 control replayed on the same replay_abstract inputs and rescored against the adjudicated labels (accuracy 0.674, precision 0.556, recall 0.714, fp 28, fn 14, keep-grade fn 2): a candidate ships only if false positives fall below 12 AND keep-grade false negatives stay at or below 8, measured excluding calibration examples.",
+    "bar_history": "The bar was first set against the pre-adjudication scoring of the same control run (accuracy 0.736, fp 21, keep-grade fn 6). Adjudication corrected 12 of 31 labels, which moved the control to fp 28 / keep-grade fn 2 without re-running it. The thresholds were not moved to fit a result — both v1.1.1 and v1.2.0 clear the original numbers too.",
+    "results": {
+      "1.1.0": "fp 3, keep-grade fn 23 pre-adjudication. Rejected: recall collapsed to 0.455 because the blanket model-improvement exclusion over-fired on 16 items.",
+      "1.1.1": "acc 0.853, prec 0.917, rec 0.673, fp 3, fn 16, keep-grade fn 4, only 7 peripheral assignments. Clears the bar but leans precision and barely uses the tier.",
+      "1.2.0": "acc 0.833, prec 0.805, rec 0.733, fp 8, fn 12, keep-grade fn 5, 15 peripheral assignments at 0.909 tier agreement. Clears the bar and is the recall-leaning choice with a functioning tier."
+    },
+    "rationale": "A candidate that trades recall for precision is not an improvement, because gate-1 rejection is terminal.",
+    "blocked_on": "The adjudication queue at eval/prefilter_v1/adjudication_queue.json must be resolved before a recall regression is treated as a real model error.",
+    "record_to": "eval/prefilter_v1/replays/<timestamp>_<profile_version>.json"
+  },
+
+  "replay_protocol": {
+    "input": "item.title + item.replay_abstract, uniform across both splits",
+    "prompt": "render_profile_prompt(load_profile(profile_under_test))",
+    "control": "Replay the previous profile version on the identical input field in the same session. The frozen system.prefilter_decision is NOT a valid control — it was produced on different input text.",
+    "compare": "parsed decision vs labels[id].prefilter_should",
+    "command": "python scripts/replay_prefilter.py --profile <path>"
+  },
+
+  "do_not": [
+    "Do not edit items.json after freeze — a new snapshot is a new eval_id",
+    "Do not replay on a field that exists for only one split",
+    "Do not use the enrichment-generated summary as gate-1 input; it is written after the pass decision",
+    "Do not change the profile and claim this set still measures the previous version",
+    "Do not treat enrichment_score as the pre-filter gold — they are different gates",
+    "Do not report replay accuracy without also reporting the excluding-calibration-examples figure",
+    "Do not add open-text reason tags; use reasons[] from the closed vocab"
+  ]
+}

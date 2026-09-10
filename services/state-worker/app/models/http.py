@@ -112,6 +112,10 @@ class PreFilterResultEntryWire(BaseModel):
     source_id: str
     decision: int = Field(description="0 = reject, 1 = pass")
     pre_filter_rationale: str
+    pre_filter_tier: str | None = Field(
+        default=None,
+        description="core | peripheral on a pass; null on a reject or a tier-less profile",
+    )
 
 
 class PreFilterResultsRequest(BaseModel):

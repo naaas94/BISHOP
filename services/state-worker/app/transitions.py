@@ -811,6 +811,7 @@ async def apply_pre_filter_results(
                 pre_filter_batch_id = ?,
                 relevance_decision = ?,
                 pre_filter_rationale = ?,
+                pre_filter_tier = ?,
                 processing_state = ?
             WHERE source_id = ?
             """,
@@ -819,6 +820,7 @@ async def apply_pre_filter_results(
                 batch_id,
                 item.decision,
                 item.pre_filter_rationale,
+                item.pre_filter_tier,
                 target.value,
                 item.source_id,
             ),
@@ -887,6 +889,7 @@ async def create_entry_from_content(
         profile_version=manifest.profile_version,  # type: ignore[arg-type]
         pre_filter_batch_id=manifest.pre_filter_batch_id,  # type: ignore[arg-type]
         pre_filter_rationale=manifest.pre_filter_rationale,  # type: ignore[arg-type]
+        pre_filter_tier=manifest.pre_filter_tier,
         processing_state=ProcessingState.SCRAPED,
     )
     await _insert_row(conn, "entries", entry.to_db_row())

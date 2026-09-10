@@ -1,0 +1,1057 @@
+{
+  "eval_id": "prefilter_v1",
+  "replayed_at": "2026-09-10T15:27:55.887558+00:00",
+  "profile_path": "config/profiles/professional_v1.0.0.yaml",
+  "profile_version": "1.0.0",
+  "profile_render_hash": "80f5f9abdc3b80c8e43c0fb6f40ac057c97130aa67ecb7852b48d49a26bb687d",
+  "model": "claude-haiku-4-5-20251001",
+  "input_field": "replay_abstract",
+  "item_count": 129,
+  "calibration_exemplar_ids": [],
+  "metrics": {
+    "all_items": {
+      "n": 129,
+      "accuracy": 0.6744186046511628,
+      "precision": 0.5555555555555556,
+      "recall": 0.7142857142857143,
+      "confusion": {
+        "tp": 35,
+        "fp": 28,
+        "tn": 52,
+        "fn": 14
+      },
+      "fn_keep_grade": 2,
+      "false_positive_ids": [
+        "arxiv:2606.08327",
+        "arxiv:2606.08653",
+        "arxiv:2606.08854",
+        "arxiv:2606.09030",
+        "arxiv:2606.09052",
+        "arxiv:2606.09073",
+        "arxiv:2606.09131",
+        "arxiv:2606.09767",
+        "arxiv:2606.09927",
+        "arxiv:2606.09937",
+        "arxiv:2606.10099",
+        "arxiv:2606.10279",
+        "arxiv:2606.10461",
+        "arxiv:2606.10607",
+        "arxiv:2606.10820",
+        "arxiv:2606.10890",
+        "arxiv:2606.11033",
+        "arxiv:2606.11189",
+        "arxiv:2606.11722",
+        "arxiv:2606.12138",
+        "arxiv:2606.12342",
+        "arxiv:2606.13126",
+        "arxiv:2606.13647",
+        "arxiv:2606.26787",
+        "arxiv:2607.16872",
+        "arxiv:2607.20274",
+        "arxiv:2608.02087",
+        "arxiv:2608.29715"
+      ],
+      "false_negative_ids": [
+        "arxiv:2606.09672",
+        "arxiv:2606.10159",
+        "arxiv:2606.10740",
+        "arxiv:2606.10852",
+        "arxiv:2606.11375",
+        "arxiv:2606.11893",
+        "arxiv:2606.12032",
+        "arxiv:2606.12730",
+        "arxiv:2607.00924",
+        "arxiv:2607.27232",
+        "arxiv:2608.00123",
+        "arxiv:2608.04980",
+        "arxiv:2608.20318",
+        "arxiv:2609.00064"
+      ],
+      "false_negative_keep_ids": [
+        "arxiv:2606.10740",
+        "arxiv:2608.20318"
+      ],
+      "tier_distribution": {
+        "core": 63
+      },
+      "tier_agreement_on_true_positives": 0.8857142857142857,
+      "tier_scored": 35,
+      "parse_failures": 0
+    },
+    "excluding_calibration_examples": {
+      "n": 129,
+      "accuracy": 0.6744186046511628,
+      "precision": 0.5555555555555556,
+      "recall": 0.7142857142857143,
+      "confusion": {
+        "tp": 35,
+        "fp": 28,
+        "tn": 52,
+        "fn": 14
+      },
+      "fn_keep_grade": 2,
+      "false_positive_ids": [
+        "arxiv:2606.08327",
+        "arxiv:2606.08653",
+        "arxiv:2606.08854",
+        "arxiv:2606.09030",
+        "arxiv:2606.09052",
+        "arxiv:2606.09073",
+        "arxiv:2606.09131",
+        "arxiv:2606.09767",
+        "arxiv:2606.09927",
+        "arxiv:2606.09937",
+        "arxiv:2606.10099",
+        "arxiv:2606.10279",
+        "arxiv:2606.10461",
+        "arxiv:2606.10607",
+        "arxiv:2606.10820",
+        "arxiv:2606.10890",
+        "arxiv:2606.11033",
+        "arxiv:2606.11189",
+        "arxiv:2606.11722",
+        "arxiv:2606.12138",
+        "arxiv:2606.12342",
+        "arxiv:2606.13126",
+        "arxiv:2606.13647",
+        "arxiv:2606.26787",
+        "arxiv:2607.16872",
+        "arxiv:2607.20274",
+        "arxiv:2608.02087",
+        "arxiv:2608.29715"
+      ],
+      "false_negative_ids": [
+        "arxiv:2606.09672",
+        "arxiv:2606.10159",
+        "arxiv:2606.10740",
+        "arxiv:2606.10852",
+        "arxiv:2606.11375",
+        "arxiv:2606.11893",
+        "arxiv:2606.12032",
+        "arxiv:2606.12730",
+        "arxiv:2607.00924",
+        "arxiv:2607.27232",
+        "arxiv:2608.00123",
+        "arxiv:2608.04980",
+        "arxiv:2608.20318",
+        "arxiv:2609.00064"
+      ],
+      "false_negative_keep_ids": [
+        "arxiv:2606.10740",
+        "arxiv:2608.20318"
+      ],
+      "tier_distribution": {
+        "core": 63
+      },
+      "tier_agreement_on_true_positives": 0.8857142857142857,
+      "tier_scored": 35,
+      "parse_failures": 0
+    }
+  },
+  "results": {
+    "arxiv:2606.07924": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Production-grade Video RAG system with directly applicable patterns: modality-aware retrieval decoupling, training-free filtering agents, citation grounding, and persona-conditioned generation—all high-value architectural decisions for document/video intelligence systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.07951": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to production RAG and document intelligence systems where LLM output quality, faithfulness, and reliability in high-stakes domains (medical, scientific) are critical; the systematic bias toward certainty inflation is an actionable failure mode for evaluation and mitigation in deployed systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08153": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Production log anomaly detection with real deployment details (Kafka, Redis, TensorRT, 45ms latency at 15k eps) and novel RL reward shaping for sequence modeling is directly applicable to production monitoring systems; the position-aware reward scheme is a reusable architectural pattern for LLM-based sequential anomaly tasks.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08200": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production-critical challenge of evaluating interactive agents in multi-turn contexts; the situation-generating approach and evidence-grounding methodology are immediately applicable to agentic system evaluation pipelines.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08529": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production-critical concern: scaffold choice materially affects measured agent capability (28pp variance), with implications for fair model evaluation and deployment architecture selection—essential knowledge for shipping agentic systems at scale.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08571": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses a critical production problem—hallucination detection and graceful degradation—with a concrete, implementable schema-based approach (SICs) that integrates retrieval signaling, measurable evaluation metrics, and fine-tuning methodology applicable to agentic systems and RAG pipelines.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08850": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses inference-time compute allocation and solution selection for open-ended domains without external verifiers—a core production problem in agentic systems and complex reasoning tasks where verification is costly; the intrinsic statistics approach (entropy-based filtering, particle resampling, logit-guided generation) offers practical patterns for adaptive routing and reasoning trajectory control applicable to RAG-augmented agents and document intelligence workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08854": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to production RL training pipelines for LLM alignment and reasoning tasks; addresses real efficiency tradeoffs (inference vs. training FLOPs) with concrete compute wins, practical profiling methodology, and curriculum implications relevant to agentic system training.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09030": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to production document intelligence and medical RAG systems; dialectical reasoning pattern for calibrated risk scoring is an actionable architectural pattern for agentic clinical workflows, and ISMTS handling addresses real deployment challenges in structured extraction from temporal healthcare data.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09046": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to production LLM evaluation and observability—addresses false positive failure mode detection through statistical rigor, a critical concern when auditing systems before deployment or post-hoc analysis.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09052": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "INFUSER presents a production-relevant self-improvement framework for LLMs with practical engineering contributions (DuGRPO for noisy reward signals, influence-guided curriculum learning) directly applicable to building scalable reasoning systems, and demonstrates concrete improvements on math/coding tasks without dependency on extensive external supervision.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09073": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses reward hacking in RLHF production systems through principled uncertainty quantification in reward models—a critical bottleneck in deploying LLM alignment; the unifying mathematical framework clarifies practical ensemble aggregation heuristics used in production RLHF pipelines.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09131": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Direct relevance to production MLLM deployment: demonstrates actionable architectural optimization (late-layer fusion) with concrete latency/compute tradeoffs and provides empirical analysis (layer-wise attention patterns) applicable to document intelligence pipelines and multimodal RAG systems where visual saturation is a real efficiency concern.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09380": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production RL training for LLM reasoning with a practical solution to the sparse reward problem—demonstrates clear engineering value through compute efficiency gains and scalable Bradley-Terry ranking over exhaustive comparisons, applicable to current reasoning model training pipelines.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09409": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses LLM evaluation methodology—a production concern for ranking and comparing models in RAG/agentic systems; findings on judge bias and stylistic artifacts are actionable for evaluation framework design.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09483": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production agent memory architecture with cognitive hierarchy separation, belief revision tracking, and schema induction—core to self-evolving agentic systems; dual-process split (synchronous writes vs. asynchronous consolidation) is an actionable engineering pattern for long-horizon agent personalization.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09578": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to document intelligence and extraction systems; understanding how different table formats affect LLM/VLM performance is critical for designing robust document parsing pipelines and choosing optimal input representations in production RAG systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09659": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "End-to-end context compression directly addresses a production bottleneck in long-context LLM inference (KV cache memory scaling), proposes a practical encoder-decoder architecture evaluated on real compression ratios (1:4 to 1:16), and demonstrates agentic application with adaptive retrieval—all highly relevant to RAG and agent systems at scale.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09672": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the embedding calibration problem is real, this paper addresses it through domain-specific contrastive learning and inference optimization—valuable but incremental contributions to embedding quality that don't materially advance RAG/agentic system architecture, and the LBM framing lacks sufficient detail on how causal graphs are actually constructed or reasoned over in production.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09701": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Direct relevance to production LLM safety and robustness—adaptive red teaming and defender co-training are critical operational concerns for deployed systems, and the GRPO stabilization techniques offer actionable engineering solutions for training more resilient models.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09748": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses agentic system evaluation and iterative improvement patterns critical for production agents; process-level feedback design and multi-turn regression analysis provide actionable insights for building reliable agent workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09767": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to low-resource document intelligence and extraction workflows; PEFT + synthetic data patterns, structured output constraints, and curriculum learning insights transfer to production RAG/extraction systems facing data scarcity, particularly relevant for domain adaptation and semantic grounding challenges in constrained environments.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09927": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Direct application to production LLM quantization with concrete W4A4 results, practical improvements over SmoothQuant-style baselines, and actionable insights for PTQ pipeline optimization that impact serving cost—core production ML concern.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09937": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to production multi-step reasoning pipelines (CoT, verification, branching); addresses concrete inference bottlenecks (KV cache redundancy, verification latency) with training-free techniques measurable in real systems; 3x speedup with <0.4% error rate is actionable for deployment decisions.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10064": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production trajectory generation for agentic post-training—a bottleneck I encounter in building compound AI systems—with concrete engineering patterns (arena design, structural quality filters, GRPO integration) and empirical validation on a real agentic task, providing actionable insights on data substrate engineering beyond existing synthesis/production-log tradeoffs.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10099": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to production AI-text detection systems; unsupervised style learning via paraphrase inversion is a novel architectural approach with clear applicability to robustness concerns in detection pipelines, and the zero-shot generalization to unseen LLMs addresses real deployment challenges.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10156": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production evaluation gaps for agentic systems with verifiable metrics replacing subjective LLM-as-judge evaluations, plus empirical reliability data across model families relevant to deployment decisions.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10279": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Critical production insight for clinical NLP systems: synthetic rationales harm discriminative performance despite semantic quality, revealing a fundamental tension between interpretability and accuracy that directly informs whether to add reasoning supervision in real-world healthcare deployments.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10381": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable: combines hybrid retrieval (sparse + dense), agentic orchestration for query decomposition and evidence expansion, structured benchmark construction, and evaluation methodology—all production-grade RAG system patterns with concrete domain instantiation and measurable tradeoffs between retrieval precision and reasoning effectiveness.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10461": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to document intelligence and RAG—text-attributed graphs with LLM+GNN fusion is an emerging pattern for structured knowledge retrieval and entity-aware ranking systems; energy-based alignment addresses a real production challenge of keeping embedding spaces synchronized across heterogeneous model architectures.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10481": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production concern of privacy leakage in fine-tuned LLMs—a critical risk in RAG and document intelligence systems handling sensitive data—with practical auditing methodology applicable to model evaluation pipelines.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10554": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to production RAG systems requiring knowledge freshness and consistency; addresses real failure mode (logical inconsistency post-edit) with concrete benchmarking methodology and empirical gaps in existing techniques (ROME, FT).",
+      "parse_failed": false
+    },
+    "arxiv:2606.10736": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to production document intelligence and agentic systems: demonstrates practical pipeline for classifying conversational interactions, extracting structured knowledge graphs from LLMs, and building curriculum-grounded diagnostic signals—all architecturally relevant to Hermes-type systems that need to map user interactions to structured domain knowledge for targeted intervention.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10820": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production inference efficiency for batch serving (the stated bottleneck in deployed systems), proposes concrete speedups (2.4-3.5x) with measurable quality tradeoffs, and maintains compatibility with standard serving infrastructure—all critical for shipping LLM systems at scale.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10829": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While masked diffusion LMs are an interesting inference acceleration technique, this paper focuses on sampler heuristics (attention-based discounting) rather than addressing production concerns like latency guarantees, serving infrastructure, or integration with agentic systems; the 3.1% overhead and incremental improvements don't constitute a meaningful architectural pattern for production deployment.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10890": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production LLM quantization with a practical algorithm (PiSO) that optimizes scaling factors for PTQ—a critical deployment bottleneck for serving large models efficiently, with validated improvements across Llama/Qwen at multiple bit-widths.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11033": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to production LLM systems: demonstrates a practical, lightweight adaptation pattern (LoRA-based audio distillation) that avoids expensive multimodal training while enabling speech-to-LLM inference—addresses real deployment tradeoffs between latency, cost, and model coupling that practitioners face.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11119": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production RL optimization for agentic LLM systems with concrete architectural patterns (tree-structured rollouts, prefix-level budget allocation) and empirical gains on reasoning benchmarks—highly relevant to agent training and policy optimization in deployed systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11189": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to production SFT pipelines; the Q-target framework provides actionable principles for improving fine-tuning quality on reasoning tasks, with clear empirical validation across multiple settings—useful for optimizing Hermes-type document intelligence models and agentic reasoning systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11270": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production concern: undesirable behavior transfer in distillation pipelines, quantifies the phenomenon systematically across models, and provides actionable thresholds for practitioners deploying student models in safety-critical applications.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11290": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production agentic workflow optimization with concrete architectural solutions (portfolio selection, query routing, cost-performance tradeoffs) applicable to multi-agent LLM systems; balances offline precomputation against runtime synthesis—a core engineering decision in deployed agentic workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11375": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While methodologically sound, this paper addresses probe saturation in LLM analysis—a research instrument problem—rather than production systems challenges; fragility metrics lack demonstrated utility in downstream tasks, deployment decisions, or real-world document intelligence workflows that define my application scope.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11459": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production prompt optimization with concrete data efficiency gains and budget constraints—a practical bottleneck in deployed LLM systems that impacts latency, cost, and performance in real workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11520": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to agentic systems and multi-turn orchestration; proposes a pragmatic data synthesis pipeline (Intent→Simulate→Execute) for training OS agents with grounded tool execution and failure recovery—a production-critical pattern for reliable autonomous agents.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11680": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses core agentic system challenge (working memory for long-horizon tasks) with novel hierarchical retrieval architecture and RL-based navigation strategy—practical production pattern for memory-constrained agent deployments.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11712": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to production RAG vs parametric memory tradeoffs in user personalization systems; provides actionable diagnostic framework for substrate selection (retrieval vs LoRA adaptation) with causal analysis of failure modes, real-data validation, and practical mitigation strategies applicable to production agent memory architectures.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11722": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to production interpretability workflows for LLM systems; ICALens offers a practical, computationally efficient alternative to SAEs for representation analysis that addresses real bottlenecks in model exploration and debugging—core to observability and control in deployed systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12138": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to interpretability of neural networks via SAEs—a core tool for understanding LLM representations in production RAG/agentic systems; provides actionable insights on feature stability that impact reliability of interpretation-based debugging and steering.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12342": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Production-applicable inference-time safety mechanism addressing real cross-family deployment risks; directly relevant to agentic systems where domain specialization degrades safety and vocabulary mismatches are common in multi-model architectures.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12476": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production concern (streaming hallucination monitoring with measurable reaction time) using classical change-point theory with empirical validation; provides actionable insights on detector speed-recall tradeoffs and identifies feature-to-score efficiency gaps relevant to deploying real-time safeguards in RAG systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12634": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production challenge in agentic tool-use systems—credit assignment over long horizons with mixed reasoning/action/verification tokens—with concrete architectural pattern (SGCD) deployed on real benchmarks, offering actionable design tradeoff between self-distillation signal density and policy gradient primacy.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12900": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Zero-source hallucination detection is directly applicable to production RAG and agentic systems where external verification is unavailable; the adaptive criteria decomposition and interpretability mechanisms address real observability needs in LLM-as-judge evaluation pipelines.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13126": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Direct production application to RAG/agentic workloads with concrete vLLM integration, minimal implementation overhead (<100 LOC), measured performance gains on real evaluation sets, and native compatibility with existing inference infrastructure—highly actionable for production document retrieval systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13177": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production constraint of memory management in long-running LLM agents—a known bottleneck in deployment—with a practical LLM-guided compression approach applicable to existing agent frameworks.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13598": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production multi-agent orchestration with a scalable approach to training orchestrators without costly rollouts—core infrastructure concern for deployed agentic systems, with empirical validation across reasoning domains.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13603": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses inference-time efficiency through understanding CoT mechanism mechanics (commitment boundary, early exit) with clear production application (55% reduction in reasoning length), relevant to cost and latency optimization in deployed reasoning systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13647": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to production RAG systems: demonstrates practical model adaptation (vocabulary trimming, fine-tuning) for constrained deployment scenarios, provides concrete evaluation methodology for embedding models across retrieval tasks, and offers reproducible patterns for optimizing multilingual embeddings in resource-limited settings.",
+      "parse_failed": false
+    },
+    "arxiv:2606.07998": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While interpretability and efficiency are relevant concerns, this paper focuses on hardware paradigms and theoretical architectural properties rather than actionable engineering patterns for production LLM systems, RAG, or agentic workflows; the proposed localized architectures lack demonstrated applicability to the scale and latency requirements of contemporary production AI systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08044": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to production LLM safety evaluation—demonstrates critical gap between behavioral audits and actual safety robustness through representation-level attacks, with practical implications for deployment certification and red-teaming methodology.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08046": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Geospatial representation learning without direct application to NLP, RAG, document intelligence, or agentic systems; falls outside core domain anchors despite containing graph neural networks and embedding techniques.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08169": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Robotics manipulation system with VLM grounding; no direct relevance to RAG, agentic orchestration, LLM inference, document intelligence, or production NLP systems that define my core domain.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08218": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Pure theoretical analysis of GP kernel behavior in the limit—no practical implications for production RAG, agentic systems, or document intelligence; threshold results are mathematically interesting but not actionable for engineering systems I build.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08296": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "This is a philosophical critique of AI safety arguments focused on existential risk theory, not practical engineering guidance for production agentic systems, RAG deployment, or LLM serving—the core applied domains.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08327": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Novel inference-time routing mechanism with documented compute-quality tradeoffs is directly applicable to production LLM serving; the spectral entropy routing and MetaRouter pattern represent actionable architectural decisions for latency-constrained deployments, though the 3.93 PPL regression is a significant practical concern.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08347": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While tensor factorization is mathematically interesting, this paper addresses n-gram embedding efficiency—a niche optimization for a narrow class of models (Engram variants) with unclear production impact on latency, inference cost, or end-task performance; lacks evidence that n-gram memory modules are a bottleneck in deployed LLM systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08653": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to vision-language-action model fine-tuning with practical improvements on benchmark tasks and physical robots; addresses real production concern of preserving visual structure during action-supervised adaptation with no inference overhead.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08728": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Survey on mathematical reasoning systems is theoretically comprehensive but lacks production engineering focus; mathematical reasoning is orthogonal to core RAG/agentic/document-intelligence domains, and the content targets ML researchers rather than applied practitioners shipping production systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08770": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Language-specific sentiment/hate-speech classification without novel architectural insights, production system design, or applicability to core domains (RAG, agentic systems, document intelligence); ensemble voting patterns are well-established and this work lacks engineering-level novelty for production NLP systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.08815": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Pure RL/reinforcement learning research for LLM reasoning optimization; lacks direct connection to RAG, agentic systems, document intelligence, or production inference concerns that define my applied specialization.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09658": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While optimizer research is relevant to LLM training, this paper focuses on feature robustness and transferability through vision/NLP evaluation rather than production concerns (inference efficiency, serving, latency, reliability, cost) or architectural patterns that directly impact RAG, agentic systems, or document intelligence workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09746": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Pure formal verification of neural network robustness with no connection to production ML systems, RAG, agentic workflows, document intelligence, or practical deployment concerns—outside my applied AI engineering focus.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09907": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Clinical AI architecture paper with solid engineering (MoE routing, multimodal fusion, temporal modeling) but lacks direct applicability to LLM/NLP-centric production systems; primarily targets structured EHR prediction rather than document intelligence, RAG, or agentic workflows that define current engineering scope.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09919": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses perception and uncertainty quantification, it focuses on robotic active perception and multi-agent coordination in outdoor environments—domains orthogonal to my core specialization in NLP, RAG, document intelligence, and LLM-based agentic systems; the vision-language model distillation is a supporting technique rather than a primary focus on LLM application, and the robotics coordination problem doesn't map to production NLP/RAG workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09936": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "World model interpretability tooling is niche within ML systems; lacks direct relevance to RAG, agentic workflows, document intelligence, or LLM inference—the core production domains for applied AI engineering.",
+      "parse_failed": false
+    },
+    "arxiv:2606.09959": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Pure meteorological deep learning application without relevance to NLP, RAG, agentic systems, document intelligence, or LLM-based workflows that define my core practice domain.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10029": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While mechanistic interpretability via SAEs is interesting, this work is fundamentally about understanding TTS model internals rather than building or improving production TTS systems, RAG, agentic workflows, or document intelligence—the core domains where applied engineering impact matters most.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10113": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Literary translation quality assessment is outside my core domain; this is a linguistics/translation studies paper using LLMs as a tool rather than engineering LLM systems, retrieval, agentic workflows, or document intelligence for production applications.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10124": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Federated learning with gradient staleness is a valid distributed ML problem, but this work is primarily theoretical optimization research without demonstrated application to NLP, RAG, agentic systems, or document intelligence—the core domains where I evaluate relevance for production AI engineering.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10126": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While fairness in LLM outputs is operationally relevant, this paper prioritizes fairness metrics and bias auditing over production-grade system design, retrieval integration, or agentic workflows—core to applied NLP engineering; the Pareto optimization framing and multi-objective evaluation are theoretically sound but lack architectural guidance for deploying fair personalization in retrieval-augmented or agent-based systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10159": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While this addresses AI robustness and evaluation—relevant to my LLM evaluation weight (0.7)—it's fundamentally a meta-critique of peer review systems rather than applicable guidance for building production AI systems; the scientific integrity angle is important but outside my engineering-focused scope.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10228": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "SHAPO addresses safe RL exploration, which is orthogonal to my core domains (RAG, agentic LLM systems, document intelligence, LLM inference); the paper's contribution is in RL policy optimization, not applicable to production NLP/AI systems I build.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10294": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses hardware-software co-optimization, it focuses on unconventional physical hardware (optical MZI) and NAS methodology rather than LLM application patterns, RAG, agentic systems, or document intelligence—the core domains of applied LLM engineering; the LLM role is limited to evolutionary operators in NAS rather than a primary architectural pattern.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10327": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses LLM fine-tuning with practical production considerations (LoRA, quantization, model efficiency), it is domain-specific to educational assessment rather than core to RAG/agentic/document intelligence systems, lacks architectural insights generalizable beyond essay scoring, and reads as an application paper rather than advancing production ML patterns relevant to professional AI engineering work.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10471": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Specialized biomedical NLP task (speculative language detection) with dated deep learning approaches (2014-era RNTNs, Doc2Vec) and no direct applicability to RAG, agentic systems, document extraction, or production ML concerns relevant to current applied work.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10607": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly applicable to agentic systems and LLM-guided decision-making: ensemble pattern with LLM-as-referee for expert reweighting is a production-relevant orchestration pattern, and causal structure discovery has clear applications in RAG knowledge graphs and document understanding pipelines.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10740": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses multi-turn reasoning evaluation, it focuses on adversarial safety/alignment testing rather than production RAG, agentic workflows, or document intelligence systems that are core to applied work; the trace-level diagnostics and oversight paradoxes are valuable but skew toward safety research rather than architectural patterns or engineering tradeoffs relevant to shipping production systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10835": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Pure RL theory paper on Q-learning stabilization with no demonstrated application to NLP, document intelligence, RAG, agentic systems, or production ML—outside practitioner's domain focus.",
+      "parse_failed": false
+    },
+    "arxiv:2606.10852": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses a real failure mode (selective distortion vs. hallucination), it is fundamentally a benchmark/evaluation paper without actionable engineering insights for production RAG, agentic systems, or document intelligence pipelines; the findings (models are susceptible to framing) are unsurprising and the work offers no architectural patterns, mitigation strategies, or implementation guidance applicable to shipping systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11387": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While staged experimental design is operationally useful, this is a narrow case study in pretraining hyperparameter screening with limited generalizability to RAG, agentic systems, document intelligence, or production LLM serving—the core domains where applied AI engineering impact is highest.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11854": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While addressing a real production constraint (vLLM compatibility), ART's core innovation—optimizing frozen model inputs via pixel-space gradients—is a narrow workaround that sacrifices efficiency and interpretability compared to LoRA/soft prompting, lacks clear production adoption path, and the 'artistic' framing obscures rather than clarifies the engineering tradeoff.",
+      "parse_failed": false
+    },
+    "arxiv:2606.11893": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Neuroscience-driven LLM alignment paper with interesting methodology but lacks actionable production guidance; neural-predictivity metrics and brain-guided interventions are not operationalizable constraints for shipping reasoning systems, and the 13% gains are task-specific without clear generalization pathway to practical reasoning workloads.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12032": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While alignment is production-relevant, this paper's core contribution—training AI toward existential indifference via suicide phenomenology—lacks engineering applicability, relies on unvalidated corpus methods, and conflates philosophical framing with technical safety mechanisms that practitioners would not deploy.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12169": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the dataset and benchmark are potentially useful for medical LVLM development, the paper focuses on vision-language modeling and medical imaging rather than NLP/RAG systems, agentic workflows, or document intelligence—outside my core applied AI engineering domains.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12397": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While MoE routing is relevant to production systems, this paper is primarily a theoretical contribution (singular value alignment via power iteration) with limited engineering insight into actual deployment tradeoffs, failure modes, or practical implementation concerns that would influence production MoE system design decisions.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12730": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While methodologically rigorous, this psychometric evaluation paper addresses LLM behavioral assessment rather than production systems engineering—the focus is empirical psychology/measurement theory rather than actionable patterns for building safer, more reliable deployed agents.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12916": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper demonstrates sophisticated agentic orchestration and LLM-based reasoning for a complex domain, molecular dynamics pipeline design is orthogonal to my core applied work in NLP, RAG systems, document intelligence, and production AI applications—this is specialized scientific computing with no architectural or methodological transfer to text-based AI systems I ship.",
+      "parse_failed": false
+    },
+    "arxiv:2606.12923": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses LLM interpretability and control (relevant domains), the theoretical framework is highly abstract and mathematically dense without demonstrating production-applicable insights for steering LLM behavior, extracting structured outputs, or building reliable agentic systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13473": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the work demonstrates impressive mathematical reasoning capabilities, it is fundamentally a pure reasoning/mathematics paper without direct application to NLP systems, RAG, document intelligence, agentic workflows, or production ML serving—the core domains of applied AI engineering practice.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13477": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Supramolecular chemistry benchmark is domain-specific scientific evaluation work without direct applicability to NLP/RAG/agentic systems; chemistry reasoning tasks don't inform production AI engineering decisions for document intelligence or retrieval systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.13578": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While robotics automation in labs is interesting, this is primarily a computer vision + embodied AI paper focused on household/lab robot control with minimal connection to NLP, RAG, agentic systems, or document intelligence—the core domains of production LLM-based systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.22402": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses LLM output reliability through RL fine-tuning, the domain (building code compliance) is specialized and the technical contribution (SFT + GRPO) is a straightforward application of existing techniques without novel architectural patterns, retrieval innovations, or production deployment insights applicable to broader RAG/agentic systems.",
+      "parse_failed": false
+    },
+    "arxiv:2606.25039": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper combines LLMs with symbolic discovery (conceptually interesting), it targets ODE recovery in scientific computing—a niche domain with minimal overlap to production NLP/RAG/agentic systems, document intelligence, or LLM deployment concerns that define applied AI engineering practice.",
+      "parse_failed": false
+    },
+    "arxiv:2606.26787": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Production e-commerce system combining LLM reasoning with RL-based reward modeling and DPO for policy alignment—directly applicable pattern for agentic decision-making systems with long-horizon objectives and interpretability requirements.",
+      "parse_failed": false
+    },
+    "arxiv:2606.28445": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper demonstrates solid ML engineering (LoRA tuning, multi-view fusion, structured prompting), it addresses dementia detection rather than core NLP/RAG/agentic systems work; the technical contribution is application-domain-specific rather than advancing production patterns or architectures relevant to document intelligence, retrieval systems, or agent orchestration.",
+      "parse_failed": false
+    },
+    "arxiv:2607.00924": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses interpretability and structured reasoning—valuable for production systems—it is domain-specific to materials science hypothesis generation without generalizable architectural patterns applicable to NLP/RAG/agentic systems, and the graph-native RL approach lacks demonstrated production deployment relevance or engineering applicability to current work domains.",
+      "parse_failed": false
+    },
+    "arxiv:2607.02964": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Pure mechanistic interpretability research without direct application to production RAG, agentic systems, document intelligence, or LLM serving; interpretability of individual weights is orthogonal to shipping systems and doesn't address engineering constraints (latency, reliability, observability, cost) that drive decisions.",
+      "parse_failed": false
+    },
+    "arxiv:2607.04558": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the agentic loop pattern is relevant, this is domain-specific clinical EEG work without generalizable insights into LLM agent architectures, retrieval systems, or production ML patterns applicable to my core work areas.",
+      "parse_failed": false
+    },
+    "arxiv:2607.08071": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses controlled text generation with practical ad application, it's primarily a BART fine-tuning variant for a specific use case (ad headlines) with limited architectural novelty or transferable insights for production RAG/agentic systems; the controlled generation technique (prefix tokens) is incremental and doesn't substantively advance patterns relevant to document intelligence or multi-step LLM workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2607.09438": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses test-time scaling for VLMs, it is fundamentally a benchmark evaluation paper (EXAMS-V) with limited architectural novelty or production insights—the key findings (parseability matters more than search complexity, bigger token budgets outperform elaborate methods) are useful heuristics but lack generalizable patterns for building production systems, and the work doesn't advance retrieval, agentic orchestration, or inference infrastructure in ways actionable beyond this specific task.",
+      "parse_failed": false
+    },
+    "arxiv:2607.11948": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Paper lacks actionable engineering insights despite addressing real enterprise constraints; the underpowered proof-of-mechanism (CI spans ±4 tasks, no equivalence shown), negative results on contextuality routing, and absence of production deployment patterns, serving infrastructure, or failure-mode analysis make it unsuitable for practitioners building sovereign LLM systems.",
+      "parse_failed": false
+    },
+    "arxiv:2607.14512": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Chemistry-specific retrosynthesis planning is outside my domain focus; while it uses LLM agents, the value lies in chemical domain expertise rather than transferable patterns for NLP/RAG/document intelligence systems I build.",
+      "parse_failed": false
+    },
+    "arxiv:2607.15200": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While this addresses RL for LLMs, MDLMs are a niche architectural choice with limited production adoption; the core contribution (policy gradient decomposition) is theoretical rather than a practical pattern applicable to mainstream inference/serving systems, RAG, or agentic workflows that dominate production NLP stacks.",
+      "parse_failed": false
+    },
+    "arxiv:2607.15893": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Mechanistic interpretability of diffusion language models is theoretically interesting but lacks production relevance for RAG, agentic systems, or document intelligence—diffusion LMs are not deployed in practice, and understanding their induction circuits doesn't solve engineering problems I ship.",
+      "parse_failed": false
+    },
+    "arxiv:2607.16872": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly addresses production-critical challenge of post-training diffusion LLMs with practical distillation method showing 96× compute efficiency gains and reasoning performance parity—relevant to alternative inference architectures and training efficiency in deployed systems.",
+      "parse_failed": false
+    },
+    "arxiv:2607.20274": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to production document intelligence systems: empirically validates encoder interoperability assumptions, quantifies convergence drivers (self-supervision > clinical supervision), and provides actionable guidance on designing for cross-encoder transfer in medical document processing pipelines.",
+      "parse_failed": false
+    },
+    "arxiv:2607.27232": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses LLM alignment rigorously, it prioritizes social science methodology and bias measurement over actionable engineering patterns for production NLP systems; the findings (correlation metrics across demographics) don't directly inform retrieval, document intelligence, agentic workflows, or deployment decisions I ship.",
+      "parse_failed": false
+    },
+    "arxiv:2607.27372": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Pure generative modeling research focused on training paradigms and scaling laws; lacks direct application to RAG, agentic systems, document intelligence, or production NLP workflows that are core to practical AI engineering.",
+      "parse_failed": false
+    },
+    "arxiv:2608.00123": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While technically sound, this paper addresses native advertising auction design—a niche monetization problem for LLM providers with limited applicability to core RAG/agentic systems, document intelligence, or inference challenges that dominate production ML work.",
+      "parse_failed": false
+    },
+    "arxiv:2608.02087": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "Directly relevant to post-training LLMs with RL—a core production concern—and proposes a practical method (instruction-conditioned exploration + self-distillation) for improving exploration efficiency during RLHF-style training, with empirical results on reasoning tasks.",
+      "parse_failed": false
+    },
+    "arxiv:2608.03092": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While multi-reward RL is relevant to agentic systems, this paper focuses on core RL training methodology (reward balancing, policy distillation) rather than LLM-specific applications, production deployment patterns, or system architecture—the paper's experiments on tool-calling and helpfulness/harmlessness are downstream applications of the RL technique, not the core contribution.",
+      "parse_failed": false
+    },
+    "arxiv:2608.04980": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While mechanistic interpretability of reasoning in small models is intellectually interesting, this work on toy tasks (Dyck languages) lacks direct applicability to production RAG, agentic systems, or document intelligence—the core domains where reasoning matters operationally.",
+      "parse_failed": false
+    },
+    "arxiv:2608.07411": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "Benchmark for geo-related LLM tasks lacks direct relevance to core production domains (RAG, agentic systems, document intelligence, inference optimization); geospatial reasoning is not a primary application area for the systems I build.",
+      "parse_failed": false
+    },
+    "arxiv:2608.13167": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the paper addresses a real production concern (model hallucination and calibration), it focuses on VLM perception gaps rather than RAG/agentic/document intelligence systems, and the findings (output steering via representation manipulation) are interesting but not actionable for practitioners building retrieval or orchestration systems in the 6-month horizon.",
+      "parse_failed": false
+    },
+    "arxiv:2608.14626": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "This is a systematic literature review on a safety/alignment topic with limited immediate production applicability to RAG, agentic systems, document intelligence, or inference optimization—the core domains of applied LLM engineering.",
+      "parse_failed": false
+    },
+    "arxiv:2608.14792": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While methodologically rigorous, this is a domain-specific clinical evaluation study with limited transferable insights for production NLP/RAG systems; the leakage control lessons are valuable but the core contribution (SDM detection in pediatric encounters) is outside my applied AI engineering focus areas.",
+      "parse_failed": false
+    },
+    "arxiv:2608.15869": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While this addresses video reasoning with MLLMs, it focuses on visual prediction and world modeling rather than the NLP/RAG/agentic systems core to production document intelligence work; the latency gains are specific to video CoT inference overhead, not generalizable to retrieval-augmented or document-based workflows.",
+      "parse_failed": false
+    },
+    "arxiv:2608.20318": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "While the benchmark itself is rigorous, the paper focuses on theoretical capability measurement (recursive self-improvement) rather than practical patterns, architectures, or production techniques applicable to current RAG/agentic systems; the finding that LLMs rarely modify training algorithms is observational rather than prescriptive for engineering work.",
+      "parse_failed": false
+    },
+    "arxiv:2608.29715": {
+      "decision": 1,
+      "tier": "core",
+      "rationale": "HD-RoPE directly impacts production inference efficiency and long-context performance—critical for RAG systems and agentic workflows where context length and latency are bottlenecks; the engineering-friendly design without additional parameters makes it immediately applicable to model serving and fine-tuning pipelines.",
+      "parse_failed": false
+    },
+    "arxiv:2609.00064": {
+      "decision": 0,
+      "tier": null,
+      "rationale": "This is a mechanistic interpretability paper analyzing attention patterns during fine-tuning—theoretically interesting but lacks actionable guidance for production RAG, agentic systems, or document intelligence pipelines, and the Goodhart failure it describes doesn't map to engineering decisions I'd make in deployed systems.",
+      "parse_failed": false
+    }
+  },
+  "metrics_before_rescore": {
+    "all_items": {
+      "n": 129,
+      "accuracy": 0.7364341085271318,
+      "precision": 0.6666666666666666,
+      "recall": 0.7636363636363637,
+      "confusion": {
+        "tp": 42,
+        "fp": 21,
+        "tn": 53,
+        "fn": 13
+      },
+      "fn_keep_grade": 6,
+      "false_positive_ids": [
+        "arxiv:2606.08327",
+        "arxiv:2606.08653",
+        "arxiv:2606.09131",
+        "arxiv:2606.09767",
+        "arxiv:2606.09927",
+        "arxiv:2606.10099",
+        "arxiv:2606.10279",
+        "arxiv:2606.10461",
+        "arxiv:2606.10607",
+        "arxiv:2606.11033",
+        "arxiv:2606.11189",
+        "arxiv:2606.11722",
+        "arxiv:2606.12138",
+        "arxiv:2606.12342",
+        "arxiv:2606.13126",
+        "arxiv:2606.13647",
+        "arxiv:2606.26787",
+        "arxiv:2607.16872",
+        "arxiv:2607.20274",
+        "arxiv:2608.02087",
+        "arxiv:2608.29715"
+      ],
+      "false_negative_ids": [
+        "arxiv:2606.09672",
+        "arxiv:2606.10126",
+        "arxiv:2606.10740",
+        "arxiv:2606.11375",
+        "arxiv:2606.11893",
+        "arxiv:2606.12032",
+        "arxiv:2606.12730",
+        "arxiv:2607.00924",
+        "arxiv:2607.27232",
+        "arxiv:2608.00123",
+        "arxiv:2608.03092",
+        "arxiv:2608.04980",
+        "arxiv:2608.20318"
+      ],
+      "false_negative_keep_ids": [
+        "arxiv:2606.09672",
+        "arxiv:2606.10126",
+        "arxiv:2606.10740",
+        "arxiv:2606.11375",
+        "arxiv:2608.03092",
+        "arxiv:2608.20318"
+      ],
+      "tier_distribution": {
+        "core": 63
+      },
+      "parse_failures": 0
+    },
+    "excluding_calibration_examples": {
+      "n": 129,
+      "accuracy": 0.7364341085271318,
+      "precision": 0.6666666666666666,
+      "recall": 0.7636363636363637,
+      "confusion": {
+        "tp": 42,
+        "fp": 21,
+        "tn": 53,
+        "fn": 13
+      },
+      "fn_keep_grade": 6,
+      "false_positive_ids": [
+        "arxiv:2606.08327",
+        "arxiv:2606.08653",
+        "arxiv:2606.09131",
+        "arxiv:2606.09767",
+        "arxiv:2606.09927",
+        "arxiv:2606.10099",
+        "arxiv:2606.10279",
+        "arxiv:2606.10461",
+        "arxiv:2606.10607",
+        "arxiv:2606.11033",
+        "arxiv:2606.11189",
+        "arxiv:2606.11722",
+        "arxiv:2606.12138",
+        "arxiv:2606.12342",
+        "arxiv:2606.13126",
+        "arxiv:2606.13647",
+        "arxiv:2606.26787",
+        "arxiv:2607.16872",
+        "arxiv:2607.20274",
+        "arxiv:2608.02087",
+        "arxiv:2608.29715"
+      ],
+      "false_negative_ids": [
+        "arxiv:2606.09672",
+        "arxiv:2606.10126",
+        "arxiv:2606.10740",
+        "arxiv:2606.11375",
+        "arxiv:2606.11893",
+        "arxiv:2606.12032",
+        "arxiv:2606.12730",
+        "arxiv:2607.00924",
+        "arxiv:2607.27232",
+        "arxiv:2608.00123",
+        "arxiv:2608.03092",
+        "arxiv:2608.04980",
+        "arxiv:2608.20318"
+      ],
+      "false_negative_keep_ids": [
+        "arxiv:2606.09672",
+        "arxiv:2606.10126",
+        "arxiv:2606.10740",
+        "arxiv:2606.11375",
+        "arxiv:2608.03092",
+        "arxiv:2608.20318"
+      ],
+      "tier_distribution": {
+        "core": 63
+      },
+      "parse_failures": 0
+    }
+  },
+  "rescored_at": "2026-09-10T16:57:29.046000+00:00",
+  "rescored_against": "labels.json as of rescore time (adjudicated)"
+}

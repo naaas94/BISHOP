@@ -25,6 +25,7 @@ class EntryPollRow(BaseModel):
     profile_version: str
     pre_filter_batch_id: str
     pre_filter_rationale: str
+    pre_filter_tier: str | None = None
     summary: str | None = None
     concepts: list[str] | None = None
     tags: list[str] | None = None

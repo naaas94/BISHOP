@@ -50,6 +50,10 @@ AioSleep = Callable[[float], asyncio.Future[None]]
 
 _JSON_OBJECT_RE = re.compile(r"\{[^{}]*\}", re.DOTALL)
 
+PRE_FILTER_TIER_CORE = "core"
+PRE_FILTER_TIER_PERIPHERAL = "peripheral"
+PRE_FILTER_TIERS = frozenset({PRE_FILTER_TIER_CORE, PRE_FILTER_TIER_PERIPHERAL})
+
 
 def _merge_tracked(
     tracked: dict[str, BatchRecordWire],
@@ -80,6 +84,28 @@ def _batch_timed_out(batch: BatchRecordWire, *, now: datetime) -> bool:
         submitted = submitted.replace(tzinfo=UTC)
     compare_now = now if now.tzinfo is not None else now.replace(tzinfo=UTC)
     return compare_now >= submitted + timedelta(hours=BATCH_TIMEOUT_HOURS)
+
+
+def _normalize_pre_filter_tier(
+    source_id: str,
+    decision: int,
+    raw_tier: object,
+) -> str | None:
+    """Tier is optional (profile v1.0.0 omits it): reject → None, pass → core|peripheral."""
+    if decision != 1:
+        return None
+    if isinstance(raw_tier, str) and raw_tier.strip().lower() in PRE_FILTER_TIERS:
+        return raw_tier.strip().lower()
+    if raw_tier is not None:
+        logger.warning(
+            "pre_filter tier normalized",
+            extra={
+                "source_id": source_id,
+                "event": "pre_filter_tier_normalized",
+                "raw_tier": raw_tier,
+            },
+        )
+    return PRE_FILTER_TIER_CORE
 
 
 def parse_pre_filter_response(source_id: str, text: str | None) -> ParsedPreFilterDecision:
@@ -128,10 +154,16 @@ def parse_pre_filter_response(source_id: str, text: str | None) -> ParsedPreFilt
             pre_filter_rationale="malformed JSON response",
             parse_failed=True,
         )
+    normalized_decision = int(decision)
     return ParsedPreFilterDecision(
         source_id=source_id,
-        decision=int(decision),
+        decision=normalized_decision,
         pre_filter_rationale=rationale.strip(),
+        pre_filter_tier=_normalize_pre_filter_tier(
+            source_id,
+            normalized_decision,
+            payload.get("tier"),
+        ),
         parse_failed=False,
     )
 
@@ -364,6 +396,7 @@ async def _handle_pre_filter_complete(
                 source_id=parsed.source_id,
                 decision=parsed.decision,
                 pre_filter_rationale=parsed.pre_filter_rationale,
+                pre_filter_tier=parsed.pre_filter_tier,
             ),
         )
 

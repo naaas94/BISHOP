@@ -44,6 +44,7 @@ class PreFilterResultEntryWire(BaseModel):
     source_id: str
     decision: int
     pre_filter_rationale: str
+    pre_filter_tier: str | None = None
 
 
 class PreFilterResultsRequest(BaseModel):
@@ -81,6 +82,7 @@ class ParsedPreFilterDecision(BaseModel):
     source_id: str
     decision: int
     pre_filter_rationale: str
+    pre_filter_tier: str | None = None
     parse_failed: bool = False
 
 

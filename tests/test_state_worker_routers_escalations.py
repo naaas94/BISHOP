@@ -100,5 +100,6 @@ def test_escalations_returns_flagged_entry_with_error_log(
     assert entries[0]["source_id"] == _SOURCE
     assert entries[0]["title"] == "Escalated Paper"
     assert entries[0]["processing_state"] == ProcessingState.ESCALATION_FLAGGED.value
-    assert len(entries[0]["error_log"]) == 1
+    assert len(entries[0]["error_log"]) == 2
     assert entries[0]["error_log"][0]["message"] == "Not found"
+    assert entries[0]["error_log"][1]["error_class"] == "ALERT"
