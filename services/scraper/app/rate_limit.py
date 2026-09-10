@@ -27,6 +27,48 @@ SOURCE_RATE_LIMITS: dict[str, RateLimit] = {
         max_retries=4,
         jitter=True,
     ),
+    SourceEnum.GITHUB.value: RateLimit(
+        calls=5000,
+        period_seconds=3600,
+        backoff="linear",
+        max_retries=5,
+        jitter=True,
+    ),
+    SourceEnum.SEMANTIC_SCHOLAR.value: RateLimit(
+        calls=100,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    ),
+    SourceEnum.HUGGINGFACE.value: RateLimit(
+        calls=50,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    ),
+    SourceEnum.PAPERSWITHCODE.value: RateLimit(
+        calls=20,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    ),
+    SourceEnum.OPENREVIEW.value: RateLimit(
+        calls=10,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    ),
+    SourceEnum.LESSWRONG.value: RateLimit(
+        calls=5,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    ),
 }
 
 

@@ -75,6 +75,56 @@ def test_arxiv_rate_limit_matches_spec() -> None:
     )
 
 
+def test_all_source_rate_limits_match_appendix_b() -> None:
+    rate_limit = _load_rate_limit_module()
+    limits = rate_limit.SOURCE_RATE_LIMITS
+
+    assert set(limits) == {member.value for member in SourceEnum}
+
+    assert limits[SourceEnum.GITHUB.value] == rate_limit.RateLimit(
+        calls=5000,
+        period_seconds=3600,
+        backoff="linear",
+        max_retries=5,
+        jitter=True,
+    )
+    assert limits[SourceEnum.SEMANTIC_SCHOLAR.value] == rate_limit.RateLimit(
+        calls=100,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    )
+    assert limits[SourceEnum.HUGGINGFACE.value] == rate_limit.RateLimit(
+        calls=50,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    )
+    assert limits[SourceEnum.PAPERSWITHCODE.value] == rate_limit.RateLimit(
+        calls=20,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    )
+    assert limits[SourceEnum.OPENREVIEW.value] == rate_limit.RateLimit(
+        calls=10,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    )
+    assert limits[SourceEnum.LESSWRONG.value] == rate_limit.RateLimit(
+        calls=5,
+        period_seconds=1,
+        backoff="exponential",
+        max_retries=3,
+        jitter=True,
+    )
+
+
 @pytest.mark.asyncio
 async def test_token_bucket_throttles() -> None:
     rate_limit = _load_rate_limit_module()

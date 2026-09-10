@@ -13,6 +13,7 @@ import httpx
 import pytest
 
 from bishop_shared.enums import DomainEnum, SourceEnum
+from bishop_shared.scraper_config import BACKFILL_CONFIG
 from bishop_shared.source_config import SourceCategoryConfig
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -106,6 +107,25 @@ def test_make_source_id() -> None:
 
 def test_resolve_effective_since_uses_backfill_window() -> None:
     arxiv = _load_arxiv_stack()
+    now = datetime(2026, 6, 12, 12, 0, 0, tzinfo=UTC)
+    resolved = arxiv.resolve_effective_since(None, now=now)
+    assert resolved == datetime(2026, 6, 5, 12, 0, 0, tzinfo=UTC)
+
+
+def test_backfill_config_and_incremental_window_stay_independent() -> None:
+    """Flag 4 falsifier (M8 T1-bis).
+
+    ``BACKFILL_CONFIG["arxiv"].window_days == 60`` is the §18.2 backfill-only
+    datum. It must not leak into the incremental
+    ``resolve_effective_since(since=None)`` default, which stays
+    ``ARXIV_BACKFILL_WINDOW_DAYS == 7`` until T8 enables backfill behind
+    ``BISHOP_BACKFILL_ENABLED``.
+    """
+    arxiv = _load_arxiv_stack()
+
+    assert BACKFILL_CONFIG["arxiv"].window_days == 60
+    assert arxiv.ARXIV_BACKFILL_WINDOW_DAYS == 7
+
     now = datetime(2026, 6, 12, 12, 0, 0, tzinfo=UTC)
     resolved = arxiv.resolve_effective_since(None, now=now)
     assert resolved == datetime(2026, 6, 5, 12, 0, 0, tzinfo=UTC)
