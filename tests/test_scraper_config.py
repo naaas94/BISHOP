@@ -128,3 +128,27 @@ def test_load_arxiv_source_config_defaults_to_measure_only() -> None:
     assert config.enforce is False
     assert config.include_categories == []
     assert "cs.CV" in config.exclude_categories
+
+
+def test_github_token_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GITHUB_TOKEN", "ghp_test_token")
+    config = _load_config_module()
+    assert config.GITHUB_TOKEN == "ghp_test_token"
+
+
+def test_github_token_default_none(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    config = _load_config_module()
+    assert config.GITHUB_TOKEN is None
+
+
+def test_semantic_scholar_key_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SEMANTIC_SCHOLAR_API_KEY", "ss-test-key")
+    config = _load_config_module()
+    assert config.SEMANTIC_SCHOLAR_API_KEY == "ss-test-key"
+
+
+def test_semantic_scholar_key_default_none(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("SEMANTIC_SCHOLAR_API_KEY", raising=False)
+    config = _load_config_module()
+    assert config.SEMANTIC_SCHOLAR_API_KEY is None

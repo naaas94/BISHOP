@@ -18,3 +18,14 @@ def _int_from_env(name: str, default: int) -> int:
 
 ARXIV_BACKFILL_WINDOW_DAYS = _int_from_env("BISHOP_ARXIV_BACKFILL_WINDOW_DAYS", 7)
 SCRAPER_SCHEDULE_INTERVAL_SEC = _int_from_env("BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC", 21600)
+
+
+def _optional_str_from_env(name: str) -> str | None:
+    raw = os.environ.get(name)
+    if raw is None or raw == "":
+        return None
+    return raw
+
+
+GITHUB_TOKEN = _optional_str_from_env("GITHUB_TOKEN")
+SEMANTIC_SCHOLAR_API_KEY = _optional_str_from_env("SEMANTIC_SCHOLAR_API_KEY")
