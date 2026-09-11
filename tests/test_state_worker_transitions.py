@@ -40,6 +40,8 @@ from app.transitions import (  # noqa: E402
     claim_entries_poll,
     claim_manifest_poll,
     create_entry_from_content,
+    list_parked_manifests,
+    promote_parked,
     ingest_manifest_batch,
     manual_retry,
     mark_enrichment_stage1_submitted,
@@ -224,8 +226,52 @@ def test_terminal_state_blocks_pre_filter_update(temp_db: Path) -> None:
     asyncio.run(_run())
 
 
-def test_pre_filter_tier_peripheral_round_trips_into_entry(temp_db: Path) -> None:
-    """Contract: a peripheral pass persists on manifest and propagates to the entry row."""
+def test_pre_filter_tier_peripheral_parks_without_entry(temp_db: Path) -> None:
+    """Peripheral pass lands in RELEVANCE_PARKED and does not create an entries row."""
+
+    async def _run() -> None:
+        await init_pool(str(temp_db), size=1)
+        try:
+            async with get_db() as conn:
+                await _seed_discovered(conn)
+                await claim_manifest_poll(conn, ProcessingState.DISCOVERED)
+                result = await apply_pre_filter_results(
+                    conn,
+                    "batch-1",
+                    "1.2.0-soft-launch",
+                    [
+                        PreFilterResultEntryWire(
+                            source_id=_SOURCE,
+                            decision=1,
+                            pre_filter_rationale="Worth a skim.",
+                            pre_filter_tier="peripheral",
+                        )
+                    ],
+                )
+                assert (result.passed, result.rejected, result.parked) == (0, 0, 1)
+                cursor = await conn.execute(
+                    "SELECT processing_state, pre_filter_tier FROM manifest WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                assert tuple(await cursor.fetchone()) == (
+                    ProcessingState.RELEVANCE_PARKED.value,
+                    "peripheral",
+                )
+                parked = await list_parked_manifests(conn)
+                assert [row.source_id for row in parked] == [_SOURCE]
+                cursor = await conn.execute(
+                    "SELECT COUNT(*) FROM entries WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                assert (await cursor.fetchone())[0] == 0
+        finally:
+            await close_pool()
+
+    asyncio.run(_run())
+
+
+def test_promote_parked_to_passed_then_entry(temp_db: Path) -> None:
+    """Promote moves PARKED → PASSED; scrape then copies tier onto the entry."""
 
     async def _run() -> None:
         await init_pool(str(temp_db), size=1)
@@ -236,7 +282,7 @@ def test_pre_filter_tier_peripheral_round_trips_into_entry(temp_db: Path) -> Non
                 await apply_pre_filter_results(
                     conn,
                     "batch-1",
-                    "1.1.0",
+                    "1.2.0-soft-launch",
                     [
                         PreFilterResultEntryWire(
                             source_id=_SOURCE,
@@ -246,12 +292,8 @@ def test_pre_filter_tier_peripheral_round_trips_into_entry(temp_db: Path) -> Non
                         )
                     ],
                 )
-                cursor = await conn.execute(
-                    "SELECT pre_filter_tier FROM manifest WHERE source_id = ?",
-                    (_SOURCE,),
-                )
-                assert tuple(await cursor.fetchone()) == ("peripheral",)
-
+                state = await promote_parked(conn, _SOURCE)
+                assert state == ProcessingState.RELEVANCE_PASSED
                 await claim_manifest_poll(conn, ProcessingState.RELEVANCE_PASSED)
                 await create_entry_from_content(conn, _SOURCE, "full body")
                 cursor = await conn.execute(

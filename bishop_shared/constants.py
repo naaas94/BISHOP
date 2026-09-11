@@ -45,3 +45,18 @@ UI_HOST_PORT = 8081
 SQLITE_DB_FILENAME = "bishop.db"
 _SQLITE_MOUNT = next(m for m in BISHOP_VOLUME_MOUNTS if m.host_suffix == "sqlite").container_path
 SQLITE_DB_PATH = f"{_SQLITE_MOUNT}/{SQLITE_DB_FILENAME}"
+
+# Integrity-gated snapshots live beside the live file; the live name never rotates.
+# See .dev/decision-logs/ops/sqlite-snapshot-and-integrity-gate.md.
+SQLITE_SNAPSHOT_DIRNAME = "snapshots"
+SQLITE_SNAPSHOT_DIR = f"{_SQLITE_MOUNT}/{SQLITE_SNAPSHOT_DIRNAME}"
+SQLITE_SNAPSHOT_PREFIX = "bishop-"
+SQLITE_SNAPSHOT_SUFFIX = ".db"
+SQLITE_SNAPSHOT_TIMESTAMP_FORMAT = "%Y%m%d-%H%M%S"
+SQLITE_SNAPSHOT_GLOB = f"{SQLITE_SNAPSHOT_PREFIX}*{SQLITE_SNAPSHOT_SUFFIX}"
+SQLITE_SNAPSHOT_TTL_HOURS = 24
+SQLITE_SNAPSHOT_INTERVAL_MINUTES = 30
+
+# Busy timeout for every writer connection; a Windows bind mount blocks longer
+# than the SQLite default of 0ms, which surfaces as spurious "database is locked".
+SQLITE_BUSY_TIMEOUT_MS = 5000

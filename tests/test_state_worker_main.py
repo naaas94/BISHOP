@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 
 import pytest
+from unittest.mock import AsyncMock
+
 from fastapi.testclient import TestClient
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -27,10 +29,23 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
         yield test_client
 
 
-def test_main_health_without_db_query(client: TestClient) -> None:
+def test_main_health_without_db_query(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    boom = AsyncMock(side_effect=AssertionError("GET /health must not query the database"))
+    monkeypatch.setattr("app.main.get_db", boom)
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+    boom.assert_not_called()
+
+
+def test_main_health_db_ok_on_migrated_db(client: TestClient) -> None:
+    response = client.get("/health/db")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "ok"
+    assert body["detail"]
 
 
 def test_main_registers_spec_routes() -> None:
@@ -38,6 +53,7 @@ def test_main_registers_spec_routes() -> None:
     routes = {route.path for route in app.routes if hasattr(route, "path")}
     expected = {
         "/health",
+        "/health/db",
         "/manifest/batch",
         "/manifest/poll",
         "/entries/poll",
@@ -52,5 +68,7 @@ def test_main_registers_spec_routes() -> None:
         "/batches/{batch_id}",
         "/scraper-state/{source}",
         "/escalations",
+        "/parked",
+        "/parked/promote",
     }
     assert expected.issubset(routes)

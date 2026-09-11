@@ -16,7 +16,7 @@ COMPOSE_PATH = Path("docker-compose.yml")
 # T1 decision log — per-service host_suffix mounts at M0.
 SERVICE_VOLUME_SUFFIXES: dict[str, tuple[str, ...]] = {
     "state-worker": ("sqlite", "logs"),
-    "batch-poller": ("sqlite", "logs"),
+    "batch-poller": ("logs",),
     "vector-writer": ("lancedb", "duckdb", "bm25", "logs"),
     "query-api": ("lancedb", "duckdb", "bm25", "sqlite", "logs"),
     "pre-filter-worker": ("profiles", "logs"),
@@ -64,7 +64,7 @@ def test_state_worker_has_healthcheck_and_no_host_ports(compose_text: str) -> No
     block = _service_block(compose_text, "state-worker")
     assert "healthcheck:" in block
     assert "curl" in block
-    assert "http://localhost:8000/health" in block
+    assert "http://localhost:8000/health/db" in block
     assert "start_period: 30s" in block
     assert "ports:" not in block
 
@@ -137,6 +137,12 @@ def test_vector_writer_stop_grace_period(compose_text: str) -> None:
     """Falsifier: spec §6.2 G1 requires stop_grace_period on vector-writer."""
     block = _service_block(compose_text, "vector-writer")
     assert "stop_grace_period: 30s" in block
+
+
+def test_batch_poller_has_no_sqlite_mount(compose_text: str) -> None:
+    """Only state-worker (rw) and query-api (ro) may mount sqlite."""
+    block = _service_block(compose_text, "batch-poller")
+    assert "${BISHOP_DATA_ROOT}/sqlite:/app/data/sqlite" not in block
 
 
 def test_repo_root_build_context_for_bishop_shared(compose_text: str) -> None:

@@ -20,7 +20,7 @@ Consolidated open and half-open items from audits (M0–M7), milestone handoffs,
 | [OPEN-002](#open-002--monolithic-pytest-app-namespace-collision) | P0 | Open | Full `pytest tests/` breaks after multi-service `app` imports |
 | [OPEN-003](#open-003--m6-integration-sysmodules-leak) | P0 | Half-open | M6 harness teardown insufficient; poisons state-worker config test |
 | [OPEN-004](#open-004--charter-g4-full-e2e-arxiv--indexed) | P1 | Open | Manual charter exit gate; not automated |
-| [OPEN-007](#open-007--sqlite-hardening-post-corruption) | P1 | Open | `db_hardening.md` recommendations after 2026-06-13 incident |
+| [OPEN-007](#open-007--sqlite-hardening-post-corruption) | P1 | Mostly closed | Hardening landed 2026-09-11; named volume / query-api HTTP-only remain |
 | [OPEN-008](#open-008--batch-claim-release-on-failures) | P2 | Half-open | Orphan/residual claims on submit 400 / register 409 |
 | [OPEN-009](#open-009--orphan-external-anthropic-batch) | P2 | Waived-deferred | Submit succeeds, state-worker register fails — no cancel |
 | [OPEN-010](#open-010--live-g3-anthropic-model-probe) | P2 | Open | `verify-g3.sh` SKIPs without API key |
@@ -140,28 +140,40 @@ Should pass in either order.
 
 | Field | Value |
 |-------|-------|
-| **Status** | Open — recommendations documented, not implemented |
-| **Incident** | 2026-06-13 — `bishop.db` replaced with ArXiv HTML; clean reset per ops log |
+| **Status** | Mostly closed 2026-09-11 — see remaining table below |
+| **Incidents** | 2026-06-13 — `bishop.db` replaced with ArXiv HTML; clean reset per ops log. 2026-09-11 — torn btree/overflow pages; **salvaged, root-caused, hardened** |
 
-**What:** Live session exposed unsafe multi-consumer sqlite volume layout on Windows bind mounts. Recovery done; hardening deferred.
+**What:** June's session exposed an unsafe multi-consumer sqlite volume layout on Windows bind mounts and the hardening was deferred. September's second corruption forced it, and also found the actual root cause: a sweep raised mid-write and `get_db()` returned the connection to the pool with its write transaction open, holding the single WAL write lock and 500-ing every route while `/health` stayed green. Deferred `BEGIN` (which bypasses `busy_timeout` on upgrade) and Alembic's `disable_existing_loggers=True` (which silenced every app logger at startup) were contributing defects.
 
 **Anchors:**
-- Ops note: `.dev/db_hardening.md` (full incident + recommendations)
-- Ops log: `.dev/decision-logs/ops/bishop-db-corrupt-clean-reset.md`
-- CHANGELOG: `bishop.db corrupt volume — clean reset` section
-- Reader: `services/query-api/app/sqlite_reader.py` — direct `mode=ro` opens per request
-- Compose: `docker-compose.yml` — sqlite mounted on **state-worker** (L10), **batch-poller** (L92), **query-api** (L131)
+- Ops log (authoritative): `.dev/decision-logs/ops/sqlite-snapshot-and-integrity-gate.md`
+- Standing note: `.dev/sqlite.md` (snapshot/restore usage)
+- June ops note: `.dev/db_hardening.md`; June reset: `.dev/decision-logs/ops/bishop-db-corrupt-clean-reset.md`
+- Salvage tool: `scripts/sqlite_salvage.py`; rotator: `scripts/sqlite_snapshot.py`; restore: `scripts/sqlite_restore.py`
+- Compose: sqlite now mounted on **state-worker** (rw) and **query-api** (ro) only
 
-**Recommended follow-ups (from `db_hardening.md`):**
+**Closed 2026-09-11:**
 
-| Change | Where | Priority |
-|--------|-------|----------|
-| `PRAGMA integrity_check` on startup | state-worker lifespan | High |
-| `PRAGMA busy_timeout` on pool init | state-worker `db.py` | Medium |
-| Remove sqlite mount from **batch-poller** (does not use DB) | `docker-compose.yml` L92 | High, low effort |
-| query-api entry reads via state-worker HTTP (not direct sqlite) | `sqlite_reader.py` + new/proxy route | Medium |
-| `/health/db` or integrity in health | state-worker | Medium |
-| Refuse compose up if DB fails integrity | scripts / ops | Low |
+| Change | Where | State |
+|--------|-------|-------|
+| `PRAGMA integrity_check` on startup, refusing to start | state-worker lifespan, before Alembic | Done |
+| `PRAGMA busy_timeout` on pool init + migration engine | `app/db.py` | Done |
+| Remove sqlite mount from **batch-poller** | `docker-compose.yml` | Done |
+| `/health/db` with real I/O + 503, compose healthcheck uses it | state-worker + compose | Done |
+| Refuse startup if DB fails integrity (supersedes "refuse compose up") | `app/db.py` | Done |
+| Integrity-gated snapshots, 30 min, 24h TTL + restore script | `scripts/`, task `BishopSqliteSnapshot` | Done |
+| Pooled-connection transaction leak / `row_factory` / `BEGIN IMMEDIATE` | `app/db.py`, `app/transitions.py` | Done |
+| App loggers silenced by migrations | `alembic/env.py` | Done |
+
+**Still open (needs an operator decision, tracked here):**
+
+| Change | Where | Priority | Note |
+|--------|-------|----------|------|
+| query-api entry reads via state-worker HTTP (not direct sqlite) | `sqlite_reader.py` + proxy route | Medium | Larger M7 seam cut; keeps ro mount today |
+| Move sqlite to a Docker **named volume** | compose + all `.dev/sqlite.md` recipes | Medium | Right long-term fix for bind-mount page tearing; changes host workflow |
+| Cut the 5-connection aiosqlite pool | `app/db.py` | Low | Contention gone after `BEGIN IMMEDIATE`; may no longer be warranted. Measure before cutting |
+| Move `content_raw` out of SQLite (blob dir + atomic persist) | spec + vector/content paths | Low | Would shrink the overflow pages that tore; spec change, proposal only |
+| Re-pre-filter the ~136 manifest rows lost to torn pages | ops | Low | Free to re-discover, paid to re-decide; not authorised |
 
 **Deferred (ops):** Automated backup; forensics on quarantined volume; integrity gate in verify scripts.
 
@@ -358,10 +370,14 @@ UI_HOST_PORT=8081
 
 | Field | Value |
 |-------|-------|
-| **Status** | Open (no test) |
+| **Status** | Partially covered 2026-09-11 — writer-side contention now tested; reader-side still not |
 | **Handoff** | M7 §8.4 — `mode=ro` only; contention not exercised |
 
-**Anchors:** `services/query-api/app/sqlite_reader.py`; M7 CHANGELOG T5 deferral; ties to OPEN-007.
+**Covered now:** `tests/test_state_worker_pool_transaction_leak.py` exercises the writer-side failure that actually bit us — a borrower raising mid-write must not hold the WAL write lock or poison the pool. `BEGIN IMMEDIATE` + `busy_timeout` landed (see OPEN-007). Live: a 4-minute loaded run produced zero `database is locked`.
+
+**Still missing:** a genuinely concurrent adversarial test — N simultaneous writers plus a `mode=ro` reader (query-api) against one WAL file — and no test runs against a Windows bind mount, which is the environment where the pages actually tore. Both live runs were manual.
+
+**Anchors:** `services/query-api/app/sqlite_reader.py`; `tests/test_state_worker_pool_transaction_leak.py`; M7 CHANGELOG T5 deferral; ties to OPEN-007.
 
 ---
 

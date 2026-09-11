@@ -203,6 +203,16 @@ class PreFilterResultsResult:
     updated: int
     passed: int
     rejected: int
+    parked: int = 0
+
+
+def _pre_filter_target(item: PreFilterResultEntryWire) -> ProcessingState:
+    """Core (or tier-less) pass → PASSED; peripheral pass → PARKED; reject → REJECTED."""
+    if item.decision != 1:
+        return ProcessingState.RELEVANCE_REJECTED
+    if item.pre_filter_tier == "peripheral":
+        return ProcessingState.RELEVANCE_PARKED
+    return ProcessingState.RELEVANCE_PASSED
 
 
 def normalize_failure_state(state_at_failure: ProcessingState) -> ProcessingState:
@@ -436,7 +446,11 @@ async def register_batch(
         source_ids=list(request.source_ids),
         external_batch_id=request.external_batch_id,
     )
-    await conn.execute("BEGIN")
+    # IMMEDIATE, not deferred: a deferred BEGIN takes no write lock, so the first
+    # UPDATE has to upgrade, and SQLite cannot safely back off an upgrade — it
+    # returns SQLITE_BUSY without honouring busy_timeout. That surfaced as
+    # "database is locked" 500s under concurrent writers on 2026-09-11.
+    await conn.execute("BEGIN IMMEDIATE")
     try:
         await _insert_row(conn, "batches", record.to_db_row())
         if request.batch_type == BatchTypeEnum.ENRICHMENT_STAGE1:
@@ -661,7 +675,7 @@ async def claim_manifest_poll(
     if lock_state is None:
         return PollClaimResult(entries=[], claimed_count=0, transitioned_to=None)
 
-    await conn.execute("BEGIN")
+    await conn.execute("BEGIN IMMEDIATE")
     try:
         query = (
             "SELECT * FROM manifest WHERE processing_state = ?"
@@ -729,7 +743,7 @@ async def claim_entries_poll(
     if lock_state is None:
         return PollClaimResult(entries=[], claimed_count=0, transitioned_to=None)
 
-    await conn.execute("BEGIN")
+    await conn.execute("BEGIN IMMEDIATE")
     try:
         query = (
             "SELECT * FROM entries WHERE processing_state = ?"
@@ -778,6 +792,7 @@ async def apply_pre_filter_results(
     updated = 0
     passed = 0
     rejected = 0
+    parked = 0
     for item in entries:
         manifest = await _fetch_manifest(conn, item.source_id)
         if manifest is None:
@@ -785,14 +800,11 @@ async def apply_pre_filter_results(
         _guard_terminal(manifest.processing_state, item.source_id)
 
         if manifest.processing_state == ProcessingState.RELEVANCE_QUEUED:
-            target = (
-                ProcessingState.RELEVANCE_PASSED
-                if item.decision == 1
-                else ProcessingState.RELEVANCE_REJECTED
-            )
+            target = _pre_filter_target(item)
         elif manifest.processing_state in {
             ProcessingState.RELEVANCE_PASSED,
             ProcessingState.RELEVANCE_REJECTED,
+            ProcessingState.RELEVANCE_PARKED,
         }:
             if (
                 manifest.pre_filter_batch_id == batch_id
@@ -807,8 +819,10 @@ async def apply_pre_filter_results(
                 "pre_filter_result",
             )
 
-        if item.decision == 1:
+        if target == ProcessingState.RELEVANCE_PASSED:
             passed += 1
+        elif target == ProcessingState.RELEVANCE_PARKED:
+            parked += 1
         else:
             rejected += 1
 
@@ -844,7 +858,9 @@ async def apply_pre_filter_results(
             },
         )
     await conn.commit()
-    return PreFilterResultsResult(updated=updated, passed=passed, rejected=rejected)
+    return PreFilterResultsResult(
+        updated=updated, passed=passed, rejected=rejected, parked=parked
+    )
 
 
 async def create_entry_from_content(
@@ -1087,7 +1103,7 @@ async def _h3_enrichment_stage1_success(
     )
     entry_type = item.entry_type.value if item.entry_type else None
 
-    await conn.execute("BEGIN")
+    await conn.execute("BEGIN IMMEDIATE")
     try:
         await conn.execute(
             "UPDATE entries SET processing_state = ? WHERE source_id = ?",
@@ -1175,7 +1191,7 @@ async def _h3_enrichment_stage2_success(
     item: EnrichmentStage2EntryWire,
     batch_id: str,
 ) -> None:
-    await conn.execute("BEGIN")
+    await conn.execute("BEGIN IMMEDIATE")
     try:
         await conn.execute(
             "UPDATE entries SET processing_state = ? WHERE source_id = ?",
@@ -1412,6 +1428,54 @@ async def manual_retry(conn: aiosqlite.Connection, source_id: str) -> Processing
     return target
 
 
+async def list_parked_manifests(conn: aiosqlite.Connection) -> list[ManifestEntry]:
+    """Manifest rows in RELEVANCE_PARKED, newest first. No entries row yet."""
+    _prepare_conn(conn)
+    cursor = await conn.execute(
+        """
+        SELECT * FROM manifest
+        WHERE processing_state = ?
+        ORDER BY discovered_at DESC
+        """,
+        (ProcessingState.RELEVANCE_PARKED.value,),
+    )
+    rows = await cursor.fetchall()
+    return [_row_to_manifest(row) for row in rows]
+
+
+async def promote_parked(conn: aiosqlite.Connection, source_id: str) -> ProcessingState:
+    """Manual inbox promote: RELEVANCE_PARKED → RELEVANCE_PASSED.
+
+    Content-scraper claims PASSED on the next poll. 404 if missing; 409 if not parked.
+    """
+    manifest = await _fetch_manifest(conn, source_id)
+    if manifest is None:
+        raise NotFoundError(source_id)
+    if manifest.processing_state != ProcessingState.RELEVANCE_PARKED:
+        raise InvalidTransitionError(
+            source_id,
+            manifest.processing_state.value,
+            ProcessingState.RELEVANCE_PASSED.value,
+        )
+    await _set_manifest_state(
+        conn,
+        source_id,
+        ProcessingState.RELEVANCE_PASSED,
+        expected=ProcessingState.RELEVANCE_PARKED,
+    )
+    await conn.commit()
+    logger.info(
+        "parked_promoted",
+        extra={
+            "event": "manual_parked_promote",
+            "source_id": source_id,
+            "from_state": ProcessingState.RELEVANCE_PARKED.value,
+            "to_state": ProcessingState.RELEVANCE_PASSED.value,
+        },
+    )
+    return ProcessingState.RELEVANCE_PASSED
+
+
 async def update_reading_status(
     conn: aiosqlite.Connection,
     source_id: str,
@@ -1493,6 +1557,7 @@ async def run_lock_state_recovery_sweep(
   Age proxy: manifest lock states use discovered_at; entry lock states use ingested_at
   (no state_entered_at column in §7 — see T2 decision log).
     """
+    _prepare_conn(conn)
     reference = now or datetime.now(UTC)
     cutoff = (reference - timedelta(seconds=threshold_sec)).isoformat()
     reset_count = 0
@@ -1557,6 +1622,7 @@ async def run_retry_sweep(
     now: datetime | None = None,
 ) -> int:
     """Re-enqueue eligible _FAILED manifest rows per §6.2 retry mapping."""
+    _prepare_conn(conn)
     reference = now or datetime.now(UTC)
     cutoff = reference.isoformat()
     limit = max_attempts if max_attempts is not None else RETRY_MAX_ATTEMPTS
@@ -1573,34 +1639,41 @@ async def run_retry_sweep(
     )
     rows = await cursor.fetchall()
     requeue_count = 0
-    for row in rows:
-        source_id = row[0]
-        failed_state = _parse_state(row[1])
-        target = RETRY_TARGET_MAP[failed_state]
-        await conn.execute(
-            """
-            UPDATE manifest SET
-                processing_state = ?,
-                next_retry_at = NULL
-            WHERE source_id = ?
-            """,
-            (target.value, source_id),
-        )
-        entry = await _fetch_entry(conn, source_id)
-        if entry is not None:
+    # The UPDATEs below open an implicit write transaction. Without this rollback
+    # a failure mid-loop left that transaction open on a pooled connection and
+    # deadlocked every writer behind the single WAL write lock.
+    try:
+        for row in rows:
+            source_id = row[0]
+            failed_state = _parse_state(row[1])
+            target = RETRY_TARGET_MAP[failed_state]
             await conn.execute(
-                "UPDATE entries SET processing_state = ? WHERE source_id = ?",
+                """
+                UPDATE manifest SET
+                    processing_state = ?,
+                    next_retry_at = NULL
+                WHERE source_id = ?
+                """,
                 (target.value, source_id),
             )
-        requeue_count += 1
-        logger.info(
-            "retry_requeue",
-            extra={
-                "source_id": source_id,
-                "from_state": failed_state.value,
-                "to_state": target.value,
-            },
-        )
-    if requeue_count:
-        await conn.commit()
+            entry = await _fetch_entry(conn, source_id)
+            if entry is not None:
+                await conn.execute(
+                    "UPDATE entries SET processing_state = ? WHERE source_id = ?",
+                    (target.value, source_id),
+                )
+            requeue_count += 1
+            logger.info(
+                "retry_requeue",
+                extra={
+                    "source_id": source_id,
+                    "from_state": failed_state.value,
+                    "to_state": target.value,
+                },
+            )
+        if requeue_count:
+            await conn.commit()
+    except Exception:
+        await conn.rollback()
+        raise
     return requeue_count

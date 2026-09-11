@@ -6,11 +6,11 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 
-from app.db import close_pool, init_pool, run_migrations
-from app.models import HealthResponse
-from app.routers import batches, entries, escalations, manifest, poll, scraper_state
+from app.db import close_pool, enforce_integrity, get_db, init_pool, run_migrations
+from app.models import DbHealthResponse, HealthResponse
+from app.routers import batches, entries, escalations, manifest, parked, poll, scraper_state
 from app.sweeps import start_sweep_task
 from bishop_shared.constants import STATE_WORKER_INTERNAL_PORT
 
@@ -23,6 +23,8 @@ _sweep_task: asyncio.Task[None] | None = None
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     global _sweep_shutdown, _sweep_task
+    logger.info("state-worker startup: checking sqlite integrity before migrations")
+    enforce_integrity()
     logger.info("state-worker startup: running migrations")
     run_migrations()
     logger.info("state-worker startup: initializing database pool")
@@ -45,11 +47,33 @@ app.include_router(entries.router)
 app.include_router(batches.router)
 app.include_router(scraper_state.router)
 app.include_router(escalations.router)
+app.include_router(parked.router)
 
 
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse(status="ok")
+
+
+@app.get("/health/db", response_model=DbHealthResponse)
+async def health_db(response: Response) -> DbHealthResponse:
+    try:
+        async with get_db() as conn:
+            cursor = await conn.execute(
+                "SELECT version_num FROM alembic_version LIMIT 1"
+            )
+            row = await cursor.fetchone()
+        if row is None:
+            raise RuntimeError("alembic_version is empty")
+        return DbHealthResponse(status="ok", detail=str(row[0]))
+    except Exception as exc:
+        logger.error(
+            "health/db failed: %s",
+            exc,
+            extra={"event": "health_db_failed"},
+        )
+        response.status_code = 503
+        return DbHealthResponse(status="error", detail=str(exc) or type(exc).__name__)
 
 
 def run() -> None:

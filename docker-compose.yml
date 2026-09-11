@@ -9,8 +9,11 @@ services:
     volumes:
       - ${BISHOP_DATA_ROOT}/sqlite:/app/data/sqlite
       - ${BISHOP_DATA_ROOT}/logs:/app/logs
+    # /health/db does real SQLite I/O. All 8 dependents gate on this via
+    # depends_on: service_healthy, so a corrupt DB blocks the stack instead of
+    # letting workers crash-loop against 500s. /health stays a liveness probe.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,6 +33,7 @@ services:
       BISHOP_BACKFILL_ENABLED: ${BISHOP_BACKFILL_ENABLED:-0}
       BISHOP_BACKFILL_CHUNK_DAYS: ${BISHOP_BACKFILL_CHUNK_DAYS:-7}
       BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC: ${BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC:-300}
+      BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS: ${BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS:-1}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       SEMANTIC_SCHOLAR_API_KEY: ${SEMANTIC_SCHOLAR_API_KEY:-}
       HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
@@ -95,7 +99,6 @@ services:
     networks:
       - bishop-internal
     volumes:
-      - ${BISHOP_DATA_ROOT}/sqlite:/app/data/sqlite
       - ${BISHOP_DATA_ROOT}/logs:/app/logs
     environment:
       STATE_WORKER_URL: http://state-worker:8000

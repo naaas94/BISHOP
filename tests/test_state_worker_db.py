@@ -17,6 +17,7 @@ for path in (_STATE_WORKER_ROOT, _REPO_ROOT):
 
 from app import db as db_mod  # noqa: E402
 from app.db import close_pool, get_db, init_pool, run_migrations  # noqa: E402
+from bishop_shared.constants import SQLITE_BUSY_TIMEOUT_MS  # noqa: E402
 
 EXPECTED_TABLES = frozenset(
     {"manifest", "entries", "batches", "error_log", "oov_tags_log", "scraper_state"}
@@ -71,3 +72,72 @@ def test_wal_mode_enabled(temp_db: Path) -> None:
             await close_pool()
 
     asyncio.run(_check_wal())
+
+
+def test_busy_timeout_applied_to_pooled_connections(temp_db: Path) -> None:
+    async def _check() -> None:
+        run_migrations(str(temp_db))
+        await init_pool(str(temp_db), size=1)
+        try:
+            async with get_db() as conn:
+                cursor = await conn.execute("PRAGMA busy_timeout")
+                row = await cursor.fetchone()
+                assert row is not None
+                assert int(row[0]) == SQLITE_BUSY_TIMEOUT_MS
+        finally:
+            await close_pool()
+
+    asyncio.run(_check())
+
+
+def test_busy_timeout_env_override_honored(
+    temp_db: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("BISHOP_SQLITE_BUSY_TIMEOUT_MS", "1234")
+
+    async def _check() -> None:
+        run_migrations(str(temp_db))
+        await init_pool(str(temp_db), size=1)
+        try:
+            async with get_db() as conn:
+                cursor = await conn.execute("PRAGMA busy_timeout")
+                row = await cursor.fetchone()
+                assert row is not None
+                assert int(row[0]) == 1234
+        finally:
+            await close_pool()
+
+    asyncio.run(_check())
+
+
+def test_busy_timeout_non_integer_env_raises(
+    temp_db: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("BISHOP_SQLITE_BUSY_TIMEOUT_MS", "not-an-int")
+
+    async def _check() -> None:
+        with pytest.raises(ValueError, match="BISHOP_SQLITE_BUSY_TIMEOUT_MS"):
+            await init_pool(str(temp_db), size=1)
+
+    asyncio.run(_check())
+
+
+def test_migrations_do_not_disable_app_loggers(temp_db: Path) -> None:
+    """Falsifier: Alembic's fileConfig defaults to disable_existing_loggers=True.
+
+    run_migrations runs in-process at startup, so that default silenced every
+    logger created at import time and the 2026-09-11 corruption produced 500s
+    with an empty log. Regression guard for alembic/env.py.
+    """
+    import logging
+
+    names = ("app.main", "app.db", "app.routers.entries")
+    loggers = [logging.getLogger(name) for name in names]
+    for logger in loggers:
+        logger.disabled = False
+
+    run_migrations(str(temp_db))
+
+    still_enabled = {logger.name: not logger.disabled for logger in loggers}
+    assert all(still_enabled.values()), f"loggers disabled by migrations: {still_enabled}"
+    assert all(logger.isEnabledFor(logging.ERROR) for logger in loggers)
