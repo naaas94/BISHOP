@@ -3,7 +3,7 @@
 **Plan name:** `m8-hardening-scale`  
 **Version:** 1.5  
 **run_status:** amended  
-**Status:** Amendment-complete, audit-pending (2026-09-11). Amendment-3/4 remediations landed: T9 F2 `be024148e02ffbb77d37632e6760b2b0e758ec4d`; T12 F4 `ba2ad79ca2390b010811563786be8485e86b0164`; T11 F3 `f4a793b183c2f636e47e7ebc52c46c2b55beec97`; T10-bis F1 `9f183675d6a713d76c3f822dcabb813f012d5c4d`. T1 / T8 / T10 remain halted (packets unmodified; do not re-dispatch). §8.1–§8.6 populated for re-audit revision 2. `run_status` stays `amended`. Re-audit slot: `audit_status: not_run`.  
+**Status:** Amendment-complete, audit-pending (2026-09-11). Amendment-3/4 remediations landed: T9 F2 `be024148e02ffbb77d37632e6760b2b0e758ec4d`; T12 F4 `ba2ad79ca2390b010811563786be8485e86b0164`; T11 F3 `f4a793b183c2f636e47e7ebc52c46c2b55beec97`; T10-bis F1 `9f183675d6a713d76c3f822dcabb813f012d5c4d`. T1 / T8 / T10 remain halted (packets unmodified; do not re-dispatch). §8.1–§8.6 populated for re-audit revision 2. `run_status` stays `amended`. Re-audit slot: `audit_status: accepted-with-waivers`. Re-audit: `.dev/audits/2026-09-11-m8-hardening-scale.md`, revision 2, verdict `pass-with-conditions`, `audit_status: accepted-with-waivers`; F1/F2/F3/F4 resolved; F5–F9 + PF1/PF2 named as waivers (not blocking).  
 **Charter path:** `.dev/bishop_program_charter.md`  
 **Charter version:** `0.1.0`  
 **Milestone ID:** `M8`  
@@ -13,7 +13,7 @@
 **Orch skill:** orchestrator-planning v1.2  
 **Supersedes:** plan v1.4 (`run_status: amended`; T9/T12 complete; T10 halted; T11 pending)  
 **Amendment round:** `amendment-4` (node `T10-bis`)  
-**Audit consumed:** `.dev/audits/2026-09-10-m8-hardening-scale.md`, revision 1, verdict `fail`, `audit_status: blocked` (historical — F1–F4). Landed closers: F2 T9 `be02414`; F4 T12 `ba2ad79`; F3 T11 `f4a793b`; F1 T10-bis `9f18367`. F5–F8 remain deferred (rev-1 minor/observation). Re-audit revision 2 is `audit_status: not_run`.
+**Audit consumed:** `.dev/audits/2026-09-10-m8-hardening-scale.md`, revision 1, verdict `fail`, `audit_status: blocked` (historical — F1–F4). Landed closers: F2 T9 `be02414`; F4 T12 `ba2ad79`; F3 T11 `f4a793b`; F1 T10-bis `9f18367`. F5–F8 remain deferred (rev-1 minor/observation). Re-audit: `.dev/audits/2026-09-11-m8-hardening-scale.md`, revision 2, verdict `pass-with-conditions`, `audit_status: accepted-with-waivers`; F1/F2/F3/F4 resolved; F5–F9 + PF1/PF2 named as waivers (not blocking).
 
 ---
 
@@ -695,7 +695,7 @@ Orch-applied before first dispatch. Closed: machine surfaces, T7 gold re-scope, 
 
 ## 8. Auditor handoff
 
-Handoff for **re-audit revision 2**. State is **amendment-complete, audit-pending**. `run_status: amended` (not `complete`). Re-audit slot: `audit_status: not_run`. Revision 1 historically recorded `audit_status: blocked` on F1–F4; that is a citation, not a new verdict. This section is evidence pointers, not a coverage verdict.
+Handoff for **re-audit revision 2**. State is **amendment-complete, audit-pending**. `run_status: amended` (not `complete`). Re-audit slot: `audit_status: accepted-with-waivers`. Revision 1 historically recorded `audit_status: blocked` on F1–F4; that is a citation, not a new verdict. This section is evidence pointers, not a coverage verdict.
 
 ### 8.1 Completion snapshot
 
@@ -916,7 +916,9 @@ Narrative-blind Phase 0 surfaces (same nine seeds; refreshed owners):
 | F3 major — `verify-m8.sh` omitted T5/T6 surfaces | `packets/T11.md` | §2 `scripts/verify-m8.sh` v1.4 Landed (T11) @ `f4a793b183c2f636e47e7ebc52c46c2b55beec97` |
 | F4 major — compose tags not `m8` | `packets/T12.md` | §2 Naming v1.4 Landed (T12) @ `ba2ad79ca2390b010811563786be8485e86b0164` |
 
-F5–F8 stay deferred (rev-1 minor/observation). T1 / T8 / T10 packets retained unmodified. Re-audit revision 2 is `audit_status: not_run`.
+F5–F8 stay deferred (rev-1 minor/observation). T1 / T8 / T10 packets retained unmodified.
+
+Re-audit revision 2 (2026-09-11): `pass-with-conditions` / `audit_status: accepted-with-waivers`. F1–F4 resolved. F5–F9, PF1 (`context-map-stale`), PF2 (`scout-incomplete`) named as waivers per `.dev/audits/2026-09-11-m8-hardening-scale.md`.
 
 ---
 
