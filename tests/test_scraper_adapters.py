@@ -79,8 +79,24 @@ async def test_source_adapter_contract() -> None:
     assert content == "Example\n\n"
 
 
-def test_registry_contains_only_arxiv() -> None:
+def test_registry_contains_all_expected_adapters() -> None:
+    """ADAPTER_REGISTRY lists all seven landed M8 adapters (T8-bis merger)."""
     _, registry, _ = _load_adapters_stack()
-    assert len(registry.ADAPTER_REGISTRY) == 1
-    assert registry.ADAPTER_REGISTRY[0] is registry.ArxivAdapter
-    assert registry.ADAPTER_REGISTRY[0].__name__ == "ArxivAdapter"
+    expected_sources = {
+        SourceEnum.ARXIV,
+        SourceEnum.GITHUB,
+        SourceEnum.HUGGINGFACE,
+        SourceEnum.LESSWRONG,
+        SourceEnum.OPENREVIEW,
+        SourceEnum.PAPERSWITHCODE,
+        SourceEnum.SEMANTIC_SCHOLAR,
+    }
+    registry_sources = {adapter_cls.source for adapter_cls in registry.ADAPTER_REGISTRY}
+    assert registry_sources == expected_sources
+    assert registry.ArxivAdapter in registry.ADAPTER_REGISTRY
+    assert registry.GitHubAdapter in registry.ADAPTER_REGISTRY
+    assert registry.HuggingFaceAdapter in registry.ADAPTER_REGISTRY
+    assert registry.LessWrongAdapter in registry.ADAPTER_REGISTRY
+    assert registry.OpenReviewAdapter in registry.ADAPTER_REGISTRY
+    assert registry.PapersWithCodeAdapter in registry.ADAPTER_REGISTRY
+    assert registry.SemanticScholarAdapter in registry.ADAPTER_REGISTRY

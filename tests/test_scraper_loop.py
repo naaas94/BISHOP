@@ -264,3 +264,19 @@ async def test_scheduler_invokes_cycle() -> None:
                 await main_mod.run_scheduler()
 
     assert invoked.is_set()
+
+
+def test_registry_lists_all_expected_sources() -> None:
+    """Assert ADAPTER_REGISTRY membership for all seven SourceEnum values."""
+    _, _, loop_mod, _, _ = _load_scraper_loop_stack()
+    expected_sources = {
+        SourceEnum.ARXIV,
+        SourceEnum.GITHUB,
+        SourceEnum.HUGGINGFACE,
+        SourceEnum.LESSWRONG,
+        SourceEnum.OPENREVIEW,
+        SourceEnum.PAPERSWITHCODE,
+        SourceEnum.SEMANTIC_SCHOLAR,
+    }
+    registry_sources = {adapter_cls.source for adapter_cls in loop_mod.ADAPTER_REGISTRY}
+    assert registry_sources == expected_sources
