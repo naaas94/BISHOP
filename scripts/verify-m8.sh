@@ -33,9 +33,25 @@ python -m pytest \
   tests/test_scraper_adapters_github.py \
   tests/test_scraper_adapters_openreview.py \
   tests/test_scraper_adapters_lesswrong.py \
+  tests/test_scraper_adapters.py \
   tests/test_scraper_loop.py \
   tests/test_scraper_backfill_chunking.py \
   tests/test_scraper_config.py \
+  -v \
+  --tb=short
+
+log "Running M8 state-worker ops pytest suite"
+python -m pytest \
+  tests/test_state_worker_reading_status.py \
+  tests/test_state_worker_permanent_fail.py \
+  -v \
+  --tb=short
+
+log "Running M8 query-api and UI pytest suite"
+python -m pytest \
+  tests/test_query_api_routes_entry_actions.py \
+  tests/test_ui_escalations.py \
+  tests/test_ui_explorer.py \
   -v \
   --tb=short
 
@@ -51,6 +67,9 @@ python -m pytest \
   tests/test_g6_enrichment_sampling.py::test_g6_enrichment_template_entry_slots \
   -v \
   --tb=short
+
+log "Running verify-m8 gate self-test"
+python -m pytest tests/test_verify_m8.py -v --tb=short
 
 log "M8 verification passed (structural)."
 log "G6 enrichment: assessed 7/10 in .dev/quality/g6-enrichment-template.md (three challenge_hooks rejects kept, owner-waived 2026-09-10)."

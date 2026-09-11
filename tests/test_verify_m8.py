@@ -13,9 +13,25 @@ SCRAPER_TEST_MODULES = (
     "tests/test_scraper_adapters_github.py",
     "tests/test_scraper_adapters_openreview.py",
     "tests/test_scraper_adapters_lesswrong.py",
+    "tests/test_scraper_adapters.py",
     "tests/test_scraper_loop.py",
     "tests/test_scraper_backfill_chunking.py",
     "tests/test_scraper_config.py",
+)
+
+STATE_WORKER_TEST_MODULES = (
+    "tests/test_state_worker_reading_status.py",
+    "tests/test_state_worker_permanent_fail.py",
+)
+
+QUERY_UI_TEST_MODULES = (
+    "tests/test_query_api_routes_entry_actions.py",
+    "tests/test_ui_escalations.py",
+    "tests/test_ui_explorer.py",
+)
+
+GATE_SELF_TEST_MODULES = (
+    "tests/test_verify_m8.py",
 )
 
 
@@ -27,6 +43,21 @@ def script_text() -> str:
 
 def test_runs_all_m8_adapter_and_loop_test_modules(script_text: str) -> None:
     for module in SCRAPER_TEST_MODULES:
+        assert module in script_text
+
+
+def test_runs_all_m8_state_worker_test_modules(script_text: str) -> None:
+    for module in STATE_WORKER_TEST_MODULES:
+        assert module in script_text
+
+
+def test_runs_all_m8_query_ui_test_modules(script_text: str) -> None:
+    for module in QUERY_UI_TEST_MODULES:
+        assert module in script_text
+
+
+def test_runs_verify_m8_self_test(script_text: str) -> None:
+    for module in GATE_SELF_TEST_MODULES:
         assert module in script_text
 
 
