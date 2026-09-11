@@ -24,7 +24,7 @@
 | T12 | complete | standard | `ba2ad79ca2390b010811563786be8485e86b0164` | F4: compose scraper/ui tags bumped to m8 |
 
 ## Completion snapshot (auditor Phase 0.5 / Phase 2 input)
-- Final tree SHA: `CEREMONY_SHA_PENDING` (pre-audit §8 ceremony; code HEAD at ceremony start = T10-bis `9f183675d6a713d76c3f822dcabb813f012d5c4d`; T11 parent `f4a793b`)
+- Final tree SHA: `e42207556c10924033aa72dff50ffbf6c2332352` (pre-audit §8 ceremony commit; code HEAD at ceremony start = T10-bis `9f183675d6a713d76c3f822dcabb813f012d5c4d`; T11 parent `f4a793b`). Detached-worktree `scripts/verify-m8.sh` at that SHA: passed=135 failed=0 skipped=1 errors=0 exit=0. A follow-up commit patches only these snapshot bytes.
 - Per-node commit SHAs this remediation set: T9 `be02414`; T12 `ba2ad79`; T10-bis `9f18367`; T11 `f4a793b`; T10 none
 - Artifact paths this run: `runs/ledger.md`, `runs/T9-brief.md`, `runs/T10-brief.md`, `runs/T10-bis-brief.md`, `runs/T11-brief.md`, `runs/T12-brief.md`, `runs/execution-summary.md`
 - Verification command declared by the plan: `scripts/verify-m8.sh` (extended by T11; detached-worktree counts live in plan §8.1)

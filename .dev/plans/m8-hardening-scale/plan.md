@@ -701,21 +701,27 @@ Handoff for **re-audit revision 2**. State is **amendment-complete, audit-pendin
 
 **Code HEAD at ceremony start:** `9f183675d6a713d76c3f822dcabb813f012d5c4d` (T10-bis). T11 parent `f4a793b183c2f636e47e7ebc52c46c2b55beec97`.
 
-**Closure tree SHA:** `CEREMONY_SHA_PENDING` — first ceremony commit that tracks `.dev/plans/m8-hardening-scale/**` plus `.dev/audits/2026-09-10-m8-hardening-scale.md`. A follow-up commit may patch only this SHA and the worktree counts below (hash/SHA body vs header consistency). Do not treat `9f18367` as the plan-artifact closure SHA: that commit is code-only; rev 1 already filed `artifact-not-in-HEAD` (major) against uncommitted packets/dag/runs.
+**Closure tree SHA:** `e42207556c10924033aa72dff50ffbf6c2332352` — first ceremony commit that tracks `.dev/plans/m8-hardening-scale/**` plus `.dev/audits/2026-09-10-m8-hardening-scale.md`. The follow-up commit after this subsection patches only these SHA/count bytes (and the matching `runs/execution-summary.md` snapshot line). Do not treat `9f18367` as the plan-artifact closure SHA: that commit is code-only; rev 1 already filed `artifact-not-in-HEAD` (major) against uncommitted packets/dag/runs.
 
 **Handoff scope:** ceremony commits are limited to this plan tree and the consumed rev-1 audit file. Unrelated dirty paths (`.dev/audit-*.diff`, `thoughts.md`, `.dev/quality/g6-enrichment-template.md` working-copy fill) are **not** absorbed.
 
 **Verification command:** `scripts/verify-m8.sh` (T11-extended; same string as §2 Tests / `scripts/verify-m8.sh` row). `BISHOP_G6_MANUAL` unset. Must run on a **detached git worktree** at the closure SHA — a dirty-tree run does not satisfy this subsection.
 
-**Detached-worktree result:** pending first ceremony commit. Placeholder (replaced after worktree run):
+**Detached-worktree result:** `git worktree add --detach` at `e42207556c10924033aa72dff50ffbf6c2332352` (path `%TEMP%\bishop-m8-verify-e422075`); `bash scripts/verify-m8.sh` via `C:\Program Files\Git\bin\bash.exe`; `BISHOP_G6_MANUAL` unset. Script is multi-session (`set -euo pipefail`).
+
+Raw slice summaries:
 
 ```
-passed: PENDING
-failed: PENDING
-skipped: PENDING
-errors: PENDING
-exit: PENDING
+scraper adapters/loop/config:  collected 96  passed 95  failed 0  skipped 1  errors 0
+state-worker T5:               collected  8  passed  8  failed 0  skipped 0  errors 0
+query-api + UI T6:             collected 12  passed 12  failed 0  skipped 0  errors 0
+G5 fixture:                    collected  2  passed  2  failed 0  skipped 0  errors 0
+G6 prefilter gold:             collected  4  passed  4  failed 0  skipped 0  errors 0
+G6 enrichment structural:      collected  2  passed  2  failed 0  skipped 0  errors 0
+test_verify_m8.py self-test:   collected 12  passed 12  failed 0  skipped 0  errors 0
 ```
+
+Sum: **passed=135, failed=0, skipped=1, errors=0, exit=0**. The skip is `tests/test_scraper_adapters_lesswrong.py::test_probe_lesswrong_api_live` (`BISHOP_LESSWRONG_PROBE_LIVE` unset). Script ended `[verify-m8] M8 verification passed (structural).`
 
 ### 8.2 Artifact chain
 
