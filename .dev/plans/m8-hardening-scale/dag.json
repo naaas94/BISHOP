@@ -1,0 +1,123 @@
+{
+  "plan_version": "1.5",
+  "nodes": [
+    {
+      "id": "T1",
+      "kind": "executable",
+      "packet": "packets/T1.md"
+    },
+    {
+      "id": "T1-bis",
+      "kind": "executable",
+      "packet": "packets/T1-bis.md",
+      "round": "amendment-1"
+    },
+    {
+      "id": "T2",
+      "kind": "executable",
+      "packet": "packets/T2.md"
+    },
+    {
+      "id": "T3",
+      "kind": "executable",
+      "packet": "packets/T3.md"
+    },
+    {
+      "id": "T4",
+      "kind": "executable",
+      "packet": "packets/T4.md"
+    },
+    {
+      "id": "T5",
+      "kind": "executable",
+      "packet": "packets/T5.md"
+    },
+    {
+      "id": "T6",
+      "kind": "executable",
+      "packet": "packets/T6.md"
+    },
+    {
+      "id": "T7",
+      "kind": "executable",
+      "packet": "packets/T7.md"
+    },
+    {
+      "id": "T8",
+      "kind": "executable",
+      "packet": "packets/T8.md"
+    },
+    {
+      "id": "T8-bis",
+      "kind": "executable",
+      "packet": "packets/T8-bis.md",
+      "round": "amendment-2"
+    },
+    {
+      "id": "T9",
+      "kind": "executable",
+      "packet": "packets/T9.md",
+      "round": "amendment-3"
+    },
+    {
+      "id": "T10",
+      "kind": "executable",
+      "packet": "packets/T10.md",
+      "round": "amendment-3"
+    },
+    {
+      "id": "T10-bis",
+      "kind": "executable",
+      "packet": "packets/T10-bis.md",
+      "round": "amendment-4"
+    },
+    {
+      "id": "T11",
+      "kind": "executable",
+      "packet": "packets/T11.md",
+      "round": "amendment-3"
+    },
+    {
+      "id": "T12",
+      "kind": "executable",
+      "packet": "packets/T12.md",
+      "round": "amendment-3"
+    }
+  ],
+  "hard_edges": [
+    ["T1-bis", "T2"],
+    ["T1-bis", "T3"],
+    ["T1-bis", "T4"],
+    ["T1-bis", "T5"],
+    ["T1-bis", "T7"],
+    ["T2", "T8-bis"],
+    ["T3", "T8-bis"],
+    ["T4", "T8-bis"],
+    ["T5", "T6"],
+    ["T6", "T8-bis"],
+    ["T7", "T8-bis"],
+    ["T9", "T11"]
+  ],
+  "soft_edges": [
+    {
+      "from": "T2",
+      "to": "T3",
+      "surface": "export-only adapter convention; T8-bis sole ADAPTER_REGISTRY merger"
+    },
+    {
+      "from": "T2",
+      "to": "T4",
+      "surface": "export-only adapter convention; T8-bis sole ADAPTER_REGISTRY merger"
+    },
+    {
+      "from": "T3",
+      "to": "T4",
+      "surface": "export-only adapter convention; T8-bis sole ADAPTER_REGISTRY merger"
+    }
+  ],
+  "parallel_groups": [
+    ["T2", "T3", "T4", "T5", "T7"],
+    ["T9", "T10", "T12"],
+    ["T10-bis", "T11"]
+  ]
+}

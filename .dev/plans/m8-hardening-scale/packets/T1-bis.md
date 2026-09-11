@@ -1,14 +1,21 @@
 ---
-subtask_id: T6
-tier: standard
-model_class: standard
+subtask_id: T1-bis
+tier: architectural
+model_class: architectural
 skills:
   - executor-subtask-execution
+decision_log_path: .dev/decision-logs/m8-hardening-scale/T1-adapter-foundation.md
+round: amendment-1
 ---
 
-# Executor packet — T6
+# Executor packet — T1-bis
+
 **Plan:** m8-hardening-scale v1.2
 **Executor skill:** executor-subtask-execution
+
+> Continuation of halted T1. Do not re-run packets/T1.md. Flag 4: incremental ArXiv window stays 7 days; BACKFILL_CONFIG arxiv.window_days=60 is backfill-only (T8).
+
+---
 
 ## 1. Task statement
 
@@ -142,29 +149,34 @@ Implement remaining source adapters (HuggingFace, PapersWithCode, SemanticSchola
 
 ---
 
-### T6 — Full UI + query-api write proxies
+### T1-bis — Adapter foundation (amendment-1)
 
 | Field | Content |
 |--------|---------|
-| **ID** | T6 |
-| **Scope** | query-api POST/PATCH proxies for retry, permanent-fail, reading-status. UI escalation panel (`/escalations`) with action buttons; entry detail reading-status control; DB explorer page. Adjust `run_search` reading_status filter to SQLite per §0 flag 1. |
-| **Files to touch** | `services/query-api/app/routers/entries.py` (new or extend), `services/query-api/app/retrieval/search.py`, `services/query-api/app/sqlite_reader.py`, `services/ui/app/main.py`, `services/ui/app/templates/*.html`, `tests/test_query_api_routes_entry_actions.py`, `tests/test_ui_escalations.py`, `tests/test_ui_explorer.py`, `tests/test_query_api_search_orchestrator.py` (extend), `CHANGELOG.MD` |
-| **Contract bindings** | All T6 §2 rows; M7 proxy error envelope |
-| **Inputs** | T5 |
-| **Outputs** | UI pages, proxy routes, tests |
-| **Kill criteria** | Halt if T5 routes not mergeable at execution start. Halt if context-map flag 1 or flag 5 is unresolved at execution start. Halt if UI must call state-worker directly (violates M7 seam) — must use query-api only. |
-| **Log tier** | standard |
-| **Model class** | standard — proxies + HTMX pages on M7 seams |
-| **Risks & mitigations** | HTMX POST CSRF — same-origin only; no CSRF token in MVP (localhost). |
+| **ID** | T1-bis |
+| **Scope** | Same foundation as T1: land `BackfillConfig` / `BACKFILL_CONFIG` / `SOURCE_RATE_LIMITS` / schedule defaults. **Flag 4 (binding, now in-packet):** incremental ArXiv `resolve_effective_since(since=None)` stays **7 days** (`ARXIV_BACKFILL_WINDOW_DAYS`). `BACKFILL_CONFIG["arxiv"].window_days=60` is the §18.2 backfill-window datum only — T8 wires it when `BISHOP_BACKFILL_ENABLED=1`. Do **not** steal T8's env keys. ArXiv may import `BACKFILL_CONFIG` without replacing the incremental 7-day path. Consume `apply_category_gate`; do not collapse it into `BACKFILL_CONFIG.categories`. |
+| **Files to touch** | `bishop_shared/scraper_config.py`, `services/scraper/app/rate_limit.py`, `services/scraper/app/config.py`, `services/scraper/app/adapters/arxiv.py`, `tests/test_scraper_config_shared.py`, `tests/test_scraper_rate_limit.py`, `tests/test_scraper_config.py`, `tests/test_scraper_arxiv_adapter.py`, `CHANGELOG.MD`, `.dev/decision-logs/m8-hardening-scale/T1-adapter-foundation.md` |
+| **Contract bindings** | All §2 rows owned by T1-bis; frozen-adjacent paths; flag 4 |
+| **Inputs** | None (T1 produced no artifacts) |
+| **Outputs** | Shared config module, expanded rate limits, tests, decision log |
+| **Kill criteria** | Halt if `SourceEnum` members do not match state-worker literals. Halt if Appendix B rate limits cannot map to `RateLimit`. **executor-preflight:** halt if `apply_category_gate` or `load_source_config` missing from `arxiv.py` at start. **runtime-invariant:** `_gate_by_category` still calls `apply_category_gate`. Halt if `test_resolve_effective_since_uses_backfill_window` is deleted or its 7-day assertion is changed to 60. Halt if `BISHOP_BACKFILL_ENABLED` / chunk env keys are introduced here (T8-owned). Halt if any edit to frozen-adjacent paths. Halt if `arxiv.py` removes or bypasses `apply_category_gate`. |
+| **Log tier** | architectural |
+| **Model class** | architectural — same seam as T1, with flag 4 + listed adapter test |
+| **Risks & mitigations** | 7-vs-60 collision is closed by flag 4 + keeping the 7-day pin. Category-gate tests in `test_scraper_arxiv_adapter.py` must stay passing; only window-related additions allowed. |
 
-## Filtered load-bearing assumptions
+---
 
-_None listing this subtask ID._
+## Filtered 5.2 (IDs include T1-bis)
 
-## Filtered hidden couplings
+- (index_policy, ArXiv category gate, and split profile pins are already landed and frozen | §2 frozen-adjacent paths | executor reinvents or collapses them into BACKFILL_CONFIG | T1-bis,T7,T8) invariant — operator-locked
+- (incremental ArXiv window is 7 days; BACKFILL_CONFIG arxiv.window_days=60 is backfill-only | §0 flag 4 + §2 BACKFILL_CONFIG | T1-bis replaces 7 with 60 and breaks test_resolve_effective_since_uses_backfill_window | T1-bis,T8) invariant — operator-locked
 
-- (reading_status search filter vs DuckDB mirror staleness | query-api run_search + duckdb_reader | UI updates status but search filter unchanged | T5,T6) suspected — mitigated by SQLite filter path
+## Filtered 5.4 (T1-bis)
+
+- (T1-bis arxiv.py BACKFILL_CONFIG wiring vs landed category gate | arxiv.py apply_category_gate + config/sources/arxiv.yaml | gate deleted or bypassed | T1-bis) confirmed
+- (T1-bis incremental window vs §18.2 60 | test_resolve_effective_since_uses_backfill_window | 7-day pin inverted | T1-bis) confirmed
+- (SOURCE_RATE_LIMITS key must exist before failure_envelope | rate_limit.py + loop.py | KeyError | T1-bis,T8) confirmed
 
 ## Resolved inputs
 
-T5 — state-worker reading-status + permanent-fail routes (to be supplied at execution time)
+None — T1 produced no artifacts. Landed category gate and ARXIV_BACKFILL_WINDOW_DAYS=7 are already at HEAD.
