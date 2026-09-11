@@ -20,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: services/scraper/Dockerfile
-    image: bishop/scraper:m2
+    image: bishop/scraper:m8
     networks:
       - bishop-internal
     volumes:
@@ -148,7 +148,7 @@ services:
     build:
       context: .
       dockerfile: services/ui/Dockerfile
-    image: bishop/ui:m7
+    image: bishop/ui:m8
     networks:
       - bishop-internal
     environment:

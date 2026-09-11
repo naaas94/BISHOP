@@ -112,14 +112,14 @@ def test_only_query_api_and_ui_expose_host_ports(compose_text: str) -> None:
 def test_image_tags_use_milestone_convention(compose_text: str) -> None:
   milestone_tags: dict[str, str] = {
       "state-worker": "m1",
-      "scraper": "m2",
+      "scraper": "m8",
       "pre-filter-worker": "m3",
       "batch-poller": "m5",
       "content-scraper": "m4",
       "enrichment-batcher": "m5",
       "vector-writer": "m6",
       "query-api": "m7",
-      "ui": "m7",
+      "ui": "m8",
   }
   for service in BISHOP_SERVICES:
       block = _service_block(compose_text, service)
