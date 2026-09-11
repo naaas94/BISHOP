@@ -14,6 +14,7 @@ from bishop_shared.scraper_config import BACKFILL_CONFIG
 
 from app.adapters.arxiv import compose_fallback_content
 from app.adapters.base import SourceAdapter
+from app.config import HUGGINGFACE_TOKEN
 from app.models import ManifestIngestEntry
 from app.rate_limit import SOURCE_RATE_LIMITS, TokenBucketRateLimiter
 
@@ -44,9 +45,8 @@ def resolve_effective_since(
 
 
 def _auth_headers() -> dict[str, str]:
-    token = os.environ.get("HUGGINGFACE_TOKEN")
-    if token:
-        return {"Authorization": f"Bearer {token}"}
+    if HUGGINGFACE_TOKEN:
+        return {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
     return {}
 
 

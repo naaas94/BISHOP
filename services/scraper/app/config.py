@@ -42,3 +42,4 @@ def _optional_str_from_env(name: str) -> str | None:
 
 GITHUB_TOKEN = _optional_str_from_env("GITHUB_TOKEN")
 SEMANTIC_SCHOLAR_API_KEY = _optional_str_from_env("SEMANTIC_SCHOLAR_API_KEY")
+HUGGINGFACE_TOKEN = _optional_str_from_env("HUGGINGFACE_TOKEN")

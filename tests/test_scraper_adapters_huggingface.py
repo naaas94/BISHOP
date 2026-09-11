@@ -152,7 +152,7 @@ async def test_fetch_manifest_sends_huggingface_token_header(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     hf = _load_hf_stack()
-    monkeypatch.setenv("HUGGINGFACE_TOKEN", "hf_test_token")
+    monkeypatch.setattr(hf, "HUGGINGFACE_TOKEN", "hf_test_token")
     captured_headers: dict[str, str] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:

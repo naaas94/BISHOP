@@ -154,6 +154,18 @@ def test_semantic_scholar_key_default_none(monkeypatch: pytest.MonkeyPatch) -> N
     assert config.SEMANTIC_SCHOLAR_API_KEY is None
 
 
+def test_huggingface_token_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HUGGINGFACE_TOKEN", "hf_test_token")
+    config = _load_config_module()
+    assert config.HUGGINGFACE_TOKEN == "hf_test_token"
+
+
+def test_huggingface_token_default_none(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("HUGGINGFACE_TOKEN", raising=False)
+    config = _load_config_module()
+    assert config.HUGGINGFACE_TOKEN is None
+
+
 def test_backfill_enabled_default_false(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("BISHOP_BACKFILL_ENABLED", raising=False)
     config = _load_config_module()
