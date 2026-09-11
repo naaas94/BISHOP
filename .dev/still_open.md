@@ -31,7 +31,7 @@ Consolidated open and half-open items from audits (M0–M7), milestone handoffs,
 | [OPEN-015](#open-015--scraper-retry-exhausted-loop-test) | P3 | Deferred | Loop branch untested; envelope test exists |
 | [OPEN-016](#open-016--m1-unwired-alert-types) | P3 | Deferred | T8 taxonomy partially wired |
 | [OPEN-017](#open-017--domain-only-search-bm25-scope) | P3 | Deferred | T4: BM25 not scoped when only `domain` filter set |
-| [OPEN-018](#open-018--sqlite-wal-contention-test) | P3 | Open | M7 handoff §8.4; no adversarial test |
+| [OPEN-018](#open-018--sqlite-wal-contention-test) | P3 | Mostly closed | Multi-process WAL harness landed; Windows bind-mount still untestable |
 | [OPEN-019](#open-019--misc-coverage--docs-gaps) | P4 | Mixed | Small tests/docs deferred across milestones |
 | [OPEN-020](#open-020--spec-normative-gaps) | P4 | Deferred | Spec §8.3 DuckDB prose; parent fsync; etc. |
 
@@ -170,7 +170,7 @@ Should pass in either order.
 | Change | Where | Priority | Note |
 |--------|-------|----------|------|
 | query-api entry reads via state-worker HTTP (not direct sqlite) | `sqlite_reader.py` + proxy route | Medium | Larger M7 seam cut; keeps ro mount today |
-| Move sqlite to a Docker **named volume** | compose + all `.dev/sqlite.md` recipes | Medium | Right long-term fix for bind-mount page tearing; changes host workflow |
+| Move sqlite to a Docker **named volume** | compose + all `.dev/sqlite.md` recipes | Medium | **Proposal + tooling landed 2026-09-11** (`.dev/decision-logs/ops/sqlite-named-volume-migration.md`): `--volume` mode on `sqlite_snapshot.py`/`sqlite_restore.py`, opt-in `docker-compose.override.named-volume.yml`, `tests/test_sqlite_named_volume.py` (10/10 pass against real throwaway volumes). **Cutover itself is a pending operator action** — `docker-compose.yml` was deliberately not modified and the live bind mount is still in use. Runbook + rollback in the proposal doc §4–5. |
 | Cut the 5-connection aiosqlite pool | `app/db.py` | Low | Contention gone after `BEGIN IMMEDIATE`; may no longer be warranted. Measure before cutting |
 | Move `content_raw` out of SQLite (blob dir + atomic persist) | spec + vector/content paths | Low | Would shrink the overflow pages that tore; spec change, proposal only |
 | Re-pre-filter the ~136 manifest rows lost to torn pages | ops | Low | Free to re-discover, paid to re-decide; not authorised |
@@ -370,14 +370,18 @@ UI_HOST_PORT=8081
 
 | Field | Value |
 |-------|-------|
-| **Status** | Partially covered 2026-09-11 — writer-side contention now tested; reader-side still not |
+| **Status** | Mostly closed 2026-09-11 — real multi-process concurrency is covered; the Windows bind-mount environment is not |
 | **Handoff** | M7 §8.4 — `mode=ro` only; contention not exercised |
 
-**Covered now:** `tests/test_state_worker_pool_transaction_leak.py` exercises the writer-side failure that actually bit us — a borrower raising mid-write must not hold the WAL write lock or poison the pool. `BEGIN IMMEDIATE` + `busy_timeout` landed (see OPEN-007). Live: a 4-minute loaded run produced zero `database is locked`.
+**Covered now:**
+- `tests/test_state_worker_pool_transaction_leak.py` — writer-side pool leak (borrower raises mid-write must not hold the WAL write lock). `BEGIN IMMEDIATE` + `busy_timeout` landed (see OPEN-007).
+- `tests/test_sqlite_wal_concurrency.py` — 5 writer **processes** (spawn, matching compose's separate containers) plus 1 `mode=ro` reader process against one tmp_path WAL file, migrated via `run_migrations`. Writers use the production write shape (`BEGIN IMMEDIATE`, read-then-write on `manifest`/`entries`/`scraper_state`, `COMMIT`, `PRAGMA busy_timeout` = `SQLITE_BUSY_TIMEOUT_MS`). Reader mirrors `services/query-api/app/sqlite_reader.py` (`file:{path}?mode=ro`, `SELECT * FROM manifest WHERE processing_state = ?`, `SELECT COUNT(*) FROM entries`). Assertions: every writer reaches its full commit count, `PRAGMA integrity_check == ["ok"]`, committed row count equals the sum of intended inserts, reader completed a meaningful number of successful reads *during* the writers (not after), wall-clock bounded by a harness `join(timeout=45)` (no `pytest-timeout` in this repo), and spawned PIDs are proven dead after reap. Live: a 4-minute loaded run produced zero `database is locked`.
 
-**Still missing:** a genuinely concurrent adversarial test — N simultaneous writers plus a `mode=ro` reader (query-api) against one WAL file — and no test runs against a Windows bind mount, which is the environment where the pages actually tore. Both live runs were manual.
+**Still missing (cannot be closed in-process):** no test runs against a Windows Docker bind mount, which is the environment where the pages actually tore. That is a host/volume property, not something pytest can fabricate. **This harness does not prove the bind-mount is now safe** — only that the application's lock-handling logic is correct under real OS-level concurrent access to the file on whatever filesystem the test happens to run on (here: a pytest `tmp_path` on the Windows host NTFS, not a compose bind mount). Named-volume migration remains the OPEN-007 follow-up for the tearing class.
 
-**Anchors:** `services/query-api/app/sqlite_reader.py`; `tests/test_state_worker_pool_transaction_leak.py`; M7 CHANGELOG T5 deferral; ties to OPEN-007.
+**Deferred-BEGIN diagnostic:** `test_wal_multiprocess_deferred_begin_diagnostic` is skip-marked. On this host it consistently needed more client-side `OperationalError` retries than `BEGIN IMMEDIATE` (12–21 vs 0 across four consecutive runs) — consistent with lock-upgrade bypassing `busy_timeout` — but writers still completed and integrity stayed `ok`, so the retry delta is not a stable CI falsifier.
+
+**Anchors:** `services/query-api/app/sqlite_reader.py`; `tests/test_sqlite_wal_concurrency.py`; `tests/test_state_worker_pool_transaction_leak.py`; M7 CHANGELOG T5 deferral; ties to OPEN-007.
 
 ---
 

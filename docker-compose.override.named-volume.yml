@@ -1,0 +1,38 @@
+# Opt-in overlay: moves ONLY the sqlite mount from a Windows bind mount to a
+# Docker named volume, for state-worker (rw) and query-api (ro-by-app-URI).
+#
+# Scope: sqlite only. lancedb/duckdb/bm25/logs/profiles stay bind mounts
+# (OPEN-007 operator decision, scoped per .dev/decision-logs/ops/
+# sqlite-named-volume-migration.md). SQLITE_DB_PATH inside the container is
+# unchanged (/app/data/sqlite/bishop.db) — only what backs that path on the
+# host changes.
+#
+# This file is NOT picked up by a plain `docker compose up -d` (Compose only
+# auto-loads a file literally named `docker-compose.override.yml`, and this
+# file is deliberately named differently so it cannot silently attach itself
+# to the live stack). It must be applied explicitly:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.override.named-volume.yml config
+#   docker compose -f docker-compose.yml -f docker-compose.override.named-volume.yml up -d
+#
+# Do NOT apply this to the live `bishop` project without following the
+# runbook in the proposal doc — it requires a one-time data copy first, or
+# state-worker will start against an empty named volume.
+
+volumes:
+  bishop-sqlite:
+    name: bishop-sqlite
+
+services:
+  state-worker:
+    volumes:
+      - bishop-sqlite:/app/data/sqlite
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+
+  query-api:
+    volumes:
+      - ${BISHOP_DATA_ROOT}/lancedb:/app/data/lancedb
+      - ${BISHOP_DATA_ROOT}/duckdb:/app/data/duckdb
+      - ${BISHOP_DATA_ROOT}/bm25:/app/data/bm25
+      - bishop-sqlite:/app/data/sqlite
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs

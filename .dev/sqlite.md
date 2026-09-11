@@ -207,3 +207,23 @@ re-paid nothing. Root cause was **not** the bind mount: a sweep raised mid-write
 the single WAL write lock and 500'd everything while `/health` stayed green. Salvage tool:
 `scripts/sqlite_salvage.py`. Evidence: `_quarantine_2026-09-11_corrupt-salvage/` and
 `_salvage_2026-09-11/` under `BISHOP_DATA_ROOT`.
+
+## Named-volume migration (proposed, not yet cut over)
+
+**Status:** proposal + tooling landed 2026-09-11; **live sqlite mount is still the bind
+mount today.** Full design, cutover runbook, and rollback plan:
+`.dev/decision-logs/ops/sqlite-named-volume-migration.md`. Do not treat any recipe below
+as changed until an operator has run that runbook and updated this line.
+
+Summary for future reference once cut over:
+- Both `scripts/sqlite_snapshot.py` and `scripts/sqlite_restore.py` gained a `--volume NAME`
+  mode that runs the identical snapshot/restore logic inside a throwaway
+  `docker run --rm` container mounting the named volume — no forked/duplicate logic.
+- `docker-compose.override.named-volume.yml` (repo root) is an opt-in overlay that swaps
+  only the `state-worker`/`query-api` sqlite mount from a bind mount to a named volume
+  `bishop-sqlite`. It is invisible to a plain `docker compose up -d` (Compose only
+  auto-loads a file literally named `docker-compose.override.yml`).
+- The `snapshots/` subdirectory does **not** move — it is written by host-side Python, not
+  by any container mount, so it stays at `${BISHOP_DATA_ROOT}/sqlite/snapshots/` regardless
+  of where the live `bishop.db` lives.
+- Container path `/app/data/sqlite/bishop.db` (`SQLITE_DB_PATH`) does not change either way.

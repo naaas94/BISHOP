@@ -10,6 +10,20 @@ the same clock (filename parse, with mtime fallback).
 Usage:
   python scripts/sqlite_snapshot.py [--db PATH] [--snapshot-dir DIR]
       [--ttl-hours 24] [--interval-minutes 30] [--loop] [--prune-only]
+
+Named-volume mode (see .dev/decision-logs/ops/sqlite-named-volume-migration.md):
+  python scripts/sqlite_snapshot.py --volume bishop-sqlite [--snapshot-dir DIR]
+
+When bishop.db lives in a Docker named volume instead of a host bind mount,
+the host process cannot open it directly. --volume shells out to a short-lived
+`docker run --rm` container that bind-mounts this repo's scripts/ and
+bishop_shared/ (read-only, never the whole repo or .env) plus the named
+volume, and re-invokes this SAME script inside that container in ordinary
+--db mode against the volume's internal path. The snapshot is written
+straight to --snapshot-dir, which stays a host bind-mounted/plain directory
+on the outside — the container never sees anything else. This reuses
+take_snapshot / integrity_ok / prune_snapshots unchanged; there is no forked
+duplicate of the snapshot logic for the volume case.
 """
 
 from __future__ import annotations
@@ -18,6 +32,7 @@ import argparse
 import logging
 import os
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import time
@@ -77,6 +92,83 @@ def resolve_db_path(arg: str | Path | None) -> Path:
             "BISHOP_DATA_ROOT (environment or repo-root .env)"
         )
     return Path(root).expanduser() / "sqlite" / SQLITE_DB_FILENAME
+
+
+def default_data_root() -> Path | None:
+    """BISHOP_DATA_ROOT from env or repo-root .env, or None if unset."""
+    root = os.environ.get(_ENV_KEY)
+    if not root:
+        root = _parse_bishop_data_root_from_env_file(ROOT / ".env")
+    return Path(root).expanduser() if root else None
+
+
+def default_snapshot_dir() -> Path:
+    """Snapshot directory when there is no host bishop.db path to derive it
+    from (named-volume mode). Snapshots stay under BISHOP_DATA_ROOT/sqlite/
+    even after the live file moves to a named volume: this directory is
+    written by host-side Python, never mounted into a container, so moving
+    the live db out of a bind mount does not affect it. See
+    .dev/decision-logs/ops/sqlite-named-volume-migration.md.
+    """
+    root = default_data_root()
+    if root is None:
+        raise SystemExit(
+            "cannot resolve snapshot dir: pass --snapshot-dir or set "
+            "BISHOP_DATA_ROOT (environment or repo-root .env)"
+        )
+    return root / "sqlite" / SQLITE_SNAPSHOT_DIRNAME
+
+
+DEFAULT_VOLUME_HELPER_IMAGE = "python:3.12-slim"
+
+
+def run_in_volume_container(
+    *,
+    volume: str,
+    snapshot_dir: Path,
+    inner_args: list[str],
+    docker_image: str = DEFAULT_VOLUME_HELPER_IMAGE,
+) -> int:
+    """Re-invoke this script inside a throwaway container against a named
+    volume, and return its exit code.
+
+    Mounts (all explicit, nothing else from the repo or host is exposed):
+      - the named volume at /data (read-write: SQLite WAL readers need
+        write access to the -shm wal-index even when the SQL-level
+        connection uses mode=ro; see the proposal doc's "why not :ro" note)
+      - snapshot_dir at /out (this is where the snapshot is actually written)
+      - repo scripts/ and bishop_shared/ at /repo/scripts and
+        /repo/bishop_shared, read-only (never the whole repo, never .env)
+
+    inner_args are passed to the containerized `python scripts/sqlite_snapshot.py`
+    verbatim except --db/--snapshot-dir, which the caller must already have
+    translated to the container-internal paths /data/<file> and /out.
+    """
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
+    scripts_dir = ROOT / "scripts"
+    shared_dir = ROOT / "bishop_shared"
+    cmd = [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        f"{volume}:/data",
+        "-v",
+        f"{snapshot_dir.as_posix()}:/out",
+        "-v",
+        f"{scripts_dir.as_posix()}:/repo/scripts:ro",
+        "-v",
+        f"{shared_dir.as_posix()}:/repo/bishop_shared:ro",
+        "-w",
+        "/repo",
+        docker_image,
+        "python",
+        "scripts/sqlite_snapshot.py",
+        *inner_args,
+    ]
+    logger.info("event=volume_snapshot_container_start volume=%s", volume)
+    completed = subprocess.run(cmd)
+    return completed.returncode
 
 
 def snapshot_dir_for(db_path: Path) -> Path:
@@ -284,6 +376,19 @@ def main() -> None:
     parser.add_argument("--db", help="Host path to bishop.db (otherwise BISHOP_DATA_ROOT)")
     parser.add_argument("--snapshot-dir", help="Directory for snapshots (default: <db-dir>/snapshots)")
     parser.add_argument(
+        "--volume",
+        help=(
+            "Named Docker volume holding bishop.db instead of a host bind "
+            "mount. Runs this script inside a throwaway container against "
+            "the volume; --db is ignored in this mode."
+        ),
+    )
+    parser.add_argument(
+        "--docker-image",
+        default=DEFAULT_VOLUME_HELPER_IMAGE,
+        help=f"Helper image for --volume mode (default {DEFAULT_VOLUME_HELPER_IMAGE})",
+    )
+    parser.add_argument(
         "--ttl-hours",
         type=float,
         default=SQLITE_SNAPSHOT_TTL_HOURS,
@@ -306,6 +411,28 @@ def main() -> None:
         help="Only prune expired snapshots; do not take a new one",
     )
     args = parser.parse_args()
+
+    if args.volume:
+        snapshot_dir = Path(args.snapshot_dir) if args.snapshot_dir else default_snapshot_dir()
+        inner_args = [
+            "--db",
+            f"/data/{SQLITE_DB_FILENAME}",
+            "--snapshot-dir",
+            "/out",
+            "--ttl-hours",
+            str(args.ttl_hours),
+        ]
+        if args.prune_only:
+            inner_args.append("--prune-only")
+        if args.loop:
+            inner_args += ["--loop", "--interval-minutes", str(args.interval_minutes)]
+        code = run_in_volume_container(
+            volume=args.volume,
+            snapshot_dir=snapshot_dir,
+            inner_args=inner_args,
+            docker_image=args.docker_image,
+        )
+        raise SystemExit(code)
 
     db_path = resolve_db_path(args.db)
     snapshot_dir = Path(args.snapshot_dir) if args.snapshot_dir else snapshot_dir_for(db_path)
