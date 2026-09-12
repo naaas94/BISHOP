@@ -136,6 +136,7 @@ class PreFilterResultsResponse(BaseModel):
     updated: int
     passed: int
     rejected: int
+    parked: int = 0
 
 
 class RetryPostRequest(BaseModel):
@@ -230,6 +231,33 @@ class EscalationEntryWire(BaseModel):
 
 class EscalationsResponse(BaseModel):
     entries: list[EscalationEntryWire]
+
+
+class ParkedEntryWire(BaseModel):
+    """Soft-launch inbox row — manifest-only, no scrape/enrich yet."""
+
+    source_id: str
+    title: str
+    abstract: str | None = None
+    source: SourceEnum
+    url: str
+    pre_filter_rationale: str | None = None
+    pre_filter_tier: str | None = None
+    discovered_at: datetime
+    processing_state: ProcessingState
+
+
+class ParkedListResponse(BaseModel):
+    entries: list[ParkedEntryWire]
+
+
+class PromoteParkedRequest(BaseModel):
+    source_id: str
+
+
+class PromoteParkedResponse(BaseModel):
+    source_id: str
+    processing_state: ProcessingState
 
 
 # --- Typed poll entry payloads (for router serialization) ---

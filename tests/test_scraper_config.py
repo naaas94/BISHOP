@@ -207,3 +207,15 @@ def test_backfill_inter_chunk_delay_env_override(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setenv("BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC", "60")
     config = _load_config_module()
     assert config.BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC == 60
+
+
+def test_backfill_window_override_default_none(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS", raising=False)
+    config = _load_config_module()
+    assert config.BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS is None
+
+
+def test_backfill_window_override_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS", "1")
+    config = _load_config_module()
+    assert config.BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS == 1

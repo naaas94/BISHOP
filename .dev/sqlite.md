@@ -9,8 +9,7 @@ Spec tables: `bishop_spec_0_6.md` §7. Enums: `services/state-worker/app/enums.p
 |------|------|
 | Filename constant | `bishop_shared/constants.py` → `SQLITE_DB_FILENAME = "bishop.db"` |
 | Container | `/app/data/sqlite/bishop.db` (`SQLITE_DB_PATH`) |
-| Host | `${BISHOP_DATA_ROOT}/sqlite/bishop.db` |
-| This Windows host | `C:/Users/Ale/bishop_data/sqlite/bishop.db` (from `.env`) |
+| Host | `${BISHOP_DATA_ROOT}/sqlite/bishop.db` (canonical). **This host, 2026-09-11 evening:** live file is `${BISHOP_DATA_ROOT}/sqlite_live/bishop.db` — Docker leaked handles on the old `sqlite/bishop.db-wal`; compose override remounts `sqlite_live`. Snapshots stay in `sqlite/snapshots/`. |
 | Sidecars | `bishop.db-wal`, `bishop.db-shm` when WAL is on |
 | Migrations | `alembic/versions/m1_001_initial_schema.py`, `m3_001_batch_source_ids.py` |
 | Domain models | `services/state-worker/app/models/domain.py` |

@@ -109,6 +109,7 @@ async def post_pre_filter_results(
         updated=result.updated,
         passed=result.passed,
         rejected=result.rejected,
+        parked=result.parked,
     )
 
 

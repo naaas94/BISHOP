@@ -690,3 +690,85 @@ def test_vector_write_poll_does_not_claim(temp_db: Path) -> None:
             await close_pool()
 
     asyncio.run(_run())
+
+
+def test_apply_pre_filter_results_skips_missing_source_ids(temp_db: Path) -> None:
+    async def _run() -> None:
+        await init_pool(str(temp_db), size=1)
+        try:
+            async with get_db() as conn:
+                await _seed_discovered(conn)
+                await claim_manifest_poll(conn, ProcessingState.DISCOVERED)
+                result = await apply_pre_filter_results(
+                    conn,
+                    "batch-mixed",
+                    "1.0.0",
+                    [
+                        PreFilterResultEntryWire(
+                            source_id="huggingface:space:gone/orphan",
+                            decision=0,
+                            pre_filter_rationale="orphan",
+                        ),
+                        PreFilterResultEntryWire(
+                            source_id=_SOURCE,
+                            decision=1,
+                            pre_filter_rationale="Relevant",
+                        ),
+                    ],
+                )
+                assert result.updated == 1
+                assert result.passed == 1
+                assert result.rejected == 0
+                cursor = await conn.execute(
+                    "SELECT processing_state FROM manifest WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                row = await cursor.fetchone()
+                assert row["processing_state"] == ProcessingState.RELEVANCE_PASSED.value
+        finally:
+            await close_pool()
+
+    asyncio.run(_run())
+
+
+def test_apply_enrichment_stage1_skips_missing_source_ids(temp_db: Path) -> None:
+    async def _run() -> None:
+        await init_pool(str(temp_db), size=1)
+        try:
+            async with get_db() as conn:
+                await _advance_to_stage1_submitted(conn)
+                await apply_enrichment_stage1_results(
+                    conn,
+                    "enrich-batch-1",
+                    [
+                        EnrichmentStage1EntryWire(
+                            source_id="github:gone/orphan",
+                            success=True,
+                            summary="orphan",
+                            concepts=["x"],
+                            tags=["t"],
+                            entry_type=EntryTypeEnum.PAPER,
+                        ),
+                        EnrichmentStage1EntryWire(
+                            source_id=_SOURCE,
+                            success=True,
+                            summary="ok",
+                            concepts=["x"],
+                            tags=["t"],
+                            entry_type=EntryTypeEnum.PAPER,
+                        ),
+                    ],
+                )
+                cursor = await conn.execute(
+                    "SELECT processing_state FROM entries WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                row = await cursor.fetchone()
+                assert (
+                    row["processing_state"]
+                    == ProcessingState.ENRICHMENT_STAGE2_QUEUED.value
+                )
+        finally:
+            await close_pool()
+
+    asyncio.run(_run())

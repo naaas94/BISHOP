@@ -17,12 +17,21 @@ from app.config import (
     BISHOP_BACKFILL_CHUNK_DAYS,
     BISHOP_BACKFILL_ENABLED,
     BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC,
+    BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS,
 )
 from app.exceptions import EscalatableError, PermanentFailureError, RetryExhaustedError
 from app.failure_envelope import failure_envelope, log_permanent_failure
 from app.state_worker_client import StateWorkerClient
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_backfill_window_days(source: str) -> int:
+    """BACKFILL_CONFIG.window_days, or the soft-launch overlay when set."""
+    if BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS is not None:
+        return BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS
+    config = BACKFILL_CONFIG.get(source)
+    return config.window_days if config is not None else 0
 
 
 def compute_backfill_chunk_starts(
@@ -65,8 +74,7 @@ async def _run_backfill_chunks(
     """Chunk-fetch backfill manifest rows: write each chunk before sleeping
     ``BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC`` so pre-filter can catch up
     before the next fetch (§18.4)."""
-    config = BACKFILL_CONFIG.get(source.value)
-    window_days = config.window_days if config is not None else 0
+    window_days = resolve_backfill_window_days(source.value)
     chunk_starts = compute_backfill_chunk_starts(
         window_days=window_days,
         chunk_days=BISHOP_BACKFILL_CHUNK_DAYS,
@@ -144,9 +152,12 @@ async def _scrape_adapter(
             )
             await _run_backfill_chunks(adapter, client=client, source=source, now=now)
         else:
+            since = last_run
+            if last_run is None and BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS is not None:
+                since = now - timedelta(days=BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS)
             entries = await failure_envelope(
                 adapter.fetch_manifest,
-                since=last_run,
+                since=since,
                 source=source,
             )
             if not entries:

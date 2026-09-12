@@ -75,6 +75,8 @@ SPEC_ROUTE_METHOD_PATHS: frozenset[tuple[str, str]] = frozenset(
         ("POST", "/batches/{batch_id}/timeout"),
         ("GET", "/health"),
         ("GET", "/escalations"),
+        ("GET", "/parked"),
+        ("POST", "/parked/promote"),
     }
 )
 
@@ -441,7 +443,7 @@ def test_post_manifest_pre_filter_results_contract(
         json=_pre_filter_payload(),
     )
     assert response.status_code == 200
-    assert response.json() == {"updated": 1, "passed": 1, "rejected": 0}
+    assert response.json() == {"updated": 1, "passed": 1, "rejected": 0, "parked": 0}
 
 
 def test_post_entries_content_contract(contract_client: tuple[TestClient, Path]) -> None:

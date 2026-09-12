@@ -1,0 +1,281 @@
+version: "1.2.0-soft-launch"
+created_at: "2026-09-11"
+domain: professional
+label: "AI/ML Engineering — Professional (soft launch)"
+
+# SHA-256 hash of the JSON-canonical profile dict per §11.3 (canonical_hash excluded from input).
+canonical_hash: "64ec84d7e8f41b0b6ea398ec9c9dd2007e1b149cd42c4e6ced2873d612150091"
+
+# Soft-launch overlay of v1.2.0. Peripheral items are parked, not enriched.
+# The renderer reads this field; do not delete it.
+peripheral_disposition: park
+
+changelog:
+  - version: "1.0.0"
+    date: "2026-06-10"
+    note: "Initial profile"
+  - version: "1.1.0"
+    date: "2026-09-10"
+    note: >
+      Calibrated against eval/prefilter_v0 (129 human labels; acc 0.798, prec 0.754, rec 0.782).
+      All 14 false positives were model-improvement research passing as system-building, so
+      llm_inference was rescoped to the API boundary and four model-improvement exclusions added.
+      The keep-grade false negatives were failure-mode, robustness, and agent-benchmark content, so
+      eval_observability was broadened and reweighted 0.7 -> 1.0. Adds the peripheral tier and
+      boundary calibration examples drawn from the labeled disagreements.
+  - version: "1.1.1"
+    date: "2026-09-10"
+    note: >
+      v1.1.0 was replayed against eval/prefilter_v1 and rejected: precision rose 0.667 -> 0.893
+      but recall collapsed 0.764 -> 0.455, taking keep-grade false negatives from 6 to 23. The
+      model cited the blanket model-improvement exclusion on 16 of the 20 new misses, rejecting
+      papers whose method was RL or fine-tuning but whose subject was an agent, retrieval,
+      prompting or eval system — content the human labelled keep. v1.1.1 narrows that exclusion
+      to base-model science and adds an explicit object-of-study test that carves those back in,
+      and extends the eval anchor to cover auditing and measurement methodology.
+  - version: "1.2.0"
+    date: "2026-09-10"
+    note: >
+      First version calibrated against adjudicated labels rather than raw ones. The 31 replay
+      disagreements were clustered into 7 recurring boundaries and decided as policy; 12 of the
+      original 31 labels turned out to be wrong, concentrated in the unnoted tail. Encodes all
+      seven: the object-of-study test is retained and sharpened; engine internals reject with
+      context compression carved out; failure-mode and measurement benchmarks pass at tier
+      peripheral; vertical applications reject regardless of technique; interpretability passes
+      only at peripheral; stimulus reads pass at peripheral; and applied systems in other
+      domains pass, which adds the applied_systems anchor. Peripheral is now load-bearing —
+      16 of 49 gold passes — so the tier instruction is stated explicitly rather than as an
+      aside.
+  - version: "1.2.0-soft-launch"
+    date: "2026-09-11"
+    note: >
+      AD HOC overlay — not the intended gate. Copy of v1.2.0 for a precision-first first week.
+      Do not treat this pin as the calibrated contract. Intended pin remains professional_v1.2.0.yaml
+      (recall-first; peripheral is a pass). This file flips that: uncertain and merely-interesting
+      items are parked (decision 1, tier peripheral) instead of paid-enriched. Core is reserved
+      for applied systems, reusable dev skills, and working references you would open this week.
+      See .dev/decision-logs/ops/soft-launch-precision-overlay.md. Re-hash after any edit.
+
+context: |
+  I am an Applied AI Engineer specializing in NLP, RAG systems, agentic workflows,
+  LLM-based document intelligence, and production ML systems. I build these systems
+  professionally. Judge relevance from the perspective of a practitioner who ships
+  production-grade AI, not an academic reviewer.
+
+  The distinction that matters most: I build systems *with* existing models. Research
+  whose contribution is a better model, a better training recipe, or a better decoding
+  procedure is not my lane, however strong the result. Research that tells me how such
+  systems behave, fail, or should be structured is my lane, even when it is framed
+  academically.
+
+  This is a soft-launch gate. Enrichment costs money. Only mark core when you are sure
+  the item is a working reference I would open this week — applied systems, reusable
+  dev-flow technique, or a pattern I would implement. On-topic is not enough. GitHub
+  repos, model cards, and paper dumps that are merely adjacent stay peripheral so a
+  human can skim the title and abstract later without paying for scrape or enrichment.
+
+principles:
+  - "Prefer practical applicability over theoretical novelty"
+  - "Value production concerns: latency, reliability, cost, observability, failure modes"
+  - "Value architectural patterns, tradeoffs, and engineering decisions"
+  - "Deprioritize pure math papers without engineering application"
+  - "Prioritize content actionable within a 6-month horizon"
+  - "Judge the contribution, not the topic: a paper about agents whose contribution is a training recipe is a training paper"
+  - "Core is scarce. Only mark core when the item is a working reference you would open this week: applied systems, reusable dev skills, or a technique you would implement."
+  - "When genuinely uncertain, or when the item is interesting but not a working reference, park with tier peripheral. Do not mark it core. A core pass spends scrape and enrichment budget; a park is recoverable in the inbox. A rejection is still for true exclusions only."
+
+anchors:
+  - id: rag_retrieval
+    label: "RAG and Retrieval Systems"
+    rationale: >
+      Core only when this is a working reference for hybrid retrieval, reranking,
+      late chunking, embeddings, vector stores, or knowledge-graph retrieval I would
+      implement. On-topic retrieval papers that I would not open this week are peripheral.
+    weight: 1.0
+
+  - id: agentic_systems
+    label: "Agentic Systems and Orchestration"
+    rationale: >
+      Core only when this is a working reference for LangGraph, multi-agent patterns,
+      state machines, tool use, planning, memory, or agent evaluation I would ship from.
+      Capability benchmarks that I would not implement from are peripheral.
+    weight: 1.0
+
+  - id: applied_systems
+    label: "Applied Systems and Shipped Practice"
+    rationale: >
+      What people actually built and what happened when they ran it: product and feature
+      architecture, pipelines, ops, migrations, postmortems. A shipped-system pattern
+      counts even when the deployment domain is not mine. This is the highest-confidence
+      core class for this rollout.
+    weight: 1.0
+
+  - id: dev_skills
+    label: "Dev Skills and Reusable Technique"
+    rationale: >
+      Dev-flow enhancement I would reuse: agent-assisted engineering, editor or CLI
+      workflows, eval harness technique, batching, prompt or tool-loop craft, debugging
+      and observability habits. A repo or changelog that only announces a version bump
+      is not this class. A write-up of a technique I would copy is.
+    weight: 1.0
+
+  - id: eval_failure_modes
+    label: "Evaluation, Failure Modes and Observability"
+    rationale: >
+      Core when this is a working reference for an eval harness, tracing, LLM-as-judge,
+      or production monitoring I would build. Failure-mode and measurement papers that
+      change how I think but are not a working reference this week are peripheral.
+    weight: 0.9
+
+  - id: document_intelligence
+    label: "Document Intelligence and Extraction"
+    rationale: >
+      Schema-bound extraction, structured output, document parsing pipelines.
+      Directly relevant to Hermes-type systems. Core only when I would implement from it.
+    weight: 0.9
+
+  - id: inference_economics
+    label: "Inference Economics at the API Boundary"
+    rationale: >
+      Cost, latency and throughput decisions available to someone consuming model
+      APIs: prompt caching and cache-read economics, batch APIs, context-window
+      budgeting, routing between models, concurrency and retry design. Engine
+      internals I cannot act on are out of scope. Core only when I would change a
+      production call from it this week.
+    weight: 0.8
+
+exclusions:
+  - "Pure computer vision or robotics without LLM/NLP application"
+  - "Market analysis or business news without technical substance"
+  - "Tutorial content at introductory level (assume expert baseline)"
+  - "Hardware-only content without ML application"
+  - "Star-count dumps, model-card listings, and changelog version bumps with no reusable technique or shipped-system write-up"
+  - >
+    Base-model science: the contribution improves the base model itself or the
+    mathematics of generation, and the object of study is the model rather than a
+    system built on top of it. Includes pretraining and continual-pretraining recipes;
+    SFT and preference-optimization objectives studied as objectives; quantization,
+    pruning and compression algorithms; sampler, decoder and speculative-decoding
+    algorithms; and attention-kernel or KV-cache mechanics. One carve-out: context
+    compression and context-window budgeting pass, because how much I can fit in a
+    request and at what cost is a decision I actually make. Decisive test: ask what
+    the paper is trying to make better. If the answer is a model, exclude it. If the
+    answer is an agent, a retrieval pipeline, a prompting scheme, a tool-use loop, or
+    an evaluation harness, it is in scope even when the method used is reinforcement
+    learning, reward modelling, distillation or fine-tuning — a reward model for
+    multi-agent orchestration, an RL method for long-horizon tool use, and a prompt
+    optimization procedure are all things I would build from.
+  - >
+    Multimodal and modality-adapter architecture: audio or vision encoders, token
+    routing across modalities, cross-modal adapters, and LoRA-style modality
+    grafting, unless the paper's payload is a production LLM/NLP application.
+  - >
+    Vertical and narrow-corpus contributions: work whose subject is a specific
+    application domain — clinical, biomedical, legal, finance, education-as-pedagogy,
+    forecasting, detection — or a benchmark or model adaptation for one specific
+    non-English language. This holds regardless of how relevant the LLM technique
+    sounds: a clinical risk-prediction system built with good prompting is still a
+    clinical paper. Distinguish this from applied systems, where the payload is the
+    pipeline or architecture and the domain is incidental.
+
+peripheral_classes:
+  - >
+    Model-internals science: interpretability, probing, representation analysis,
+    sparse autoencoders, circuit and mechanistic work. I will not implement it, but it
+    changes how I reason about the models I build on.
+  - >
+    Benchmarks and measurement methodology whose payload is a failure mode or the
+    unreliability of a common evaluation proxy. Useful for designing eval harnesses,
+    not a working reference for building this week.
+  - >
+    Thinking material that is off-lane for building but genuinely stimulating:
+    alignment philosophy, agency and self-preservation arguments, LLM psychometrics,
+    sociotechnical and market-design analysis of model deployment.
+  - >
+    On-topic but not enriching: a paper, repo, or model card I would not open as a
+    working reference this week. Adjacent-interesting, clever, or "I might skim the
+    abstract later." Park these. Do not mark them core.
+
+# Boundary cases drawn from eval/prefilter_v0 human labels, plus soft-launch
+# calibration for park-vs-core. They exist to fix the boundary, not to enumerate topics.
+calibration_examples:
+  - title: "MiniPIC: Flexible Position-Independent Caching in <100LOC"
+    decision: 0
+    tier: null
+    why: >
+      Sounds like caching economics but is KV-cache engine internals; I cannot act on
+      it from the API boundary. Prompt caching and batch-API economics would pass.
+  - title: "A Unifying Lens on Supervised Fine-Tuning Through Target Distribution Design"
+    decision: 0
+    tier: null
+    why: "Contribution is a training recipe, not a system built with existing models."
+  - title: "SkMTEB: Slovak Massive Text Embedding Benchmark and Model Adaptation"
+    decision: 0
+    tier: null
+    why: "Retrieval-adjacent, but a single-language benchmark with no transferable design."
+  - title: "AuRA: Internalizing Audio Understanding into LLMs as LoRA"
+    decision: 0
+    tier: null
+    why: "Modality adapter architecture; no production LLM/NLP application payload."
+  - title: "awesome-llm-agents: 12k-star curated list of agent frameworks"
+    decision: 0
+    tier: null
+    why: "Star-count dump with no reusable technique or shipped-system write-up."
+  - title: "Unstable Features, Reproducible Subspaces: Understanding Seed Dependence in Sparse Autoencoders"
+    decision: 1
+    tier: peripheral
+    why: >
+      Model-internals science, so never core. Park it for a later skim. Do not enrich.
+  - title: "When the Chain of Thought Knows Better: Failure Modes in Multi-Turn Reasoning Models"
+    decision: 1
+    tier: peripheral
+    why: >
+      Useful failure-mode analysis, but not a working reference I would implement from
+      this week. Park, do not mark core.
+  - title: "When Behavioral Safety Evaluation Fails: A Representation-Level Perspective"
+    decision: 1
+    tier: peripheral
+    why: >
+      Transferable thought about eval harnesses, but not a pattern I would ship from
+      this week. Park.
+  - title: "How we built hybrid retrieval for a 40M-doc customer support index"
+    decision: 1
+    tier: core
+    why: "Applied systems write-up of a shipped retrieval stack. Working reference."
+  - title: "A Claude Code hook that batches evals and fails the PR on judge drift"
+    decision: 1
+    tier: core
+    why: "Reusable dev-flow technique I would copy this week."
+  - title: "AI4AI-Bench: Benchmarking LLM Agents in Algorithmic Design for Recursive Self-Improvement"
+    decision: 1
+    tier: peripheral
+    why: "Agent benchmark I might skim later, not a working reference this week."
+  - title: "Rethinking Psychometric Evaluation of LLMs: When and Why Self-Reports Predict Behavior"
+    decision: 1
+    tier: peripheral
+    why: >
+      Not something I would build from. Park for a later skim. Do not reject.
+
+output:
+  format: json
+  include_rationale: true
+  rationale_max_tokens: 100
+  instruction: >
+    Respond with a JSON object:
+    {"decision": 0 or 1, "tier": "core" or "peripheral" or null, "rationale": "one sentence"}.
+
+    Decide in this order. First, does an exclusion apply? If so, decision 0 and tier null.
+    Second, does a peripheral class apply? If so, decision 1 and tier "peripheral" — these
+    are parked for later human review, not paid enrichment, and not rejections.
+    Third, does an anchor apply AND is this a working reference you would open this week?
+    If so, decision 1 and tier "core". If an anchor is only loosely related, park it
+    (decision 1, tier "peripheral") rather than marking core.
+
+    If none of the three clearly applies, park with tier "peripheral" rather than
+    rejecting and rather than marking core. A rejection is for true exclusions only.
+    A core pass spends scrape and enrichment budget. A peripheral park is recoverable.
+
+    Core should be scarce. If you find yourself marking almost everything core, you are
+    conflating "on topic" with "I would build from this this week". The rationale must
+    name the anchor, exclusion, or peripheral class that decided the call. No other
+    output. No preamble.

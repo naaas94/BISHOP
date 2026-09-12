@@ -1,0 +1,260 @@
+﻿[verify-m8] Running M8 scraper adapter, registry, config, and backfill-chunking pytest suite
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Ale\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+PyQt6 6.10.1 -- Qt runtime 6.10.1 -- Qt compiled 6.10.0
+rootdir: C:\Users\Ale\Documents\Repos\BISHOP
+configfile: pyproject.toml
+plugins: anyio-4.12.0, Faker-40.5.1, hypothesis-6.150.2, langsmith-0.7.4, asyncio-1.3.0, cov-7.0.0, qt-4.5.0, respx-0.23.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 96 items
+
+tests/test_scraper_adapters_huggingface.py::test_resolve_effective_since_uses_backfill_config PASSED [  1%]
+tests/test_scraper_adapters_huggingface.py::test_parse_entity_list_filters_by_since_and_maps_fields PASSED [  2%]
+tests/test_scraper_adapters_huggingface.py::test_fetch_manifest_hits_all_entity_endpoints PASSED [  3%]
+tests/test_scraper_adapters_huggingface.py::test_fetch_manifest_sends_huggingface_token_header PASSED [  4%]
+tests/test_scraper_adapters_huggingface.py::test_fetch_content_reads_readme_or_falls_back PASSED [  5%]
+tests/test_scraper_adapters_huggingface.py::test_fetch_content_falls_back_when_readme_missing PASSED [  6%]
+tests/test_scraper_adapters_huggingface.py::test_parse_entity_list_since_filter_falsifier PASSED [  7%]
+tests/test_scraper_adapters_paperswithcode.py::test_resolve_effective_since_uses_backfill_config PASSED [  8%]
+tests/test_scraper_adapters_paperswithcode.py::test_parse_papers_page_filters_by_since_and_maps_fields PASSED [  9%]
+tests/test_scraper_adapters_paperswithcode.py::test_fetch_manifest_calls_papers_list_endpoint PASSED [ 10%]
+tests/test_scraper_adapters_paperswithcode.py::test_fetch_content_uses_detail_endpoint_or_fallback PASSED [ 11%]
+tests/test_scraper_adapters_paperswithcode.py::test_fetch_content_falls_back_when_detail_missing PASSED [ 12%]
+tests/test_scraper_adapters_paperswithcode.py::test_parse_papers_page_since_filter_falsifier PASSED [ 13%]
+tests/test_scraper_adapters_semantic_scholar.py::test_make_source_id PASSED [ 14%]
+tests/test_scraper_adapters_semantic_scholar.py::test_resolve_effective_since_uses_backfill_window PASSED [ 15%]
+tests/test_scraper_adapters_semantic_scholar.py::test_parse_search_response_maps_manifest_fields PASSED [ 16%]
+tests/test_scraper_adapters_semantic_scholar.py::test_fetch_manifest_sends_api_key_header PASSED [ 17%]
+tests/test_scraper_adapters_semantic_scholar.py::test_fetch_manifest_builds_search_url PASSED [ 18%]
+tests/test_scraper_adapters_semantic_scholar.py::test_fetch_content_returns_paper_fields PASSED [ 19%]
+tests/test_scraper_adapters_semantic_scholar.py::test_fetch_content_falls_back_when_paper_missing PASSED [ 20%]
+tests/test_scraper_adapters_semantic_scholar.py::test_parse_search_response_empty_payload_returns_empty_list PASSED [ 21%]
+tests/test_scraper_adapters_github.py::test_make_source_id PASSED        [ 22%]
+tests/test_scraper_adapters_github.py::test_resolve_effective_since_uses_backfill_window PASSED [ 23%]
+tests/test_scraper_adapters_github.py::test_build_search_query_includes_since_date PASSED [ 25%]
+tests/test_scraper_adapters_github.py::test_parse_search_response_maps_manifest_fields PASSED [ 26%]
+tests/test_scraper_adapters_github.py::test_fetch_manifest_sends_bearer_token PASSED [ 27%]
+tests/test_scraper_adapters_github.py::test_fetch_manifest_stops_at_max_pages PASSED [ 28%]
+tests/test_scraper_adapters_github.py::test_fetch_content_returns_readme_text PASSED [ 29%]
+tests/test_scraper_adapters_github.py::test_fetch_content_falls_back_when_readme_missing PASSED [ 30%]
+tests/test_scraper_adapters_openreview.py::test_make_source_id PASSED    [ 31%]
+tests/test_scraper_adapters_openreview.py::test_resolve_effective_since_default_window PASSED [ 32%]
+tests/test_scraper_adapters_openreview.py::test_resolve_effective_since_preserves_incremental_since PASSED [ 33%]
+tests/test_scraper_adapters_openreview.py::test_parse_search_response_maps_manifest_fields_and_filters_by_since PASSED [ 34%]
+tests/test_scraper_adapters_openreview.py::test_parse_search_response_dedupes_by_source_id PASSED [ 35%]
+tests/test_scraper_adapters_openreview.py::test_parse_search_response_skips_notes_missing_title_or_id PASSED [ 36%]
+tests/test_scraper_adapters_openreview.py::test_fetch_manifest_hits_declared_search_url_and_parses_response PASSED [ 37%]
+tests/test_scraper_adapters_openreview.py::test_fetch_manifest_empty_notes_returns_empty_list PASSED [ 38%]
+tests/test_scraper_adapters_openreview.py::test_fetch_content_composes_title_and_abstract PASSED [ 39%]
+tests/test_scraper_adapters_openreview.py::test_since_filter_is_load_bearing PASSED [ 40%]
+tests/test_scraper_adapters_lesswrong.py::test_make_source_id PASSED     [ 41%]
+tests/test_scraper_adapters_lesswrong.py::test_resolve_effective_since_default_window PASSED [ 42%]
+tests/test_scraper_adapters_lesswrong.py::test_build_graphql_get_params_encodes_variables_as_json PASSED [ 43%]
+tests/test_scraper_adapters_lesswrong.py::test_parse_posts_response_maps_manifest_fields PASSED [ 44%]
+tests/test_scraper_adapters_lesswrong.py::test_parse_posts_response_dedupes_by_source_id PASSED [ 45%]
+tests/test_scraper_adapters_lesswrong.py::test_parse_posts_response_skips_posts_missing_id_or_title PASSED [ 46%]
+tests/test_scraper_adapters_lesswrong.py::test_strip_html_to_text_removes_tags_and_collapses_whitespace PASSED [ 47%]
+tests/test_scraper_adapters_lesswrong.py::test_fetch_manifest_uses_get_and_hits_declared_url PASSED [ 48%]
+tests/test_scraper_adapters_lesswrong.py::test_fetch_content_strips_html_from_graphql_response PASSED [ 50%]
+tests/test_scraper_adapters_lesswrong.py::test_fetch_content_falls_back_to_title_when_html_missing PASSED [ 51%]
+tests/test_scraper_adapters_lesswrong.py::test_probe_lesswrong_api_live SKIPPED [ 52%]
+tests/test_scraper_adapters.py::test_source_adapter_contract PASSED      [ 53%]
+tests/test_scraper_adapters.py::test_registry_contains_all_expected_adapters PASSED [ 54%]
+tests/test_scraper_loop.py::test_scrape_cycle_posts_batch_and_updates_state PASSED [ 55%]
+tests/test_scraper_loop.py::test_scrape_cycle_skips_state_update_on_batch_failure PASSED [ 56%]
+tests/test_scraper_loop.py::test_scrape_cycle_rerun_reports_skipped_idempotent_rows PASSED [ 57%]
+tests/test_scraper_loop.py::test_scrape_cycle_survives_429_via_failure_envelope PASSED [ 58%]
+tests/test_scraper_loop.py::test_scrape_cycle_logs_permanent_failure_and_continues PASSED [ 59%]
+tests/test_scraper_loop.py::test_scrape_cycle_escalatable_failure_skips_batch PASSED [ 60%]
+tests/test_scraper_loop.py::test_scheduler_invokes_cycle PASSED          [ 61%]
+tests/test_scraper_loop.py::test_registry_lists_all_expected_sources PASSED [ 62%]
+tests/test_scraper_backfill_chunking.py::test_compute_chunk_starts_covers_full_window PASSED [ 63%]
+tests/test_scraper_backfill_chunking.py::test_compute_chunk_starts_falsifier_wrong_step_changes_count PASSED [ 64%]
+tests/test_scraper_backfill_chunking.py::test_compute_chunk_starts_zero_window_returns_single_now PASSED [ 65%]
+tests/test_scraper_backfill_chunking.py::test_compute_chunk_starts_zero_chunk_days_returns_single_window_start PASSED [ 66%]
+tests/test_scraper_backfill_chunking.py::test_scrape_adapter_cold_start_with_backfill_enabled_chunks_and_sleeps PASSED [ 67%]
+tests/test_scraper_backfill_chunking.py::test_scrape_adapter_cold_start_backfill_disabled_stays_single_incremental_call PASSED [ 68%]
+tests/test_scraper_backfill_chunking.py::test_scrape_adapter_backfill_enabled_but_warm_start_stays_incremental PASSED [ 69%]
+tests/test_scraper_config.py::test_state_worker_url_default PASSED       [ 70%]
+tests/test_scraper_config.py::test_state_worker_url_env_override PASSED  [ 71%]
+tests/test_scraper_config.py::test_arxiv_categories_default PASSED       [ 72%]
+tests/test_scraper_config.py::test_arxiv_backfill_window_default PASSED  [ 73%]
+tests/test_scraper_config.py::test_arxiv_backfill_window_env_override PASSED [ 75%]
+tests/test_scraper_config.py::test_schedule_interval_default PASSED      [ 76%]
+tests/test_scraper_config.py::test_schedule_interval_env_override PASSED [ 77%]
+tests/test_scraper_config.py::test_category_matches_exact PASSED         [ 78%]
+tests/test_scraper_config.py::test_category_matches_wildcard PASSED      [ 79%]
+tests/test_scraper_config.py::test_gate_exact_include_allows_only_listed PASSED [ 80%]
+tests/test_scraper_config.py::test_gate_wildcard_include PASSED          [ 81%]
+tests/test_scraper_config.py::test_gate_empty_include_allows_all PASSED  [ 82%]
+tests/test_scraper_config.py::test_gate_exclude_overrides_include PASSED [ 83%]
+tests/test_scraper_config.py::test_gate_allows_item_without_category_metadata PASSED [ 84%]
+tests/test_scraper_config.py::test_load_source_config_missing_file_returns_none PASSED [ 85%]
+tests/test_scraper_config.py::test_load_arxiv_source_config_defaults_to_measure_only PASSED [ 86%]
+tests/test_scraper_config.py::test_github_token_from_env PASSED          [ 87%]
+tests/test_scraper_config.py::test_github_token_default_none PASSED      [ 88%]
+tests/test_scraper_config.py::test_semantic_scholar_key_from_env PASSED  [ 89%]
+tests/test_scraper_config.py::test_semantic_scholar_key_default_none PASSED [ 90%]
+tests/test_scraper_config.py::test_huggingface_token_from_env PASSED     [ 91%]
+tests/test_scraper_config.py::test_huggingface_token_default_none PASSED [ 92%]
+tests/test_scraper_config.py::test_backfill_enabled_default_false PASSED [ 93%]
+tests/test_scraper_config.py::test_backfill_enabled_env_override_true PASSED [ 94%]
+tests/test_scraper_config.py::test_backfill_enabled_env_override_false_string PASSED [ 95%]
+tests/test_scraper_config.py::test_backfill_chunk_days_default PASSED    [ 96%]
+tests/test_scraper_config.py::test_backfill_chunk_days_env_override PASSED [ 97%]
+tests/test_scraper_config.py::test_backfill_inter_chunk_delay_default PASSED [ 98%]
+tests/test_scraper_config.py::test_backfill_inter_chunk_delay_env_override PASSED [100%]
+
+======================== 95 passed, 1 skipped in 5.12s ========================
+[verify-m8] Running M8 state-worker ops pytest suite
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Ale\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+PyQt6 6.10.1 -- Qt runtime 6.10.1 -- Qt compiled 6.10.0
+rootdir: C:\Users\Ale\Documents\Repos\BISHOP
+configfile: pyproject.toml
+plugins: anyio-4.12.0, Faker-40.5.1, hypothesis-6.150.2, langsmith-0.7.4, asyncio-1.3.0, cov-7.0.0, qt-4.5.0, respx-0.23.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 8 items
+
+tests/test_state_worker_reading_status.py::test_patch_reading_status_updates_entry PASSED [ 12%]
+tests/test_state_worker_reading_status.py::test_patch_reading_status_does_not_touch_manifest_processing_state PASSED [ 25%]
+tests/test_state_worker_reading_status.py::test_patch_reading_status_not_found_returns_404 PASSED [ 37%]
+tests/test_state_worker_reading_status.py::test_patch_reading_status_manifest_only_returns_409 PASSED [ 50%]
+tests/test_state_worker_reading_status.py::test_patch_reading_status_invalid_enum_returns_422 PASSED [ 62%]
+tests/test_state_worker_permanent_fail.py::test_post_permanent_fail_transitions_to_permanently_failed PASSED [ 75%]
+tests/test_state_worker_permanent_fail.py::test_post_permanent_fail_not_found_returns_404 PASSED [ 87%]
+tests/test_state_worker_permanent_fail.py::test_post_permanent_fail_wrong_state_returns_409 PASSED [100%]
+
+============================== warnings summary ===============================
+tests/test_state_worker_reading_status.py::test_patch_reading_status_updates_entry
+tests/test_state_worker_reading_status.py::test_patch_reading_status_does_not_touch_manifest_processing_state
+tests/test_state_worker_reading_status.py::test_patch_reading_status_not_found_returns_404
+tests/test_state_worker_reading_status.py::test_patch_reading_status_manifest_only_returns_409
+tests/test_state_worker_reading_status.py::test_patch_reading_status_invalid_enum_returns_422
+tests/test_state_worker_permanent_fail.py::test_post_permanent_fail_transitions_to_permanently_failed
+tests/test_state_worker_permanent_fail.py::test_post_permanent_fail_not_found_returns_404
+tests/test_state_worker_permanent_fail.py::test_post_permanent_fail_wrong_state_returns_409
+  C:\Users\Ale\AppData\Local\Programs\Python\Python314\Lib\site-packages\alembic\config.py:612: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 8 passed, 8 warnings in 1.55s ========================
+[verify-m8] Running M8 query-api and UI pytest suite
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Ale\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+PyQt6 6.10.1 -- Qt runtime 6.10.1 -- Qt compiled 6.10.0
+rootdir: C:\Users\Ale\Documents\Repos\BISHOP
+configfile: pyproject.toml
+plugins: anyio-4.12.0, Faker-40.5.1, hypothesis-6.150.2, langsmith-0.7.4, asyncio-1.3.0, cov-7.0.0, qt-4.5.0, respx-0.23.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 12 items
+
+tests/test_query_api_routes_entry_actions.py::test_post_retry_proxies_state_worker PASSED [  8%]
+tests/test_query_api_routes_entry_actions.py::test_post_permanent_fail_proxies_state_worker PASSED [ 16%]
+tests/test_query_api_routes_entry_actions.py::test_patch_reading_status_proxies_state_worker PASSED [ 25%]
+tests/test_query_api_routes_entry_actions.py::test_patch_reading_status_invalid_enum_returns_422 PASSED [ 33%]
+tests/test_query_api_routes_entry_actions.py::test_entry_action_upstream_error_envelope PASSED [ 41%]
+tests/test_query_api_routes_entry_actions.py::test_retry_proxy_passes_source_id_in_body PASSED [ 50%]
+tests/test_ui_escalations.py::test_escalations_page_renders_rows PASSED  [ 58%]
+tests/test_ui_escalations.py::test_escalations_retry_posts_via_query_api PASSED [ 66%]
+tests/test_ui_escalations.py::test_escalations_permanent_fail_posts_via_query_api PASSED [ 75%]
+tests/test_ui_escalations.py::test_ui_escalations_does_not_call_state_worker PASSED [ 83%]
+tests/test_ui_explorer.py::test_explorer_page_renders_filter_form PASSED [ 91%]
+tests/test_ui_explorer.py::test_explorer_search_forwards_metadata_params PASSED [100%]
+
+============================= 12 passed in 0.89s ==============================
+[verify-m8] Running G5 quality gate (fixture; optional live probe via BISHOP_G5_LIVE=1)
+[run-g5-quality-gate] Running G5 fixture gate (mocked vectors; heavy live gate excluded)
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Ale\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+PyQt6 6.10.1 -- Qt runtime 6.10.1 -- Qt compiled 6.10.0
+rootdir: C:\Users\Ale\Documents\Repos\BISHOP
+configfile: pyproject.toml
+plugins: anyio-4.12.0, Faker-40.5.1, hypothesis-6.150.2, langsmith-0.7.4, asyncio-1.3.0, cov-7.0.0, qt-4.5.0, respx-0.23.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 2 items
+
+tests/test_g5_quality_gate.py::test_g5_fixture_queries_count PASSED      [ 50%]
+tests/test_g5_quality_gate.py::test_g5_quality_gate_fixture PASSED       [100%]
+
+============================== warnings summary ===============================
+tests\test_g5_quality_gate.py:111
+  C:\Users\Ale\Documents\Repos\BISHOP\tests\test_g5_quality_gate.py:111: PytestUnknownMarkWarning: Unknown pytest.mark.heavy - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.heavy
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 2 passed, 1 warning in 2.20s =========================
+[run-g5-quality-gate] G5 quality gate passed (fixture)
+[run-g5-quality-gate] Optional live gate: BISHOP_G5_LIVE=1 scripts/run-g5-quality-gate.sh
+[verify-m8] Running G6 prefilter gold binding (landed eval/prefilter_v1, not a rebuilt CSV scaffold)
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Ale\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+PyQt6 6.10.1 -- Qt runtime 6.10.1 -- Qt compiled 6.10.0
+rootdir: C:\Users\Ale\Documents\Repos\BISHOP
+configfile: pyproject.toml
+plugins: anyio-4.12.0, Faker-40.5.1, hypothesis-6.150.2, langsmith-0.7.4, asyncio-1.3.0, cov-7.0.0, qt-4.5.0, respx-0.23.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 4 items
+
+tests/test_g6_prefilter_gold.py::test_g6_prefilter_gold_artifacts_exist PASSED [ 25%]
+tests/test_g6_prefilter_gold.py::test_g6_prefilter_gold_item_count_at_least_129 PASSED [ 50%]
+tests/test_g6_prefilter_gold.py::test_g6_prefilter_gold_labels_cover_items PASSED [ 75%]
+tests/test_g6_prefilter_gold.py::test_g6_prefilter_replay_script_importable PASSED [100%]
+
+============================== 4 passed in 0.35s ==============================
+[verify-m8] Running G6 enrichment structural gate (manual all-true checklist NOT invoked by this script)
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Ale\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+PyQt6 6.10.1 -- Qt runtime 6.10.1 -- Qt compiled 6.10.0
+rootdir: C:\Users\Ale\Documents\Repos\BISHOP
+configfile: pyproject.toml
+plugins: anyio-4.12.0, Faker-40.5.1, hypothesis-6.150.2, langsmith-0.7.4, asyncio-1.3.0, cov-7.0.0, qt-4.5.0, respx-0.23.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 2 items
+
+tests/test_g6_enrichment_sampling.py::test_g6_enrichment_template_schema PASSED [ 50%]
+tests/test_g6_enrichment_sampling.py::test_g6_enrichment_template_entry_slots PASSED [100%]
+
+============================== 2 passed in 0.31s ==============================
+[verify-m8] Running verify-m8 gate self-test
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Ale\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+PyQt6 6.10.1 -- Qt runtime 6.10.1 -- Qt compiled 6.10.0
+rootdir: C:\Users\Ale\Documents\Repos\BISHOP
+configfile: pyproject.toml
+plugins: anyio-4.12.0, Faker-40.5.1, hypothesis-6.150.2, langsmith-0.7.4, asyncio-1.3.0, cov-7.0.0, qt-4.5.0, respx-0.23.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 12 items
+
+tests/test_verify_m8.py::test_runs_all_m8_adapter_and_loop_test_modules PASSED [  8%]
+tests/test_verify_m8.py::test_runs_all_m8_state_worker_test_modules PASSED [ 16%]
+tests/test_verify_m8.py::test_runs_all_m8_query_ui_test_modules PASSED   [ 25%]
+tests/test_verify_m8.py::test_runs_verify_m8_self_test PASSED            [ 33%]
+tests/test_verify_m8.py::test_runs_g5_quality_gate_wrapper PASSED        [ 41%]
+tests/test_verify_m8.py::test_runs_g6_prefilter_gold_binding PASSED      [ 50%]
+tests/test_verify_m8.py::test_runs_g6_enrichment_structural_tests_only PASSED [ 58%]
+tests/test_verify_m8.py::test_does_not_export_g6_manual_flag PASSED      [ 66%]
+tests/test_verify_m8.py::test_does_not_rebuild_retired_v1_g6_scaffold PASSED [ 75%]
+tests/test_verify_m8.py::test_uses_pytest_verbose_short_traceback PASSED [ 83%]
+tests/test_verify_m8.py::test_exits_nonzero_on_failure PASSED            [ 91%]
+tests/test_verify_m8.py::test_does_not_require_docker PASSED             [100%]
+
+============================= 12 passed in 0.31s ==============================
+[verify-m8] M8 verification passed (structural).
+[verify-m8] G6 enrichment: assessed 7/10 in .dev/quality/g6-enrichment-template.md (three challenge_hooks rejects kept, owner-waived 2026-09-10).
+[verify-m8] The BISHOP_G6_MANUAL operator checklist (all-true) is expected-fail and intentionally not run by this script.
+[verify-m8] Optional live G5 gate: BISHOP_G5_LIVE=1 scripts/verify-m8.sh

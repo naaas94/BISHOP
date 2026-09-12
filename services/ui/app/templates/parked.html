@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Parked — BISHOP{% endblock %}
+{% block content %}
+<h1>Parked inbox</h1>
+<p class="muted">Interesting but not sure enough to enrich. Title and abstract only — promote to pay for scrape and index.</p>
+{% if message %}
+<p class="success">{{ message }}</p>
+{% endif %}
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+{% if entries %}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Source ID</th>
+      <th>Title</th>
+      <th>Abstract</th>
+      <th>Why parked</th>
+      <th>Source</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in entries %}
+    <tr>
+      <td><a href="{{ row.url }}" target="_blank" rel="noopener">{{ row.source_id }}</a></td>
+      <td>{{ row.title }}</td>
+      <td>{{ row.abstract or "—" }}</td>
+      <td>{{ row.pre_filter_rationale or "—" }}</td>
+      <td>{{ row.source }}</td>
+      <td class="action-cell">
+        <form method="post" action="/parked/{{ row.source_id }}/promote" class="inline-form">
+          <button type="submit">Promote</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% elif not error %}
+<p class="muted">No parked items.</p>
+{% endif %}
+{% endblock %}

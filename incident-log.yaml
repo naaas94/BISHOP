@@ -1,0 +1,129 @@
+# Bishop incident log — append newest first.
+# Chronological ops index, not a decision log. Write-ups stay in .dev/decision-logs/.
+# Times are local (UTC-3) unless a field is explicitly UTC.
+
+schema_version: 1
+
+incidents:
+  - id: 2026-09-12-state-worker-compose-up-exit-3
+    status: resolved
+    severity: sev2
+    started_at: "2026-09-12T07:19:00-03:00"
+    detected_at: "2026-09-12T11:12:00-03:00"
+    resolved_at: "2026-09-12T11:14:00-03:00"
+    title: state-worker exited 3 on compose up; stack blocked
+    summary: >
+      Docker Desktop had SIGKILL'd the previous run (~07:19). The first
+      `docker compose up -d` then failed in 3.2s because bishop-state-worker-1
+      exited 3 (uvicorn lifespan startup failure). All eight dependents are
+      gated on state-worker healthy, so the stack never came up. Live
+      bishop.db was intact. A second start succeeded; no restore, no rebuild.
+    impact:
+      - full ingest + query stack down from Docker Desktop stop until ~11:14
+      - first compose up failed; operator saw "dependency failed to start"
+      - batch-poller crash-looped on httpx.ConnectError (state-worker DNS)
+      - no data loss; integrity_check ok; nothing re-paid
+    timeline:
+      - at: "2026-09-11T14:55:20-03:00"
+        event: previous state-worker start (healthy for ~16h)
+      - at: "2026-09-12T03:21:31-03:00"
+        event: last live bishop.db write; WAL last write 03:30
+      - at: "2026-09-12T07:19:01-03:00"
+        event: Docker Desktop killed all containers (ExitCode 255)
+      - at: "2026-09-12T11:10:26-03:00"
+        event: BishopSqliteSnapshot touched sqlite_live SHM and published bishop-20260912-111026.db
+      - at: "2026-09-12T11:12:00-03:00"
+        event: docker compose up -d — state-worker Error 3.2s, exited (3)
+      - at: "2026-09-12T11:13:00-03:00"
+        event: docker compose up state-worker succeeded; /health/db 200; alembic m8_001_pre_filter_tier
+      - at: "2026-09-12T11:14:00-03:00"
+        event: remaining eight services started; pipeline moving (pre-filter 201, scraper posting)
+    evidence:
+      compose_error: "dependency failed to start: container bishop-state-worker-1 exited (3)"
+      uvicorn_exit_3: lifespan startup failure (not a healthcheck timeout)
+      first_failure_logs: not captured — failed start did not persist a traceback
+      host_integrity: "PRAGMA integrity_check = ok on C:/Users/Ale/bishop_data/sqlite_live/bishop.db"
+      alembic_head: m8_001_pre_filter_tier
+      live_paths:
+        override: docker-compose.override.yml remounts BISHOP_DATA_ROOT/sqlite_live
+        db: C:/Users/Ale/bishop_data/sqlite_live/bishop.db
+        reason: leftover leaked handles on sqlite/bishop.db-wal (0-byte WAL / disk I/O error)
+      leftover_after_desktop_kill:
+        state-worker: Exited (255)
+        batch-poller: Restarting — ConnectError Name or service not known
+      non_incidents:
+        - paperswithcode adapter skip (API discontinued)
+        - semantic scholar 429 (no API key)
+        - empty openreview fetch this cycle
+    root_cause:
+      class: environment-race
+      confidence: medium
+      statement: >
+        Not another torn-page corruption. Host integrity passed. Exit 3 in 3.2s
+        is uvicorn refusing lifespan — most likely enforce_integrity() or the
+        first SQLite open inside the container racing a stale WAL/SHM after
+        Docker Desktop came back, coinciding with the 11:10 host snapshot
+        opening the same live file. Same image then started cleanly ~60s later
+        with no file swap.
+      not:
+        - integrity failure of the live file (host check ok; second start ok)
+        - bind-mount page tearing (no new integrity_check issues)
+        - the 2026-09-11 sweep write-lock defect (already patched)
+    resolution:
+      - started state-worker alone; lifespan completed; /health/db 200
+      - docker compose up -d for the remaining services
+      - confirmed all nine Up; state-worker healthy; batch-poller recovered
+      - no sqlite_restore, no image rebuild, no schema change
+    follow_ups:
+      - id: FU-001
+        item: >
+          Capture state-worker stderr on the next exit-3 instead of inferring;
+          first-failure logs were gone by the time we inspected.
+        status: open
+      - id: FU-002
+        item: >
+          sqlite_live override is still temporary. Move live file back under
+          sqlite/ once leaked wal/shm handles are gone, or cut over to the
+          named-volume runbook.
+        status: open
+        see: .dev/decision-logs/ops/sqlite-named-volume-migration.md
+      - id: FU-003
+        item: >
+          Snapshot task and compose start can open the same live file within
+          seconds. Confirm BishopSqliteSnapshot does not block container
+          integrity_check (mode=ro should be fine; SHM refresh may not be).
+        status: open
+    related:
+      - 2026-09-11-bishop-db-salvage
+      - 2026-06-13-bishop-db-overwrite
+      - docker-compose.override.yml
+      - .dev/sqlite.md
+      - .dev/decision-logs/ops/sqlite-snapshot-and-integrity-gate.md
+
+  - id: 2026-09-11-bishop-db-salvage
+    status: closed
+    severity: sev1
+    started_at: "2026-09-11"
+    title: bishop.db torn pages; salvage not wipe
+    summary: >
+      Second bishop.db failure. Valid SQLite header, 101 integrity_check
+      issues. Root cause was a state-worker pool leak (retry sweep returned a
+      connection with an open write transaction), not the bind mount. Salvaged
+      in place; integrity gate + snapshot/restore landed.
+    see:
+      - .dev/decision-logs/ops/sqlite-snapshot-and-integrity-gate.md
+      - .dev/handoffs/2026-09-11-opus-db-salvage-hardening.md
+      - CHANGELOG.MD
+
+  - id: 2026-06-13-bishop-db-overwrite
+    status: closed
+    severity: sev1
+    started_at: "2026-06-13"
+    title: bishop.db replaced with ArXiv HTML from byte 0
+    summary: >
+      Live file header was scraped HTML. Recovered by Path B wipe. Do not
+      re-derive this conclusion from "Back to arXiv" inside a valid SQLite
+      file — that string is entries.content_raw.
+    see:
+      - .dev/db_hardening.md
+      - .dev/decision-logs/ops/bishop-db-corrupt-clean-reset.md

@@ -1,0 +1,40 @@
+---
+description: Bishop SQLite location, schema, writer rules, and how to query live vs frozen eval data
+alwaysApply: true
+---
+
+# Bishop SQLite
+
+Authoritative ops note: `.dev/sqlite.md`. Do not rediscover the DB from the README (M0-only).
+
+## Where
+
+- Filename: `bishop.db` (`bishop_shared/constants.py`)
+- Container: `/app/data/sqlite/bishop.db`
+- Host: `${BISHOP_DATA_ROOT}/sqlite/bishop.db` (this machine: `C:/Users/Ale/bishop_data/sqlite/bishop.db`)
+- Migrations: repo-root `alembic/versions/` (not under `services/state-worker/`)
+- Runtime models: Pydantic in `services/state-worker/app/models/domain.py` — no SQLAlchemy ORM
+
+## Writer rule
+
+Only `state-worker` opens SQLite for write. Everyone else POSTs HTTP or reads `mode=ro`. Never `curl` or redirect into `bishop.db`. If compose is up, prefer read-only URI so you do not fight WAL.
+
+```python
+sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+```
+
+## Meaning (do not invent columns)
+
+There is no `processed` column. Progress is `processing_state`.
+Relevance is two gates:
+
+- Pre-filter: `manifest.relevance_decision` 0/1 → `RELEVANCE_PASSED` | `RELEVANCE_REJECTED`
+- Enrichment: `entries.relevance_score` 0–1 (Call 2). Only pre-filter passes become `entries` rows.
+
+Fully processed + relevant: `SELECT * FROM entries WHERE processing_state = 'INDEXED'`.
+
+## Agent tasks
+
+- Live inspect / export: query host `bishop.db` read-only; see `.dev/sqlite.md` for recipes.
+- Calibration / eval: frozen snapshot in `eval/prefilter_v0/` (`items.json`, `labels.json`, `contract.json`). Do not treat that folder as the live DB. Do not edit `items.json` after freeze.
+- Schema change: new Alembic revision + `ProcessingState` / domain model in the same change. Do not add ad-hoc columns from a notebook.

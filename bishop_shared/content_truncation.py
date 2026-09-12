@@ -10,6 +10,16 @@ from bishop_shared.enrichment_config import ENRICHMENT_TRUNCATION_MAX_TOKENS
 
 _ENCODING = tiktoken.get_encoding("cl100k_base")
 
+
+def _encode(text: str) -> list[int]:
+    """Count/truncate tokens; treat model specials as ordinary text.
+
+    Scraped bodies can contain literal ``<|endoftext|>``. tiktoken's default
+    ``disallowed_special`` raises on those, which killed enrichment-batcher.
+    """
+    return _ENCODING.encode(text, disallowed_special=())
+
+
 _PAPER_SOURCES = frozenset({"arxiv", "openreview", "semantic_scholar"})
 _ARTICLE_SOURCES = frozenset({"lesswrong", "paperswithcode"})
 _STRUCTURE_LINE_RE = re.compile(r"^(\s*[-*]\s+\S+|^\S+/?\s*$)", re.MULTILINE)
@@ -17,13 +27,13 @@ _ABSTRACT_SPLIT_RE = re.compile(r"\n\s*Abstract\s*:?\s*\n", re.IGNORECASE)
 
 
 def _count_tokens(text: str) -> int:
-    return len(_ENCODING.encode(text))
+    return len(_encode(text))
 
 
 def _truncate_to_tokens(text: str, max_tokens: int) -> str:
     if max_tokens <= 0:
         return ""
-    tokens = _ENCODING.encode(text)
+    tokens = _encode(text)
     if len(tokens) <= max_tokens:
         return text
     return _ENCODING.decode(tokens[:max_tokens])
@@ -94,7 +104,7 @@ def _huggingface_model_strategy(content: str) -> str:
 
 
 def _beginning_end_strategy(content: str) -> str:
-    tokens = _ENCODING.encode(content)
+    tokens = _encode(content)
     if len(tokens) <= ENRICHMENT_TRUNCATION_MAX_TOKENS:
         return content
     beginning = _ENCODING.decode(tokens[:2500])

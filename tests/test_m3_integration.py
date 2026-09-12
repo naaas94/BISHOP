@@ -293,7 +293,8 @@ def test_m3_e2e_pre_filter_tier_reaches_manifest(
     assert tiers[source_ids[2]] is None
 
     states = asyncio.run(_manifest_states(db_path, source_ids))
-    assert states[source_ids[1]] == ProcessingState.RELEVANCE_PASSED.value
+    assert states[source_ids[0]] == ProcessingState.RELEVANCE_PASSED.value
+    assert states[source_ids[1]] == ProcessingState.RELEVANCE_PARKED.value
     assert states[source_ids[2]] == ProcessingState.RELEVANCE_REJECTED.value
 
 

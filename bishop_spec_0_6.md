@@ -180,6 +180,7 @@ HuggingFace's daily papers feed is a community-curated upvote layer on top of Ar
 6. Submits batch to Anthropic Batch API (`claude-haiku-4-5-20251001`). System prompt = rendered NL profile (eligible for Anthropic prompt caching once profile reaches the prompt caching minimum token threshold — growing the profile toward that threshold is the documented path to additional cost savings on top of the 50% batch discount). User prompt per entry = title + abstract.
 7. Batch-poller polls Anthropic for batch completion. On completion: results parsed, decisions POSTed to `state-worker /manifest/pre-filter-results`.
 8. State-worker transitions: decision=1 → `RELEVANCE_PASSED`; decision=0 → `RELEVANCE_REJECTED` (terminal clean).
+   **Ad hoc overlay (2026-09-11, not intended):** decision=1 + tier peripheral → `RELEVANCE_PARKED` (recoverable inbox, no scrape/enrich); manual promote `RELEVANCE_PARKED` → `RELEVANCE_PASSED`. See `.dev/decision-logs/ops/soft-launch-precision-overlay.md`. Revert with the overlay.
 9. `pre_filter_rationale` and `profile_version` written to manifest entry.
 10. BatchRecord created with `batch_type = pre_filter`, `profile_render_hash` field populated.
 
@@ -266,6 +267,7 @@ Happy path:
   RELEVANCE_QUEUED
   RELEVANCE_PASSED
   RELEVANCE_REJECTED              ← terminal, clean
+  RELEVANCE_PARKED                ← AD HOC overlay 2026-09-11, not intended; recoverable inbox; revert with overlay
   SCRAPE_QUEUED
   SCRAPED
   ENRICHMENT_STAGE1_QUEUED

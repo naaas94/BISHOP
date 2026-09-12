@@ -32,6 +32,7 @@ from app.transitions import (  # noqa: E402
     claim_manifest_poll,
     ingest_manifest_batch,
     mark_enrichment_stage1_submitted,
+    promote_parked,
     record_failure,
 )
 from app.routers.entries import router  # noqa: E402
@@ -134,6 +135,7 @@ def test_post_content_carries_pre_filter_tier_into_entry(client: TestClient) -> 
                     )
                 ],
             )
+            await promote_parked(conn, _SOURCE)
             await claim_manifest_poll(conn, ProcessingState.RELEVANCE_PASSED)
 
     asyncio.run(_seed())
@@ -222,7 +224,37 @@ def test_post_pre_filter_results_returns_counts(client: TestClient) -> None:
         },
     )
     assert response.status_code == 200
-    assert response.json() == {"updated": 1, "passed": 1, "rejected": 0}
+    assert response.json() == {"updated": 1, "passed": 1, "rejected": 0, "parked": 0}
+
+
+def test_post_pre_filter_results_skips_missing_source_ids(client: TestClient) -> None:
+    async def _seed() -> None:
+        async with get_db() as conn:
+            await _seed_discovered(conn)
+            await claim_manifest_poll(conn, ProcessingState.DISCOVERED)
+
+    asyncio.run(_seed())
+    response = client.post(
+        "/manifest/pre-filter-results",
+        json={
+            "batch_id": "batch-mixed",
+            "profile_version": "1.0.0",
+            "entries": [
+                {
+                    "source_id": "huggingface:space:gone/orphan",
+                    "decision": 0,
+                    "pre_filter_rationale": "orphan",
+                },
+                {
+                    "source_id": _SOURCE,
+                    "decision": 1,
+                    "pre_filter_rationale": "Relevant",
+                },
+            ],
+        },
+    )
+    assert response.status_code == 200
+    assert response.json() == {"updated": 1, "passed": 1, "rejected": 0, "parked": 0}
 
 
 def test_post_enrichment_stage1_results_returns_204(client: TestClient) -> None:

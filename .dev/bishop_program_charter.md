@@ -1,9 +1,11 @@
 # BISHOP Program Charter
 
-**Version:** 0.1.0
+**Version:** 0.2.0
 **Author:** Alejandro Garay Frontini
-**Date:** 2026-06-09
+**Date:** 2026-09-11
 **Status:** Active
+
+**Amendment note (0.2.0, 2026-09-11).** Tier-2 charter amendment (milestone-charter skill escalation ladder, tier 2: "change crosses milestone boundaries"). Adds **M9 — Source Expansion** as a new sequential milestone after M8. M0–M8 are **not** retroactively re-sliced: their Intent, spec refs, and stubs are unchanged. This amendment touches only §3 (new M9 block), §4 (hub registry extension), §5 (G7's `Blocks` column), §6 (new M9 stub), §8 (`M0–M8` → `M0–M9` scoping line + a footnote), and adds a new §9 amendment/adversarial-validation record for this amendment. See §9 for the full checklist.
 
 ---
 
@@ -541,6 +543,67 @@ M-plan name convention: `m<n>-<slug>`, e.g., `m0-workshop`, `m1-state-kernel`.
 
 ---
 
+### M9 — Source Expansion
+
+**Intent.** Add exactly **one** non-paper source class (engineering blog, changelog/release-notes, or conference talk — class in scope; concrete origin and host **not** picked by this charter) that can emit `applied_systems` / `dev_skills` content, ingested through the existing `SourceAdapter` ABC and `ManifestEntry` DTO, and freeze — as person decisions at entry, not as choices this charter makes — what of the paper-shaped downstream stack (gate-1 input, profile vocabulary, truncation strategy, `source_id` scheme, incremental cursor, fetch/robots policy, eval freeze) must change before those rows reach `INDEXED`.
+
+**Note on relation to M8.** M8 landed six spec-reserved paper/model/repo adapters (HuggingFace, PapersWithCode, Semantic Scholar, GitHub, OpenReview, LessWrong). Those expand paper/model/repo *volume*; per `.dev/plans/m9-source-expansion/proposal.md` §2 (129-item labeled set: 2/129 `applied_systems`, 0/129 `dev_skills`), they do not raise `applied_systems` / `dev_skills` density. M9 is a different source *class*, not a rewrite of M8's adapter set — M8's block above is unmodified.
+
+**Runnable checkpoint.** The new adapter is present in `ADAPTER_REGISTRY` (`services/scraper/app/adapters/registry.py`), has a `SourceEnum` literal and a `SOURCE_RATE_LIMITS` entry, and at least one entry sourced from it reaches `processing_state = INDEXED` end-to-end (manifest → entries → vector-writer). A new labeled eval freeze exists (new directory under `eval/`, distinct from `eval/prefilter_v0` and `eval/prefilter_v1`, both confirmed ArXiv-only) with `items.json` + `labels.json` + `contract.json`, capable of measuring `applied_systems` / `dev_skills` reason-tag density on the new source's items.
+
+**§22 mapping.** None. Spec §22 (Implementation Checklist) does not itemize a non-paper source class — this milestone is not in the spec's checklist. Whether a checklist item is retroactively added is downstream of the Q3 entry-gate decision (spec §3.1/§20.1 amendment vs. documented local-enum exception); this charter does not decide it.
+
+**Services touched.** `scraper` (new adapter file + registry + rate-limit entry), `state-worker` (`SourceEnum` dual-lockstep file `services/state-worker/app/enums.py`; **not** a new REST endpoint — the lockstep file is not the `§9.1` REST hub). Possibly `pre-filter-worker` / `enrichment-batcher` if the Q4/Q5 entry-gate decisions require a source-conditional gate-1 input or profile overlay — that branching is an orchestrator-planning decision, not decided here.
+
+**Contract surfaces extended (names only — decisions the plan must freeze, not implemented work here).**
+- `SourceAdapter` ABC (§10.1) — new concrete subclass.
+- `ADAPTER_REGISTRY` (§10.2) — new entry, 7 → 8.
+- `SourceEnum` dual-lockstep (`bishop_shared/enums.py` + `services/state-worker/app/enums.py`, spec §20.1) — new literal, per the Q3 decision (new value vs. spec amendment vs. reuse of an existing reserved value for a different job — reuse is disfavored per `proposal.md` §6 Q3 but not foreclosed here).
+- `SOURCE_RATE_LIMITS` (§15) — new per-source `RateLimit` entry.
+- `ManifestEntry` / ingest DTO (§7.1) — no schema change implied; `source_id` canonicalization scheme (Q6) and the 48-byte batch `custom_id` cap are decisions the plan must freeze, not new fields.
+- Gate-1 abstract stand-in (Q4) — a decision the plan must freeze; not a contract change enumerated here.
+- Profile contribution-vocabulary fit (Q5) — a decision (amend `professional_v1.2.0`, new version, or source-specific overlay); not decided here.
+- ArXiv category-gate YAML generalization (Q10) — `config/sources/<source>.yaml` is ArXiv-local by construction (§18.3) and fails open when absent; whether a new source gets an equivalent file is a plan-time decision, not a charter default.
+
+**Entry gate.**
+1. M8 §8 handoff `audit_status` ∈ {`clean`, `accepted-with-waivers`} — current: `accepted-with-waivers` (`.dev/plans/m8-hardening-scale/handoff.md`).
+2. Charter G7 recorded as passed, **or** an explicit owner-signed waiver of the G7 wet-run, documented in the M9 plan's entry record. **Current state: neither holds.** `.dev/plans/m8-hardening-scale/handoff.md` §"Explicitly still open" item 1 states the G7 wet-run has not been executed. **This entry gate is not satisfied as of this amendment.** Pre-plan exploration for M9 may proceed against this charter slice; orchestrator planning and execution may not begin until G7 records or the waiver is written.
+3. Q2 (first source class + concrete origin) and Q3 (`SourceEnum` literal vs. spec §3.1/§20.1 amendment vs. documented local-enum exception) are resolved and documented by a person as entry-gate decisions before orchestrator planning begins. This charter does not resolve either.
+
+**Exit gate.** One registered non-paper adapter (Q2-selected class, `ADAPTER_REGISTRY` entry, `SourceEnum` literal per the Q3 decision, `SOURCE_RATE_LIMITS` entry) producing at least one row that reaches `processing_state = INDEXED`, **and** a new labeled eval freeze (per Runnable checkpoint, above) capable of measuring `applied_systems` / `dev_skills` density on that source's items. `eval/prefilter_v0` and `eval/prefilter_v1` are ArXiv-only (verified) and must not be cited as evidence for this exit gate. No host or feed URL pick is required to satisfy this gate's wording — only that whichever one was chosen at entry produced the observable above.
+
+**Parallelism.** Not decided here — `proposal.md` §5 lists eight breakage surfaces (gate-1 input, profile vocabulary, truncation strategy, `source_id`/48-byte cap, incremental cursor, robots/paywall policy, eval freeze, adjacent couplings) whose sequencing and parallelizability is an orchestrator-planning §5 decision once Q2–Q10 are frozen.
+
+**Explicit non-goals.** The remaining spec-reserved sources are not in scope (already landed in M8). A second non-paper source. A profile rewrite beyond what Q5 freezes. A generic multi-host RSS framework (a specific decision, not a framework, per `proposal.md` §1(c) non-goals). Landing HTML robots-parsing infrastructure beyond what the Q9 decision requires. All §23 and §24 items of `bishop_spec_0_6.md` are non-goals for this plan.
+
+---
+
+#### M9 Spec Reference Block
+
+**Primary (read):**
+- `bishop_spec_0_6.md` L762–873 (§10 source adapter pattern — complete; §10.1 Abstract Base at L764–799 is the ABC a new adapter must satisfy; §10.2 Adapter Registry begins L801)
+- L357–383 (§7.1 `ManifestEntry` — ingest DTO shape the new adapter's rows must satisfy)
+- L1147–1182 (§15 rate limiting — `RateLimit` config; new source needs a `SOURCE_RATE_LIMITS` entry or registry construction fails)
+- L1369–1422 (§20 enums/tags — complete; §20.1 `SourceEnum` literals at L1373–1376 — dual-lockstep surface for the Q3 decision)
+
+**Adjacent (read, do not implement):**
+- L874–987 (§11 NL profile system — Q5's surface; profile is written in research-contribution vocabulary per `proposal.md` §5.2)
+- L988–1037 (§12 pre-filter layer — Q4's surface; gate-1 user text is `title + abstract`)
+- L1038–1103 (§13 enrichment pipeline — truncation strategy per-source-type; new source falls through to beginning/end unless a branch is added)
+- L1300–1339 (§18 backfill strategy — §18.3 ArXiv Category Filtering at L1327 is ArXiv-local by construction and fails open when a source has no `config/sources/<source>.yaml`; Q10's surface)
+- L613–760 (§9.1 REST API — `POST /manifest/batch` and `GET/POST /scraper-state/{source}`; already landed M1, unchanged by M9)
+- L81–103 (§3 source stack — table of currently-named sources; the new class is **not** listed here; §3.1 is ArXiv-specific detail and not cited as a primary ref for this milestone)
+
+**Extra-spec scoping input (not normative):** `.dev/plans/m9-source-expansion/proposal.md` v0.1 — §3 candidate classes, §4 adapter-interface fit, §5 breakage surfaces, §6 open questions Q1–Q10. Q1 is closed by this charter (M9 sequences after M8's landed adapters). Note: the proposal's own §0/§2 context (`ADAPTER_REGISTRY` = `[ArxivAdapter]`, "one live adapter", `professional_v1.1.1.yaml`, "v1.1.1 / Q1 open") is **stale** against the current program state — 7 adapters are registered and the active profile is `professional_v1.2.0.yaml` (which already carries an `applied_systems` anchor; the anchor rewards applied-systems content when present, it does not manufacture a corpus that lacks it). Treat the proposal's §3–§8 analysis as current; treat its §0/§2 counts as historical.
+
+**Gates:**
+- Entry: M8 audit status `accepted-with-waivers` + (G7 recorded **or** owner waiver — neither currently holds) + Q2/Q3 resolved as person decisions
+- Exit: one non-paper adapter producing `INDEXED` rows + a new labeled eval freeze measuring `applied_systems`/`dev_skills` density (existing `eval/prefilter_v0`/`v1` cannot certify this)
+
+**Pre-plan stub:** See §6.
+
+---
+
 ## 4. Cross-Milestone Contract Registry
 
 These symbols are program-level persistent contracts. Any change mid-milestone requires an orch §7 amendment. A new stage requires a new M-plan entry.
@@ -557,11 +620,16 @@ These symbols are program-level persistent contracts. Any change mid-milestone r
 | `ScraperState` Pydantic model | §7.6 L494–505 | M1 | M2 |
 | All §9.1 REST endpoints | §9.1 L613–760 | M1 | M2–M8 |
 | Volume layout paths | §8.5 L580–595 | M0 | M1–M8 |
-| `SourceAdapter` ABC | §10.1 L764–795 | M2 | M4, M8 |
+| `SourceAdapter` ABC | §10.1 L764–795 | M2 | M4, M8, M9 |
 | NL profile schema + `canonical_hash` | §11.2 L885–987 | M3 | M5, M8 |
 | Embedding model + text pin | §8.4 L572–574, §5.6 L222–225 | M6 | M7, M8 |
 | BM25 directory layout | §8.4 L565–570 | M6 | M7 |
 | RRF formula (k=60, 3-channel) | §16.2 L1211–1228 | M7 | M8 |
+| `ADAPTER_REGISTRY` | §10.2 L801+ | M2 (create) | M8 (extend to 7), M9 (extend to 8) |
+| `SOURCE_RATE_LIMITS` | §15 L1147–1182 | M2 (create) | M8 (extend to 7 keys), M9 (extend to 8 keys) |
+| `SourceEnum` dual-lockstep (`bishop_shared/enums.py` + `services/state-worker/app/enums.py`) | §20.1 L1373–1376 | M2 (create) | M8 (extend to 7 literals), M9 (extend to 8 literals, per Q3) |
+
+**M9 note.** `ADAPTER_REGISTRY`, `SOURCE_RATE_LIMITS`, and the `SourceEnum` dual-lockstep are surfaces M8 already extended; M9 is the next serialized extension of each (M8 → M9, in that order — M8 is closed per its §8 handoff). M9 does **not** extend `state-worker`'s REST surface (§9.1): the enum-lockstep file is a second file containing the same enum, not a new endpoint.
 
 ### Amendment Rules
 
@@ -587,7 +655,9 @@ These symbols are program-level persistent contracts. Any change mid-milestone r
 | **G4** | §21 steps 7–8 e2e smoke: ArXiv entries flow from `DISCOVERED` → `INDEXED` in a single run | M8 full source expansion |
 | **G5** | §21 step 9–10: 3–5 mid-spec test queries against `challenge_hooks` return intuitively correct semantic results | Backfill enable (G7) |
 | **G6** | Pre-filter quality sampling (20 decisions, precision/recall vs. manual judgment acceptable) + enrichment quality sampling (10 entries, `challenge_hooks` and `value_rationale` assessed) | Backfill enable (G7) |
-| **G7** | G5 + G6 + all-sources e2e verified → backfill enabled, chunked, monitored | Program complete |
+| **G7** | G5 + G6 + all-sources e2e verified → backfill enabled, chunked, monitored | M9 entry (jointly with M8 §8 handoff `audit_status`) |
+
+**G7 amendment note (0.2.0).** G7 no longer blocks "program complete" — the program is not closed at M8. Per `.dev/plans/m8-hardening-scale/handoff.md`, G7's wet-run is **not recorded** (`BISHOP_BACKFILL_ENABLED` compose keys and chunking landed in code, but the live cluster run was not executed as part of M8 closeout). This charter does not claim G7 passed. M9's entry gate (§3) requires either G7 to record as passed, or an explicit owner-signed waiver of the wet-run, in addition to M8's `audit_status: accepted-with-waivers`. No new program gate (e.g. a "G8") is introduced by this amendment — the spec names no such gate, and none is invented here.
 
 **G3 detail.** Per §22 L1469: before building any component that calls the Anthropic API, make one direct test call to Anthropic Messages API using model `claude-haiku-4-5-20251001`. HTTP 400 = model string invalid; all enrichment pipeline work blocked. This is a 60-second check; do not skip.
 
@@ -821,6 +891,39 @@ Expected subtask count: 5–7 (HF adapter, PwC adapter, SS adapter, GitHub adapt
 
 ---
 
+### M9 — Source Expansion
+
+```
+Milestone: M9 — Source Expansion
+Intent: One non-paper source class (blog/changelog/talk — class in scope, host not picked) through
+  existing SourceAdapter + ManifestEntry; freeze which paper-shaped downstream surfaces must change.
+
+Spec slices to read (only these):
+  bishop_spec_0_6.md L762–873   (§10 source adapter pattern — §10.1 ABC, §10.2 registry)
+  bishop_spec_0_6.md L357–383   (§7.1 ManifestEntry — ingest DTO shape)
+  bishop_spec_0_6.md L1147–1182 (§15 rate limiting)
+  bishop_spec_0_6.md L1369–1422 (§20 enums — §20.1 SourceEnum dual-lockstep)
+  bishop_spec_0_6.md L874–987   (§11 profile — adjacent, Q5)
+  bishop_spec_0_6.md L988–1037  (§12 pre-filter — adjacent, Q4)
+  bishop_spec_0_6.md L1038–1103 (§13 enrichment — adjacent, truncation)
+  bishop_spec_0_6.md L1300–1339 (§18 backfill — §18.3 ArXiv-local category gate, Q10)
+
+Prior handoff: .dev/plans/m8-hardening-scale/handoff.md
+Scoping input (not normative): .dev/plans/m9-source-expansion/proposal.md v0.1 (§0/§2 counts stale — see M9 spec ref block)
+Architecture folder: .dev/architecture/ at M8 handoff SHA (F7 waiver — partial refresh; see handoff)
+
+Entry requirement: M8 audit_status accepted-with-waivers + (G7 recorded OR owner waiver — neither holds
+  yet) + Q2 (first source/host) and Q3 (SourceEnum literal vs. spec amendment) resolved as person decisions.
+Non-goals: remaining spec-reserved sources (landed M8), a second non-paper source, a generic multi-host
+  RSS framework, robots infra beyond the Q9 decision. §23/§24 non-goals apply.
+Sizing: advisory — projected to fit one orchestrator plan (budget symbol per orchestrator skill) for one
+  first source once Q2/Q3 freeze at entry. If Q4–Q8 (gate-1 stand-in, profile fit, source_id scheme,
+  incremental cursor, robots/eval-freeze policy) all land in-milestone rather than as pre-frozen decisions,
+  flag as a sizing risk / open fork at orchestrator planning time — do not force a split here.
+```
+
+---
+
 ## 7. Post-Milestone Housekeeping Checklist
 
 After each M-plan reaches *Auditor §8 handoff*:
@@ -841,14 +944,55 @@ After each M-plan reaches *Auditor §8 handoff*:
 
 ## 8. Non-Goals (Program Level)
 
-The following are explicitly not planned in M0–M8 and must not appear in any M-plan scope. They are tracked in the spec at §23 (L1524–1545) and §24 (L1547–1564).
+The following are explicitly not planned in M0–M9 and must not appear in any M-plan scope. They are tracked in the spec at §23 (L1524–1545) and §24 (L1547–1564).
 
 **Deferred (§23):** Graph layer (Kuzu, citation traversal), daily digest, cosine anchor migration (§12.3 Phase 2+), personal domain scrapers and NL profile (§3.2, §19.2), cross-domain query (§19.3), reranker (`ms-marco-MiniLM-L-6-v2` §16.6), query expansion (§16.5), interest profile re-enrichment on version bump, local enrichment path (Qwen/Llama via Ollama), time-decayed retrieval weights, reading history analytics, Redis queue upgrade, Postgres state store upgrade, LessWrong (pending API verification).
 
 **Rejected (§24):** PyQt6 UI, HuggingFace as primary paper source, content hash for dedup, semantic anchor embeddings as MVP pre-filter, Gemini Flash for pre-filter, Redis + Celery, single container, global BM25 index, GPT-4o-mini for enrichment, synchronous state-worker.
 
+**Footnote (0.2.0).** The §23 line above lists "LessWrong (pending API verification)" as deferred — that line is M8-era spec-deferred prose and is left as-is per the escalation ladder's rule against silently rewriting deferred lists. As a factual matter, LessWrong is no longer pending: `.dev/plans/m8-hardening-scale/handoff.md` records a landed `LessWrongAdapter` (GET-only, after a GraphQL probe) in the 7-entry `ADAPTER_REGISTRY`. This footnote does not edit the §23 deferred registry; it only prevents this charter from being read as contradicting the M8 handoff.
+
+**M9 scope note.** M9's non-paper source class is **in scope** for this program (§3 M9 block) — it is not added to the non-goals above. Only the class is in scope; the concrete host/feed is an entry-gate decision (Q2), not a charter commitment.
+
 Every M-plan §1 non-goals section **must** include: *"All items in §23 and §24 of bishop_spec_0_6.md are non-goals for this plan."*
 
 ---
 
-*Charter version 0.1.0 — 2026-06-09 — Alejandro Garay Frontini*
+## 9. Amendment / Adversarial-Validation Record — 0.2.0 (M9 addition)
+
+Per the milestone-charter skill's embedded adversarial validation, scoped to **this amendment only** (M0–M8 blocks are unmodified and were validated at their own charter version; not re-litigated here).
+
+| # | Check | Result | Evidence |
+|---|-------|--------|----------|
+| 1 | **Dependency-cycle check** — order graph acyclic, M9 reachable from M0 | **PASS** | M9 is appended sequentially after M8 (M0→M1→…→M8→M9); no new edges elsewhere. |
+| 2 | **Hub-serialization check** — one extending milestone per phase; explicit sequence edge if shared | **PASS** | `ADAPTER_REGISTRY`, `SOURCE_RATE_LIMITS`, `SourceEnum` dual-lockstep each now show an explicit M8→M9 sequence edge in §4. M8 is closed (`audit_status: accepted-with-waivers`), so no concurrent-extension conflict exists. |
+| 3 | **Hub-completeness check** — any symbol listed by ≥2 milestones appears in the §4 hub registry | **PASS** | The three symbols M9 shares with M8 (`ADAPTER_REGISTRY`, `SOURCE_RATE_LIMITS`, `SourceEnum` dual-lockstep) are all newly registered in §4 this amendment. `SourceAdapter` ABC row (pre-existing, M2/M4/M8) is extended to add M9 as a fourth consumer — no new row needed, it was already a hub. |
+| 4 | **Gate-falsifiability check** — no TBD in any gate | **PASS** | M9 entry gate names three falsifiable conditions (audit status enum membership, G7-recorded-or-waiver, Q2/Q3-resolved-as-documented-decision). M9 exit gate names an observable (`INDEXED` row from the new adapter + a new eval freeze with three named files). Neither leaves a blank to fill later. |
+| 5 | **Range-verification sweep** — every cited range passes the range falsifier | **PASS with one correction** | 11/12 candidate ranges verified PASS at first line (§10 L762; §10.1 L764; §15 L1147; §20/§20.1 L1369/L1373; §7.1 L357; §11 L874; §12 L988; §13 L1038; §18 L1300; §9.1 L613; §3 L81). §3.1 at L81–103 **FAILED** (L81 is `§3`, not `§3.1`; correct §3.1 header is at L83) — **not cited** in the M9 block; §3 (L81–103, PASS) is cited instead, and the charter text explicitly notes §3.1 is ArXiv-specific detail, not an M9 primary ref. See full range table below. |
+| 6 | **Reading-budget check** — M9's refs are a strict subset of the spec | **PASS** | M9 primary refs: 4 sections (~370 lines). Adjacent: 5 sections (~470 lines). Combined well under the ~1700-line spec; consistent with M0–M8 sizing precedent. |
+| 7 | **Stub self-containment** | **PASS** | M9 stub (§6) + its 8 cited spec slices + `handoff.md` + `proposal.md` name every open decision (Q2–Q10) and the entry-gate blocker (G7 not recorded) without requiring the reader to consult anything else to know what is blocked and why. |
+| 8 | **Non-goal coverage** | **PASS** | M9's non-goals (§3 block) list the remaining spec sources (already M8), a second source, a generic RSS framework, and excess robots infra; §23/§24 inherited per the standing §8 rule. Nothing new introduced by this amendment is left uncovered. |
+
+**Range-falsifier table (this amendment):**
+
+| Cite | Range | First line | Verdict |
+|------|-------|-------------|---------|
+| §10 | L762–873 | `## 10. Source Adapter Pattern` | PASS |
+| §10.1 | L764–799 (sub) | `### 10.1 Abstract Base` | PASS |
+| §7.1 | L357–383 | `### 7.1 ManifestEntry (manifest table)` | PASS |
+| §15 | L1147–1182 | `## 15. Rate Limiting and Failure Envelope` | PASS |
+| §20 / §20.1 | L1369–1422 / L1373–1376 | `## 20. Enumerations and Controlled Vocabularies` / `### 20.1 SourceEnum` | PASS |
+| §11 | L874–987 | `## 11. NL Profile System` | PASS |
+| §12 | L988–1037 | `## 12. Pre-filter Layer` | PASS |
+| §13 | L1038–1103 | `## 13. Enrichment Pipeline` | PASS |
+| §18 | L1300–1339 | `## 18. Backfill Strategy` (§18.3 at L1327) | PASS |
+| §9.1 | L613–760 | `### 9.1 State-Worker Internal REST API` | PASS |
+| §3 | L81–103 | `## 3. Source Stack` | PASS |
+| §3.1 | L81–103 | `## 3. Source Stack` (not `§3.1`; real §3.1 header at L83) | **FAIL — not cited; §3 cited instead** |
+
+**Not decided by this amendment (explicit open forks, per operator instruction):** Q2 (first host/feed), Q3 (`SourceEnum` literal vs. spec §3.1/§20.1 amendment vs. local-enum exception), Q4 (gate-1 abstract stand-in), Q5 (profile vs. overlay), Q6 (`source_id` hash scheme), Q7 (incremental cursor), Q8 (eval-before-vs-after), Q9 (fetch/robots policy), Q10 (category-yaml generalization). All nine remain open forks for a person to resolve before or during M9 pre-plan/orchestrator planning; Q2 and Q3 are gated as M9 entry-gate preconditions specifically.
+
+---
+
+*Charter version 0.2.0 — 2026-09-11 — Alejandro Garay Frontini (0.2.0 amendment: adds M9 — Source Expansion)*
+*Charter version 0.1.0 — 2026-06-09 — Alejandro Garay Frontini (original M0–M8 slice)*

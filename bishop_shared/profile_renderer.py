@@ -21,9 +21,13 @@ Gate = Literal["prefilter", "enrichment"]
 # (a decision/tier verdict). Profile versions past 1.0.0 were tuned and measured against
 # the gate-1 eval only, so advancing gate 1 must not silently change the enrichment
 # prompt, which has no eval of its own. Advance the enrichment pin deliberately.
+#
+# AD HOC (2026-09-11): prefilter pin is the soft-launch overlay, not the intended
+# calibrated pin (professional_v1.2.0.yaml). Revert with the overlay.
+# See .dev/decision-logs/ops/soft-launch-precision-overlay.md.
 _PROFILE_FILENAME: dict[Gate, dict[DomainEnum, str]] = {
     "prefilter": {
-        DomainEnum.PROFESSIONAL: "professional_v1.2.0.yaml",
+        DomainEnum.PROFESSIONAL: "professional_v1.2.0_soft_launch.yaml",
     },
     "enrichment": {
         DomainEnum.PROFESSIONAL: "professional_v1.0.0.yaml",
@@ -67,6 +71,7 @@ class ProfileDocument(BaseModel):
     anchors: list[ProfileAnchor]
     exclusions: list[str]
     peripheral_classes: list[str] = []
+    peripheral_disposition: Literal["pass", "park"] = "pass"
     calibration_examples: list[CalibrationExample] = []
     output: ProfileOutput
 
@@ -126,17 +131,31 @@ def render_profile_prompt(profile: ProfileDocument) -> str:
     sections.extend(f"- {' '.join(exclusion.split())}" for exclusion in profile.exclusions)
 
     if profile.peripheral_classes:
-        sections.append(
-            "## Peripheral tier\n"
-            "These classes are neither core nor excluded. Pass them with decision 1 and "
-            "tier peripheral. Do not reject them, and do not mark them core."
-        )
+        if profile.peripheral_disposition == "park":
+            peripheral_header = (
+                "## Peripheral tier\n"
+                "These classes are neither core nor excluded. Park them with decision 1 and "
+                "tier peripheral. They do not proceed to enrichment. Do not reject them, "
+                "and do not mark them core."
+            )
+        else:
+            peripheral_header = (
+                "## Peripheral tier\n"
+                "These classes are neither core nor excluded. Pass them with decision 1 and "
+                "tier peripheral. Do not reject them, and do not mark them core."
+            )
+        sections.append(peripheral_header)
         sections.extend(f"- {' '.join(item.split())}" for item in profile.peripheral_classes)
 
     if profile.calibration_examples:
         sections.append("## Calibration examples")
         for example in profile.calibration_examples:
-            verdict = "reject" if example.decision == 0 else f"pass ({example.tier or 'core'})"
+            if example.decision == 0:
+                verdict = "reject"
+            elif example.tier == "peripheral" and profile.peripheral_disposition == "park":
+                verdict = "park (peripheral)"
+            else:
+                verdict = f"pass ({example.tier or 'core'})"
             sections.append(
                 f'- "{example.title}" -> {verdict}\n  {" ".join(example.why.split())}'
             )

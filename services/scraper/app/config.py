@@ -40,6 +40,24 @@ def _optional_str_from_env(name: str) -> str | None:
     return raw
 
 
+def _optional_int_from_env(name: str) -> int | None:
+    raw = os.environ.get(name)
+    if raw is None or raw == "":
+        return None
+    return int(raw)
+
+
+# AD HOC overlay (2026-09-11), not intended. When set, replaces
+# BACKFILL_CONFIG.window_days for every source and, on cold start with backfill
+# disabled, supplies since=now-N instead of None so adapters do not fall back
+# to their 30–90 day first-run windows. Unset restores intended
+# BACKFILL_CONFIG / adapter defaults. See
+# .dev/decision-logs/ops/soft-launch-precision-overlay.md.
+BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS = _optional_int_from_env(
+    "BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS"
+)
+
+
 GITHUB_TOKEN = _optional_str_from_env("GITHUB_TOKEN")
 SEMANTIC_SCHOLAR_API_KEY = _optional_str_from_env("SEMANTIC_SCHOLAR_API_KEY")
 HUGGINGFACE_TOKEN = _optional_str_from_env("HUGGINGFACE_TOKEN")

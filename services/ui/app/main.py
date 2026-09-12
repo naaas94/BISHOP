@@ -136,6 +136,61 @@ def batch_detail(request: Request, batch_id: str) -> HTMLResponse:
 READING_STATUS_OPTIONS = ("unread", "reading", "read", "archived")
 
 
+@app.get("/parked", response_class=HTMLResponse)
+def parked_page(request: Request) -> HTMLResponse:
+    code, payload = _query_api_get("/parked")
+    entries: list[dict[str, Any]] = []
+    error: str | None = None
+    if code == 200 and isinstance(payload, dict):
+        raw = payload.get("entries", [])
+        if isinstance(raw, list):
+            entries = raw
+    else:
+        error = f"query-api returned status {code}"
+        logger.warning(
+            "parked list upstream failure",
+            extra={"event": "ui_parked_failed", "status": code},
+        )
+
+    return templates.TemplateResponse(
+        request,
+        "parked.html",
+        {"entries": entries, "error": error, "message": None},
+    )
+
+
+@app.post("/parked/{source_id:path}/promote", response_class=HTMLResponse)
+def parked_promote(request: Request, source_id: str) -> HTMLResponse:
+    code, _payload = _query_api_request(
+        "POST",
+        "/parked/promote",
+        body={"source_id": source_id},
+    )
+    message: str | None = None
+    error: str | None = None
+    if code == 200:
+        message = f"Promoted {source_id} — scrape and enrichment will run next"
+        logger.info(
+            "parked promote",
+            extra={"event": "manual_parked_promote", "source_id": source_id},
+        )
+    else:
+        error = f"Promote failed (status {code})"
+
+    code_list, payload = _query_api_get("/parked")
+    entries: list[dict[str, Any]] = []
+    if code_list == 200 and isinstance(payload, dict):
+        raw = payload.get("entries", [])
+        if isinstance(raw, list):
+            entries = raw
+
+    return templates.TemplateResponse(
+        request,
+        "parked.html",
+        {"entries": entries, "error": error, "message": message},
+    )
+
+
 @app.get("/escalations", response_class=HTMLResponse)
 def escalations_page(request: Request) -> HTMLResponse:
     code, payload = _query_api_get("/escalations")

@@ -57,6 +57,7 @@ class PreFilterResultsResponse(BaseModel):
     updated: int
     passed: int
     rejected: int
+    parked: int = 0
 
 
 class BatchPatchRequest(BaseModel):

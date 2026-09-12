@@ -49,6 +49,13 @@ def test_short_content_unchanged_under_ceiling() -> None:
     assert truncated == content
 
 
+def test_literal_endoftext_does_not_raise() -> None:
+    content = "Abstract\n\nWe study retrieval.\n\nBody mentions <|endoftext|> in a quote."
+    truncated = truncate_content_for_call1("arxiv", "Paper", content)
+    assert "retrieval" in truncated
+    assert "<|endoftext|>" in truncated
+
+
 def test_github_over_ceiling_uses_header_and_structure() -> None:
     prose = "README intro " * 800
     structure = "\n".join(["- src/", "- tests/", "- README.md"])

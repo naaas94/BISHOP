@@ -1,0 +1,16 @@
+# Temporary: live bishop.db moved to sqlite_live after Docker Desktop leaked
+# handles on sqlite/bishop.db-wal (0-byte WAL → container disk I/O error).
+# Snapshots stay in ${BISHOP_DATA_ROOT}/sqlite/snapshots/. Remove this file
+# once the old wal/shm handles are gone and the live file is back under sqlite/.
+services:
+  state-worker:
+    volumes:
+      - ${BISHOP_DATA_ROOT}/sqlite_live:/app/data/sqlite
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs
+  query-api:
+    volumes:
+      - ${BISHOP_DATA_ROOT}/lancedb:/app/data/lancedb
+      - ${BISHOP_DATA_ROOT}/duckdb:/app/data/duckdb
+      - ${BISHOP_DATA_ROOT}/bm25:/app/data/bm25
+      - ${BISHOP_DATA_ROOT}/sqlite_live:/app/data/sqlite
+      - ${BISHOP_DATA_ROOT}/logs:/app/logs

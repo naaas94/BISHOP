@@ -134,6 +134,24 @@ async def test_fetch_manifest_calls_papers_list_endpoint(
     assert entries[0].source_id == "paperswithcode:fresh-paper-slug"
 
 
+@pytest.mark.asyncio
+async def test_fetch_manifest_skips_when_api_redirects() -> None:
+    pwc = _load_pwc_stack()
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            302,
+            headers={"Location": "https://huggingface.co/papers/trending"},
+        )
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        adapter = pwc.PapersWithCodeAdapter(http_client=client)
+        entries = await adapter.fetch_manifest(since=_SINCE)
+
+    assert entries == []
+
+
 def _manifest_entry(**kwargs: object):
     saved_app_modules = {
         name: module

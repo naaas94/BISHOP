@@ -204,3 +204,40 @@ async def test_scrape_adapter_backfill_enabled_but_warm_start_stays_incremental(
 
     adapter.fetch_manifest.assert_awaited_once_with(since=last_run)
     client.post_manifest_batch.assert_awaited_once_with([entry])
+
+
+@pytest.mark.asyncio
+async def test_scrape_adapter_cold_start_override_uses_one_day_since() -> None:
+    """Soft-launch overlay: first-run with override=1 passes since=now-1d, not None."""
+    loop_mod, models = _load_scraper_loop_stack(
+        env={
+            "BISHOP_BACKFILL_ENABLED": "0",
+            "BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS": "1",
+        }
+    )
+    entry = _sample_entry(models, "arxiv:2607.00004")
+    adapter = _StubAdapter([[entry]])
+    client = AsyncMock()
+    client.get_scraper_state.return_value = models.ScraperStateSnapshot(
+        source=SourceEnum.ARXIV,
+        last_successful_run_at=None,
+        updated_at=_NOW,
+    )
+    client.post_manifest_batch.return_value = models.ManifestBatchResult(inserted=1, skipped=0)
+
+    with patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]):
+        await loop_mod.scrape_cycle(client)
+
+    adapter.fetch_manifest.assert_awaited_once()
+    since = adapter.fetch_manifest.await_args.kwargs["since"]
+    assert since is not None
+    age = datetime.now(UTC) - since
+    assert timedelta(hours=23) < age < timedelta(hours=25)
+
+
+def test_resolve_backfill_window_days_override_ignores_config() -> None:
+    loop_mod, _ = _load_scraper_loop_stack(
+        env={"BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS": "1"}
+    )
+    assert loop_mod.resolve_backfill_window_days("arxiv") == 1
+    assert loop_mod.resolve_backfill_window_days("openreview") == 1

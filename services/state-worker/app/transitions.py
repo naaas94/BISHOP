@@ -789,6 +789,24 @@ async def apply_pre_filter_results(
     profile_version: str,
     entries: list[PreFilterResultEntryWire],
 ) -> PreFilterResultsResult:
+    await conn.execute("BEGIN IMMEDIATE")
+    try:
+        result = await _apply_pre_filter_results_inner(
+            conn, batch_id, profile_version, entries
+        )
+        await conn.commit()
+        return result
+    except Exception:
+        await conn.rollback()
+        raise
+
+
+async def _apply_pre_filter_results_inner(
+    conn: aiosqlite.Connection,
+    batch_id: str,
+    profile_version: str,
+    entries: list[PreFilterResultEntryWire],
+) -> PreFilterResultsResult:
     updated = 0
     passed = 0
     rejected = 0
@@ -796,7 +814,17 @@ async def apply_pre_filter_results(
     for item in entries:
         manifest = await _fetch_manifest(conn, item.source_id)
         if manifest is None:
-            raise NotFoundError(item.source_id)
+            # Mixed-membership batches (salvage orphans, lost rows) must not
+            # fail the whole POST — poller treats non-2xx as "retry forever".
+            logger.warning(
+                "pre-filter result skipped; source_id absent from manifest",
+                extra={
+                    "source_id": item.source_id,
+                    "batch_id": batch_id,
+                    "event": "pre_filter_result_orphan",
+                },
+            )
+            continue
         _guard_terminal(manifest.processing_state, item.source_id)
 
         if manifest.processing_state == ProcessingState.RELEVANCE_QUEUED:
@@ -857,7 +885,6 @@ async def apply_pre_filter_results(
                 "batch_id": batch_id,
             },
         )
-    await conn.commit()
     return PreFilterResultsResult(
         updated=updated, passed=passed, rejected=rejected, parked=parked
     )
@@ -1064,7 +1091,15 @@ async def apply_enrichment_stage1_results(
     for item in entries:
         entry = await _fetch_entry(conn, item.source_id)
         if entry is None:
-            raise NotFoundError(item.source_id)
+            logger.warning(
+                "enrichment stage1 result skipped; source_id absent from entries",
+                extra={
+                    "source_id": item.source_id,
+                    "batch_id": batch_id,
+                    "event": "enrichment_stage1_result_orphan",
+                },
+            )
+            continue
         _guard_terminal(entry.processing_state, item.source_id)
 
         if not item.success:
@@ -1160,7 +1195,15 @@ async def apply_enrichment_stage2_results(
     for item in entries:
         entry = await _fetch_entry(conn, item.source_id)
         if entry is None:
-            raise NotFoundError(item.source_id)
+            logger.warning(
+                "enrichment stage2 result skipped; source_id absent from entries",
+                extra={
+                    "source_id": item.source_id,
+                    "batch_id": batch_id,
+                    "event": "enrichment_stage2_result_orphan",
+                },
+            )
+            continue
         _guard_terminal(entry.processing_state, item.source_id)
 
         if not item.success:

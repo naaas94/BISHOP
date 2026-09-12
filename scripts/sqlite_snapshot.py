@@ -91,7 +91,11 @@ def resolve_db_path(arg: str | Path | None) -> Path:
             "cannot resolve host SQLite path: pass --db or set "
             "BISHOP_DATA_ROOT (environment or repo-root .env)"
         )
-    return Path(root).expanduser() / "sqlite" / SQLITE_DB_FILENAME
+    root_path = Path(root).expanduser()
+    live = root_path / "sqlite_live" / SQLITE_DB_FILENAME
+    if live.is_file():
+        return live
+    return root_path / "sqlite" / SQLITE_DB_FILENAME
 
 
 def default_data_root() -> Path | None:

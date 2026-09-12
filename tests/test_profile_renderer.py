@@ -20,11 +20,13 @@ from bishop_shared.profile_renderer import (
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROFESSIONAL_PROFILE_PATH = REPO_ROOT / "config/profiles/professional_v1.0.0.yaml"
 CALIBRATED_PROFILE_PATH = REPO_ROOT / "config/profiles/professional_v1.1.1.yaml"
+SOFT_LAUNCH_PROFILE_PATH = REPO_ROOT / "config/profiles/professional_v1.2.0_soft_launch.yaml"
+V1_2_PROFILE_PATH = REPO_ROOT / "config/profiles/professional_v1.2.0.yaml"
 
 
 def test_resolve_profile_path_professional() -> None:
     path = resolve_profile_path(DomainEnum.PROFESSIONAL)
-    assert path.as_posix() == "/app/config/profiles/professional_v1.2.0.yaml"
+    assert path.as_posix() == "/app/config/profiles/professional_v1.2.0_soft_launch.yaml"
 
 
 def test_resolve_profile_path_enrichment_pinned_separately() -> None:
@@ -138,3 +140,21 @@ def test_hash_mismatch_detected_when_content_tampered() -> None:
     tampered = dict(data)
     tampered["context"] = tampered["context"] + "\nTAMPER"
     assert compute_profile_hash(tampered) != data["canonical_hash"]
+
+
+def test_soft_launch_profile_loads_and_parks_peripheral() -> None:
+    profile = load_profile(SOFT_LAUNCH_PROFILE_PATH)
+    assert profile.version == "1.2.0-soft-launch"
+    assert profile.peripheral_disposition == "park"
+    assert compute_profile_hash(SOFT_LAUNCH_PROFILE_PATH) == profile.canonical_hash
+    rendered = render_profile_prompt(profile)
+    assert "Park them with decision 1" in rendered
+    assert "They do not proceed to enrichment" in rendered
+    assert "park (peripheral)" in rendered
+    assert "When genuinely uncertain, pass with tier peripheral" not in rendered
+
+
+def test_legacy_profiles_default_peripheral_disposition_pass() -> None:
+    profile = load_profile(V1_2_PROFILE_PATH)
+    assert profile.peripheral_disposition == "pass"
+    assert "Pass them with decision 1" in render_profile_prompt(profile)

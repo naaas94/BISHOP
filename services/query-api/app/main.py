@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from app.config import LOG_LEVEL
 from app.embedding import QueryEmbeddingEncoder
 from app.lifespan import cold_start_init
-from app.routers import batches, entries, escalations, recent, search
+from app.routers import batches, entries, escalations, parked, recent, search
 from app.stores.bm25_reader import Bm25QueryIndex
 from app.stores.duckdb_reader import DuckDbReader
 from app.stores.lancedb_reader import LanceDbSearcher
@@ -84,6 +84,7 @@ app.include_router(recent.router)
 app.include_router(entries.router)
 app.include_router(batches.router)
 app.include_router(escalations.router)
+app.include_router(parked.router)
 
 
 @app.get("/health", response_model=HealthResponse)

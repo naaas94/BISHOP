@@ -23,6 +23,14 @@ PWC_API_BASE_URL = "https://paperswithcode.com/api/v1"
 PWC_PAPERS_LIST_URL = f"{PWC_API_BASE_URL}/papers/"
 
 
+def _paperswithcode_api_unavailable(response: httpx.Response) -> bool:
+    """True when the v1 API is gone (site 302s to huggingface.co/papers)."""
+    if response.is_redirect:
+        return True
+    content_type = response.headers.get("content-type", "")
+    return response.status_code < 400 and "json" not in content_type.lower()
+
+
 def resolve_effective_since(
     since: datetime | None,
     *,
@@ -150,6 +158,16 @@ class PapersWithCodeAdapter(SourceAdapter):
         try:
             await self._rate_limiter.acquire()
             response = await client.get(PWC_PAPERS_LIST_URL, params=params)
+            if _paperswithcode_api_unavailable(response):
+                logger.warning(
+                    "paperswithcode API discontinued; skipping manifest fetch",
+                    extra={
+                        "event": "adapter_source_unavailable",
+                        "source": self.source.value,
+                        "http_status": response.status_code,
+                    },
+                )
+                return []
             response.raise_for_status()
             payload = response.json()
             if not isinstance(payload, dict):
