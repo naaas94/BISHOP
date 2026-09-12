@@ -1,4 +1,4 @@
-"""Unit tests for bishop_shared.rubric_assets (prompt-caching plan T1 / T4)."""
+"""Unit tests for bishop_shared.rubric_assets (prompt-caching plan T1 / T2 / T4)."""
 
 from __future__ import annotations
 
@@ -254,3 +254,96 @@ def test_call2_rubric_v1_front_matter_matches_shared_schema() -> None:
         r'canonical_hash: "[0-9a-f]{64}"\n---\n',
         raw,
     ), "front matter does not match the shared rubric schema"
+
+
+# --- T2: config/prompts/prefilter_rubric_v1.md (pre-filter source-shape annex) ---
+
+_PREFILTER_RUBRIC_PATH = REPO_ROOT / "config" / "prompts" / "prefilter_rubric_v1.md"
+
+# The seven adapters actually registered in
+# services/scraper/app/adapters/registry.py::ADAPTER_REGISTRY, mirrored here as
+# source-name literals rather than importing bishop_shared.enums.SourceEnum, so
+# this rubric-content test tracks the registration list the packet's kill
+# criterion is anchored to ("the M8 adapter set") without adding a coupling to
+# a shared import surface another subtask edits independently.
+_M8_ADAPTER_SOURCE_NAMES = frozenset(
+    {
+        "arxiv",
+        "github",
+        "huggingface",
+        "lesswrong",
+        "openreview",
+        "paperswithcode",
+        "semantic_scholar",
+    }
+)
+
+
+def test_prefilter_rubric_v1_resolves_and_hash_verifies() -> None:
+    """The committed asset resolves via the real container-path mapping (not a
+    tmp_path stand-in) and its stamped canonical_hash matches its own body."""
+    assert resolve_rubric_path("prefilter_rubric") == PROMPTS_CONTAINER_DIR / "prefilter_rubric_v1.md"
+    verified = verify_rubric_hash("prefilter_rubric", rubric_path=_PREFILTER_RUBRIC_PATH)
+    assert verified is not None
+    rubric_id, version, canonical_hash = verified
+    assert rubric_id == "prefilter_rubric"
+    assert version == "1.0.0"
+    assert canonical_hash == compute_rubric_hash(_PREFILTER_RUBRIC_PATH)
+
+
+def test_prefilter_rubric_v1_front_matter_matches_shared_schema() -> None:
+    """§2 row 7 literal schema, shared verbatim with T3/T4: the on-disk file's
+    front matter matches the exact block shape, not just a parseable subset."""
+    raw = _PREFILTER_RUBRIC_PATH.read_text(encoding="utf-8")
+    assert re.match(
+        r'\A---\nrubric_id: prefilter_rubric\nversion: "[^"\n]+"\n'
+        r'canonical_hash: "[0-9a-f]{64}"\n---\n',
+        raw,
+    ), "front matter does not match the shared rubric schema"
+
+
+def test_prefilter_rubric_v1_clears_key_a_token_floor() -> None:
+    """§2 row 8: measured against the real prefilter profile render (the pin
+    key A actually uses at cache-time — professional_v1.2.0_soft_launch.yaml,
+    not the enrichment pin), the total prefix (profile render + annex body)
+    clears the 4,506-token floor with positive margin. This is the packet's
+    own kill-criterion falsifier for "sizes its annex to meet the floor" — a
+    padding-free content-sizing claim, not a mechanical afterthought. T10
+    re-verifies the same floor at closure across all three keys; this test is
+    T2's own proof for key A, in T2's own diff."""
+    encoding = tiktoken.get_encoding("cl100k_base")
+    profile = load_profile(Path("config/profiles/professional_v1.2.0_soft_launch.yaml"))
+    profile_prompt = render_profile_prompt(profile)
+    profile_tokens = len(encoding.encode(profile_prompt))
+
+    rubric_doc = load_rubric(_PREFILTER_RUBRIC_PATH)
+    annex_tokens = len(encoding.encode(rubric_doc.body))
+
+    total = profile_tokens + annex_tokens
+    assert total >= 4506, (
+        f"key A total prefix {total} tokens (profile={profile_tokens}, "
+        f"annex={annex_tokens}) is below the 4,506-token floor"
+    )
+
+
+def test_prefilter_rubric_v1_names_only_m8_registered_adapters() -> None:
+    """Kill criterion: 'HALT if the annex names a specific source not in the
+    M8 adapter set.' Extracts every source-name token from the annex's five
+    '## Shape N — <shape> (<sources>)' headers and asserts each one is among
+    the seven adapters actually registered in
+    services/scraper/app/adapters/registry.py::ADAPTER_REGISTRY.
+
+    Mutation-checked: inserting a fictitious source name into a shape header
+    (e.g. appending ", reddit" to the Shape 1 parenthetical) makes this
+    assertion fail; reverting restores green (verified by hand while
+    authoring, then reverted — see decision log). This only proves the named
+    set is a *subset* of the registered adapters, not that it is exhaustive
+    — a real registered adapter omitted from every header is a gap this test
+    cannot see."""
+    body = load_rubric(_PREFILTER_RUBRIC_PATH).body
+    headers = re.findall(r"^## Shape \d+ — [\w\s]+\(([^)]+)\)", body, re.MULTILINE)
+    assert headers, "no '## Shape N — <name> (<sources>)' headers found in the annex"
+    named_sources = {token.strip() for group in headers for token in group.split(",")}
+    assert named_sources, "no source names extracted from shape headers"
+    unregistered = named_sources - _M8_ADAPTER_SOURCE_NAMES
+    assert not unregistered, f"annex names sources outside the M8 adapter set: {unregistered}"
