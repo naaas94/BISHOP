@@ -46,6 +46,30 @@ def test_enrichment_stage2_batch_size_env_override(monkeypatch: pytest.MonkeyPat
     assert config.ENRICHMENT_STAGE2_BATCH_SIZE == 7
 
 
+def test_enrichment_stage1_max_hold_minutes_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("BISHOP_ENRICHMENT_STAGE1_MAX_HOLD_MINUTES", raising=False)
+    config = _load_config_module()
+    assert config.ENRICHMENT_STAGE1_MAX_HOLD_MINUTES == 30
+
+
+def test_enrichment_stage1_max_hold_minutes_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BISHOP_ENRICHMENT_STAGE1_MAX_HOLD_MINUTES", "45")
+    config = _load_config_module()
+    assert config.ENRICHMENT_STAGE1_MAX_HOLD_MINUTES == 45
+
+
+def test_enrichment_stage2_max_hold_minutes_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("BISHOP_ENRICHMENT_STAGE2_MAX_HOLD_MINUTES", raising=False)
+    config = _load_config_module()
+    assert config.ENRICHMENT_STAGE2_MAX_HOLD_MINUTES == 30
+
+
+def test_enrichment_stage2_max_hold_minutes_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BISHOP_ENRICHMENT_STAGE2_MAX_HOLD_MINUTES", "45")
+    config = _load_config_module()
+    assert config.ENRICHMENT_STAGE2_MAX_HOLD_MINUTES == 45
+
+
 def test_enrichment_poll_interval_default(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("BISHOP_ENRICHMENT_POLL_INTERVAL_SEC", raising=False)
     config = _load_config_module()

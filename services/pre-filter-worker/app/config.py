@@ -16,7 +16,7 @@ def _int_from_env(name: str, default: int) -> int:
 
 PREFILTER_BATCH_SIZE = _int_from_env("BISHOP_PREFILTER_BATCH_SIZE", 50)
 PREFILTER_MIN_BATCH_SIZE = _int_from_env("BISHOP_PREFILTER_MIN_BATCH_SIZE", 25)
-PREFILTER_MAX_HOLD_MINUTES = _int_from_env("BISHOP_PREFILTER_MAX_HOLD_MINUTES", 120)
+PREFILTER_MAX_HOLD_MINUTES = _int_from_env("BISHOP_PREFILTER_MAX_HOLD_MINUTES", 30)
 PREFILTER_POLL_INTERVAL_SEC = _int_from_env("BISHOP_PREFILTER_POLL_INTERVAL_SEC", 60)
 
 # Dev-only bypass for G3 gate when live probe is impractical (e.g. local mocks).

@@ -23,6 +23,14 @@ hash-or-G3 abort from **extending** the deadline indefinitely (kill criterion 2 
 since the abort branch never touches `_hold_started_at`, a second, third, or Nth abort all measure
 elapsed time from the same original arrival, not from the moment of the latest failed attempt.
 
+> **Superseded by T11 (amendment round 5, v1.5.0):** the `Max hold minutes` column below (120 for
+> all three gates) is a stale default. Live G1 showed `ttl: "1h"` can be outlived by a 120-minute
+> idle flush on the trickle path; the operator-locked production default for all three
+> `*_MAX_HOLD_MINUTES` keys is now **30**, not 120. The nine keys, their typed `_int_from_env`
+> parse paths, and the hold-clock mechanism described in this section (start/reset/abort
+> semantics) are unchanged and this log remains authority for that mechanism — only the integer
+> default moved. See `.dev/plans/prompt-caching/packets/T11.md`.
+
 Config: nine new env-backed keys, three per gate, added to each service's existing
 `_int_from_env`-based `config.py` (no new parsing idiom, no `getattr` defaults):
 

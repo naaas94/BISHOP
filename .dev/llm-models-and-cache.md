@@ -61,9 +61,9 @@ resets on service restart (accepted, documented in
 
 | Stage | Batch size default | Batch size env var | Min batch size | Max hold (minutes) |
 |-------|---------------------|---------------------|-----------------|---------------------|
-| Pre-filter | 50 | `BISHOP_PREFILTER_BATCH_SIZE` | 25 (`BISHOP_PREFILTER_MIN_BATCH_SIZE`) | 120 (`BISHOP_PREFILTER_MAX_HOLD_MINUTES`) |
-| Enrichment stage 1 | 50 (was 10) | `BISHOP_ENRICHMENT_STAGE1_BATCH_SIZE` | 10 (`BISHOP_ENRICHMENT_STAGE1_MIN_BATCH_SIZE`) | 120 (`BISHOP_ENRICHMENT_STAGE1_MAX_HOLD_MINUTES`) |
-| Enrichment stage 2 | 50 (was 10) | `BISHOP_ENRICHMENT_STAGE2_BATCH_SIZE` | 10 (`BISHOP_ENRICHMENT_STAGE2_MIN_BATCH_SIZE`) | 120 (`BISHOP_ENRICHMENT_STAGE2_MAX_HOLD_MINUTES`) |
+| Pre-filter | 50 | `BISHOP_PREFILTER_BATCH_SIZE` | 25 (`BISHOP_PREFILTER_MIN_BATCH_SIZE`) | 30 (was 120; `BISHOP_PREFILTER_MAX_HOLD_MINUTES`) |
+| Enrichment stage 1 | 50 (was 10) | `BISHOP_ENRICHMENT_STAGE1_BATCH_SIZE` | 10 (`BISHOP_ENRICHMENT_STAGE1_MIN_BATCH_SIZE`) | 30 (was 120; `BISHOP_ENRICHMENT_STAGE1_MAX_HOLD_MINUTES`) |
+| Enrichment stage 2 | 50 (was 10) | `BISHOP_ENRICHMENT_STAGE2_BATCH_SIZE` | 10 (`BISHOP_ENRICHMENT_STAGE2_MIN_BATCH_SIZE`) | 30 (was 120; `BISHOP_ENRICHMENT_STAGE2_MAX_HOLD_MINUTES`) |
 
 All LLM calls use the Anthropic Batch API (~50% discount vs standard pricing per spec §12.1).
 

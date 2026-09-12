@@ -384,6 +384,8 @@ During active hours, scrapers on staggered intervals feed manifest rows; pre-fil
 
 **Red-team verdict:** default **5m TTL is wrong for BISHOP** on all batch paths. Use **`ttl: "1h"`** everywhere. Revisit only if steady-state traffic is continuous sub-5-minute intervals *and* cost telemetry shows 1h write premium exceeds savings (unlikely at backfill scale).
 
+**Idle-flush ceiling vs TTL (amendment round 5, v1.5.0, T11).** Each gate's trickle path (buffer below `*_MIN_BATCH_SIZE`) holds entries until `*_MAX_HOLD_MINUTES` elapses since the buffer went empty→non-empty. Live G1 (cache key A, runner ledger 2026-09-12T22:25Z) confirmed the busy size-50 path stays warm via ~1-minute jobs. But T9-bis's original idle-flush default of 120 minutes can outlive `ttl: "1h"` on the trickle path — a quiet flush at 120 min would land after TTL expiry and pay a full write instead of a hit. Operator-locked retune: the idle-flush ceiling is now **30 minutes** on all three gates (`BISHOP_PREFILTER_MAX_HOLD_MINUTES`, `BISHOP_ENRICHMENT_STAGE1_MAX_HOLD_MINUTES`, `BISHOP_ENRICHMENT_STAGE2_MAX_HOLD_MINUTES`), keeping the trickle-path flush comfortably inside the 1h TTL with margin. This does not change hold-clock semantics (T9-bis remains authority) and does not implement the §3c warmup-then-cohort pattern (deferred, `FU-CACHE-WARMUP-01`).
+
 ### 12c. Rate limits during backfill
 
 Anthropic docs: **cache hits do not deduct from input-tokens-per-minute rate limits.** At backfill scale, caching is not only a cost optimization — it reduces throttling risk on the pre-filter flood.

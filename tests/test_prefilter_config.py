@@ -34,6 +34,18 @@ def test_prefilter_batch_size_env_override(monkeypatch: pytest.MonkeyPatch) -> N
     assert config.PREFILTER_BATCH_SIZE == 20
 
 
+def test_prefilter_max_hold_minutes_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("BISHOP_PREFILTER_MAX_HOLD_MINUTES", raising=False)
+    config = _load_config_module()
+    assert config.PREFILTER_MAX_HOLD_MINUTES == 30
+
+
+def test_prefilter_max_hold_minutes_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BISHOP_PREFILTER_MAX_HOLD_MINUTES", "45")
+    config = _load_config_module()
+    assert config.PREFILTER_MAX_HOLD_MINUTES == 45
+
+
 def test_prefilter_poll_interval_default(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("BISHOP_PREFILTER_POLL_INTERVAL_SEC", raising=False)
     config = _load_config_module()
