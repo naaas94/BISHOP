@@ -1,8 +1,22 @@
 {
   "plan": "prompt-caching",
-  "plan_version": "1.0.0",
-  "run_status": "complete",
+  "plan_version": "1.1.0",
+  "run_status": "amended",
   "baseline_sha": "b919fdba09e07a77700d57cf3b360c001058bb84",
+  "amendments": [
+    {
+      "round": 1,
+      "plan_version": "1.1.0",
+      "trigger": "T1 kill-criterion HALT on section 2 row 9 falsifier (see runs/T1-brief.md)",
+      "fork_chosen": 2,
+      "fork_description": "Move ownership/timing of the row-9 sweep-test verification from T1 to T10 (post T5/T6/T7). No new architectural fork.",
+      "superseded_node": "T1",
+      "added_nodes": ["T1-bis"],
+      "rebound_edges": ["T1->T2", "T1->T3", "T1->T4", "T1->T8", "T1->T9"],
+      "runner_bypass": true,
+      "runner_bypass_note": "This amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop, invoked mid-wave after the T1 dispatch HALTed. It does not write runs/ledger.md or runs/execution-summary.md (runner-owned, append-only). Plan-runner's own next pre-flight reconciles the ledger against this round."
+    }
+  ],
   "nodes": [
     {
       "id": "T1",
@@ -10,7 +24,19 @@
       "packet": ".dev/plans/prompt-caching/packets/T1.md",
       "tier": "architectural",
       "model_class": "architectural",
-      "decision_log_path": ".dev/decision-logs/prompt-caching/T1-cache-and-rubric-contract.md"
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T1-cache-and-rubric-contract.md",
+      "status": "halted",
+      "note": "HALTed at dispatch on section 2 row 9's falsifier (see runs/T1-brief.md). Packet retained unmodified as the historical HALT record. Not re-dispatched. Continuation node is T1-bis (amendment round 1)."
+    },
+    {
+      "id": "T1-bis",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T1-bis.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T1-bis-cache-and-rubric-contract.md",
+      "round": 1,
+      "note": "Amendment round 1 continuation of halted T1. Consumes T1's uncommitted working tree as input; lands T1's DoD under the amended section 2 row 9 (verification timing moved to T10)."
     },
     {
       "id": "T2",
@@ -79,7 +105,8 @@
       "kind": "executable",
       "packet": ".dev/plans/prompt-caching/packets/T10.md",
       "tier": "standard",
-      "model_class": "standard"
+      "model_class": "standard",
+      "note": "Amendment round 1 adds section 2 row 9 verification ownership: T10 must run tests/test_prompt_cache.py::test_no_inline_cache_control_literals at closure and HALT (new section 7 row) if it is not green."
     },
     {
       "id": "G1",
@@ -88,11 +115,12 @@
     }
   ],
   "hard_edges": [
-    ["T1", "T2"],
-    ["T1", "T3"],
-    ["T1", "T4"],
-    ["T1", "T8"],
-    ["T1", "T9"],
+    ["T1", "T1-bis"],
+    ["T1-bis", "T2"],
+    ["T1-bis", "T3"],
+    ["T1-bis", "T4"],
+    ["T1-bis", "T8"],
+    ["T1-bis", "T9"],
     ["T2", "T5"],
     ["T3", "T6"],
     ["T4", "T7"],
@@ -146,7 +174,8 @@
       "rank": 1,
       "nodes": ["T2", "T3", "T4", "T8", "T9"],
       "benefit": "throughput-only",
-      "commit_order_guard": "T2, T3, T4 all append CHANGELOG.MD and all create files under config/prompts/. Commit order is ascending Tn; whichever lands later reconciles the shared CHANGELOG section as part of its own definition of done."
+      "commit_order_guard": "T2, T3, T4 all append CHANGELOG.MD and all create files under config/prompts/. Commit order is ascending Tn; whichever lands later reconciles the shared CHANGELOG section as part of its own definition of done.",
+      "note": "Amendment round 1: this rank now depends on T1-bis, not T1 (T1 never committed)."
     },
     {
       "rank": 2,
@@ -156,9 +185,10 @@
     }
   ],
   "commit_order_invariants": [
-    "T5, T6, T7, T8 and T9 import symbols owned by T1 (prompt_cache, rubric_assets, the extended render_profile_prompt). None may land, and section 8.1 may not freeze closure, while T1 remains uncommitted, even if the full suite passes in a dirty in-tree run."
+    "T5, T6, T7, T8 and T9 import symbols owned by T1-bis (amendment round 1 successor to halted T1): prompt_cache, rubric_assets, the extended render_profile_prompt. None may land, and section 8.1 may not freeze closure, while T1-bis remains uncommitted, even if the full suite passes in a dirty in-tree run."
   ],
   "preconditions": [
-    "D1: .dev/plans/prompt-caching/ (context-map.md, plan.md, dag.json, packets/) must be committed before the first dispatch. Until then the plan is not dispatchable regardless of run_status."
+    "D1: .dev/plans/prompt-caching/ (context-map.md, plan.md, dag.json, packets/) must be committed before the first dispatch. Until then the plan is not dispatchable regardless of run_status.",
+    "Amendment round 1: this amendment's own artifacts (plan.md, dag.json, packets/T1-bis.md, refreshed packets/T2.md..T10.md) are committed in an amendment-only commit before T1-bis is dispatched. T1-bis's implementation files remain uncommitted until T1-bis itself lands them."
   ]
 }

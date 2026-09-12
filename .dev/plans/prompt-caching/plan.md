@@ -1,12 +1,14 @@
 # Plan — prompt-caching
 
-**Version:** 1.0.0
-**run_status:** `complete`
+**Version:** 1.1.0
+**run_status:** `amended`
 **audit_status:** `not_run`
 **Mode:** Standard (non-charter; caching is not an M8/M9 charter row)
 **Baseline SHA:** `b919fdba09e07a77700d57cf3b360c001058bb84` (branch `dev`)
-**Declared subtask budget:** 4–10 (orchestrator-planning §Budget). This plan declares **10 executable subtasks + 1 gate node** — at the ceiling, no split proposal required.
+**Declared subtask budget:** 4–10 (orchestrator-planning §Budget). This plan declared **10 executable subtasks + 1 gate node** at v1.0.0 — at the ceiling, no split proposal required.
+**Budget-amendment (v1.1.0, amendment round 1):** Prior authorized count **10 executable + 1 gate**. New count **11 executable + 1 gate** — crosses the 4–10 ceiling by one, recorded here per orchestrator-planning §Budget / Validation item 19. The added subtask is **T1-bis**, which closes T1's kill-criterion HALT (§7 round 1) by landing T1's already-scoped shared-module DoD under an amended §2 row-9 verification timing. It does not reopen T1's design and introduces no new architectural fork.
 **Skill version:** orchestrator-planning v1.2
+**Amendment round 1 (v1.1.0) — status banner:** T1 HALTed at dispatch on §2 row 9's falsifier (full report: `.dev/plans/prompt-caching/runs/T1-brief.md`). Resolved as a scoped contract-timing fix — fork 2 of the HALT's three offered forks: row 9's sweep-test verification moves from T1 to T10 (post T5/T6/T7), rather than re-scoping the grep itself or expanding T1 into T7's territory. Continuation node **T1-bis** lands T1's DoD from the existing uncommitted working tree; **T1**'s own packet is retained unmodified as the historical HALT record and is not re-dispatched. See §7 for the full amendment row.
 
 ---
 
@@ -110,7 +112,7 @@ Binding on every subagent. Enforcement mode is one token per row; rows whose ver
 | # | Contract | Owner | Enforcement | Falsifier |
 |---|---|---|---|---|
 | 8 | **Token floor.** Total measured system-prefix tokens per cache key ≥ **4,506** (`cl100k_base`) = 4,096 × 1.10. The 10% margin exists because `cl100k_base` is a proxy for Anthropic's tokenizer, not the tokenizer itself. Measured on the **total prefix**, not the annex, so the contract cannot go stale when a profile render changes. | T10 (gate); T2/T3/T4 size their annexes to meet it | `pytest-enforced` | **New** `tests/test_prompt_cache_token_floor.py`: one point-literal assertion per key (A, B, C) that the assembled prefix ≥ 4506, printing the measured margin. **Named semantic gap:** a proxy tokenizer cannot prove Anthropic cached anything — the live falsifier is G1's `cache_creation_input_tokens > 0`. |
-| 9 | **Single emitter.** No `cache_control` dict literal may appear anywhere outside `bishop_shared/prompt_cache.py`. All three gates obtain blocks from `cached_system_blocks`. | T1 | `pytest-enforced` | `tests/test_prompt_cache.py::test_no_inline_cache_control_literals` — tree grep over `bishop_shared/**` and `services/**` excluding `prompt_cache.py`; asserts zero hits. This is the mechanical guard for §5.4 C1. |
+| 9 | **Single emitter.** No `cache_control` dict literal may appear anywhere outside `bishop_shared/prompt_cache.py`. All three gates obtain blocks from `cached_system_blocks`. **Amendment banner (v1.1.0, round 1) — read this before the Owner column:** at T1's original dispatch this row's falsifier could not pass: `bishop_shared/enrichment_prompts.py::build_call2_system_prompt` (pre-existing production code on the live Call 2 wire path, migrated under contract row 5 by **T7**) inlines a `cache_control` literal until T7 lands. That is not a T1 defect — T7's files are outside T1's Files to touch. Verification of this row is therefore split by *timing*, not by a new design fork: **T1-bis** authors `cached_system_blocks` and the grep test; **T10** owns asserting the test green, at its own closure sweep, after T5/T6/T7 have landed. Full discovery: `.dev/plans/prompt-caching/runs/T1-brief.md`; amendment record: §7 round 1. | **T1-bis** (authors the helper + the test); **T10** (verifies green at closure — Landed by amendment round 1) | `pytest-enforced` | `tests/test_prompt_cache.py::test_no_inline_cache_control_literals` — tree grep over `bishop_shared/**` and `services/**` excluding `prompt_cache.py`; asserts zero hits. This is the mechanical guard for §5.4 C1. **T1-bis may land with this specific test red** — documented explicitly in its decision log, not silently — because T7 has not migrated yet. **T10** re-runs it as part of its own closure sweep and HALTs, opening a new §7 row, if it is not green once T7 has landed. |
 | 10 | **Breakpoint placement.** Exactly **one** `cache_control` per request, on the **last** system block, on all three gates. Block order: key A `[profile_render, prefilter_rubric]`; key B `[call1_system, call1_rubric]`; key C `[profile_render(include_output=False), call2_rubric, call2_instructions]`. | T5 / T6 / T7 | `pytest-enforced` | Per-gate: `sum(1 for b in blocks if "cache_control" in b) == 1` **and** the index equals `len(blocks) - 1`. Both assertions required — a count-only test passes with the breakpoint on block 0. |
 | 11 | **Batch identity.** Every request within one batch carries byte-identical system blocks. Dynamic per-entry content stays in the user message. | T5 / T6 / T7 | `pytest-enforced` | Per-gate multi-entry test asserting all requests' `params["system"]` compare equal |
 
@@ -176,7 +178,9 @@ Binding on every subagent. Enforcement mode is one token per row; rows whose ver
 
 ### Decision log path
 
-**`.dev/decision-logs/prompt-caching/T<n>-<slug>.md`** — required for every `architectural` subtask (T1, T2, T3, T4, T6, T7, T9). This path is a contract anchor; drift between `decision-logs/` and `decisions/` is a violation, not cleanup.
+**`.dev/decision-logs/prompt-caching/T<n>-<slug>.md`** — required for every `architectural` subtask (T2, T3, T4, T6, T7, T9). This path is a contract anchor; drift between `decision-logs/` and `decisions/` is a violation, not cleanup.
+
+**Amendment round 1 (v1.1.0):** T1 never reached a commit before its HALT, so no `T1-*.md` decision log was ever written. **T1-bis** (§7 round 1) is the architectural subtask that actually lands this surface; its decision log is `.dev/decision-logs/prompt-caching/T1-bis-cache-and-rubric-contract.md`, following the same `T<n>-<slug>` pattern with `T1-bis` as `<n>`.
 
 ### CHANGELOG convention
 
@@ -188,15 +192,16 @@ Binding on every subagent. Enforcement mode is one token per row; rows whose ver
 
 ```mermaid
 graph TD
-    T1[T1 shared cache + rubric contract] --> T2[T2 author prefilter rubric]
-    T1 --> T3[T3 author call1 rubric]
-    T1 --> T4[T4 author call2 rubric]
-    T1 --> T8[T8 poller cache usage]
-    T1 --> T9[T9 batch amortization]
+    T1[T1 shared cache + rubric contract — HALTed, packet retained unmodified] --> T1bis[T1-bis: continuation, lands T1 DoD]
+    T1bis --> T2[T2 author prefilter rubric]
+    T1bis --> T3[T3 author call1 rubric]
+    T1bis --> T4[T4 author call2 rubric]
+    T1bis --> T8[T8 poller cache usage]
+    T1bis --> T9[T9 batch amortization]
     T2 --> T5[T5 pre-filter wiring]
     T3 --> T6[T6 Call 1 wiring]
     T4 --> T7[T7 Call 2 wiring]
-    T5 --> T10[T10 closeout + token gate + sweep]
+    T5 --> T10[T10 closeout + token gate + sweep + row-9 verification]
     T6 --> T10
     T7 --> T10
     T8 --> T10
@@ -204,9 +209,11 @@ graph TD
     T10 --> G1{{G1 operator live cache gate}}
 ```
 
+**Amendment round 1 (v1.1.0) — DAG rebind.** T1 HALTed before committing; its downstream consumers (T2, T3, T4, T8, T9) originally hard-depended on `T1` directly. That edge set is retired and replaced: `T1 --> T1-bis` (continued-HALT edge, per orchestrator-planning §7), and `T1-bis --> {T2,T3,T4,T8,T9}` (every consumer rebound onto the node that actually lands the shared modules). `T1`'s node stays in the graph — kind `executable`, packet retained — but is not re-dispatched; `dag.json` records it as `status: halted` for the runner's benefit.
+
 **Parallel groups.**
 
-- **`{T2, T3, T4, T8, T9}`** — rank 1, all depend only on T1. **Throughput-only.** No HALT-isolation claim is made: a single operator executing serially never exercises concurrency, so claiming isolation here would be unfalsifiable.
+- **`{T2, T3, T4, T8, T9}`** — rank 1 (post-amendment: depend on **T1-bis**, not T1). **Throughput-only.** No HALT-isolation claim is made: a single operator executing serially never exercises concurrency, so claiming isolation here would be unfalsifiable.
 - **`{T5, T6, T7}`** — rank 2. **Throughput-only.**
 
 **Soft dependencies (coordination notes, never ordering constraints).** Declared as `soft_edges` in `dag.json`, not encoded in mermaid edge styling.
@@ -219,7 +226,7 @@ graph TD
 
 1. **Prose-coupled group `{T2, T3, T4}`** — all three append `CHANGELOG.MD` and all three create files under `config/prompts/`. Commit order is ascending `Tn`; whichever lands second or third reconciles the shared CHANGELOG section as part of its own definition of done. Parallel execution otherwise permits a CHANGELOG describing annexes that do not exist yet, and no test observes that.
 2. **Prose-coupled group `{T5, T6, T7}`** — same rule for `CHANGELOG.MD`, ascending `Tn`.
-3. **Cross-subtask import guard.** T5, T6, T7, T8 and T9 all import symbols owned by T1 (`prompt_cache`, `rubric_assets`, the extended `render_profile_prompt`). None of them may land, and §8.1 may not freeze closure, while T1 remains uncommitted — even if the whole suite passes in a dirty in-tree run. This is listed as an explicit risk in §5.3.
+3. **Cross-subtask import guard.** T5, T6, T7, T8 and T9 all import symbols owned by **T1-bis** (post-amendment successor to T1: `prompt_cache`, `rubric_assets`, the extended `render_profile_prompt`). None of them may land, and §8.1 may not freeze closure, while T1-bis remains uncommitted — even if the whole suite passes in a dirty in-tree run. This is listed as an explicit risk in §5.3.
 
 **Gate node.**
 
@@ -244,6 +251,23 @@ graph TD
 | **Model class** | `architectural` — every downstream subtask's contract surface originates here; a wrong breakpoint helper propagates to all three gates |
 | **Risks & mitigations** | The `cache_control` dict is the single most-copied literal in the plan; row 9's grep test is the structural guard. CRLF line endings on this Windows checkout could destabilise the rubric body hash — row 7's LF normalisation plus a CRLF-vs-LF equality test. `render_profile_prompt` is consumed by pre-filter, stage2, and `scripts/profile_hash.py`; the keyword-only default-`True` param is chosen precisely so no existing call site changes. |
 
+**HALT record (do not edit above this line).** T1 HALTed before committing: implementing `test_no_inline_cache_control_literals` exactly as row 9 specifies surfaced a live inline `cache_control` literal in `bishop_shared/enrichment_prompts.py::build_call2_system_prompt` (called from `services/enrichment-batcher/app/anthropic_batch_client.py:94` on the real Call 2 wire path) — files outside T1's Files to touch and owned by T7. Full report: `.dev/plans/prompt-caching/runs/T1-brief.md`. Resolved by amendment round 1 (§7) as a scoped contract-timing fix. T1's packet is retained unmodified as the historical record.
+
+### T1-bis — Continuation of T1: land the shared cache/rubric contract (amendment round 1, v1.1.0)
+
+| Field | Content |
+|---|---|
+| **ID** | `T1-bis` |
+| **Scope** | Finish T1's DoD from the existing uncommitted working tree under the amended §2 row 9 (verification timing moved to T10). Not a clean-slate rewrite: the working tree already contains T1's new modules, the stamping script, the Dockerfile bakes, the SDK pin bump, and 38 passing tests. T1-bis completes and commits that work; it does not re-derive it. |
+| **Files to touch** | Same set T1 declared — consumed as already-present, not authored fresh: `bishop_shared/prompt_cache.py` (new, present), `bishop_shared/rubric_assets.py` (new, present), `bishop_shared/profile_renderer.py` (modified, present — includes both T1's `include_output` extension and the pre-existing overlay pin edits; do not revert either), `scripts/rubric_hash.py` (new, present), `config/prompts/README.md` (new, present), `tests/test_prompt_cache.py` (new, present), `tests/test_rubric_assets.py` (new, present), `tests/test_profile_renderer.py` (modified, present), `services/pre-filter-worker/Dockerfile` (modified, present), `services/enrichment-batcher/Dockerfile` (modified, present), `services/pre-filter-worker/requirements.txt`, `services/enrichment-batcher/requirements.txt`, `services/batch-poller/requirements.txt` (all modified, present), `pyproject.toml` (modified, present), `CHANGELOG.MD`, `.dev/decision-logs/prompt-caching/T1-bis-cache-and-rubric-contract.md` (new). **Do not** touch `bishop_shared/enrichment_prompts.py` or `services/enrichment-batcher/app/anthropic_batch_client.py` — those are T7's row-5 ownership; migrating them here would be fork 3 of the HALT, rejected as scope creep onto T7. **Do not** `git add` `AGENTS.md` or `.cursor/rules/windows-file-tools.mdc` — unrelated dirty files present in the same working tree, out of scope for this commit. |
+| **Contract bindings** | Rows 1, 1a, 2, 3, 6, 7, 9 (author only — verification moved to T10 by this amendment), 16, 21, 22. Owner of rows 1, 1a, 2, 3, 7, 16. Author (not verifier) of row 9. |
+| **Inputs** | T1 (halted; this node consumes T1's uncommitted working-tree output directly — there is no other artifact to resolve) |
+| **Outputs** | Two shared modules committed; `scripts/rubric_hash.py` committed with frozen CLI `python scripts/rubric_hash.py <path> [--render]`; `config/prompts/` committed; two Dockerfiles baking `config/prompts` committed; SDK floor `>=0.100` committed; three test modules committed (38 tests green; `test_no_inline_cache_control_literals` expected red — see kill criteria); decision log recording the HALT, the three offered forks, and why fork 2 was chosen. |
+| **Kill criteria** | Re-verify all of T1's original kill criteria still hold on the working tree before committing: **(runtime-invariant)** `cached_system_blocks` places `cache_control` on the last block without mutating a module-level dict shared across requests. **(executor-preflight)** `anthropic>=0.100` is satisfied in this environment. **(mechanical post-check)** Run `docker build -f services/pre-filter-worker/Dockerfile .` and paste the exit code. **(mechanical post-check)** Run `git ls-files config/profiles/professional_v1.2.0_soft_launch.yaml` and paste the output — per the T1 HALT report this file is **already tracked at HEAD**, so no `git add` is needed for it; if the output is empty, HALT (the HALT report's premise was wrong and needs re-investigation, not a silent `git add`). **(runtime-invariant)** `render_profile_prompt`'s default render is byte-identical to pre-change. HALT if any change touches a row-20 frozen path. **(row-9 specific — this is the amendment's own falsifier)** Run `pytest tests/test_prompt_cache.py::test_no_inline_cache_control_literals` and paste the result: it is **expected to fail** with exactly one hit (`bishop_shared/enrichment_prompts.py::build_call2_system_prompt`). Record this expected-red result explicitly in the decision log. HALT instead of committing if the grep finds any **other** hit, or finds zero hits with the known T7 literal still present in the source (a stale AST/grep miss), or if you find yourself tempted to add an exemption/exclusion into the test body itself — the test text is frozen as written by the original T1 packet; only its *pass requirement's owner* changed. Do not edit `enrichment_prompts.py` to make it pass. **Run the full suite** `pytest tests/ -m "not heavy"` and paste passed/failed counts; only `test_no_inline_cache_control_literals` may be red. Commit your work before reporting done (T2/T3/T4/T8/T9 hard-depend on this commit existing). |
+| **Log tier** | `architectural` (same tier as the T1 spec it continues) |
+| **Model class** | `architectural` — same rationale as T1: every downstream subtask's contract surface originates here |
+| **Risks & mitigations** | Same as T1's original risks (row-9 grep as structural guard for the *other* two gates' inline-literal discipline; CRLF hash stability; `render_profile_prompt` consumer breadth). **Amendment-specific risk:** committing a tree with one known-red test invites a future reader to assume the whole plan is broken; the decision log and the §2 row 9 banner exist specifically so that red is legible as "expected, owned by T10" rather than "regression." |
+
 ### T2 — Author `prefilter_rubric_v1.md` (cache key A)
 
 | Field | Content |
@@ -252,7 +276,7 @@ graph TD
 | **Scope** | Author the pre-filter rubric annex as **source-shape law** — how to judge relevance differently for a paper vs a repo vs a model card vs an article vs a hub dump — and stamp its hash. |
 | **Files to touch** | `config/prompts/prefilter_rubric_v1.md` (new), `tests/test_rubric_assets.py` (extend), `CHANGELOG.MD`, `.dev/decision-logs/prompt-caching/T2-prefilter-rubric.md` |
 | **Contract bindings** | Rows 6, 7, 8, 21, 22. Sizes its annex so key A's **total** prefix ≥ 4,506. |
-| **Inputs** | T1 (`rubric_assets`, `scripts/rubric_hash.py`) |
+| **Inputs** | T1-bis (`rubric_assets`, `scripts/rubric_hash.py`) — amendment round 1 rebind, was T1 |
 | **Outputs** | Stamped annex; measured token report for key A (annex tokens, total prefix tokens, margin over 4,506); decision log recording why each source shape earned its space |
 | **Kill criteria** | HALT rather than pad — no filler, whitespace, or lorem to reach the floor (strategy §17). If genuine source-shape content cannot reach the floor, HALT and report the shortfall. **(mechanical post-check)** Run `python scripts/rubric_hash.py config/prompts/prefilter_rubric_v1.md` and paste its output; then re-run and paste the "already current" line. HALT if the annex contradicts the live profile's exclusions or peripheral-tier disposition rather than extending them. HALT if the annex names a specific source not in the M8 adapter set. |
 | **Log tier** | `architectural` |
@@ -267,7 +291,7 @@ graph TD
 | **Scope** | Author the Call 1 extraction rubric: per-`entry_type` extraction guidance, per-source content-shape notes, and worked examples for `summary` / `concepts` / `tags` / `entry_type` / `challenge_hooks`. Call 1 has no profile, so this annex carries almost the entire prefix. |
 | **Files to touch** | `config/prompts/call1_rubric_v1.md` (new), `tests/test_rubric_assets.py` (extend), `CHANGELOG.MD`, `.dev/decision-logs/prompt-caching/T3-call1-rubric.md` |
 | **Contract bindings** | Rows 6, 7, 8, 21, 22. Sizes its annex so key B's **total** prefix ≥ 4,506. Must not restate or edit `TAG_TAXONOMY_ORDERED`; the taxonomy is injected by `build_call1_system_prompt` and duplicating it into the annex would double the tokens and create a second copy to drift. |
-| **Inputs** | T1 |
+| **Inputs** | T1-bis — amendment round 1 rebind, was T1 |
 | **Outputs** | Stamped annex; measured token report for key B; **a manual spot-check artifact** at `.dev/plans/prompt-caching/artifacts/T3-call1-spotcheck.md` comparing Call 1 output fields for at least 5 real entries before and after the annex; decision log |
 | **Kill criteria** | HALT rather than pad. **(mechanical post-check)** paste `scripts/rubric_hash.py` output as in T2. HALT if the annex would change the Appendix A JSON schema in `build_call1_system_prompt` — the annex adds guidance, never a second schema. HALT if the spot-check shows `challenge_hooks` degrading in specificity; spec §13.1 names it the most load-bearing field for Layer 2 retrieval and there is **no automated Call 1 eval gate** to catch this. |
 | **Log tier** | `architectural` |
@@ -282,7 +306,7 @@ graph TD
 | **Scope** | Author the Call 2 relevance-scoring rubric: score-band definitions, pass/marginal/reject worked examples with scores, and `value_rationale` guidance. Must explicitly govern relevance **scoring** (0–1 float), not the gate-1 binary decision. |
 | **Files to touch** | `config/prompts/call2_rubric_v1.md` (new), `tests/test_rubric_assets.py` (extend), `CHANGELOG.MD`, `.dev/decision-logs/prompt-caching/T4-call2-rubric.md` |
 | **Contract bindings** | Rows 6, 7, 8, 21, 22. Sizes its annex so key C's **total** prefix ≥ 4,506, measured against the `include_output=False` profile render (row 3) that T7 will use — **not** against the current 383-token render. |
-| **Inputs** | T1 |
+| **Inputs** | T1-bis — amendment round 1 rebind, was T1 |
 | **Outputs** | Stamped annex; measured token report for key C stating which render variant it measured; decision log |
 | **Kill criteria** | HALT rather than pad. **(mechanical post-check)** paste `scripts/rubric_hash.py` output. HALT if the annex reintroduces a `{"decision": 0 or 1}` output contract — that is the gate-1 contract this plan is removing from the Call 2 prefix (§5.4 C4). HALT if measuring against the wrong render variant, since the resulting margin would be wrong in the unsafe direction. |
 | **Log tier** | `architectural` |
@@ -297,7 +321,7 @@ graph TD
 | **Scope** | Convert pre-filter `params.system` from a plain string to cached content blocks, and add rubric hash-or-abort to the pre-filter cycle. |
 | **Files to touch** | `services/pre-filter-worker/app/anthropic_batch_client.py`, `services/pre-filter-worker/app/loop.py`, `tests/test_prefilter_anthropic_client.py`, `tests/test_prefilter_loop.py`, `CHANGELOG.MD` |
 | **Contract bindings** | Rows 1, 2, 5, 8, 9, 10, 11, 12, 21, 22. |
-| **Inputs** | T1 (`cached_system_blocks`, `verify_rubric_hash`), T2 (stamped `prefilter_rubric_v1.md`) |
+| **Inputs** | T1-bis (`cached_system_blocks`, `verify_rubric_hash`) — amendment round 1 rebind, was T1; T2 (stamped `prefilter_rubric_v1.md`) |
 | **Outputs** | Block-shaped pre-filter payload with `cache_control` + `ttl: "1h"` on the last block; rubric abort wired ahead of Anthropic with the existing CRITICAL alert; updated tests |
 | **Kill criteria** | **(runtime-invariant)** HALT if any code path can still submit a plain-string `system`. HALT if the rubric abort lands *after* the Anthropic call rather than before it — the abort is worthless downstream of submit. HALT if `emit_profile_hash_mismatch_alert`'s existing profile behaviour changes. Must update `tests/test_prefilter_anthropic_client.py:73` (`assert requests[0]["params"]["system"] == "system text"`), which fails by construction. No inline `cache_control` literal (row 9). |
 | **Log tier** | `standard` — applies T1's established pattern; no new design fork |
@@ -312,7 +336,7 @@ graph TD
 | **Scope** | Convert Call 1 `params.system` to cached content blocks including the Call 1 rubric, and give stage 1 a rubric hash-or-abort path it does not currently have — without altering `_profile_render_hash`. |
 | **Files to touch** | `bishop_shared/enrichment_prompts.py`, `services/enrichment-batcher/app/anthropic_batch_client.py`, `services/enrichment-batcher/app/stage1_loop.py`, `tests/test_enrichment_prompts.py`, `tests/test_enrichment_batcher_stage1_loop.py`, `CHANGELOG.MD`, `.dev/decision-logs/prompt-caching/T6-call1-wiring.md` |
 | **Contract bindings** | Rows 1, 2, 5, 8, 9, 10, 11, 12, 13, 21, 22. Owner of row 13. |
-| **Inputs** | T1, T3 (stamped `call1_rubric_v1.md`) |
+| **Inputs** | T1-bis — amendment round 1 rebind, was T1; T3 (stamped `call1_rubric_v1.md`) |
 | **Outputs** | Block-shaped Call 1 payload; new stage-1 rubric abort (log-only, no CRITICAL); regression test pinning `_profile_render_hash` semantics; decision log |
 | **Kill criteria** | **(runtime-invariant)** HALT if `_profile_render_hash` starts calling `compute_profile_hash` — that is a separate contract change the M5 T4 log explicitly left open, and doing it here silently widens scope. HALT if the abort path emits a CRITICAL alert (pre-filter's asymmetry must not be copied here — row 12). HALT if `build_call1_system_prompt`'s Appendix A schema text or injected taxonomy changes. `tests/test_enrichment_prompts.py::test_call1_includes_taxonomy` asserts `tag in prompt` against a **string**; if the builder's return type changes, that assertion silently passes or breaks in the wrong direction — it must be re-pointed at the specific block, not at the block list. |
 | **Log tier** | `architectural` — introduces a failure mode (batch abort) in a path that previously could not abort |
@@ -327,7 +351,7 @@ graph TD
 | **Scope** | Move the Call 2 `cache_control` breakpoint from the first system block to the **last**, add `ttl: "1h"`, insert the Call 2 rubric, and stop caching the gate-1 output contract that the v1.0.0 profile render currently drags into the Call 2 prefix. |
 | **Files to touch** | `bishop_shared/enrichment_prompts.py`, `services/enrichment-batcher/app/anthropic_batch_client.py`, `services/enrichment-batcher/app/stage2_loop.py`, `tests/test_enrichment_prompts.py`, `tests/test_enrichment_batcher_stage2_loop.py`, `CHANGELOG.MD`, `.dev/decision-logs/prompt-caching/T7-call2-breakpoint-move.md` |
 | **Contract bindings** | Rows 1, 2, 3, 5, 8, 9, 10, 11, 12, 21, 22. |
-| **Inputs** | T1 (`include_output` param), T4 (stamped `call2_rubric_v1.md`) |
+| **Inputs** | T1-bis (`include_output` param) — amendment round 1 rebind, was T1; T4 (stamped `call2_rubric_v1.md`) |
 | **Outputs** | Three-block Call 2 system with one `cache_control` on the last block; profile rendered with `include_output=False`; rubric abort (log-only); updated tests; decision log recording the breakpoint move **and** the output-contract removal as two distinct decisions |
 | **Kill criteria** | **(runtime-invariant)** HALT if more than one block carries `cache_control`, or if it is not on the last block. HALT if the cached prefix contains a `{"decision": 0 or 1}` instruction — v1.0.0's `output.instruction` is a **gate-1** contract and caching it ahead of the relevance schema ships a contradiction to the model on every row (§5.4 C4). HALT if the enrichment pin moves off `professional_v1.0.0.yaml` (D5). Must update both `tests/test_enrichment_prompts.py:29-32` and `tests/test_enrichment_batcher_stage2_loop.py:178-179`, which assert `blocks[0]["cache_control"] == {"type": "ephemeral"}` and fail by construction. |
 | **Log tier** | `architectural` — a schema-stable **semantic inversion**: which content is billed at cache-read price versus full price reverses, and the removal of the gate-1 output contract changes what the model is told to produce. No structural or AST test can see either change. |
@@ -342,7 +366,7 @@ graph TD
 | **Scope** | Parse Anthropic `message.usage` cache fields in the poller, aggregate them per batch, add them to the three existing completion log lines, and warn when a completed batch reports no cache usage at all. |
 | **Files to touch** | `services/batch-poller/app/clients/anthropic.py`, `services/batch-poller/app/models.py` (**already dirty** — a `parked` overlay field is present; do not revert it), `services/batch-poller/app/loop.py`, `tests/test_batch_poller_anthropic_client.py`, `tests/test_batch_poller_loop.py`, `tests/test_batch_poller_enrichment.py`, `CHANGELOG.MD` |
 | **Contract bindings** | Rows 4, 14, 15, 21, 22. Owner of rows 4, 14, 15. |
-| **Inputs** | T1 |
+| **Inputs** | T1-bis — amendment round 1 rebind, was T1 |
 | **Outputs** | Four new optional fields on `AnthropicBatchResultItem`; `usage` extraction in `fetch_batch_results` following the existing `getattr(...) or ...get(...)` idiom; an aggregation helper used by all three handlers; five new `extra` keys per completion line; `cache_read_zero` warning |
 | **Kill criteria** | **(runtime-invariant)** HALT if any of the five log keys collides with a `logging.LogRecord` reserved attribute — that raises at emit time, turning an observability feature into a crash. HALT if fields are added to the model but not extracted, or extracted but not logged (§5.4 C6 — the seam has three stages and all three need a falsifier). HALT if usage is attributed **per entry** by re-deriving `custom_id`: aggregation is batch-level only, so an encode drift in `source_id_to_batch_custom_id` cannot silently mis-attribute (§5.4 C5). HALT if any `BatchRecord`, `BatchPatchRequest`, `domain.py`, or `alembic/**` change becomes necessary — that is D8's excluded path and a scope HALT, not a judgement call. |
 | **Log tier** | `standard` — but the five log field names are a contract anchor consumed by G1, so the tier floor is `standard` regardless of how mechanical the diff looks |
@@ -357,7 +381,7 @@ graph TD
 | **Scope** | Make batches big enough to be worth a cache write. Raise the enrichment batch-size defaults, and add a per-gate minimum-volume threshold with a bounded maximum hold so entries never starve. Stage 1 and stage 2 are configured and timed independently. |
 | **Files to touch** | `services/pre-filter-worker/app/config.py`, `services/pre-filter-worker/app/loop.py`, `services/enrichment-batcher/app/config.py`, `services/enrichment-batcher/app/stage1_loop.py`, `services/enrichment-batcher/app/stage2_loop.py`, `tests/test_prefilter_loop.py`, `tests/test_enrichment_batcher_stage1_loop.py`, `tests/test_enrichment_batcher_stage2_loop.py`, `CHANGELOG.MD`, `.dev/decision-logs/prompt-caching/T9-batch-amortization.md` |
 | **Contract bindings** | Rows 18, 19, 21, 22. Owner of rows 18, 19. |
-| **Inputs** | T1 |
+| **Inputs** | T1-bis — amendment round 1 rebind, was T1 |
 | **Outputs** | Nine env keys through typed parse paths (three per gate, stage 1 and stage 2 separate); hold-deadline logic per gate; raised stage-1/stage-2 defaults 10 → 50; tests including the starvation and abort-interaction cases; decision log recording the in-process clock choice and its restart behaviour |
 | **Kill criteria** | **(runtime-invariant)** HALT if an entry can be held indefinitely — the maximum-hold deadline must be reachable on every path, including when inflow is permanently below the minimum. **(runtime-invariant)** HALT if a hash abort (T5/T6/T7) can prevent the hold clock from ever advancing, which would convert one bad hash into permanent starvation (§5.4 C9). HALT if raising stage-1 batch size to 50 requires touching `content_truncation.py` (row 20 frozen) or changes any Anthropic per-request limit assumption. HALT if a `getattr`-papered default is used instead of the typed parse path (row 18). |
 | **Log tier** | `architectural` — introduces a new class of failure (deliberate withholding of work) into three loops that previously always submitted what they claimed |
@@ -370,11 +394,11 @@ graph TD
 |---|---|
 | **ID** | `T10` |
 | **Scope** | Prove all three cache keys clear the floor, refresh the as-built caching docs, ensure every plan artifact is tracked, and run the declared-scope sweep. Writes no production code. |
-| **Files to touch** | `tests/test_prompt_cache_token_floor.py` (new), `.dev/llm-models-and-cache.md`, `.dev/caching_strategy.md` (checklist boxes only — §18 wiring/ops items this plan lands; the **spec** group stays unchecked per D6), `.dev/plans/prompt-caching/plan.md` (§8 back-fill), `.dev/plans/prompt-caching/artifacts/T10-closure-report.md` (new), `CHANGELOG.MD` |
-| **Contract bindings** | Rows 8, 16, 20, 21. Owner of rows 8, 20 verification. |
-| **Inputs** | T5, T6, T7, T8, T9 |
-| **Outputs** | Token-floor gate with one point-literal assertion per key and the measured margins; refreshed as-built table; checked strategy §18 boxes for landed items only; closure report carrying the clean-worktree test counts, the collected-test count, the frozen-path `git log` output, and the declared-scope `git diff --stat`; §8.1–§8.5 back-filled |
-| **Kill criteria** | **(mechanical post-check)** Run the §8.1 verification in a **detached worktree** at the closure SHA — not the working tree — and paste raw passed/failed/skipped/errored counts. In-tree counts do not discharge this: `config/prompts/**` is baked-and-tracked, but the profiles the tests read come from a host directory, so a fresh checkout is the only way to see what a clone sees. **(mechanical post-check)** Re-run `git log b919fdb..HEAD -- <full row-20 path list, literalized inline in this packet>` and paste the output; the frozen-path assumption expires and a partial path list is not a discharge. **(mechanical post-check)** Run `git diff --stat b919fdb..HEAD` and fail on any tracked change outside the union of all ten subtasks' declared Files to touch. **No production edits during verification** — if the sweep surfaces a defect, HALT and route to §7; do not fix it inside the verification window. HALT if any strategy §18 **spec** checkbox is ticked (D6 leaves them open). |
+| **Files to touch** | `tests/test_prompt_cache_token_floor.py` (new), `tests/test_prompt_cache.py` (**verify only** — do not edit its content; amendment round 1 assigns you the row-9 pass-gate, see below), `.dev/llm-models-and-cache.md`, `.dev/caching_strategy.md` (checklist boxes only — §18 wiring/ops items this plan lands; the **spec** group stays unchecked per D6), `.dev/plans/prompt-caching/plan.md` (§8 back-fill), `.dev/plans/prompt-caching/artifacts/T10-closure-report.md` (new), `CHANGELOG.MD` |
+| **Contract bindings** | Rows 8, 9 (**verifier, by amendment round 1** — see §2 row 9 banner), 16, 20, 21. Owner of rows 8, 9 (verification only), 20 verification. |
+| **Inputs** | T1-bis (row-9 grep test, expected red at T1-bis's own landing), T5, T6, T7, T8, T9 |
+| **Outputs** | Token-floor gate with one point-literal assertion per key and the measured margins; refreshed as-built table; checked strategy §18 boxes for landed items only; closure report carrying the clean-worktree test counts, the collected-test count, the frozen-path `git log` output, the declared-scope `git diff --stat`, **and the row-9 verification result**; §8.1–§8.5 back-filled |
+| **Kill criteria** | **(mechanical post-check)** Run the §8.1 verification in a **detached worktree** at the closure SHA — not the working tree — and paste raw passed/failed/skipped/errored counts. In-tree counts do not discharge this: `config/prompts/**` is baked-and-tracked, but the profiles the tests read come from a host directory, so a fresh checkout is the only way to see what a clone sees. **(mechanical post-check, amendment round 1)** As part of that same run, isolate and paste the result of `pytest tests/test_prompt_cache.py::test_no_inline_cache_control_literals` specifically. This was **deferred from T1 to you** by §2 row 9's amendment banner because it could not pass until T7 migrated `build_call2_system_prompt` off its inline literal. HALT — opening a **new** §7 row, not a silent fix here — if it is still red at your closure sweep; do not weaken the test or patch T7's files yourself to make it pass. **(mechanical post-check)** Re-run `git log b919fdb..HEAD -- <full row-20 path list, literalized inline in this packet>` and paste the output; the frozen-path assumption expires and a partial path list is not a discharge. **(mechanical post-check)** Run `git diff --stat b919fdb..HEAD` and fail on any tracked change outside the union of all eleven subtasks' declared Files to touch (T1-bis included, T1 excluded since it never committed). **No production edits during verification** — if the sweep surfaces a defect, HALT and route to §7; do not fix it inside the verification window. HALT if any strategy §18 **spec** checkbox is ticked (D6 leaves them open). |
 | **Log tier** | `standard` |
 | **Model class** | `standard` |
 | **Risks & mitigations** | This subtask writes narrative and therefore must **not** own any self-hash recomputation; none is asserted in this plan, so no terminal hash subtask is required. Its own Files-to-touch excludes every production path, which makes the "no production edits during verification" fence mechanically checkable. |
@@ -467,6 +491,8 @@ Mitigation is structural rather than hopeful: T3's spot-check artifact is a requ
 ```
 **Bound** — §2 row 9 plus `tests/test_prompt_cache.py::test_no_inline_cache_control_literals`, a tree grep asserting zero `cache_control` literals outside the one module. Kill criterion on all three wiring subtasks.
 
+**Amendment round 1 note (v1.1.0):** this is exactly the coupling T1's HALT discovered live — `build_call2_system_prompt` was still inlining the literal at T1's original dispatch time, because T7 (which migrates it) had not yet run. The bound falsifier itself is unchanged; only *when* it is asserted green moved, from T1 to T10 (see §2 row 9's amendment banner and §7 round 1).
+
 **C2** · **confirmed**
 ```
 (existing tests assert the pre-move cache shape | tests/test_enrichment_prompts.py:29-32, tests/test_enrichment_batcher_stage2_loop.py:178-179, tests/test_prefilter_anthropic_client.py:73 | these fail by construction the moment the breakpoint moves or the system becomes a list; an executor that "fixes" them by loosening the assertion removes the only guard on breakpoint placement | T5,T7)
@@ -548,7 +574,7 @@ Mitigation is structural rather than hopeful: T3's spot-check artifact is a requ
 
 ## 6. Executor packets
 
-Ten packets at `.dev/plans/prompt-caching/packets/T<n>.md`, plus the machine surface `.dev/plans/prompt-caching/dag.json`. `G1` owns no packet and is never dispatched.
+Eleven packets at `.dev/plans/prompt-caching/packets/T<n>.md` (T1 through T10, plus **T1-bis** added by amendment round 1 / v1.1.0), plus the machine surface `.dev/plans/prompt-caching/dag.json`. `T1`'s packet is retained byte-unmodified as the historical HALT record and is never re-dispatched. `G1` owns no packet and is never dispatched.
 
 Each packet contains, in order: YAML frontmatter (`subtask_id`, `tier`, `model_class`, `skills`, `decision_log_path` for architectural tiers); §1 verbatim; §2 verbatim including the row-22 glossary; that subtask's own §4 block verbatim; only the §5.2 assumptions and §5.4 couplings whose tuples name that subtask; and resolved inputs. Every packet also carries the D6 note marking `bishop_spec_0_6.md` informational and known-stale on caching, so no executor halts on the "no code change" language.
 
@@ -560,7 +586,27 @@ Each packet contains, in order: YAML frontmatter (`subtask_id`, `tier`, `model_c
 
 ## 7. Amendment subtasks
 
-None. `run_status` is `complete` at version 1.0.0 with no amendment round.
+### Round 1 (v1.1.0) — T1-bis
+
+**Condition (orchestrator-planning §7 table, row 1):** "A subtask's kill criterion failed, or the subtask landed partially." T1 HALTed mid-execution: its own row-9 kill criterion (`tests/test_prompt_cache.py::test_no_inline_cache_control_literals` must be zero-hit) could not pass against live production code (`bishop_shared/enrichment_prompts.py::build_call2_system_prompt`, `services/enrichment-batcher/app/anthropic_batch_client.py:94`) that belongs to T7's Files to touch, not T1's. Full HALT report: `.dev/plans/prompt-caching/runs/T1-brief.md`.
+
+**Blast-radius routing.** Non-charter plan (Mode: Standard) — the charter escalation ladder does not apply. This finding is within-plan (it re-times one existing §2 row's verification; it does not extend a hub or cross a milestone), so it routes through this §7 amendment path rather than a re-plan.
+
+**Chosen fork.** The HALT offered three forks. **Fork 2 is chosen**: move ownership/timing of the row-9 sweep-test verification from T1 to T10 (post T5/T6/T7, once T7 has actually migrated Call 2 off the inline literal). Fork 1 (re-scope the grep itself to carve out a named legacy exemption) was rejected because it requires inventing exemption-list machinery that §2 row 9 does not currently have, and orchestrator-planning explicitly flags exception-list growth as a pattern to avoid introducing casually. Fork 3 (expand T1 to migrate `enrichment_prompts.py` / `anthropic_batch_client.py` now) was rejected as stated in the HALT report: it conflicts with T7's declared row-5 ownership of that exact surface and would be scope creep into a sibling subtask, not a scoped fix. **No new architectural fork is introduced** — the grep test's text, the module boundary, and the abort discipline are all unchanged; only *which subtask's DoD requires it to be green, and when* changes.
+
+**Continuation node.** Per the "continued HALT keeps its own node" rule: `T1` → `T1-bis`. T1's packet is retained unmodified; T1-bis is a new self-contained packet at `.dev/plans/prompt-caching/packets/T1-bis.md`. No T1 decision log existed to supersede (T1 never reached a commit), so T1-bis's own decision log is the first and only architectural record for this surface.
+
+**Explicit DAG edges.** `T1 --> T1-bis` (continuation). `T1-bis --> {T2, T3, T4, T8, T9}` (every subtask that hard-depended on T1 is rebound onto T1-bis, since T1 never committed and T1-bis is the node that actually lands the shared modules). See `dag.json` for the machine-readable edge set; §3 above carries the human-readable mermaid update.
+
+**DoD — code and narrative.** (a) T1-bis lands T1's code/test DoD from the existing working tree and commits it. (b) §2 row 9 is back-annotated in place with an amendment banner at first mention (done above — not only a trailing *Landed:* bullet), naming T1-bis as author and T10 as verifier. (c) §5.4 C1 is refreshed with an amendment-round note (done above) since this HALT is exactly the coupling C1 predicted, now resolved by timing rather than by a new mechanism. (d) T10's spec and packet gain the row-9 verification duty as an explicit Files-to-touch / kill-criterion addition (done above). (e) The Decision log path section and every downstream packet's §2 row 9 cell are refreshed (retired-string sweep, this round — see below). No §5.1/§5.3 change: this amendment does not falsify a load-bearing assumption or change the highest-replan-risk subtask (still T3, unaffected).
+
+**Retired-string / superseded-ID sweep (this round).** Grepped `.dev/plans/prompt-caching/packets/*.md` for `row 9` and `test_no_inline_cache_control_literals`: hits in T1 (left unmodified — historical), T2, T3, T4, T5, T6, T7, T8, T9, T10 (all refreshed with the amended row-9 cell and, where present, an amendment-round note next to the existing C1 "Bound" line). `Inputs:` fields on T2/T3/T4/T8/T9 packets and on plan §4 are refreshed from `T1` to `T1-bis`. No other packet quoted a stale row-9 exemption list or superseded ID.
+
+**Runner-ledger bypass note.** This §7 amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop — it was invoked mid-wave after plan-runner's T1 dispatch HALTed, directly by the operator, not through a scheduled orchestrator pickup. It does **not** add to or edit `runs/ledger.md` or `runs/execution-summary.md` (runner-owned, append-only). Whoever accepts the gap: the operator who invoked this amendment. Plan-runner's own next pre-flight is responsible for reconciling the ledger against this out-of-band round before dispatching T1-bis.
+
+**Amendment commit.** This round's commit contains only the plan amendment artifacts (this file, `dag.json`, `packets/T1-bis.md`, and the refreshed row-9 cells in `packets/T2.md`…`T10.md`). It does **not** contain T1's/T1-bis's implementation files (`bishop_shared/prompt_cache.py`, etc.) — those remain uncommitted until T1-bis is dispatched and lands them per its own DoD.
+
+---
 
 Routing for what comes later, so the path is not invented under pressure:
 
@@ -600,7 +646,7 @@ Every path must satisfy `git show HEAD:<path>` at the §8.1 SHA. `<T10 verifies>
 1. `.dev/plans/prompt-caching/context-map.md` — **staleness disposition: refreshed-not-required.** The map's recorded SHA `b919fdb` **equals** the planning HEAD, so zero committed files in direct scope diverged. Pin semantics: the SHA means code HEAD at scouting time, and it is still code HEAD at plan time. If the closure SHA diverges from `b919fdb` on files in direct scope — which it will, since this plan edits them — T10 records **deferred** with the diverged file list and follow-up **`FU-CACHE-MAP-01`**, per §8.2's requirement that divergence be a decision rather than a note. Two planning-time corrections to the map are already recorded: D16 (compose is up, not down) and P1 (the profiles mount mechanism).
 2. `.dev/plans/prompt-caching/plan.md` — this file
 3. `.dev/plans/prompt-caching/dag.json`
-4. `.dev/plans/prompt-caching/packets/T1.md` … `T10.md`
+4. `.dev/plans/prompt-caching/packets/T1.md` … `T10.md`, plus `.dev/plans/prompt-caching/packets/T1-bis.md` (amendment round 1, v1.1.0)
 5. `.dev/decision-logs/prompt-caching/T1-cache-and-rubric-contract.md`, `T2-prefilter-rubric.md`, `T3-call1-rubric.md`, `T4-call2-rubric.md`, `T6-call1-wiring.md`, `T7-call2-breakpoint-move.md`, `T9-batch-amortization.md`
 6. `.dev/plans/prompt-caching/artifacts/T3-call1-spotcheck.md`, `.dev/plans/prompt-caching/artifacts/T10-closure-report.md`
 7. `.dev/caching_strategy.md` — binding for rejected alternatives and the 4,096 floor
@@ -649,14 +695,14 @@ Omitted — no §7 amendment fired during version 1.0.0.
 | # | Rule | Status |
 |---|---|---|
 | 1 | Every subtask has all required fields; no TBD in kill criteria or contract bindings | **pass** |
-| 2 | DAG has no cycles, no orphans; every node has correct intent | **pass** — 10 executable + 1 gate, single sink `G1` |
+| 2 | DAG has no cycles, no orphans; every node has correct intent | **v1.1.0: pass** — 11 executable + 1 gate (T1-bis added, round 1), single sink `G1`; T1 retained as a halted node feeding only `T1 --> T1-bis` |
 | 3 | Parallel safety: no two parallel subtasks touch the same interface | **pass with documented merge strategy** — `{T2,T3,T4}` and `{T5,T6,T7}` share only `CHANGELOG.MD`, governed by the ascending-`Tn` commit-order guards in §3 |
 | 4 | At least one rejected alternative and one load-bearing assumption | **pass** — 4 rejected, 9 assumptions |
 | 5 | Log tiers match scope; no `trivial` subtask owns a contract-anchor string | **pass** — no `trivial` tier in this plan; T8 held at `standard` because its five log keys are consumed by G1 |
 | 6 | Packet emission completed; self-containment verified | **pending §6 emission** |
 | 7 | Typed-surface binding satisfied for every §2 key | **pass** — rows 1, 2, 4, 7, 14, 18 each name owner, typed site, and test; no prose-only keys, no `getattr` defaults |
 | 8 | CLI strings frozen before downstream packets emit | **pass** — `scripts/rubric_hash.py <path> [--render]` frozen in T1 (row 6) before T2/T3/T4 packets, which consume it to stamp |
-| 9 | Amendment DoD includes narrative back-annotation | **n/a** — no amendment at 1.0.0; the rule is stated in §7 for when one fires |
+| 9 | Amendment DoD includes narrative back-annotation | **pass (v1.1.0)** — Amendment round 1 back-annotates §2 row 9 with a banner at first mention and refreshes §5.4 C1; amendment commit carries only plan artifacts, not T1-bis's implementation (still to be dispatched) — see §7 round 1 |
 | 10 | Wire contract matches shipped behaviour; no illustrative values presented as binding | **pass** — row 1 fixes `{"type": "ephemeral", "ttl": "1h"}` as the single binding literal; there are no illustrative wire examples in §2 |
 | 11 | Decision log paths frozen; architectural log preambles current | **pass** — `.dev/decision-logs/prompt-caching/T<n>-<slug>.md` for T1, T2, T3, T4, T6, T7, T9. **Supersession obligation recorded:** T7 changes the behaviour narrated by `.dev/decision-logs/m5-enrichment/T4-call2-cache-control.md` (which records the breakpoint on the profile block only, and rejects omitting `cache_control` for short profiles). T7's Outputs must add a supersession banner to that log at its first mention, not only append to §2 |
 | 12 | §5.2/§5.4 conform to tuple shape and name explicit `Tn` IDs; §2 internally consistent | **pass** — all 21 items are tuples with `Tn` lists. §2 rows read against each other: row 20 freezes `content_truncation.py` while row 22 separates 4000 from 4096, so no row requires editing a frozen file; row 16's no-mount rule and row 8's token gate are jointly satisfiable because the gate measures repo files, not container files; row 21 forbids new `conftest.py` and no row requires one |
@@ -666,7 +712,7 @@ Omitted — no §7 amendment fired during version 1.0.0.
 | 16 | §8.2 chain resolves at HEAD; no out-of-tree binding artifacts | **conditional — D1 must land first.** The map and this plan are untracked at the moment of writing; committing `.dev/plans/prompt-caching/` is a precondition to dispatch, not a closeout task |
 | 17 | §8.4 disposition complete with matching closure vocabulary | **pending T10** — pre-marked items in §8.4 use `ruled-out` only where the premise was shown not to apply; no `verified-compatible` claims are made anywhere |
 | 18 | Charter binding declared | **n/a** — non-charter plan (Standard mode); no milestone stub in the inputs |
-| 19 | Carryability check | **pass** — 10 executable subtasks, at the ceiling of the 4–10 budget. No split proposal required, no `merge-candidate` flag. Any amendment that adds a subtask crosses the ceiling and requires an explicit budget-amendment line in this header first |
+| 19 | Carryability check | **v1.0.0: pass** — 10 executable subtasks, at the ceiling of the 4–10 budget. No split proposal required, no `merge-candidate` flag. **v1.1.0: amendment crosses ceiling, as predicted** — T1-bis is an 11th executable subtask; the required budget-amendment line (prior count, new count, what T1-bis closes) is recorded in this file's header before T1-bis's packet was emitted |
 | 20 | Declared-scope sweep at closure | **assigned** — T10, with the frozen path list literalized inline in its packet and a "no production edits during verification" fence in its own kill criteria |
 
 
