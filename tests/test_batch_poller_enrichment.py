@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import ModuleType
 
 import httpx
+import pytest
 
 from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
 
@@ -261,6 +263,118 @@ def test_poll_once_enrichment_stage2_posts_results_and_patches_complete() -> Non
         assert tracked == {}
 
     asyncio.run(_run())
+
+
+def test_poll_once_enrichment_stage1_completion_logs_cache_usage_keys(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    state_worker_mod, loop_mod, models_mod = _load_enrichment_stack()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/batches":
+            return httpx.Response(
+                200,
+                json={
+                    "batches": [
+                        _batch_wire(batch_id=_STAGE1_BATCH_ID, batch_type="enrichment_stage1"),
+                    ],
+                },
+            )
+        if request.url.path == "/entries/enrichment-stage1-results":
+            return httpx.Response(204)
+        if request.url.path == f"/batches/{_STAGE1_BATCH_ID}" and request.method == "PATCH":
+            return httpx.Response(200, json={"batch": {}})
+        return httpx.Response(404)
+
+    fake_results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
+            text=_call1_payload(),
+            cache_read_input_tokens=4200,
+            cache_creation_input_tokens=0,
+        ),
+    ]
+    anthropic = FakeAnthropicClient(results=fake_results)
+
+    async def _run() -> None:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            client = state_worker_mod.StateWorkerClient(client=http)
+            batch = models_mod.BatchRecordWire.model_validate(
+                _batch_wire(batch_id=_STAGE1_BATCH_ID, batch_type="enrichment_stage1"),
+            )
+            batch = batch.model_copy(update={"source_ids": [_SOURCE_PASS]})
+            tracked = {batch.batch_id: batch}
+            with caplog.at_level(logging.INFO, logger="app.loop"):
+                await loop_mod.poll_once(client, anthropic, tracked, now=_NOW)
+
+    asyncio.run(_run())
+
+    complete_records = [
+        record
+        for record in caplog.records
+        if record.getMessage() == "enrichment stage1 batch complete"
+    ]
+    assert len(complete_records) == 1
+    emitted_keys = frozenset(complete_records[0].__dict__)
+    for key in loop_mod.CACHE_USAGE_LOG_KEYS:
+        assert key in emitted_keys
+
+
+def test_poll_once_enrichment_stage2_completion_logs_cache_usage_keys(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    state_worker_mod, loop_mod, models_mod = _load_enrichment_stack()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/batches":
+            return httpx.Response(
+                200,
+                json={
+                    "batches": [
+                        _batch_wire(batch_id=_STAGE2_BATCH_ID, batch_type="enrichment_stage2"),
+                    ],
+                },
+            )
+        if request.url.path == "/entries/enrichment-stage2-results":
+            return httpx.Response(204)
+        if request.url.path == f"/batches/{_STAGE2_BATCH_ID}" and request.method == "PATCH":
+            return httpx.Response(200, json={"batch": {}})
+        return httpx.Response(404)
+
+    fake_results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
+            text=_call2_payload(),
+            cache_read_input_tokens=0,
+            cache_creation_input_tokens=4300,
+        ),
+    ]
+    anthropic = FakeAnthropicClient(results=fake_results)
+
+    async def _run() -> None:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            client = state_worker_mod.StateWorkerClient(client=http)
+            batch = models_mod.BatchRecordWire.model_validate(
+                _batch_wire(batch_id=_STAGE2_BATCH_ID, batch_type="enrichment_stage2"),
+            )
+            batch = batch.model_copy(update={"source_ids": [_SOURCE_PASS]})
+            tracked = {batch.batch_id: batch}
+            with caplog.at_level(logging.INFO, logger="app.loop"):
+                await loop_mod.poll_once(client, anthropic, tracked, now=_NOW)
+
+    asyncio.run(_run())
+
+    complete_records = [
+        record
+        for record in caplog.records
+        if record.getMessage() == "enrichment stage2 batch complete"
+    ]
+    assert len(complete_records) == 1
+    emitted_keys = frozenset(complete_records[0].__dict__)
+    for key in loop_mod.CACHE_USAGE_LOG_KEYS:
+        assert key in emitted_keys
 
 
 def test_poll_once_enrichment_stage1_results_non_2xx_skips_patch_complete() -> None:

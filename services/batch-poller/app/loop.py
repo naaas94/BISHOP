@@ -337,6 +337,82 @@ async def _handle_results_post_error(
     raise exc
 
 
+CACHE_USAGE_LOG_KEYS = frozenset(
+    {
+        "cache_read_tokens",
+        "cache_write_tokens",
+        "input_tokens",
+        "output_tokens",
+        "cache_hit_ratio",
+    },
+)
+
+
+def aggregate_batch_cache_usage(
+    results: list[AnthropicBatchResultItem],
+) -> dict[str, int | float | None]:
+    """Sum token and cache usage across all batch results (batch-level aggregation)."""
+    input_tokens = 0
+    output_tokens = 0
+    cache_read_tokens = 0
+    cache_write_tokens = 0
+
+    for item in results:
+        if item.input_tokens is not None:
+            input_tokens += item.input_tokens
+        if item.output_tokens is not None:
+            output_tokens += item.output_tokens
+        if item.cache_read_input_tokens is not None:
+            cache_read_tokens += item.cache_read_input_tokens
+        if item.cache_creation_input_tokens is not None:
+            cache_write_tokens += item.cache_creation_input_tokens
+
+    cache_total = cache_read_tokens + cache_write_tokens
+    cache_hit_ratio: float | None
+    if cache_total == 0:
+        cache_hit_ratio = None
+    else:
+        cache_hit_ratio = cache_read_tokens / cache_total
+
+    return {
+        "cache_read_tokens": cache_read_tokens,
+        "cache_write_tokens": cache_write_tokens,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "cache_hit_ratio": cache_hit_ratio,
+    }
+
+
+def _log_batch_cache_usage(
+    batch: BatchRecordWire,
+    results: list[AnthropicBatchResultItem],
+    *,
+    message: str,
+    event: str,
+    **outcome_keys: int,
+) -> None:
+    usage = aggregate_batch_cache_usage(results)
+    logger.info(
+        message,
+        extra={
+            "batch_id": batch.batch_id,
+            "external_batch_id": batch.external_batch_id,
+            "event": event,
+            **outcome_keys,
+            **usage,
+        },
+    )
+    if usage["cache_read_tokens"] == 0 and usage["cache_write_tokens"] == 0:
+        logger.warning(
+            "no cache usage reported",
+            extra={
+                "batch_id": batch.batch_id,
+                "external_batch_id": batch.external_batch_id,
+                "event": "cache_read_zero",
+            },
+        )
+
+
 async def _patch_batch_complete(
     state_client: StateWorkerClient,
     batch: BatchRecordWire,
@@ -423,15 +499,13 @@ async def _handle_pre_filter_complete(
         passed_count=passed_count,
         failed_count=failed_count,
     )
-    logger.info(
-        "batch complete",
-        extra={
-            "batch_id": batch.batch_id,
-            "external_batch_id": batch.external_batch_id,
-            "event": "batch_complete",
-            "passed": response.passed,
-            "rejected": response.rejected,
-        },
+    _log_batch_cache_usage(
+        batch,
+        raw_results,
+        message="batch complete",
+        event="batch_complete",
+        passed=response.passed,
+        rejected=response.rejected,
     )
     tracked.pop(batch.batch_id, None)
 
@@ -485,15 +559,13 @@ async def _handle_enrichment_stage1_complete(
         passed_count=passed_count,
         failed_count=failed_count,
     )
-    logger.info(
-        "enrichment stage1 batch complete",
-        extra={
-            "batch_id": batch.batch_id,
-            "external_batch_id": batch.external_batch_id,
-            "event": "enrichment_batch_complete",
-            "passed": passed_count,
-            "failed": failed_count,
-        },
+    _log_batch_cache_usage(
+        batch,
+        raw_results,
+        message="enrichment stage1 batch complete",
+        event="enrichment_batch_complete",
+        passed=passed_count,
+        failed=failed_count,
     )
     tracked.pop(batch.batch_id, None)
 
@@ -547,15 +619,13 @@ async def _handle_enrichment_stage2_complete(
         passed_count=passed_count,
         failed_count=failed_count,
     )
-    logger.info(
-        "enrichment stage2 batch complete",
-        extra={
-            "batch_id": batch.batch_id,
-            "external_batch_id": batch.external_batch_id,
-            "event": "enrichment_batch_complete",
-            "passed": passed_count,
-            "failed": failed_count,
-        },
+    _log_batch_cache_usage(
+        batch,
+        raw_results,
+        message="enrichment stage2 batch complete",
+        event="enrichment_batch_complete",
+        passed=passed_count,
+        failed=failed_count,
     )
     tracked.pop(batch.batch_id, None)
 

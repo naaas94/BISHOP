@@ -77,6 +77,10 @@ class AnthropicBatchResultItem(BaseModel):
     custom_id: str
     text: str | None = None
     errored: bool = False
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    cache_creation_input_tokens: int | None = None
+    cache_read_input_tokens: int | None = None
 
 
 class ParsedPreFilterDecision(BaseModel):

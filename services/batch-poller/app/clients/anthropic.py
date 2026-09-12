@@ -82,8 +82,17 @@ class AnthropicBatchPollerClient:
                 continue
             message = getattr(result, "message", None) or result.get("message", {})
             text = _extract_message_text(message)
+            input_tokens, output_tokens, cache_write, cache_read = _extract_message_usage(message)
             items.append(
-                AnthropicBatchResultItem(custom_id=custom_id, text=text, errored=False),
+                AnthropicBatchResultItem(
+                    custom_id=custom_id,
+                    text=text,
+                    errored=False,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    cache_creation_input_tokens=cache_write,
+                    cache_read_input_tokens=cache_read,
+                ),
             )
         return items
 
@@ -120,6 +129,34 @@ def _extract_message_text(message: Any) -> str | None:
     if isinstance(first, dict):
         return first.get("text")
     return getattr(first, "text", None)
+
+
+def _read_optional_field(obj: Any, key: str) -> Any:
+    if obj is None:
+        return None
+    if isinstance(obj, dict):
+        return obj.get(key)
+    if hasattr(obj, key):
+        return getattr(obj, key)
+    get_method = getattr(obj, "get", None)
+    if callable(get_method):
+        return get_method(key)
+    return None
+
+
+def _extract_message_usage(
+    message: Any,
+) -> tuple[int | None, int | None, int | None, int | None]:
+    """Return (input_tokens, output_tokens, cache_creation_input_tokens, cache_read_input_tokens)."""
+    usage = _read_optional_field(message, "usage")
+    if usage is None:
+        return None, None, None, None
+    return (
+        _read_optional_field(usage, "input_tokens"),
+        _read_optional_field(usage, "output_tokens"),
+        _read_optional_field(usage, "cache_creation_input_tokens"),
+        _read_optional_field(usage, "cache_read_input_tokens"),
+    )
 
 
 class AnthropicBatchPollerProtocol(Protocol):

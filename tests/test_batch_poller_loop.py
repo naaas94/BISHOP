@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -447,6 +448,185 @@ def test_poll_once_anthropic_failed_patches_batch_failed() -> None:
         assert tracked == {}
 
     asyncio.run(_run())
+
+
+def test_cache_usage_log_keys_do_not_collide_with_log_record_reserved() -> None:
+    _, loop_mod, _ = _load_loop_stack()
+    reserved = frozenset(logging.LogRecord("", 0, "", 0, "", (), None).__dict__)
+    assert loop_mod.CACHE_USAGE_LOG_KEYS.isdisjoint(reserved)
+
+
+def test_aggregate_batch_cache_usage_sums_across_results() -> None:
+    """Falsifier: aggregation must sum all results, not just the first."""
+    _, loop_mod, models_mod = _load_loop_stack()
+    results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id="a",
+            input_tokens=100,
+            output_tokens=10,
+            cache_creation_input_tokens=4000,
+            cache_read_input_tokens=0,
+        ),
+        models_mod.AnthropicBatchResultItem(
+            custom_id="b",
+            input_tokens=200,
+            output_tokens=20,
+            cache_creation_input_tokens=0,
+            cache_read_input_tokens=3800,
+        ),
+    ]
+    usage = loop_mod.aggregate_batch_cache_usage(results)
+    assert usage["input_tokens"] == 300
+    assert usage["output_tokens"] == 30
+    assert usage["cache_write_tokens"] == 4000
+    assert usage["cache_read_tokens"] == 3800
+    assert usage["cache_hit_ratio"] == pytest.approx(3800 / 7800)
+
+
+def test_poll_once_pre_filter_completion_logs_cache_usage_keys(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    state_worker_mod, loop_mod, models_mod = _load_loop_stack()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/batches":
+            return httpx.Response(200, json={"batches": [_batch_wire()]})
+        if request.url.path == "/manifest/pre-filter-results":
+            return httpx.Response(200, json={"updated": 2, "passed": 1, "rejected": 1})
+        if request.url.path == f"/batches/{_BATCH_ID}" and request.method == "PATCH":
+            return httpx.Response(200, json={"batch": _batch_wire(status="complete")})
+        return httpx.Response(404)
+
+    fake_results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
+            text='{"decision": 1, "rationale": "Strong RAG content."}',
+            input_tokens=100,
+            output_tokens=10,
+            cache_creation_input_tokens=0,
+            cache_read_input_tokens=5000,
+        ),
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_FAIL),
+            text='{"decision": 0, "rationale": "Off topic."}',
+            input_tokens=100,
+            output_tokens=10,
+            cache_creation_input_tokens=0,
+            cache_read_input_tokens=5000,
+        ),
+    ]
+    anthropic = FakeAnthropicClient(results=fake_results)
+
+    async def _run() -> None:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            client = state_worker_mod.StateWorkerClient(client=http)
+            batch = models_mod.BatchRecordWire.model_validate(_batch_wire())
+            tracked = {batch.batch_id: batch}
+            with caplog.at_level(logging.INFO, logger="app.loop"):
+                await loop_mod.poll_once(client, anthropic, tracked, now=_NOW)
+
+    asyncio.run(_run())
+
+    complete_records = [
+        record
+        for record in caplog.records
+        if record.getMessage() == "batch complete"
+    ]
+    assert len(complete_records) == 1
+    emitted_keys = frozenset(complete_records[0].__dict__)
+    for key in loop_mod.CACHE_USAGE_LOG_KEYS:
+        assert key in emitted_keys
+
+
+def test_poll_once_pre_filter_zero_cache_usage_emits_warning(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    state_worker_mod, loop_mod, models_mod = _load_loop_stack()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/batches":
+            return httpx.Response(200, json={"batches": [_batch_wire()]})
+        if request.url.path == "/manifest/pre-filter-results":
+            return httpx.Response(200, json={"updated": 1, "passed": 1, "rejected": 0})
+        if request.url.path == f"/batches/{_BATCH_ID}" and request.method == "PATCH":
+            return httpx.Response(200, json={"batch": _batch_wire(status="complete")})
+        return httpx.Response(404)
+
+    fake_results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
+            text='{"decision": 1, "rationale": "ok"}',
+            input_tokens=100,
+            output_tokens=10,
+        ),
+    ]
+    anthropic = FakeAnthropicClient(results=fake_results)
+
+    async def _run() -> None:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            client = state_worker_mod.StateWorkerClient(client=http)
+            batch = models_mod.BatchRecordWire.model_validate(
+                {**_batch_wire(), "source_ids": [_SOURCE_PASS]},
+            )
+            tracked = {batch.batch_id: batch}
+            with caplog.at_level(logging.WARNING, logger="app.loop"):
+                await loop_mod.poll_once(client, anthropic, tracked, now=_NOW)
+
+    asyncio.run(_run())
+
+    zero_warnings = [
+        record
+        for record in caplog.records
+        if record.getMessage() == "no cache usage reported"
+    ]
+    assert len(zero_warnings) == 1
+    assert zero_warnings[0].event == "cache_read_zero"
+
+
+def test_poll_once_pre_filter_nonzero_cache_usage_skips_zero_warning(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    state_worker_mod, loop_mod, models_mod = _load_loop_stack()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/batches":
+            return httpx.Response(200, json={"batches": [_batch_wire()]})
+        if request.url.path == "/manifest/pre-filter-results":
+            return httpx.Response(200, json={"updated": 1, "passed": 1, "rejected": 0})
+        if request.url.path == f"/batches/{_BATCH_ID}" and request.method == "PATCH":
+            return httpx.Response(200, json={"batch": _batch_wire(status="complete")})
+        return httpx.Response(404)
+
+    fake_results = [
+        models_mod.AnthropicBatchResultItem(
+            custom_id=source_id_to_batch_custom_id(_SOURCE_PASS),
+            text='{"decision": 1, "rationale": "ok"}',
+            cache_read_input_tokens=5000,
+        ),
+    ]
+    anthropic = FakeAnthropicClient(results=fake_results)
+
+    async def _run() -> None:
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            client = state_worker_mod.StateWorkerClient(client=http)
+            batch = models_mod.BatchRecordWire.model_validate(
+                {**_batch_wire(), "source_ids": [_SOURCE_PASS]},
+            )
+            tracked = {batch.batch_id: batch}
+            with caplog.at_level(logging.WARNING, logger="app.loop"):
+                await loop_mod.poll_once(client, anthropic, tracked, now=_NOW)
+
+    asyncio.run(_run())
+
+    zero_warnings = [
+        record
+        for record in caplog.records
+        if record.getMessage() == "no cache usage reported"
+    ]
+    assert zero_warnings == []
 
 
 def test_poll_loop_invokes_startup_scan_before_first_cycle() -> None:
