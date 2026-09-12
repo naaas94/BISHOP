@@ -1,6 +1,6 @@
 {
   "plan": "prompt-caching",
-  "plan_version": "1.1.0",
+  "plan_version": "1.2.0",
   "run_status": "amended",
   "baseline_sha": "b919fdba09e07a77700d57cf3b360c001058bb84",
   "amendments": [
@@ -15,6 +15,23 @@
       "rebound_edges": ["T1->T2", "T1->T3", "T1->T4", "T1->T8", "T1->T9"],
       "runner_bypass": true,
       "runner_bypass_note": "This amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop, invoked mid-wave after the T1 dispatch HALTed. It does not write runs/ledger.md or runs/execution-summary.md (runner-owned, append-only). Plan-runner's own next pre-flight reconciles the ledger against this round."
+    },
+    {
+      "round": 2,
+      "plan_version": "1.2.0",
+      "trigger": "T9 kill-criterion HALT on section 2 row 18 Files-to-touch omission (see runs/T9-brief.md)",
+      "fork_chosen": 1,
+      "fork_description": "Add tests/test_enrichment_batcher_config.py to the continuation's Files to touch so the two pinned default-value assertions (stage1/stage2, both currently 10) update to 50 in the same subtask. No new architectural fork.",
+      "superseded_node": "T9",
+      "added_nodes": ["T9-bis"],
+      "rebound_edges": ["T9->T10"],
+      "rebound_soft_edges": [
+        {"from": ["T9", "T5"], "to": ["T9-bis", "T5"]},
+        {"from": ["T9", "T6"], "to": ["T9-bis", "T6"]},
+        {"from": ["T9", "T7"], "to": ["T9-bis", "T7"]}
+      ],
+      "runner_bypass": true,
+      "runner_bypass_note": "This amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop, invoked mid-wave after the T9 dispatch HALTed. It does not write runs/ledger.md or runs/execution-summary.md (runner-owned, append-only). Plan-runner's own next pre-flight reconciles the ledger against this round."
     }
   ],
   "nodes": [
@@ -98,7 +115,19 @@
       "packet": ".dev/plans/prompt-caching/packets/T9.md",
       "tier": "architectural",
       "model_class": "architectural",
-      "decision_log_path": ".dev/decision-logs/prompt-caching/T9-batch-amortization.md"
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T9-batch-amortization.md",
+      "status": "halted",
+      "note": "HALTed at dispatch on section 2 row 18's Files-to-touch omission (see runs/T9-brief.md): raising the enrichment stage1/stage2 batch-size defaults 10 -> 50 breaks the pre-existing tests/test_enrichment_batcher_config.py, which is outside T9's declared Files to touch. No code written; nothing staged or committed. Packet retained unmodified as the historical HALT record. Not re-dispatched. Continuation node is T9-bis (amendment round 2)."
+    },
+    {
+      "id": "T9-bis",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T9-bis.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T9-bis-batch-amortization.md",
+      "round": 2,
+      "note": "Amendment round 2 continuation of halted T9. T9 left no working-tree state (no code written), so T9-bis executes T9's full original DoD from a clean slate, plus updates the two pinned default-value assertions in tests/test_enrichment_batcher_config.py (added to Files to touch by this amendment) from 10 to 50."
     },
     {
       "id": "T10",
@@ -106,7 +135,7 @@
       "packet": ".dev/plans/prompt-caching/packets/T10.md",
       "tier": "standard",
       "model_class": "standard",
-      "note": "Amendment round 1 adds section 2 row 9 verification ownership: T10 must run tests/test_prompt_cache.py::test_no_inline_cache_control_literals at closure and HALT (new section 7 row) if it is not green."
+      "note": "Amendment round 1 adds section 2 row 9 verification ownership: T10 must run tests/test_prompt_cache.py::test_no_inline_cache_control_literals at closure and HALT (new section 7 row) if it is not green. Amendment round 2 rebinds T10's Inputs from T9 to T9-bis (T9 never committed)."
     },
     {
       "id": "G1",
@@ -128,7 +157,8 @@
     ["T6", "T10"],
     ["T7", "T10"],
     ["T8", "T10"],
-    ["T9", "T10"],
+    ["T9", "T9-bis"],
+    ["T9-bis", "T10"],
     ["T10", "G1"]
   ],
   "soft_edges": [
@@ -157,16 +187,16 @@
       "shared_surface": "bishop_shared/enrichment_prompts.py (both edit it); cached_system_blocks; CHANGELOG.MD"
     },
     {
-      "pair": ["T9", "T5"],
-      "shared_surface": "services/pre-filter-worker/app/loop.py submit path: T9 changes when a submit happens, T5 changes what is submitted"
+      "pair": ["T9-bis", "T5"],
+      "shared_surface": "services/pre-filter-worker/app/loop.py submit path: T9-bis changes when a submit happens, T5 changes what is submitted. Amendment round 2: relabeled from [T9, T5] since T9 never landed any code."
     },
     {
-      "pair": ["T9", "T6"],
-      "shared_surface": "services/enrichment-batcher/app/stage1_loop.py submit path"
+      "pair": ["T9-bis", "T6"],
+      "shared_surface": "services/enrichment-batcher/app/stage1_loop.py submit path. Amendment round 2: relabeled from [T9, T6]."
     },
     {
-      "pair": ["T9", "T7"],
-      "shared_surface": "services/enrichment-batcher/app/stage2_loop.py submit path"
+      "pair": ["T9-bis", "T7"],
+      "shared_surface": "services/enrichment-batcher/app/stage2_loop.py submit path. Amendment round 2: relabeled from [T9, T7]."
     }
   ],
   "parallel_groups": [
@@ -175,7 +205,7 @@
       "nodes": ["T2", "T3", "T4", "T8", "T9"],
       "benefit": "throughput-only",
       "commit_order_guard": "T2, T3, T4 all append CHANGELOG.MD and all create files under config/prompts/. Commit order is ascending Tn; whichever lands later reconciles the shared CHANGELOG section as part of its own definition of done.",
-      "note": "Amendment round 1: this rank now depends on T1-bis, not T1 (T1 never committed)."
+      "note": "Amendment round 1: this rank now depends on T1-bis, not T1 (T1 never committed). Amendment round 2: T2, T3, T4, T8 completed at this rank; T9 (the fifth member) HALTed with no code written and is not re-dispatched. Its continuation, T9-bis, is not itself a member of any declared parallel_group -- its only hard predecessor is T1-bis (already committed), so it is independently dispatchable and does not block or get blocked by rank 2."
     },
     {
       "rank": 2,
