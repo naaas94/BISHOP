@@ -1,6 +1,6 @@
 {
   "plan": "prompt-caching",
-  "plan_version": "1.4.0",
+  "plan_version": "1.5.0",
   "run_status": "amended",
   "baseline_sha": "b919fdba09e07a77700d57cf3b360c001058bb84",
   "amendments": [
@@ -61,6 +61,19 @@
       "rebound_edges": ["T10->G1"],
       "runner_bypass": true,
       "runner_bypass_note": "This amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop, invoked mid-wave after the T10 dispatch HALTed. It does not write runs/ledger.md or runs/execution-summary.md (runner-owned, append-only). Plan-runner's own next pre-flight reconciles the ledger against this round."
+    },
+    {
+      "round": 5,
+      "plan_version": "1.5.0",
+      "trigger": "Post-commit default retune of T9-bis MAX_HOLD defaults after G1 gate-satisfied: 120 min idle flush can outlive ttl 1h. Owner-driven scope expansion, not a kill-criterion HALT continuation.",
+      "fork_chosen": "operator-locked-30",
+      "fork_description": "Retune the three MAX_HOLD_MINUTES defaults 120 to 30 (idle-flush ceiling only). Same keys, same parse path, same loops. No warmup subtask (FU-CACHE-WARMUP-01). No G2. G1 not re-opened. T11 is a new node, not T9-ter.",
+      "superseded_node": null,
+      "added_nodes": ["T11"],
+      "rebound_edges": [],
+      "new_hard_edges": [["T9-bis", "T11"]],
+      "runner_bypass": true,
+      "runner_bypass_note": "This amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop, invoked by the operator after G1 gate-satisfied, not through a scheduled pickup of a failed node. It does not write runs/ledger.md or runs/execution-summary.md (runner-owned, append-only). Plan-runner's own next pre-flight reconciles the ledger against this round before dispatching T11 only. Do not re-dispatch G1."
     }
   ],
   "nodes": [
@@ -189,9 +202,19 @@
       "note": "Amendment round 4 continuation of halted T10. T10 left no working-tree state (no code written), so T10-bis executes T10's full original closeout DoD from a clean slate, against section 2 row 20's SHA range re-baselined (for row-20 frozen-path purposes only) from b919fdb to 26b78b6."
     },
     {
+      "id": "T11",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T11.md",
+      "tier": "standard",
+      "model_class": "standard",
+      "round": 5,
+      "note": "Amendment round 5: post-commit retune of T9-bis MAX_HOLD defaults 120 to 30 after G1 showed 120 min idle flush can outlive ttl:1h. Not a HALT continuation. T9-bis packet unmodified. G1 not re-opened; no G2. After this node lands, rebuild pre-filter-worker and enrichment-batcher (defaults are image-baked via config.py import, not compose env)."
+    },
+    {
       "id": "G1",
       "kind": "gate",
-      "condition": "Operator rebuilds pre-filter-worker and enrichment-batcher images, restarts compose with ANTHROPIC_API_KEY resolvable, and lets at least one gate submit two batches on the same cache key. PASS when the batch-poller completion log line for the second batch reports cache_read_tokens > 0. FAIL when all keys report event=cache_read_zero across two consecutive completed batches. A FAIL is a section-7 amendment trigger. The only alternative close is an explicit operator budget waiver recorded against this condition by name."
+      "condition": "Operator rebuilds pre-filter-worker and enrichment-batcher images, restarts compose with ANTHROPIC_API_KEY resolvable, and lets at least one gate submit two batches on the same cache key. PASS when the batch-poller completion log line for the second batch reports cache_read_tokens > 0. FAIL when all keys report event=cache_read_zero across two consecutive completed batches. A FAIL is a section-7 amendment trigger. The only alternative close is an explicit operator budget waiver recorded against this condition by name.",
+      "note": "Gate-satisfied in runner ledger 2026-09-12T22:25Z (cache key A, cache_read_tokens=276150). Amendment round 5 does not re-open G1 and does not invent G2."
     }
   ],
   "hard_edges": [
@@ -212,7 +235,8 @@
     ["T9", "T9-bis"],
     ["T9-bis", "T10"],
     ["T10", "T10-bis"],
-    ["T10-bis", "G1"]
+    ["T10-bis", "G1"],
+    ["T9-bis", "T11"]
   ],
   "soft_edges": [
     {
@@ -275,6 +299,7 @@
     "D1: .dev/plans/prompt-caching/ (context-map.md, plan.md, dag.json, packets/) must be committed before the first dispatch. Until then the plan is not dispatchable regardless of run_status.",
     "Amendment round 1: this amendment's own artifacts (plan.md, dag.json, packets/T1-bis.md, refreshed packets/T2.md..T10.md) are committed in an amendment-only commit before T1-bis is dispatched. T1-bis's implementation files remain uncommitted until T1-bis itself lands them.",
     "Amendment round 3: this amendment's own artifacts (plan.md, dag.json, packets/T7-bis.md, refreshed T10.md and superseded-ID sweep hits) are committed in an amendment-only commit before T7-bis is dispatched. T7-bis's implementation files remain uncommitted until T7-bis itself lands them. T7-bis consumes current HEAD (includes T6 at ba49bb1), not the T7 HALT report's stale HEAD c47248e.",
-    "Amendment round 4: this amendment's own artifacts (plan.md, dag.json, packets/T10-bis.md) are committed in an amendment-only commit before T10-bis is dispatched. T10-bis's implementation files remain uncommitted until T10-bis itself lands them. T10-bis's row-20 frozen-path kill criterion uses the re-baselined range 26b78b6..HEAD; the plan's overall baseline SHA and every other range check stay b919fdb."
+    "Amendment round 4: this amendment's own artifacts (plan.md, dag.json, packets/T10-bis.md) are committed in an amendment-only commit before T10-bis is dispatched. T10-bis's implementation files remain uncommitted until T10-bis itself lands them. T10-bis's row-20 frozen-path kill criterion uses the re-baselined range 26b78b6..HEAD; the plan's overall baseline SHA and every other range check stay b919fdb.",
+    "Amendment round 5: this amendment's own artifacts (plan.md, dag.json, packets/T11.md) are committed in an amendment-only commit before T11 is dispatched. T11's implementation files remain uncommitted until T11 itself lands them. G1 is already gate-satisfied; do not re-dispatch G1. After T11 lands, rebuild pre-filter-worker and enrichment-batcher (defaults are image-baked via config.py import, not compose env)."
   ]
 }
