@@ -516,18 +516,18 @@ Any rubric change must participate in the same hash-or-abort discipline as the p
 
 ### Wiring
 
-- [ ] Add `cache_control` + `ttl: "1h"` to pre-filter `build_requests()` on profile + **multi-source** rubric block
-- [ ] Add `cache_control` + `ttl: "1h"` to Call 1 on **dedicated** rubric block (not profile — separate asset)
-- [ ] Call 2: `ttl: "1h"`; place `cache_control` on **last** system block (§5e); include profile + eval schema + few-shots in cached prefix
-- [ ] Author `prefilter_rubric` and `call1_rubric` content to reach **≥ 4,096 tokens** each (measured with `cl100k_base`)
-- [ ] Extend hash verification to cover rubric assets (or composite hash in profile commit)
+- [x] Add `cache_control` + `ttl: "1h"` to pre-filter `build_requests()` on profile + **multi-source** rubric block
+- [x] Add `cache_control` + `ttl: "1h"` to Call 1 on **dedicated** rubric block (not profile — separate asset)
+- [x] Call 2: `ttl: "1h"`; place `cache_control` on **last** system block (§5e); include profile + eval schema + few-shots in cached prefix
+- [x] Author `prefilter_rubric` and `call1_rubric` content to reach **≥ 4,096 tokens** each (measured with `cl100k_base`) — landed measuring the **total prefix** (profile render + annex), not the annex alone (prompt-caching plan §2 row 8); prefilter_rubric annex alone is 2,777 tokens, call1_rubric annex alone is 4,619 tokens, both prefixes clear 4,506 with margin
+- [x] Extend hash verification to cover rubric assets (or composite hash in profile commit)
 
 ### Scale / ops
 
-- [ ] Persist cache usage aggregates in `batch-poller` logs (minimum); consider `BatchRecord` columns
-- [ ] Document env overrides for backfill: larger `BISHOP_PREFILTER_BATCH_SIZE`, `BISHOP_ENRICHMENT_STAGE*_BATCH_SIZE`
+- [x] Persist cache usage aggregates in `batch-poller` logs (minimum); consider `BatchRecord` columns — logs only landed (no `BatchRecord` columns, per plan D8/non-goal)
+- [x] Document env overrides for backfill: larger `BISHOP_PREFILTER_BATCH_SIZE`, `BISHOP_ENRICHMENT_STAGE*_BATCH_SIZE` — see `.dev/llm-models-and-cache.md` batch-size/amortization table
 - [ ] Profile freeze policy during G7 backfill tranches
-- [ ] Alert: consecutive batches with zero `cache_read_input_tokens` after enablement
+- [ ] Alert: consecutive batches with zero `cache_read_input_tokens` after enablement — landed a **per-batch** zero-read warning (`cache_read_zero`, T8), not a consecutive-batch tracker; leaving unchecked as the literal item is narrower than what shipped
 - [ ] Optional: pre-filter user-tail truncation for `title + abstract` (~500–1k tokens; §5f)
 
 ### Spec

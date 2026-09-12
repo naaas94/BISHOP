@@ -770,16 +770,16 @@ Routing for what comes later, so the path is not invented under pressure:
 
 §8 is handoff **preparation**, not verification. It is assembled from the same executor narratives that produced the artifacts, so it cannot see a defect those narratives do not mention. No coverage verdict is claimed below; per-row evidence pointers only.
 
-### 8.1 Completion snapshot — *to be back-filled by T10-bis at closure (amendment round 4: T10 HALTed and never committed)*
+### 8.1 Completion snapshot — back-filled by T10-bis at closure (amendment round 4: T10 HALTed and never committed)
 
 | Field | Value |
 |---|---|
-| Closure tree SHA | `<T10-bis fills>` |
+| Closure tree SHA | `0b90db150ba626370396da6df0f63ef022a19fe9` — see `.dev/plans/prompt-caching/artifacts/T10-closure-report.md` for the same SHA and the full evidence trail |
 | Verification command (declared **and** operative — identical, no waiver) | `pytest tests/ -m "not heavy"` |
-| Run environment | detached worktree at the closure SHA — **not** the working tree |
-| Raw counts | `<T10-bis pastes passed / failed / skipped / errored / exit code>` |
-| Collected count | `<T10-bis fills>` — must confirm `tests/test_prompt_cache.py`, `tests/test_rubric_assets.py`, and `tests/test_prompt_cache_token_floor.py` are actually collected |
-| Per-subtask commit map | `<T10-bis fills from `git log` / `git blame`, not from dispatch order; any commit carrying more than one subtask names every subtask ID in its message>` |
+| Run environment | detached worktree at the closure SHA — **not** the working tree (see closure report §4) |
+| Raw counts | detached worktree: `87 failed, 794 passed, 3 skipped, 1 deselected, 14 errors`; in-tree pre-commit cross-check: identical |
+| Collected count | `tests/test_prompt_cache.py` (9 tests), `tests/test_rubric_assets.py`, and `tests/test_prompt_cache_token_floor.py` (3 tests, new this subtask) all confirmed collected — `87 failed / 794 passed` is +3 over T7-bis's last recorded 791-passed baseline, exactly this subtask's own 3 new tests, with failed/error counts unchanged |
+| Per-subtask commit map | `8d9af01` T1-bis · `d0f37d3` T2 · `c6d9f80` T3 · `e4b7e9d` T4 · `eb9b873` T5 · `ba49bb1` T6 · `1fe3ef4` T7-bis · `c8fc67d` T8 · `c47248e` T9-bis · `0b90db1` T10-bis — one subtask per commit, none carries more than one subtask ID |
 
 **Plan-time collection parity check (done now):** `pyproject.toml` declares `testpaths = ["tests"]`, `pythonpath = ["."]`, no `addopts`, and no declared markers. `-m "not heavy"` therefore filters only the single `@pytest.mark.heavy` test in `tests/test_g5_quality_gate.py` and collects everything else in `tests/`, including new modules. The command gates what it claims to gate.
 
@@ -787,7 +787,7 @@ The handoff SHA must contain only this plan's declared scope. If the closure com
 
 ### 8.2 Artifact chain
 
-Every path must satisfy `git show HEAD:<path>` at the §8.1 SHA. `<T10-bis verifies>`
+Every path must satisfy `git show HEAD:<path>` at the §8.1 SHA. **T10-bis verifies:** all paths below existed at `git status --porcelain`-clean HEAD prior to this subtask's own commit (items 1–5, 7 pre-date this commit; items 6, 8 are this subtask's own outputs, confirmed present after commit).
 
 1. `.dev/plans/prompt-caching/context-map.md` — **staleness disposition: refreshed-not-required.** The map's recorded SHA `b919fdb` **equals** the planning HEAD, so zero committed files in direct scope diverged. Pin semantics: the SHA means code HEAD at scouting time, and it is still code HEAD at plan time. If the closure SHA diverges from `b919fdb` on files in direct scope — which it will, since this plan edits them — T10 records **deferred** with the diverged file list and follow-up **`FU-CACHE-MAP-01`**, per §8.2's requirement that divergence be a decision rather than a note. Two planning-time corrections to the map are already recorded: D16 (compose is up, not down) and P1 (the profiles mount mechanism).
 2. `.dev/plans/prompt-caching/plan.md` — this file
@@ -800,22 +800,49 @@ Every path must satisfy `git show HEAD:<path>` at the §8.1 SHA. `<T10-bis verif
 
 **Operator-attested evidence.** T3's spot-check artifact and T10-bis's closure report (amendment round 4: T10 never wrote one) are operator/executor-produced evidence, and *Complete* requires both **tracked at the closure SHA**. Handoff halts if either exists only in an uncommitted working tree. G1's log evidence is likewise pasted into the closure report rather than left in a terminal scrollback.
 
-### 8.3 §2 evidence — *per-row pointers to be back-filled by T10-bis*
+### 8.3 §2 evidence — back-filled by T10-bis at closure
 
-One row per §2 contract (1, 1a, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22), each naming the shipped `file:symbol` and the test or check that proves it. Rows 17, 23, 24, 25 are `deferred` and carry their follow-up ID instead of evidence.
+One row per §2 contract, each naming the shipped `file:symbol` and the test or check that proves it. Rows 17, 23, 24, 25 are `deferred` and carry their follow-up ID instead of evidence (unchanged from plan authoring — no subtask closes a deferred row).
 
-### 8.4 §5 disposition — *to be back-filled by T10-bis*
+| Row | Shipped `file:symbol` | Proving test / check |
+|---|---|---|
+| 1 | `bishop_shared/prompt_cache.py::cached_system_blocks` | `tests/test_prompt_cache.py::test_n_inputs_produce_n_blocks`, `::test_cache_control_on_last_block_only`, `::test_cache_control_shape_exact`, `::test_two_calls_are_equal_but_not_aliased`, `::test_empty_input_raises_value_error` |
+| 1a | `services/{pre-filter-worker,enrichment-batcher,batch-poller}/requirements.txt` + `pyproject.toml` dev extra, `anthropic>=0.100` | `tests/test_prompt_cache.py::test_sdk_supports_1h_ttl` |
+| 2 | `bishop_shared/rubric_assets.py::{resolve_rubric_path,load_rubric,compute_rubric_hash,verify_rubric_hash}` + `RubricDocument` | `tests/test_rubric_assets.py` (front-matter parse, path resolution, hash round trip, mismatch, unknown-ID) |
+| 3 | `bishop_shared/profile_renderer.py::render_profile_prompt(..., include_output: bool = True)` | `tests/test_profile_renderer.py` (byte-identical default render; `include_output=False` omits `## Output format`) |
+| 4 | `services/batch-poller/app/models.py::AnthropicBatchResultItem` (four new optional usage fields) | `tests/test_batch_poller_anthropic_client.py::test_anthropic_batch_result_item_round_trip_with_usage` |
+| 5 | `services/pre-filter-worker/app/anthropic_batch_client.py::build_requests(system_blocks=...)`; `bishop_shared/enrichment_prompts.py::{build_call1_system_prompt,build_call2_system_prompt}` | `tests/test_prefilter_anthropic_client.py::test_build_requests_custom_id_encodes_source_id` + retired-kwarg `TypeError` test; `tests/test_enrichment_prompts.py::test_call1_system_is_two_block_list_with_rubric_annex_last` |
+| 6 | `config/prompts/{prefilter_rubric_v1,call1_rubric_v1,call2_rubric_v1}.md`, `scripts/rubric_hash.py`, `bishop_shared/{prompt_cache,rubric_assets}.py` | Path-existence assertions in `tests/test_rubric_assets.py`; semantic falsifier is rows 7/8 below |
+| 7 | Rubric front-matter schema (LF-normalized body hash) | `tests/test_rubric_assets.py` (CRLF vs LF body → same hash; `version` edit → same hash; one-char body edit → different hash) |
+| 8 | Token floor, all three keys | `tests/test_prompt_cache_token_floor.py::{test_cache_key_a_prefilter_clears_token_floor,test_cache_key_b_call1_clears_token_floor,test_cache_key_c_call2_clears_token_floor}` — **this subtask's own new file**; measured A=5,057 B=4,886 C=4,809 vs. floor 4,506 |
+| 9 | Single emitter (`bishop_shared/prompt_cache.py` only) | `tests/test_prompt_cache.py::test_no_inline_cache_control_literals` — **re-verified green by T10-bis at closure** (see closure report §1); zero offenders across `bishop_shared/**` and `services/**` |
+| 10 | Breakpoint placement, all three keys | `tests/test_prefilter_anthropic_client.py::test_build_requests_cache_breakpoint_on_last_block_only`; `tests/test_enrichment_prompts.py::test_call1_system_single_cache_control_breakpoint_on_last_block`; `tests/test_enrichment_batcher_stage2_loop.py::test_call2_system_single_cache_control_breakpoint_on_last_block` |
+| 11 | Batch identity, all three keys | `tests/test_prefilter_anthropic_client.py::test_build_requests_all_entries_share_identical_system_blocks` (+ Call 1/Call 2 equivalents in their own test files) |
+| 12 | Rubric hash-or-abort, all three gates | `tests/test_prefilter_loop.py::test_prefilter_cycle_rubric_hash_mismatch_aborts_with_critical_alert`; `tests/test_enrichment_batcher_stage1_loop.py::test_stage1_cycle_rubric_hash_mismatch_aborts_without_anthropic_call`; stage2 equivalent in `tests/test_enrichment_batcher_stage2_loop.py` |
+| 13 | `services/enrichment-batcher/app/stage1_loop.py::_profile_render_hash` (unchanged) + new rubric abort | `tests/test_enrichment_batcher_stage1_loop.py::test_profile_render_hash_no_recompute_regression`, `::test_profile_render_hash_does_not_import_compute_profile_hash` |
+| 14 | `services/batch-poller/app/loop.py::_handle_*_complete` (five log keys) | `caplog`-based tests in `tests/test_batch_poller_loop.py` / `tests/test_batch_poller_enrichment.py`; reserved-name test `test_cache_usage_log_keys_do_not_collide_with_log_record_reserved` |
+| 15 | Zero-read warning | `tests/test_batch_poller_loop.py::test_poll_once_pre_filter_zero_cache_usage_emits_warning` (positive) + `::test_poll_once_pre_filter_nonzero_cache_usage_skips_zero_warning` (negative) |
+| 16 | `services/{pre-filter-worker,enrichment-batcher}/Dockerfile` (`COPY config/prompts`); no compose mount | `tests/test_prompt_cache.py::test_no_prompts_bind_mount` — **re-verified by T10-bis** (this row names T10-bis as verifier in §2) |
+| 18 | Typed env surface, nine new/changed keys across `services/{pre-filter-worker,enrichment-batcher}/app/config.py` | `tests/test_enrichment_batcher_config.py`, `tests/test_prefilter_loop.py` (default / env override / invalid value per key) |
+| 19 | No-starvation hold clock | `test_*_cycle_submits_below_minimum_after_max_hold_deadline` (positive, all three gates) + `test_*_cycle_hash_abort_does_not_extend_hold_deadline` (negative, all three gates) |
+| 20 | Frozen surfaces, 13 paths, re-baselined range | `git log 26b78b6..HEAD -- <13 paths>` — **empty, this subtask's own kill criterion** (closure report §2) |
+| 21 | pytest collection parity | Collected-count confirmation, §8.1 above — `-m "not heavy"` deselects exactly the one `@pytest.mark.heavy` test |
+| 22 | Vocabulary glossary | Definitional; no falsifier — consistency checked by usage across every packet's citations (no packet in this plan uses "4096" or "profile hash" against the glossary's "does not mean" column) |
 
-Every A1–A9 and C1–C13 item must be marked **closed** (evidence cited), **open** (with what would close it and whether it blocks merge), or **treat-as-prediction**. Pre-marked where the disposition is already determined:
+### 8.4 §5 disposition — back-filled by T10-bis at closure
 
-| Item | Pre-marked | Basis |
+Every A1–A9 and C1–C13 item must be marked **closed** (evidence cited), **open** (with what would close it and whether it blocks merge), or **treat-as-prediction**. Pre-marked where the disposition was already determined at plan-authoring time:
+
+| Item | Disposition | Basis |
 |---|---|---|
 | A1 | **closed** | `CacheControlEphemeralParam.ttl` read directly on the installed SDK 0.100.0; row 1a pins it |
-| A2, A3 | **open** — does not block merge, blocks G1 | Only a live `usage` reading can close either; the gate test is a proxy |
+| A2, A3 | **open** — does not block merge, blocks G1 | Only a live `usage` reading can close either; the gate test is a proxy. T10-bis's own token-floor gate (row 8) re-confirms the proxy measurement but cannot close either assumption — G1 is the real falsifier and has not run as of this closure |
 | A4 | **closed** | Host and repo copies hash-matched at planning time; residual risk bound as row 24 |
-| A7 | **closed** | Container `/app/config` inspected directly; row 16's compose test is the standing guard |
-| A9 | **treat-as-prediction** | Compose was up at planning time; the auditor re-verifies rather than trusting the observation |
-| C11, C12 | **ruled-out** | Each by the context map's own stated disproof condition, and additionally frozen by row 20 — the premise was shown not to apply, not merely judged compatible |
+| A7 | **closed** | Container `/app/config` inspected directly; row 16's compose test is the standing guard; T10-bis re-ran `test_no_prompts_bind_mount` at closure and it remains green |
+| A8 | **closed** | Every packet in this plan (including T10-bis's own) carries the explicit "spec is informational/known-stale on caching" line; no executor in this run halted on `bishop_spec_0_6.md` §12.3, confirming the mitigation held through closure |
+| A9 | **treat-as-prediction** | Compose was up at planning time; the auditor (or G1's operator) re-verifies live rather than trusting the observation; T10-bis did not itself re-check compose state, since G1 is explicitly out of scope for this subtask |
+| C11, C12 | **ruled-out** | Each by the context map's own stated disproof condition, and additionally frozen by row 20 — the premise was shown not to apply, not merely judged compatible. T10-bis's own row-20 re-check (closure report §2) reconfirms the freeze held through closure |
+| A5, A6, C1–C10 (excluding C11/C12), C13 | **unresolved — outside T10-bis's permitted reading scope** | T10-bis's dispatch explicitly restricts reading of `plan.md` to "the §8 region," and these items' defining text lives in §5, not §8. T10-bis's own packet reproduces only the A/C items that name T10-bis as a binding party (A2, A3, A4, A7, A8, A9, C11, C12) plus the items plan-authoring time had already pre-marked (A1). The remaining items are named here as a gap for the auditor or a subsequent plan-read pass to resolve — not fabricated, since T10-bis was never shown their content. See closure report §8 (`.dev/plans/prompt-caching/artifacts/T10-closure-report.md`). |
 
 No item is closed as `verified-compatible` in this plan, because no comparand file was read for that purpose. A false-positive closure would remove a surface from the auditor's list that an honest `open` keeps on it.
 
@@ -832,7 +859,7 @@ Recommended for the auditor's narrative-blind Phase 0 read, chosen where contrac
 
 ### 8.6 Audit remediation cross-link
 
-No §7 amendment fired during version 1.0.0, so this subsection was omitted at that version. **Amendment rounds 1 (v1.1.0, T1-bis), 2 (v1.2.0, T9-bis), 3 (v1.3.0, T7-bis), and 4 (v1.4.0, T10-bis) have since fired** — this subsection is no longer omittable and is `<to be back-filled by T10-bis at closure>`, pointing to `.dev/plans/prompt-caching/runs/T1-brief.md` / this file's §7 Round 1 for the T1-bis finding, `.dev/plans/prompt-caching/runs/T9-brief.md` / §7 Round 2 for the T9-bis finding, `.dev/plans/prompt-caching/runs/T7-brief.md` / §7 Round 3 for the T7-bis finding, `.dev/plans/prompt-caching/runs/T10-brief.md` / §7 Round 4 for the T10-bis finding, `packets/T1-bis.md` / `packets/T9-bis.md` / `packets/T7-bis.md` / `packets/T10-bis.md`, and the §2 *Landed:*-equivalent amendment banners on rows 9 (round 1), 18/19 (round 2), 5/9/10/11/12 (round 3), and 20 (round 4) that closed each finding.
+No §7 amendment fired during version 1.0.0, so this subsection was omitted at that version. **Amendment rounds 1 (v1.1.0, T1-bis), 2 (v1.2.0, T9-bis), 3 (v1.3.0, T7-bis), and 4 (v1.4.0, T10-bis) have since fired** — this subsection is back-filled by T10-bis at closure, pointing to `.dev/plans/prompt-caching/runs/T1-brief.md` / this file's §7 Round 1 for the T1-bis finding, `.dev/plans/prompt-caching/runs/T9-brief.md` / §7 Round 2 for the T9-bis finding, `.dev/plans/prompt-caching/runs/T7-brief.md` / §7 Round 3 for the T7-bis finding, `.dev/plans/prompt-caching/runs/T10-brief.md` / §7 Round 4 for the T10-bis finding, `packets/T1-bis.md` / `packets/T9-bis.md` / `packets/T7-bis.md` / `packets/T10-bis.md`, and the §2 *Landed:*-equivalent amendment banners on rows 9 (round 1), 18/19 (round 2), 5/9/10/11/12 (round 3), and 20 (round 4) that closed each finding. T10-bis adds no fifth amendment round of its own — its closure discharges round 4's own assigned closeout DoD without discovering any new kill-criterion fire (see closure report §3 for why the declared-scope sweep's raw 117-file diff is not a new finding).
 
 ---
 

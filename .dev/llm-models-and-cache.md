@@ -2,7 +2,7 @@
 
 Quick reference for which models and caching apply at each pipeline stage. Canonical constants live in `bishop_shared/anthropic_config.py` and `bishop_shared/indexing_config.py`.
 
-**Last reviewed:** 2026-06-13 (as-built in repo)
+**Last reviewed:** 2026-09-12 (as-built in repo, post prompt-caching plan T10-bis closure)
 
 ---
 
@@ -52,11 +52,18 @@ Pinned dated snapshot — do not use undated aliases (`claude-haiku-4-5` returns
 
 ## Batch sizes and env overrides
 
-| Stage | Default | Env var |
-|-------|---------|---------|
-| Pre-filter | 50 | `BISHOP_PREFILTER_BATCH_SIZE` |
-| Enrichment stage 1 | 10 | `BISHOP_ENRICHMENT_STAGE1_BATCH_SIZE` |
-| Enrichment stage 2 | 10 | `BISHOP_ENRICHMENT_STAGE2_BATCH_SIZE` |
+Amortization controls added by the prompt-caching plan (T9-bis): each gate also
+holds a partial batch open until `MIN_BATCH_SIZE` is reached, up to
+`MAX_HOLD_MINUTES`, so small trickles of entries don't submit batches too
+small to amortize a cache write. The hold clock is per-gate, in-process, and
+resets on service restart (accepted, documented in
+`.dev/decision-logs/prompt-caching/T9-bis-batch-amortization.md`).
+
+| Stage | Batch size default | Batch size env var | Min batch size | Max hold (minutes) |
+|-------|---------------------|---------------------|-----------------|---------------------|
+| Pre-filter | 50 | `BISHOP_PREFILTER_BATCH_SIZE` | 25 (`BISHOP_PREFILTER_MIN_BATCH_SIZE`) | 120 (`BISHOP_PREFILTER_MAX_HOLD_MINUTES`) |
+| Enrichment stage 1 | 50 (was 10) | `BISHOP_ENRICHMENT_STAGE1_BATCH_SIZE` | 10 (`BISHOP_ENRICHMENT_STAGE1_MIN_BATCH_SIZE`) | 120 (`BISHOP_ENRICHMENT_STAGE1_MAX_HOLD_MINUTES`) |
+| Enrichment stage 2 | 50 (was 10) | `BISHOP_ENRICHMENT_STAGE2_BATCH_SIZE` | 10 (`BISHOP_ENRICHMENT_STAGE2_MIN_BATCH_SIZE`) | 120 (`BISHOP_ENRICHMENT_STAGE2_MAX_HOLD_MINUTES`) |
 
 All LLM calls use the Anthropic Batch API (~50% discount vs standard pricing per spec §12.1).
 
@@ -70,11 +77,37 @@ Every LLM inference goes through the Batch API (async, non-urgent pipeline). `ba
 
 ### Prompt caching (`cache_control`)
 
-| Stage | Caching in code? | Details |
-|-------|------------------|---------|
-| **Pre-filter** | **No** | Profile is a plain `system` string in `pre-filter-worker` — no `cache_control`. Spec §12.1 documents future caching when the NL profile grows past Anthropic's minimum token threshold ("Phase 1.5"); not wired yet. |
-| **Enrichment Call 1** | **No** | Static taxonomy system prompt (`build_call1_system_prompt`); no profile injected. |
-| **Enrichment Call 2** | **Yes** | Profile block: `cache_control: {"type": "ephemeral"}` via `build_call2_system_prompt` in `bishop_shared/enrichment_prompts.py`. Instructions block is not cached. Profile is likely still below Anthropic's caching threshold (~300–500 tokens today) — `cache_control` is emitted per spec but may no-op until the profile grows. See `.dev/decision-logs/m5-enrichment/T4-call2-cache-control.md`. |
+All three gates now emit a single `cache_control: {"type": "ephemeral", "ttl": "1h"}`
+breakpoint on the **last** block of `params["system"]`, via the sole emitter
+`bishop_shared/prompt_cache.py::cached_system_blocks` (prompt-caching plan,
+landed 2026-09-12). Each gate's cached prefix is sized with a stamped,
+hash-verified rubric annex (`config/prompts/*.md`) so the **total** prefix —
+not the annex alone — clears Claude Haiku 4.5's 4,096-token minimum with a
+10% margin (4,506), per `tests/test_prompt_cache_token_floor.py`. The three
+cache keys (A/B/C) stay independent by construction — no shared prefix.
+
+| Stage | Cache key | System blocks (breakpoint on last) | Measured tokens (`cl100k_base`) |
+|-------|-----------|--------------------------------------|----------------------------------|
+| **Pre-filter** | A | `[profile_render(professional_v1.2.0_soft_launch), prefilter_rubric]` | 5,057 (floor 4,506, margin 551) |
+| **Enrichment Call 1** | B | `[call1_system, call1_rubric]` | 4,886 (floor 4,506, margin 380) |
+| **Enrichment Call 2** | C | `[profile_render(professional_v1.0.0, include_output=False), call2_rubric, call2_instructions]` | 4,809 (floor 4,506, margin 303) |
+
+Each rubric asset is image-baked (`Dockerfile` `COPY config/prompts`), never
+bind-mounted, and hash-verified before every submit (hash-or-abort mirrors the
+existing profile-hash abort; pre-filter additionally raises the CRITICAL
+alert path, stage1/stage2 log-only, per the pre-existing M5 T4 asymmetry).
+`batch-poller` logs `cache_read_tokens`, `cache_write_tokens`, `input_tokens`,
+`output_tokens`, `cache_hit_ratio` on every batch completion (`cache_read_zero`
+warning when both cache counters are zero) — see
+`.dev/decision-logs/prompt-caching/`. **This `cl100k_base` measurement is a
+proxy, not proof Anthropic cached anything** — the live falsifier is gate G1's
+`cache_creation_input_tokens > 0` on a real batch (operator-run, not yet
+executed as of this doc's last review).
+
+`bishop_spec_0_6.md` §12.1/§12.3 still describe pre-filter caching as
+"applies automatically" / "no code change required" with a ~1,024-token
+framing — that language is now known-stale and was left uncorrected by
+explicit operator decision (D6); do not treat the spec as current on caching.
 
 ### Embeddings
 
