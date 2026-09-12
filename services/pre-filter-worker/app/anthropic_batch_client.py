@@ -36,7 +36,7 @@ class AnthropicBatchClient:
     def build_requests(
         self,
         *,
-        system_prompt: str,
+        system_blocks: list[dict[str, object]],
         entries: list[PreFilterBatchEntry],
     ) -> list[dict[str, Any]]:
         """Build wire payload; exposed for contract tests asserting custom_id encoding."""
@@ -48,7 +48,7 @@ class AnthropicBatchClient:
                     "params": {
                         "model": ANTHROPIC_MODEL_PREFILTER,
                         "max_tokens": _PREFILTER_MAX_TOKENS,
-                        "system": system_prompt,
+                        "system": system_blocks,
                         "messages": [
                             {"role": "user", "content": entry.user_message()},
                         ],
@@ -60,11 +60,11 @@ class AnthropicBatchClient:
     def submit_pre_filter_batch(
         self,
         *,
-        system_prompt: str,
+        system_blocks: list[dict[str, object]],
         entries: list[PreFilterBatchEntry],
     ) -> AnthropicBatchSubmitResult:
         """Submit batch to Anthropic; raises BadRequestError on HTTP 400."""
-        requests = self.build_requests(system_prompt=system_prompt, entries=entries)
+        requests = self.build_requests(system_blocks=system_blocks, entries=entries)
         batch = self._client.messages.batches.create(requests=requests)
         return AnthropicBatchSubmitResult(
             external_batch_id=batch.id,
@@ -79,12 +79,12 @@ class ModelStringFatalError(Exception):
 def submit_pre_filter_batch_or_fatal(
     client: AnthropicBatchClient,
     *,
-    system_prompt: str,
+    system_blocks: list[dict[str, object]],
     entries: list[PreFilterBatchEntry],
 ) -> AnthropicBatchSubmitResult | None:
     """Submit batch; log structured 400 event and return None on HTTP 400."""
     try:
-        return client.submit_pre_filter_batch(system_prompt=system_prompt, entries=entries)
+        return client.submit_pre_filter_batch(system_blocks=system_blocks, entries=entries)
     except BadRequestError as exc:
         event = anthropic_batch_400_event(exc)
         logger.error(

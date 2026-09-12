@@ -12,12 +12,14 @@ import httpx
 import pytest
 
 from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
-
 from bishop_shared.enums import DomainEnum, SourceEnum
+from bishop_shared.prompt_cache import CACHE_TTL, cached_system_blocks
+from bishop_shared.rubric_assets import load_rubric
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _PREFILTER_ROOT = _REPO_ROOT / "services" / "pre-filter-worker"
 _PROFILE_PATH = _REPO_ROOT / "config/profiles/professional_v1.0.0.yaml"
+_RUBRIC_PATH = _REPO_ROOT / "config/prompts/prefilter_rubric_v1.md"
 
 
 def _load_prefilter_loop_stack() -> tuple[ModuleType, ModuleType, ModuleType, ModuleType]:
@@ -142,11 +144,45 @@ def test_prefilter_cycle_hash_mismatch_aborts_without_anthropic(
             state_client,
             anthropic_client,
             profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
         )
 
     asyncio.run(_run())
     state_client.register_batch.assert_not_called()
     anthropic_client._client.messages.batches.create.assert_not_called()
+
+
+def test_prefilter_cycle_rubric_hash_mismatch_aborts_with_critical_alert(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """§2 row 12: tampered rubric aborts before Anthropic and emits CRITICAL."""
+    anthropic_mod, loop_mod, models, client_mod = _load_prefilter_loop_stack()
+    monkeypatch.setattr(loop_mod, "PREFILTER_MIN_BATCH_SIZE", 1)
+    entries = [_sample_poll_entry(models, "arxiv:2406.00001")]
+    state_client = _mock_state_client(client_mod, models, entries=entries)
+    anthropic_client = _mock_anthropic_client(anthropic_mod, models)
+
+    monkeypatch.setattr(
+        loop_mod,
+        "compute_rubric_hash",
+        lambda _path: "deadbeef" * 8,
+    )
+
+    with patch.object(loop_mod.logger, "critical") as mock_critical:
+        async def _run() -> None:
+            await loop_mod.prefilter_cycle(
+                state_client,
+                anthropic_client,
+                profile_path=_PROFILE_PATH,
+                rubric_path=_RUBRIC_PATH,
+            )
+
+        asyncio.run(_run())
+
+    state_client.register_batch.assert_not_called()
+    anthropic_client._client.messages.batches.create.assert_not_called()
+    mock_critical.assert_called_once()
+    assert mock_critical.call_args.kwargs["extra"]["alert_type"] == "rubric_hash_mismatch"
 
 
 def test_prefilter_cycle_happy_path_registers_batch(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -162,6 +198,7 @@ def test_prefilter_cycle_happy_path_registers_batch(monkeypatch: pytest.MonkeyPa
             state_client,
             anthropic_client,
             profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
         )
 
     asyncio.run(_run())
@@ -173,8 +210,11 @@ def test_prefilter_cycle_happy_path_registers_batch(monkeypatch: pytest.MonkeyPa
     assert register_body.entry_count == 3
     assert register_body.profile_render_hash == loop_mod.load_profile(_PROFILE_PATH).canonical_hash
 
+    profile_prompt = loop_mod.render_profile_prompt(loop_mod.load_profile(_PROFILE_PATH))
+    rubric_body = load_rubric(_RUBRIC_PATH).body
+    expected_blocks = cached_system_blocks(profile_prompt, rubric_body)
     requests = anthropic_client.build_requests(
-        system_prompt=loop_mod.render_profile_prompt(loop_mod.load_profile(_PROFILE_PATH)),
+        system_blocks=expected_blocks,
         entries=[
             models.PreFilterBatchEntry(
                 source_id=entry.source_id,
@@ -186,6 +226,13 @@ def test_prefilter_cycle_happy_path_registers_batch(monkeypatch: pytest.MonkeyPa
     )
     for req, source_id in zip(requests, source_ids, strict=True):
         assert req["custom_id"] == source_id_to_batch_custom_id(source_id)
+    wire_system = anthropic_client._client.messages.batches.create.call_args.kwargs["requests"][0][
+        "params"
+    ]["system"]
+    assert wire_system == expected_blocks
+    cache_indices = [idx for idx, block in enumerate(wire_system) if "cache_control" in block]
+    assert cache_indices == [len(wire_system) - 1]
+    assert wire_system[-1]["cache_control"] == {"type": "ephemeral", "ttl": CACHE_TTL}
 
 
 def test_prefilter_cycle_twenty_entry_batch_assembly(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -202,6 +249,7 @@ def test_prefilter_cycle_twenty_entry_batch_assembly(monkeypatch: pytest.MonkeyP
             state_client,
             anthropic_client,
             profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
         )
 
     asyncio.run(_run())
@@ -224,6 +272,7 @@ def test_prefilter_cycle_state_worker_register_error_skips_after_anthropic(
             state_client,
             anthropic_client,
             profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
         )
 
     asyncio.run(_run())
@@ -255,6 +304,7 @@ def test_prefilter_cycle_anthropic_400_skips_batch_registration(
             state_client,
             anthropic_client,
             profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
         )
 
     asyncio.run(_run())
@@ -305,7 +355,12 @@ def test_prefilter_cycle_holds_batch_below_minimum_volume_then_submits_on_volume
     anthropic_client = _mock_anthropic_client(anthropic_mod, models)
 
     async def _run() -> None:
-        await loop_mod.prefilter_cycle(state_client, anthropic_client, profile_path=_PROFILE_PATH)
+        await loop_mod.prefilter_cycle(
+            state_client,
+            anthropic_client,
+            profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
+        )
 
     # Cycle 1: 1 entry held (below min of 5); no submit.
     asyncio.run(_run())
@@ -340,7 +395,12 @@ def test_prefilter_cycle_submits_below_minimum_after_max_hold_deadline(
     monkeypatch.setattr(loop_mod, "_now", lambda: fake_now["t"])
 
     async def _run() -> None:
-        await loop_mod.prefilter_cycle(state_client, anthropic_client, profile_path=_PROFILE_PATH)
+        await loop_mod.prefilter_cycle(
+            state_client,
+            anthropic_client,
+            profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
+        )
 
     # Cycle 1: entry held, deadline not reached.
     asyncio.run(_run())
@@ -374,7 +434,12 @@ def test_prefilter_cycle_hash_abort_does_not_extend_hold_deadline(
     monkeypatch.setattr(loop_mod, "_now", lambda: fake_now["t"])
 
     async def _run() -> None:
-        await loop_mod.prefilter_cycle(state_client, anthropic_client, profile_path=_PROFILE_PATH)
+        await loop_mod.prefilter_cycle(
+            state_client,
+            anthropic_client,
+            profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
+        )
 
     # Cycle 1: entry held, deadline not reached (t = 1000).
     asyncio.run(_run())

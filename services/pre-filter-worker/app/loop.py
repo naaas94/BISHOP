@@ -23,6 +23,8 @@ from bishop_shared.profile_renderer import (
     render_profile_prompt,
     resolve_profile_path,
 )
+from bishop_shared.prompt_cache import cached_system_blocks
+from bishop_shared.rubric_assets import compute_rubric_hash, load_rubric, resolve_rubric_path
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +87,7 @@ def ensure_g3_verified() -> bool:
 
 
 def _verify_profile_hash(profile_path: Path) -> tuple[str, str, str] | None:
-    """Return (profile_version, render_hash, system_prompt) or None on mismatch."""
+    """Return (profile_version, render_hash, profile_prompt) or None on mismatch."""
     profile = load_profile(profile_path)
     computed = compute_profile_hash(profile_path)
     if computed != profile.canonical_hash:
@@ -105,11 +107,40 @@ def _verify_profile_hash(profile_path: Path) -> tuple[str, str, str] | None:
     return profile.version, computed, render_profile_prompt(profile)
 
 
+def _verify_rubric_hash(rubric_path: Path) -> str | None:
+    """Return rubric body on hash match, or None on mismatch (CRITICAL alert)."""
+    doc = load_rubric(rubric_path)
+    computed = compute_rubric_hash(rubric_path)
+    if computed != doc.canonical_hash:
+        logger.error(
+            "rubric canonical_hash mismatch at batch time",
+            extra={
+                "event": "rubric_hash_mismatch",
+                "rubric_id": doc.rubric_id,
+                "expected_hash": doc.canonical_hash,
+                "computed_hash": computed,
+            },
+        )
+        logger.critical(
+            "rubric canonical_hash mismatch at batch time",
+            extra={
+                "alert_type": "rubric_hash_mismatch",
+                "event": "rubric_hash_mismatch",
+                "rubric_id": doc.rubric_id,
+                "expected_hash": doc.canonical_hash,
+                "computed_hash": computed,
+            },
+        )
+        return None
+    return doc.body
+
+
 async def prefilter_cycle(
     state_client: StateWorkerClient | None = None,
     anthropic_client: AnthropicBatchClient | None = None,
     *,
     profile_path: Path | None = None,
+    rubric_path: Path | None = None,
 ) -> None:
     """Run one pre-filter cycle: poll, verify hash, submit Anthropic batch, register."""
     owns_state = state_client is None
@@ -164,14 +195,21 @@ async def prefilter_cycle(
 
         domain = _pending_entries[0].domain
 
-        resolved_path = profile_path or resolve_profile_path(domain, gate="prefilter")
-        verified = _verify_profile_hash(resolved_path)
-        if verified is None:
+        resolved_profile_path = profile_path or resolve_profile_path(domain, gate="prefilter")
+        verified_profile = _verify_profile_hash(resolved_profile_path)
+        if verified_profile is None:
             # Hash abort: retain pending entries and hold_started_at unchanged so a
             # persistent mismatch cannot extend the hold deadline indefinitely (C9).
             return
 
-        profile_version, profile_render_hash, system_prompt = verified
+        profile_version, profile_render_hash, profile_prompt = verified_profile
+
+        resolved_rubric_path = rubric_path or resolve_rubric_path("prefilter_rubric")
+        rubric_body = _verify_rubric_hash(resolved_rubric_path)
+        if rubric_body is None:
+            return
+
+        system_blocks = cached_system_blocks(profile_prompt, rubric_body)
 
         if not ensure_g3_verified():
             return
@@ -192,7 +230,7 @@ async def prefilter_cycle(
         submit_result = await asyncio.to_thread(
             submit_pre_filter_batch_or_fatal,
             anthropic_client,
-            system_prompt=system_prompt,
+            system_blocks=system_blocks,
             entries=batch_entries,
         )
 
