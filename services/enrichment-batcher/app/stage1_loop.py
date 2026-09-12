@@ -22,6 +22,7 @@ from bishop_shared.anthropic_config import get_anthropic_api_key, verify_model_s
 from bishop_shared.content_truncation import truncate_content_for_call1
 from bishop_shared.enums import DomainEnum
 from bishop_shared.profile_renderer import load_profile, resolve_profile_path
+from bishop_shared.rubric_assets import compute_rubric_hash, load_rubric, resolve_rubric_path
 
 logger = logging.getLogger(__name__)
 
@@ -92,11 +93,35 @@ def _profile_render_hash(
     return profile.canonical_hash
 
 
+def _verify_rubric_hash(rubric_path: Path) -> str | None:
+    """Return rubric body on hash match, or None on mismatch.
+
+    Log-only on mismatch — no CRITICAL alert. §2 row 12 asymmetry: only
+    pre-filter emits the CRITICAL alert path; stage 1 and stage 2 log only,
+    matching the M5 T4 deferral. Changing that asymmetry is out of scope.
+    """
+    doc = load_rubric(rubric_path)
+    computed = compute_rubric_hash(rubric_path)
+    if computed != doc.canonical_hash:
+        logger.error(
+            "rubric canonical_hash mismatch at batch time",
+            extra={
+                "event": "rubric_hash_mismatch",
+                "rubric_id": doc.rubric_id,
+                "expected_hash": doc.canonical_hash,
+                "computed_hash": computed,
+            },
+        )
+        return None
+    return doc.body
+
+
 async def stage1_cycle(
     state_client: StateWorkerClient | None = None,
     anthropic_client: AnthropicBatchClient | None = None,
     *,
     profile_path: Path | None = None,
+    rubric_path: Path | None = None,
 ) -> None:
     """Run one Call 1 cycle: poll SCRAPED, truncate, submit Anthropic batch, register."""
     owns_state = state_client is None
@@ -150,6 +175,12 @@ async def stage1_cycle(
             return
 
         domain = _pending_entries[0].domain
+
+        resolved_rubric_path = rubric_path or resolve_rubric_path("call1_rubric")
+        if _verify_rubric_hash(resolved_rubric_path) is None:
+            # Hash abort: retain pending entries and hold_started_at unchanged so a
+            # persistent mismatch cannot extend the hold deadline indefinitely (C9).
+            return
 
         if not ensure_g3_verified():
             # G3 abort: retain pending entries and hold_started_at unchanged so a

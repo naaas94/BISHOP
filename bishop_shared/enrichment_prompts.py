@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from bishop_shared.prompt_cache import cached_system_blocks
+from bishop_shared.rubric_assets import load_rubric, resolve_rubric_path
 from bishop_shared.tag_taxonomy import TAG_TAXONOMY_ORDERED
 
 _ENTRY_TYPES = (
@@ -21,11 +23,19 @@ def _format_taxonomy_list() -> str:
     return ", ".join(TAG_TAXONOMY_ORDERED)
 
 
-def build_call1_system_prompt() -> str:
-    """Appendix A Call 1 system prompt with injected taxonomy."""
+def build_call1_system_prompt() -> list[dict[str, object]]:
+    """Appendix A Call 1 system content blocks (cache key B, §2 row 10).
+
+    Block 0 is the schema/taxonomy instruction text — byte-identical to the
+    pre-caching plain-string prompt. Block 1 (last) is the call1 rubric
+    annex; ``cached_system_blocks`` attaches the sole ``cache_control``
+    breakpoint there. The rubric asset is loaded directly (no hash-or-abort
+    here) — the hash-or-abort gate that can refuse to submit lives in
+    ``stage1_loop.py`` per §2 row 12/13, ahead of this call.
+    """
     taxonomy = _format_taxonomy_list()
     entry_types = "|".join(_ENTRY_TYPES)
-    return f"""You are a technical content analyst. Extract structured metadata from the provided content.
+    schema_text = f"""You are a technical content analyst. Extract structured metadata from the provided content.
 Respond only with a valid JSON object matching the schema below. No preamble, no explanation.
 
 Schema:
@@ -43,6 +53,8 @@ Any tags not in the provided list will be stripped by the parser and logged for 
 
 challenge_hooks: 2-4 problem framings this content addresses, written as problems a practitioner would search for.
 concepts: 5-8 key technical concepts."""
+    rubric_body = load_rubric(resolve_rubric_path("call1_rubric")).body
+    return cached_system_blocks(schema_text, rubric_body)
 
 
 def build_call1_user_message(title: str, truncated_content: str) -> str:

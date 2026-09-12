@@ -46,8 +46,13 @@ class AnthropicBatchClient:
         *,
         entries: list[Stage1BatchEntry],
     ) -> list[dict[str, Any]]:
-        """Build wire payload; exposed for contract tests asserting custom_id encoding."""
-        system_prompt = build_call1_system_prompt()
+        """Build wire payload; exposed for contract tests asserting custom_id encoding.
+
+        ``system`` is the cache key B content-block list from
+        ``build_call1_system_prompt`` (§2 rows 5/10/11) — built once per batch
+        so every request in the batch shares byte-identical system blocks.
+        """
+        system_blocks = build_call1_system_prompt()
         requests: list[dict[str, Any]] = []
         for entry in entries:
             requests.append(
@@ -56,7 +61,7 @@ class AnthropicBatchClient:
                     "params": {
                         "model": ANTHROPIC_MODEL_ENRICHMENT,
                         "max_tokens": _CALL1_MAX_TOKENS,
-                        "system": system_prompt,
+                        "system": system_blocks,
                         "messages": [
                             {
                                 "role": "user",
