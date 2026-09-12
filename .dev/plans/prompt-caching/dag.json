@@ -1,6 +1,6 @@
 {
   "plan": "prompt-caching",
-  "plan_version": "1.2.0",
+  "plan_version": "1.3.0",
   "run_status": "amended",
   "baseline_sha": "b919fdba09e07a77700d57cf3b360c001058bb84",
   "amendments": [
@@ -32,6 +32,23 @@
       ],
       "runner_bypass": true,
       "runner_bypass_note": "This amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop, invoked mid-wave after the T9 dispatch HALTed. It does not write runs/ledger.md or runs/execution-summary.md (runner-owned, append-only). Plan-runner's own next pre-flight reconciles the ledger against this round."
+    },
+    {
+      "round": 3,
+      "plan_version": "1.3.0",
+      "trigger": "T7 kill-criterion HALT on prior-log supersession Files-to-touch omission (see runs/T7-brief.md)",
+      "fork_chosen": "a",
+      "fork_description": "Add .dev/decision-logs/m5-enrichment/T4-call2-cache-control.md to the continuation's Files to touch so the supersession banner can land at first mention. T7-bis also executes T7's original Call 2 wiring DoD from current HEAD (includes T6). No new architectural fork.",
+      "superseded_node": "T7",
+      "added_nodes": ["T7-bis"],
+      "rebound_edges": ["T7->T10"],
+      "rebound_soft_edges": [
+        {"from": ["T5", "T7"], "to": ["T5", "T7-bis"]},
+        {"from": ["T6", "T7"], "to": ["T6", "T7-bis"]},
+        {"from": ["T9-bis", "T7"], "to": ["T9-bis", "T7-bis"]}
+      ],
+      "runner_bypass": true,
+      "runner_bypass_note": "This amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop, invoked mid-wave after the T7 dispatch HALTed (T6 subsequently completed). It does not write runs/ledger.md or runs/execution-summary.md (runner-owned, append-only). Plan-runner's own next pre-flight reconciles the ledger against this round."
     }
   ],
   "nodes": [
@@ -100,7 +117,19 @@
       "packet": ".dev/plans/prompt-caching/packets/T7.md",
       "tier": "architectural",
       "model_class": "architectural",
-      "decision_log_path": ".dev/decision-logs/prompt-caching/T7-call2-breakpoint-move.md"
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T7-call2-breakpoint-move.md",
+      "status": "halted",
+      "note": "HALTed at dispatch on packet section 6 prior-log supersession duty (see runs/T7-brief.md): .dev/decision-logs/m5-enrichment/T4-call2-cache-control.md is git-tracked and required a first-mention banner, but was not in T7's Files to touch. No code written; nothing staged or committed. Packet retained unmodified as the historical HALT record. Not re-dispatched. Continuation node is T7-bis (amendment round 3). T6 landed after this HALT at ba49bb1; T7-bis consumes that HEAD, not the HALT report's stale c47248e."
+    },
+    {
+      "id": "T7-bis",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T7-bis.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T7-bis-call2-breakpoint-move.md",
+      "round": 3,
+      "note": "Amendment round 3 continuation of halted T7. T7 left no working-tree state (no code written). T7-bis executes T7's full original Call 2 wiring DoD from current HEAD (includes T6 at ba49bb1 — reconcile enrichment_prompts.py with T6's Call 1 blocks; do not start from c47248e), plus the supersession banner on .dev/decision-logs/m5-enrichment/T4-call2-cache-control.md (added to Files to touch by this amendment)."
     },
     {
       "id": "T8",
@@ -135,7 +164,7 @@
       "packet": ".dev/plans/prompt-caching/packets/T10.md",
       "tier": "standard",
       "model_class": "standard",
-      "note": "Amendment round 1 adds section 2 row 9 verification ownership: T10 must run tests/test_prompt_cache.py::test_no_inline_cache_control_literals at closure and HALT (new section 7 row) if it is not green. Amendment round 2 rebinds T10's Inputs from T9 to T9-bis (T9 never committed)."
+      "note": "Amendment round 1 adds section 2 row 9 verification ownership: T10 must run tests/test_prompt_cache.py::test_no_inline_cache_control_literals at closure and HALT (new section 7 row) if it is not green. Amendment round 2 rebinds T10's Inputs from T9 to T9-bis (T9 never committed). Amendment round 3 rebinds T10's Inputs from T7 to T7-bis (T7 never committed); row-9 green depends on T7-bis's Call 2 migration, not T7."
     },
     {
       "id": "G1",
@@ -153,9 +182,10 @@
     ["T2", "T5"],
     ["T3", "T6"],
     ["T4", "T7"],
+    ["T7", "T7-bis"],
     ["T5", "T10"],
     ["T6", "T10"],
-    ["T7", "T10"],
+    ["T7-bis", "T10"],
     ["T8", "T10"],
     ["T9", "T9-bis"],
     ["T9-bis", "T10"],
@@ -179,12 +209,12 @@
       "shared_surface": "bishop_shared/prompt_cache.py::cached_system_blocks; no-inline-cache_control rule (contract row 9); CHANGELOG.MD"
     },
     {
-      "pair": ["T5", "T7"],
-      "shared_surface": "bishop_shared/prompt_cache.py::cached_system_blocks; no-inline-cache_control rule (contract row 9); CHANGELOG.MD"
+      "pair": ["T5", "T7-bis"],
+      "shared_surface": "bishop_shared/prompt_cache.py::cached_system_blocks; no-inline-cache_control rule (contract row 9); CHANGELOG.MD. Amendment round 3: relabeled from [T5, T7] since T7 never landed any code."
     },
     {
-      "pair": ["T6", "T7"],
-      "shared_surface": "bishop_shared/enrichment_prompts.py (both edit it); cached_system_blocks; CHANGELOG.MD"
+      "pair": ["T6", "T7-bis"],
+      "shared_surface": "bishop_shared/enrichment_prompts.py (both edit it); cached_system_blocks; CHANGELOG.MD. Amendment round 3: relabeled from [T6, T7]. T6 already landed at ba49bb1 after T7 HALTed; T7-bis reconciles Call 2 into T6's Call 1 blocks rather than rewriting from the pre-T6 file."
     },
     {
       "pair": ["T9-bis", "T5"],
@@ -195,8 +225,8 @@
       "shared_surface": "services/enrichment-batcher/app/stage1_loop.py submit path. Amendment round 2: relabeled from [T9, T6]."
     },
     {
-      "pair": ["T9-bis", "T7"],
-      "shared_surface": "services/enrichment-batcher/app/stage2_loop.py submit path. Amendment round 2: relabeled from [T9, T7]."
+      "pair": ["T9-bis", "T7-bis"],
+      "shared_surface": "services/enrichment-batcher/app/stage2_loop.py submit path. Amendment round 2: relabeled from [T9, T7]. Amendment round 3: relabeled T7 -> T7-bis since T7 never landed the Call 2 payload; T9-bis already committed."
     }
   ],
   "parallel_groups": [
@@ -211,14 +241,16 @@
       "rank": 2,
       "nodes": ["T5", "T6", "T7"],
       "benefit": "throughput-only",
-      "commit_order_guard": "All three append CHANGELOG.MD; T6 and T7 both edit bishop_shared/enrichment_prompts.py. Commit order is ascending Tn; the later commit reconciles both shared surfaces."
+      "commit_order_guard": "All three append CHANGELOG.MD; T6 and T7 both edit bishop_shared/enrichment_prompts.py. Commit order is ascending Tn; the later commit reconciles both shared surfaces.",
+      "note": "Amendment round 3: T5 and T6 completed at this rank; T7 (the third member) HALTed with no code written and is not re-dispatched. Its continuation, T7-bis, is not itself a member of any declared parallel_group -- T6 already won the enrichment_prompts.py commit-order, so T7-bis reconciles sequentially from current HEAD. T7-bis is independently dispatchable (T4 already committed) and does not re-open rank 2."
     }
   ],
   "commit_order_invariants": [
-    "T5, T6, T7, T8 and T9 import symbols owned by T1-bis (amendment round 1 successor to halted T1): prompt_cache, rubric_assets, the extended render_profile_prompt. None may land, and section 8.1 may not freeze closure, while T1-bis remains uncommitted, even if the full suite passes in a dirty in-tree run."
+    "T5, T6, T7-bis, T8 and T9-bis import symbols owned by T1-bis (amendment round 1 successor to halted T1): prompt_cache, rubric_assets, the extended render_profile_prompt. None may land, and section 8.1 may not freeze closure, while T1-bis remains uncommitted, even if the full suite passes in a dirty in-tree run. Amendment round 3: T7 never committed, so the Call 2 importer is T7-bis, not T7. T6 already committed at ba49bb1; T7-bis must not land a revert of T6's Call 1 symbols."
   ],
   "preconditions": [
     "D1: .dev/plans/prompt-caching/ (context-map.md, plan.md, dag.json, packets/) must be committed before the first dispatch. Until then the plan is not dispatchable regardless of run_status.",
-    "Amendment round 1: this amendment's own artifacts (plan.md, dag.json, packets/T1-bis.md, refreshed packets/T2.md..T10.md) are committed in an amendment-only commit before T1-bis is dispatched. T1-bis's implementation files remain uncommitted until T1-bis itself lands them."
+    "Amendment round 1: this amendment's own artifacts (plan.md, dag.json, packets/T1-bis.md, refreshed packets/T2.md..T10.md) are committed in an amendment-only commit before T1-bis is dispatched. T1-bis's implementation files remain uncommitted until T1-bis itself lands them.",
+    "Amendment round 3: this amendment's own artifacts (plan.md, dag.json, packets/T7-bis.md, refreshed T10.md and superseded-ID sweep hits) are committed in an amendment-only commit before T7-bis is dispatched. T7-bis's implementation files remain uncommitted until T7-bis itself lands them. T7-bis consumes current HEAD (includes T6 at ba49bb1), not the T7 HALT report's stale HEAD c47248e."
   ]
 }
