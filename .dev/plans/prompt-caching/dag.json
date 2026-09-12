@@ -1,0 +1,164 @@
+{
+  "plan": "prompt-caching",
+  "plan_version": "1.0.0",
+  "run_status": "complete",
+  "baseline_sha": "b919fdba09e07a77700d57cf3b360c001058bb84",
+  "nodes": [
+    {
+      "id": "T1",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T1.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T1-cache-and-rubric-contract.md"
+    },
+    {
+      "id": "T2",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T2.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T2-prefilter-rubric.md"
+    },
+    {
+      "id": "T3",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T3.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T3-call1-rubric.md"
+    },
+    {
+      "id": "T4",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T4.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T4-call2-rubric.md"
+    },
+    {
+      "id": "T5",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T5.md",
+      "tier": "standard",
+      "model_class": "standard"
+    },
+    {
+      "id": "T6",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T6.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T6-call1-wiring.md"
+    },
+    {
+      "id": "T7",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T7.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T7-call2-breakpoint-move.md"
+    },
+    {
+      "id": "T8",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T8.md",
+      "tier": "standard",
+      "model_class": "standard"
+    },
+    {
+      "id": "T9",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T9.md",
+      "tier": "architectural",
+      "model_class": "architectural",
+      "decision_log_path": ".dev/decision-logs/prompt-caching/T9-batch-amortization.md"
+    },
+    {
+      "id": "T10",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T10.md",
+      "tier": "standard",
+      "model_class": "standard"
+    },
+    {
+      "id": "G1",
+      "kind": "gate",
+      "condition": "Operator rebuilds pre-filter-worker and enrichment-batcher images, restarts compose with ANTHROPIC_API_KEY resolvable, and lets at least one gate submit two batches on the same cache key. PASS when the batch-poller completion log line for the second batch reports cache_read_tokens > 0. FAIL when all keys report event=cache_read_zero across two consecutive completed batches. A FAIL is a section-7 amendment trigger. The only alternative close is an explicit operator budget waiver recorded against this condition by name."
+    }
+  ],
+  "hard_edges": [
+    ["T1", "T2"],
+    ["T1", "T3"],
+    ["T1", "T4"],
+    ["T1", "T8"],
+    ["T1", "T9"],
+    ["T2", "T5"],
+    ["T3", "T6"],
+    ["T4", "T7"],
+    ["T5", "T10"],
+    ["T6", "T10"],
+    ["T7", "T10"],
+    ["T8", "T10"],
+    ["T9", "T10"],
+    ["T10", "G1"]
+  ],
+  "soft_edges": [
+    {
+      "pair": ["T2", "T3"],
+      "shared_surface": "config/prompts/ conventions and the rubric front-matter schema (contract row 7); CHANGELOG.MD"
+    },
+    {
+      "pair": ["T2", "T4"],
+      "shared_surface": "config/prompts/ conventions and the rubric front-matter schema (contract row 7); CHANGELOG.MD"
+    },
+    {
+      "pair": ["T3", "T4"],
+      "shared_surface": "config/prompts/ conventions and the rubric front-matter schema (contract row 7); CHANGELOG.MD"
+    },
+    {
+      "pair": ["T5", "T6"],
+      "shared_surface": "bishop_shared/prompt_cache.py::cached_system_blocks; no-inline-cache_control rule (contract row 9); CHANGELOG.MD"
+    },
+    {
+      "pair": ["T5", "T7"],
+      "shared_surface": "bishop_shared/prompt_cache.py::cached_system_blocks; no-inline-cache_control rule (contract row 9); CHANGELOG.MD"
+    },
+    {
+      "pair": ["T6", "T7"],
+      "shared_surface": "bishop_shared/enrichment_prompts.py (both edit it); cached_system_blocks; CHANGELOG.MD"
+    },
+    {
+      "pair": ["T9", "T5"],
+      "shared_surface": "services/pre-filter-worker/app/loop.py submit path: T9 changes when a submit happens, T5 changes what is submitted"
+    },
+    {
+      "pair": ["T9", "T6"],
+      "shared_surface": "services/enrichment-batcher/app/stage1_loop.py submit path"
+    },
+    {
+      "pair": ["T9", "T7"],
+      "shared_surface": "services/enrichment-batcher/app/stage2_loop.py submit path"
+    }
+  ],
+  "parallel_groups": [
+    {
+      "rank": 1,
+      "nodes": ["T2", "T3", "T4", "T8", "T9"],
+      "benefit": "throughput-only",
+      "commit_order_guard": "T2, T3, T4 all append CHANGELOG.MD and all create files under config/prompts/. Commit order is ascending Tn; whichever lands later reconciles the shared CHANGELOG section as part of its own definition of done."
+    },
+    {
+      "rank": 2,
+      "nodes": ["T5", "T6", "T7"],
+      "benefit": "throughput-only",
+      "commit_order_guard": "All three append CHANGELOG.MD; T6 and T7 both edit bishop_shared/enrichment_prompts.py. Commit order is ascending Tn; the later commit reconciles both shared surfaces."
+    }
+  ],
+  "commit_order_invariants": [
+    "T5, T6, T7, T8 and T9 import symbols owned by T1 (prompt_cache, rubric_assets, the extended render_profile_prompt). None may land, and section 8.1 may not freeze closure, while T1 remains uncommitted, even if the full suite passes in a dirty in-tree run."
+  ],
+  "preconditions": [
+    "D1: .dev/plans/prompt-caching/ (context-map.md, plan.md, dag.json, packets/) must be committed before the first dispatch. Until then the plan is not dispatchable regardless of run_status."
+  ]
+}
