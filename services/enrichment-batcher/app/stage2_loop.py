@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 import uuid
 from pathlib import Path
 
 import httpx
 
 from app.anthropic_batch_client import AnthropicBatchClient, submit_stage2_batch_or_fatal
+from app.config import ENRICHMENT_STAGE2_MAX_HOLD_MINUTES, ENRICHMENT_STAGE2_MIN_BATCH_SIZE
 from app.models import (
     ENRICHMENT_STAGE2_BATCH_TYPE,
     BatchRegisterRequest,
@@ -26,6 +28,17 @@ from bishop_shared.profile_renderer import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Minimum-volume hold state (row 18/19), stage 2 gate — independent of stage 1's
+# clock (separate module, gathered concurrently by app.main). In-process only —
+# resets on service restart; accepted tradeoff (no BatchRecord schema change, D8).
+_pending_entries: list[object] = []
+_hold_started_at: float | None = None
+
+
+def _now() -> float:
+    """Monotonic clock, indirected for test time-injection."""
+    return time.monotonic()
 
 
 def _verify_profile_hash(profile_path: Path) -> tuple[str, str, str] | None:
@@ -67,24 +80,48 @@ async def stage2_cycle(
             )
             return
 
-        if not poll.entries:
+        global _hold_started_at
+
+        if poll.entries:
+            domain = poll.entries[0].domain
+            if domain != DomainEnum.PROFESSIONAL:
+                logger.error(
+                    "unsupported domain for M5 enrichment stage2",
+                    extra={"domain": domain.value, "event": "unsupported_domain"},
+                )
+                return
+            if _hold_started_at is None:
+                _hold_started_at = _now()
+            _pending_entries.extend(poll.entries)
+
+        if not _pending_entries:
             logger.info(
                 "empty stage2 poll",
                 extra={"claimed_count": poll.claimed_count, "event": "empty_poll"},
             )
             return
 
-        domain = poll.entries[0].domain
-        if domain != DomainEnum.PROFESSIONAL:
-            logger.error(
-                "unsupported domain for M5 enrichment stage2",
-                extra={"domain": domain.value, "event": "unsupported_domain"},
+        held_count = len(_pending_entries)
+        hold_elapsed_sec = _now() - _hold_started_at if _hold_started_at is not None else 0.0
+        deadline_reached = hold_elapsed_sec >= (ENRICHMENT_STAGE2_MAX_HOLD_MINUTES * 60)
+        if held_count < ENRICHMENT_STAGE2_MIN_BATCH_SIZE and not deadline_reached:
+            logger.info(
+                "batch held below minimum volume",
+                extra={
+                    "held_count": held_count,
+                    "min_batch_size": ENRICHMENT_STAGE2_MIN_BATCH_SIZE,
+                    "event": "batch_held",
+                },
             )
             return
+
+        domain = _pending_entries[0].domain
 
         path = profile_path or resolve_profile_path(domain, gate="enrichment")
         verified = _verify_profile_hash(path)
         if verified is None:
+            # Hash abort: retain pending entries and hold_started_at unchanged so a
+            # persistent mismatch cannot extend the hold deadline indefinitely (C9).
             return
 
         profile_version, profile_render_hash, profile_prompt = verified
@@ -92,8 +129,9 @@ async def stage2_cycle(
         if not ensure_g3_verified():
             return
 
+        entries_to_submit = list(_pending_entries)
         batch_entries: list[Stage2BatchEntry] = []
-        for entry in poll.entries:
+        for entry in entries_to_submit:
             if not entry.summary:
                 logger.error(
                     "stage2 entry missing summary",
@@ -118,6 +156,12 @@ async def stage2_cycle(
             entries=batch_entries,
         )
 
+        # Submission was attempted (accepted or fatally rejected by Anthropic) — the
+        # held entries are consumed either way and the hold clock resets for the next
+        # accumulation window.
+        _pending_entries.clear()
+        _hold_started_at = None
+
         if submit_result is None:
             return
 
@@ -128,9 +172,9 @@ async def stage2_cycle(
             domain=domain,
             profile_version=profile_version,
             profile_render_hash=profile_render_hash,
-            source_ids=[entry.source_id for entry in poll.entries],
+            source_ids=[entry.source_id for entry in entries_to_submit],
             external_batch_id=submit_result.external_batch_id,
-            entry_count=len(poll.entries),
+            entry_count=len(entries_to_submit),
         )
 
         try:
@@ -152,7 +196,7 @@ async def stage2_cycle(
             extra={
                 "batch_id": registered.batch_id,
                 "external_batch_id": submit_result.external_batch_id,
-                "entry_count": len(poll.entries),
+                "entry_count": len(entries_to_submit),
                 "event": "batch_registered",
             },
         )

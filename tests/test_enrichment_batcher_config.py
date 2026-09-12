@@ -25,7 +25,7 @@ def _load_config_module() -> ModuleType:
 def test_enrichment_stage1_batch_size_default(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("BISHOP_ENRICHMENT_STAGE1_BATCH_SIZE", raising=False)
     config = _load_config_module()
-    assert config.ENRICHMENT_STAGE1_BATCH_SIZE == 10
+    assert config.ENRICHMENT_STAGE1_BATCH_SIZE == 50
 
 
 def test_enrichment_stage1_batch_size_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -37,7 +37,7 @@ def test_enrichment_stage1_batch_size_env_override(monkeypatch: pytest.MonkeyPat
 def test_enrichment_stage2_batch_size_default(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("BISHOP_ENRICHMENT_STAGE2_BATCH_SIZE", raising=False)
     config = _load_config_module()
-    assert config.ENRICHMENT_STAGE2_BATCH_SIZE == 10
+    assert config.ENRICHMENT_STAGE2_BATCH_SIZE == 50
 
 
 def test_enrichment_stage2_batch_size_env_override(monkeypatch: pytest.MonkeyPatch) -> None:

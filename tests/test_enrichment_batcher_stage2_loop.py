@@ -131,8 +131,11 @@ def test_stage2_cycle_empty_poll_skips_submit() -> None:
     anthropic_client.submit_stage2_batch.assert_not_called()
 
 
-def test_stage2_cycle_happy_path_registers_enrichment_stage2_batch() -> None:
+def test_stage2_cycle_happy_path_registers_enrichment_stage2_batch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     anthropic_mod, loop_mod, models, client_mod, _ = _load_enrichment_batcher_stack()
+    monkeypatch.setattr(loop_mod, "ENRICHMENT_STAGE2_MIN_BATCH_SIZE", 1)
     source_ids = [f"arxiv:2406.{idx:05d}" for idx in range(1, 4)]
     entries = [
         _sample_stage2_poll_entry(models, sid, title=f"Paper {sid}") for sid in source_ids
@@ -183,6 +186,7 @@ def test_stage2_cycle_hash_mismatch_aborts_without_anthropic(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     anthropic_mod, loop_mod, models, client_mod, _ = _load_enrichment_batcher_stack()
+    monkeypatch.setattr(loop_mod, "ENRICHMENT_STAGE2_MIN_BATCH_SIZE", 1)
     entries = [_sample_stage2_poll_entry(models, "arxiv:2406.00001")]
     state_client = _mock_state_client(client_mod, models, entries=entries)
     anthropic_client = _mock_anthropic_client(anthropic_mod, models)
@@ -205,9 +209,12 @@ def test_stage2_cycle_hash_mismatch_aborts_without_anthropic(
     anthropic_client._client.messages.batches.create.assert_not_called()
 
 
-def test_stage2_cycle_state_worker_register_error_after_anthropic_submit() -> None:
+def test_stage2_cycle_state_worker_register_error_after_anthropic_submit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Falsifier: orphaned Anthropic batch when POST /batches fails (M3 CR-1 pattern)."""
     anthropic_mod, loop_mod, models, client_mod, _ = _load_enrichment_batcher_stack()
+    monkeypatch.setattr(loop_mod, "ENRICHMENT_STAGE2_MIN_BATCH_SIZE", 1)
     entries = [_sample_stage2_poll_entry(models, "arxiv:2406.00001")]
     state_client = _mock_state_client(client_mod, models, entries=entries, register_error=True)
     anthropic_client = _mock_anthropic_client(anthropic_mod, models)
@@ -231,7 +238,7 @@ def test_poll_stage2_queued_entries_uses_stage2_state() -> None:
         def handler(request: httpx.Request) -> httpx.Response:
             assert request.url.path == "/entries/poll"
             assert request.url.params["state"] == "ENRICHMENT_STAGE2_QUEUED"
-            assert request.url.params["limit"] == "10"
+            assert request.url.params["limit"] == "50"
             return httpx.Response(
                 200,
                 json={
@@ -270,9 +277,10 @@ def test_stage2_cycle_poll_http_error_skips_submit() -> None:
     anthropic_client.submit_stage2_batch.assert_not_called()
 
 
-def test_stage2_cycle_missing_summary_aborts_batch() -> None:
+def test_stage2_cycle_missing_summary_aborts_batch(monkeypatch: pytest.MonkeyPatch) -> None:
     """Falsifier: entry without Call 1 summary must not submit Call 2."""
     anthropic_mod, loop_mod, models, client_mod, _ = _load_enrichment_batcher_stack()
+    monkeypatch.setattr(loop_mod, "ENRICHMENT_STAGE2_MIN_BATCH_SIZE", 1)
     entries = [
         _sample_stage2_poll_entry(models, "arxiv:2406.00001", summary="ok"),
         _sample_stage2_poll_entry(models, "arxiv:2406.00002", summary=None),
@@ -290,3 +298,142 @@ def test_stage2_cycle_missing_summary_aborts_batch() -> None:
     asyncio.run(_run())
     state_client.register_batch.assert_not_called()
     anthropic_client._client.messages.batches.create.assert_not_called()
+
+
+def _mock_state_client_sequence(
+    client_mod: ModuleType,
+    models: ModuleType,
+    *,
+    poll_entries_sequence: list[list[object]],
+) -> MagicMock:
+    """State client whose poll returns a different entry list on each successive call."""
+    responses = [
+        models.EntryPollResponse(
+            entries=entries,
+            claimed_count=len(entries),
+            transitioned_to="ENRICHMENT_STAGE2_CLAIMED" if entries else None,
+        )
+        for entries in poll_entries_sequence
+    ]
+    client = MagicMock(spec=client_mod.StateWorkerClient)
+    client.poll_stage2_queued_entries = AsyncMock(side_effect=responses)
+    client.register_batch = AsyncMock(
+        return_value=models.BatchRegisterResponse(batch_id="batch-2", status="submitted")
+    )
+    client.aclose = AsyncMock()
+    return client
+
+
+def test_stage2_cycle_holds_batch_below_minimum_volume_then_submits_on_volume() -> None:
+    """Falsifier for row 18/19: entries below MIN_BATCH_SIZE are held, not submitted,
+    and later cycles accumulate onto the same held set until the minimum is met."""
+    anthropic_mod, loop_mod, models, client_mod, _ = _load_enrichment_batcher_stack()
+    loop_mod.ENRICHMENT_STAGE2_MIN_BATCH_SIZE = 5
+    loop_mod.ENRICHMENT_STAGE2_MAX_HOLD_MINUTES = 120
+
+    first_batch = [_sample_stage2_poll_entry(models, "arxiv:2406.00001")]
+    second_batch = [
+        _sample_stage2_poll_entry(models, f"arxiv:2406.{idx:05d}") for idx in range(2, 6)
+    ]
+    state_client = _mock_state_client_sequence(
+        client_mod, models, poll_entries_sequence=[first_batch, second_batch]
+    )
+    anthropic_client = _mock_anthropic_client(anthropic_mod, models)
+
+    async def _run() -> None:
+        await loop_mod.stage2_cycle(state_client, anthropic_client, profile_path=_PROFILE_PATH)
+
+    # Cycle 1: 1 entry held (below min of 5); no submit.
+    asyncio.run(_run())
+    state_client.register_batch.assert_not_called()
+    anthropic_client._client.messages.batches.create.assert_not_called()
+    assert len(loop_mod._pending_entries) == 1
+
+    # Cycle 2: 4 more entries arrive -> total 5 == min -> submits accumulated 5.
+    asyncio.run(_run())
+    state_client.register_batch.assert_called_once()
+    register_body = state_client.register_batch.call_args.args[0]
+    assert register_body.entry_count == 5
+    assert len(loop_mod._pending_entries) == 0
+
+
+def test_stage2_cycle_submits_below_minimum_after_max_hold_deadline(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Falsifier for row 19 (no starvation): a single entry below MIN_BATCH_SIZE is
+    submitted once MAX_HOLD_MINUTES has elapsed since it started being held."""
+    anthropic_mod, loop_mod, models, client_mod, _ = _load_enrichment_batcher_stack()
+    loop_mod.ENRICHMENT_STAGE2_MIN_BATCH_SIZE = 10
+    loop_mod.ENRICHMENT_STAGE2_MAX_HOLD_MINUTES = 10
+
+    entries = [_sample_stage2_poll_entry(models, "arxiv:2406.00001")]
+    state_client = _mock_state_client_sequence(
+        client_mod, models, poll_entries_sequence=[entries, []]
+    )
+    anthropic_client = _mock_anthropic_client(anthropic_mod, models)
+
+    fake_now = {"t": 1_000.0}
+    monkeypatch.setattr(loop_mod, "_now", lambda: fake_now["t"])
+
+    async def _run() -> None:
+        await loop_mod.stage2_cycle(state_client, anthropic_client, profile_path=_PROFILE_PATH)
+
+    # Cycle 1: entry held, deadline not reached.
+    asyncio.run(_run())
+    state_client.register_batch.assert_not_called()
+
+    # Advance time past the 10-minute deadline; second poll is empty (no new arrivals).
+    fake_now["t"] = 1_000.0 + (10 * 60) + 1
+    asyncio.run(_run())
+    state_client.register_batch.assert_called_once()
+    register_body = state_client.register_batch.call_args.args[0]
+    assert register_body.entry_count == 1
+
+
+def test_stage2_cycle_hash_abort_does_not_extend_hold_deadline(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Negative falsifier for C9: a hash-mismatch abort while held must not push the
+    hold deadline forward. If it did, the second (post-deadline) cycle below would
+    incorrectly hold again instead of submitting once the hash is fixed."""
+    anthropic_mod, loop_mod, models, client_mod, _ = _load_enrichment_batcher_stack()
+    loop_mod.ENRICHMENT_STAGE2_MIN_BATCH_SIZE = 25
+    loop_mod.ENRICHMENT_STAGE2_MAX_HOLD_MINUTES = 10
+
+    entries = [_sample_stage2_poll_entry(models, "arxiv:2406.00001")]
+    state_client = _mock_state_client_sequence(
+        client_mod, models, poll_entries_sequence=[entries, [], []]
+    )
+    anthropic_client = _mock_anthropic_client(anthropic_mod, models)
+
+    fake_now = {"t": 1_000.0}
+    monkeypatch.setattr(loop_mod, "_now", lambda: fake_now["t"])
+
+    async def _run() -> None:
+        await loop_mod.stage2_cycle(state_client, anthropic_client, profile_path=_PROFILE_PATH)
+
+    # Cycle 1: entry held, deadline not reached (t = 1000).
+    asyncio.run(_run())
+    assert loop_mod._hold_started_at == 1_000.0
+
+    # Advance past the deadline and force a hash mismatch: the attempt aborts before
+    # submit, but hold_started_at must remain at its original value (not reset to now).
+    fake_now["t"] = 1_000.0 + (10 * 60) + 1
+    monkeypatch.setattr(loop_mod, "compute_profile_hash", lambda _path: "deadbeef" * 8)
+    asyncio.run(_run())
+    state_client.register_batch.assert_not_called()
+    anthropic_client._client.messages.batches.create.assert_not_called()
+    assert loop_mod._hold_started_at == 1_000.0
+
+    # Fix the hash and retry at the same "now" (barely past deadline). If the abort
+    # above had reset hold_started_at to that later "now", the deadline would no
+    # longer be considered elapsed and this cycle would incorrectly hold again.
+    monkeypatch.setattr(
+        loop_mod,
+        "compute_profile_hash",
+        lambda path: loop_mod.load_profile(path).canonical_hash,
+    )
+    asyncio.run(_run())
+    state_client.register_batch.assert_called_once()
+    register_body = state_client.register_batch.call_args.args[0]
+    assert register_body.entry_count == 1

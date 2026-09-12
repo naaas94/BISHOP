@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 import uuid
 from pathlib import Path
 
@@ -11,7 +12,7 @@ import httpx
 
 from app.alerts import emit_profile_hash_mismatch_alert
 from app.anthropic_batch_client import AnthropicBatchClient, submit_pre_filter_batch_or_fatal
-from app.config import G3_DEV_BYPASS
+from app.config import G3_DEV_BYPASS, PREFILTER_MAX_HOLD_MINUTES, PREFILTER_MIN_BATCH_SIZE
 from app.models import BatchRegisterRequest, PreFilterBatchEntry
 from app.state_worker_client import StateWorkerClient
 from bishop_shared.anthropic_config import get_anthropic_api_key, verify_model_string
@@ -26,6 +27,18 @@ from bishop_shared.profile_renderer import (
 logger = logging.getLogger(__name__)
 
 _g3_verified = False
+
+# Minimum-volume hold state (row 18/19): entries claimed from state-worker but not
+# yet large enough to submit are held in-process across cycles. In-process only —
+# resets on service restart; this is an accepted tradeoff (no BatchRecord schema
+# change, D8). Per-gate, independent of stage1/stage2 (separate modules).
+_pending_entries: list[object] = []
+_hold_started_at: float | None = None
+
+
+def _now() -> float:
+    """Monotonic clock, indirected for test time-injection."""
+    return time.monotonic()
 
 
 def reset_g3_gate_for_tests() -> None:
@@ -114,24 +127,48 @@ async def prefilter_cycle(
             )
             return
 
-        if not poll.entries:
+        global _hold_started_at
+
+        if poll.entries:
+            domain = poll.entries[0].domain
+            if domain != DomainEnum.PROFESSIONAL:
+                logger.error(
+                    "unsupported domain for M3 pre-filter",
+                    extra={"domain": domain.value, "event": "unsupported_domain"},
+                )
+                return
+            if _hold_started_at is None:
+                _hold_started_at = _now()
+            _pending_entries.extend(poll.entries)
+
+        if not _pending_entries:
             logger.info(
                 "empty manifest poll",
                 extra={"claimed_count": poll.claimed_count, "event": "empty_poll"},
             )
             return
 
-        domain = poll.entries[0].domain
-        if domain != DomainEnum.PROFESSIONAL:
-            logger.error(
-                "unsupported domain for M3 pre-filter",
-                extra={"domain": domain.value, "event": "unsupported_domain"},
+        held_count = len(_pending_entries)
+        hold_elapsed_sec = _now() - _hold_started_at if _hold_started_at is not None else 0.0
+        deadline_reached = hold_elapsed_sec >= (PREFILTER_MAX_HOLD_MINUTES * 60)
+        if held_count < PREFILTER_MIN_BATCH_SIZE and not deadline_reached:
+            logger.info(
+                "batch held below minimum volume",
+                extra={
+                    "held_count": held_count,
+                    "min_batch_size": PREFILTER_MIN_BATCH_SIZE,
+                    "event": "batch_held",
+                },
             )
             return
+
+        domain = _pending_entries[0].domain
 
         resolved_path = profile_path or resolve_profile_path(domain, gate="prefilter")
         verified = _verify_profile_hash(resolved_path)
         if verified is None:
+            # Hash abort: retain pending entries and hold_started_at unchanged so a
+            # persistent mismatch cannot extend the hold deadline indefinitely (C9).
             return
 
         profile_version, profile_render_hash, system_prompt = verified
@@ -139,13 +176,14 @@ async def prefilter_cycle(
         if not ensure_g3_verified():
             return
 
+        entries_to_submit = list(_pending_entries)
         batch_entries = [
             PreFilterBatchEntry(
                 source_id=entry.source_id,
                 title=entry.title,
                 abstract=entry.abstract,
             )
-            for entry in poll.entries
+            for entry in entries_to_submit
         ]
 
         if anthropic_client is None:
@@ -158,6 +196,12 @@ async def prefilter_cycle(
             entries=batch_entries,
         )
 
+        # Submission was attempted (accepted or fatally rejected by Anthropic) — the
+        # held entries are consumed either way and the hold clock resets for the next
+        # accumulation window.
+        _pending_entries.clear()
+        _hold_started_at = None
+
         if submit_result is None:
             return
 
@@ -167,9 +211,9 @@ async def prefilter_cycle(
             domain=domain,
             profile_version=profile_version,
             profile_render_hash=profile_render_hash,
-            source_ids=[entry.source_id for entry in poll.entries],
+            source_ids=[entry.source_id for entry in entries_to_submit],
             external_batch_id=submit_result.external_batch_id,
-            entry_count=len(poll.entries),
+            entry_count=len(entries_to_submit),
         )
 
         try:
@@ -191,7 +235,7 @@ async def prefilter_cycle(
             extra={
                 "batch_id": registered.batch_id,
                 "external_batch_id": submit_result.external_batch_id,
-                "entry_count": len(poll.entries),
+                "entry_count": len(entries_to_submit),
                 "passed": 0,
                 "rejected": 0,
                 "event": "batch_registered",
