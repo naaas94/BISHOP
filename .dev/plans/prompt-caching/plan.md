@@ -1,6 +1,6 @@
 # Plan — prompt-caching
 
-**Version:** 1.3.0
+**Version:** 1.4.0
 **run_status:** `amended`
 **audit_status:** `not_run`
 **Mode:** Standard (non-charter; caching is not an M8/M9 charter row)
@@ -9,10 +9,12 @@
 **Budget-amendment (v1.1.0, amendment round 1):** Prior authorized count **10 executable + 1 gate**. New count **11 executable + 1 gate** — crosses the 4–10 ceiling by one, recorded here per orchestrator-planning §Budget / Validation item 19. The added subtask is **T1-bis**, which closes T1's kill-criterion HALT (§7 round 1) by landing T1's already-scoped shared-module DoD under an amended §2 row-9 verification timing. It does not reopen T1's design and introduces no new architectural fork.
 **Budget-amendment (v1.2.0, amendment round 2):** Prior authorized count **11 executable + 1 gate**. New count **12 executable + 1 gate** — the added subtask is **T9-bis**, which closes T9's Files-to-touch-omission HALT (§7 round 2) by executing T9's original scoped DoD (raise the enrichment stage1/stage2 batch-size defaults 10 → 50, add the minimum-volume/maximum-hold controls) while additionally touching the one pre-existing test file (`tests/test_enrichment_batcher_config.py`) whose two pinned assertions the default bump requires updating. It does not reopen T9's design and introduces no new architectural fork.
 **Budget-amendment (v1.3.0, amendment round 3):** Prior authorized count **12 executable + 1 gate**. New count **13 executable + 1 gate** — the added subtask is **T7-bis**, which closes T7's Files-to-touch-omission HALT (§7 round 3) by executing T7's original Call 2 wiring DoD from current HEAD (includes T6) while additionally touching `.dev/decision-logs/m5-enrichment/T4-call2-cache-control.md` so the required first-mention supersession banner can land. It does not reopen T7's Call 2 caching design and introduces no new architectural fork.
+**Budget-amendment (v1.4.0, amendment round 4):** Prior authorized count **13 executable + 1 gate**. New count **14 executable + 1 gate** — the added subtask is **T10-bis**, which closes T10's row-20 frozen-path kill-criterion HALT (§7 round 4) by re-running T10's full original closeout DoD (token-floor gate, docs refresh, tracked artifacts, declared-scope sweep, row-9 re-verification) against a corrected row-20 SHA range. It does not reopen T10's closeout design and introduces no new architectural fork.
 **Skill version:** orchestrator-planning v1.2
 **Amendment round 1 (v1.1.0) — status banner:** T1 HALTed at dispatch on §2 row 9's falsifier (full report: `.dev/plans/prompt-caching/runs/T1-brief.md`). Resolved as a scoped contract-timing fix — fork 2 of the HALT's three offered forks: row 9's sweep-test verification moves from T1 to T10 (post T5/T6/T7), rather than re-scoping the grep itself or expanding T1 into T7's territory. Continuation node **T1-bis** lands T1's DoD from the existing uncommitted working tree; **T1**'s own packet is retained unmodified as the historical HALT record and is not re-dispatched. See §7 for the full amendment row.
 **Amendment round 2 (v1.2.0) — status banner:** T9 HALTed at dispatch on §2 row 18's Files-to-touch omission (full report: `.dev/plans/prompt-caching/runs/T9-brief.md`). T9 wrote no code; nothing was staged or committed. Resolved as a scoped Files-to-touch fix — fork 1 of the HALT's three offered forks: `tests/test_enrichment_batcher_config.py` is added to the continuation's Files to touch so its two pinned default-value assertions update 10 → 50 in the same subtask, rather than a separate follow-on packet (fork 2) or reassigning the default bump elsewhere (fork 3). Continuation node **T9-bis** executes T9's full original DoD from a clean slate (T9 left no working-tree state to consume); **T9**'s own packet is retained unmodified as the historical HALT record and is not re-dispatched. See §7 round 2 for the full amendment row.
 **Amendment round 3 (v1.3.0) — status banner:** T7 HALTed at dispatch on packet §6's prior-log supersession duty (full report: `.dev/plans/prompt-caching/runs/T7-brief.md`). T7 wrote no code; nothing was staged or committed. T6 subsequently completed at `ba49bb1` (after the HALT) and edited `bishop_shared/enrichment_prompts.py` / `tests/test_enrichment_prompts.py`, which T7 also owned. Resolved as a scoped Files-to-touch fix — **fork a** of the HALT's two offered forks: `.dev/decision-logs/m5-enrichment/T4-call2-cache-control.md` is added to the continuation's Files to touch so the first-mention supersession banner can land in the same subtask, rather than waiving §6 and routing the banner to a named follow-on (fork b). Continuation node **T7-bis** executes T7's full original DoD from **current HEAD** (includes T6; do not start from the HALT report's stale HEAD `c47248e`); **T7**'s own packet is retained unmodified as the historical HALT record and is not re-dispatched. See §7 round 3 for the full amendment row.
+**Amendment round 4 (v1.4.0) — status banner:** T10 HALTed at dispatch on its own mandatory §2 row 20 mechanical post-check (full report: `.dev/plans/prompt-caching/runs/T10-brief.md`): `git log b919fdb..HEAD -- <13 frozen paths>` returned one commit, `26b78b6` ("pre prompt cache fold of misc stuff I guess"), touching 6 of the 13 paths. `26b78b6`'s parent is `b919fdb` itself, and it is a confirmed ancestor of the orchestrator plan's own opening commit `3682c38` — i.e. it landed **before this plan's execution window began**, and none of the nine landed subtasks (T1-bis/T2/T3/T4/T5/T6/T8/T9-bis/T7-bis) touch those six paths. T10 wrote no code; nothing was staged or committed. Resolved as a scoped baseline-correction fix — **fork (b)** of the HALT's three offered forks: row 20's SHA range, for frozen-path-emptiness purposes **only**, is re-baselined from `b919fdb` to `26b78b6` — the commit immediately preceding the plan's own opening commit — closing the gap for all six paths at once as a single class-level correction rather than six item-by-item path waivers. All other range checks in this plan (declared-scope Files-to-touch union, the closure `git diff --stat`) keep `b919fdb` unchanged. Continuation node **T10-bis** re-runs T10's full original closeout DoD from current HEAD against the corrected row-20 range; **T10**'s own packet is retained unmodified as the historical HALT record and is not re-dispatched. See §7 round 4 for the full amendment row.
 
 ---
 
@@ -152,7 +154,7 @@ Binding on every subagent. Enforcement mode is one token per row; rows whose ver
 
 | # | Contract | Owner | Enforcement | Falsifier |
 |---|---|---|---|---|
-| 20 | **Byte-unchanged from baseline `b919fdb` through closure:** `bishop_shared/anthropic_config.py`, `bishop_shared/content_truncation.py`, `bishop_shared/batch_custom_id.py`, `eval/prefilter_v0/**`, `eval/prefilter_v1/items.json`, `eval/prefilter_v1/labels.json`, `services/state-worker/app/models/domain.py`, `services/state-worker/app/models/http.py`, `services/state-worker/app/transitions.py`, `services/state-worker/app/routers/parked.py`, `alembic/**`, `bishop_spec_0_6.md`, `config/profiles/professional_v1.0.0.yaml`. | T10 | `pytest-enforced` + closure `git diff` | T10 kill criteria literalize the **full** path list and the SHA range `b919fdb..<closure>`; a partial list is not a discharge. Immediately before the T10 sweep and again before G1, re-run `git log <frozen paths>` — the assumption expires. |
+| 20 | **Byte-unchanged from baseline through closure:** `bishop_shared/anthropic_config.py`, `bishop_shared/content_truncation.py`, `bishop_shared/batch_custom_id.py`, `eval/prefilter_v0/**`, `eval/prefilter_v1/items.json`, `eval/prefilter_v1/labels.json`, `services/state-worker/app/models/domain.py`, `services/state-worker/app/models/http.py`, `services/state-worker/app/transitions.py`, `services/state-worker/app/routers/parked.py`, `alembic/**`, `bishop_spec_0_6.md`, `config/profiles/professional_v1.0.0.yaml`. **Amendment banner (v1.4.0, round 4) — read this before the SHA range below:** at T10's original dispatch this row's own mandatory mechanical post-check (`git log b919fdb..HEAD -- <these 13 paths>`) found one commit, `26b78b6`, touching 6 of the 13 paths (`batch_custom_id.py`, `content_truncation.py`, `bishop_spec_0_6.md`, `http.py`, `parked.py`, `transitions.py`). `26b78b6`'s parent is `b919fdb` itself, and it is a confirmed ancestor of this plan's own opening commit `3682c38` — it predates the plan's execution window entirely and no landed subtask touches those paths. **For row-20 frozen-path-emptiness purposes only**, the SHA range is re-baselined `26b78b6..<closure>`. This does **not** change the plan's overall `Baseline SHA` header field or the declared-scope Files-to-touch union check, both of which stay `b919fdb`. Full discovery: `.dev/plans/prompt-caching/runs/T10-brief.md`; amendment record: §7 round 4. | T10-bis | `pytest-enforced` + closure `git diff` | **T10-bis** kill criteria literalize the **full** path list and the re-baselined SHA range `26b78b6..<closure>`; a partial list is not a discharge. Immediately before the T10-bis sweep and again before G1, re-run `git log <frozen paths>` — the assumption expires. |
 
 ### Tests
 
@@ -211,12 +213,13 @@ graph TD
     T3 --> T6[T6 Call 1 wiring]
     T4 --> T7[T7 Call 2 wiring — HALTed, packet retained unmodified]
     T7 --> T7bis[T7-bis: continuation, executes T7 DoD + M5 log banner]
-    T5 --> T10[T10 closeout + token gate + sweep + row-9 verification]
+    T5 --> T10[T10 closeout + token gate + sweep + row-9 verification — HALTed, packet retained unmodified]
     T6 --> T10
     T7bis --> T10
     T8 --> T10
     T9bis --> T10
-    T10 --> G1{{G1 operator live cache gate}}
+    T10 --> T10bis[T10-bis: continuation, re-runs T10 DoD against re-baselined row-20 range]
+    T10bis --> G1{{G1 operator live cache gate}}
 ```
 
 **Amendment round 1 (v1.1.0) — DAG rebind.** T1 HALTed before committing; its downstream consumers (T2, T3, T4, T8, T9) originally hard-depended on `T1` directly. That edge set is retired and replaced: `T1 --> T1-bis` (continued-HALT edge, per orchestrator-planning §7), and `T1-bis --> {T2,T3,T4,T8,T9}` (every consumer rebound onto the node that actually lands the shared modules). `T1`'s node stays in the graph — kind `executable`, packet retained — but is not re-dispatched; `dag.json` records it as `status: halted` for the runner's benefit.
@@ -224,6 +227,8 @@ graph TD
 **Amendment round 2 (v1.2.0) — DAG rebind.** T9 HALTed before writing any code; its sole downstream consumer, `T10`, originally hard-depended on `T9` directly. That edge is retired and replaced: `T9 --> T9-bis` (continued-HALT edge, per orchestrator-planning §7), and `T9-bis --> T10` (T10's Inputs list is rebound from `T9` to `T9-bis` — see §4 T10). `T9`'s node stays in the graph — kind `executable`, packet retained — but is not re-dispatched; `dag.json` records it as `status: halted` for the runner's benefit. The soft-edge coordination pairs `T9 ~ T5`, `T9 ~ T6`, `T9 ~ T7` are relabeled `T9-bis ~ T5/T6/T7` for the same reason: T9 itself never lands any code, so the submit-path coordination hazard those pairs describe is actually between T9-bis and T5/T6/T7. **No new hard edges are added** from T9-bis to T5, T6, or T7 — the original plan had none (the relationship is soft-edge coordination on the submit path, not an ordering constraint), and this amendment does not change that.
 
 **Amendment round 3 (v1.3.0) — DAG rebind.** T7 HALTed before writing any code; its sole remaining downstream consumer, `T10`, originally hard-depended on `T7` directly. That edge is retired and replaced: `T7 --> T7-bis` (continued-HALT edge, per orchestrator-planning §7), and `T7-bis --> T10` (T10's Inputs list is rebound from `T7` to `T7-bis` — see §4 T10). `T7`'s node stays in the graph — kind `executable`, packet retained unmodified — but is not re-dispatched; `dag.json` records it as `status: halted` for the runner's benefit. The soft-edge coordination pairs `T5 ~ T7`, `T6 ~ T7`, and `T9-bis ~ T7` are relabeled `T5 ~ T7-bis`, `T6 ~ T7-bis`, `T9-bis ~ T7-bis` because they named T7 as the Call 2 wiring owner, and T7 never lands any code. **No new hard edge `T6 → T7-bis`** is added — the original plan had T6~T7 as a soft edge (shared `enrichment_prompts.py`) with a commit-order guard, not an ordering constraint. T6 already landed at `ba49bb1` after T7 HALTed; T7-bis consumes that HEAD and reconciles Call 2 into T6's Call 1 blocks. T4 → T7 remains (historical predecessor); T7-bis inherits T4 transitively via `T7 --> T7-bis`.
+
+**Amendment round 4 (v1.4.0) — DAG rebind.** T10 HALTed on its own row-20 mechanical post-check, before writing any code; its sole downstream consumer, the gate `G1`, originally hard-depended on `T10` directly. That edge is retired and replaced: `T10 --> T10-bis` (continued-HALT edge, per orchestrator-planning §7), and `T10-bis --> G1` (G1's condition text is unchanged; it simply now fires after T10-bis rather than T10). `T10`'s node stays in the graph — kind `executable`, packet retained unmodified — but is not re-dispatched; `dag.json` records it as `status: halted` for the runner's benefit. T10 named no soft-edge coordination pairs (it was the plan's sole sink before G1), so none require relabeling.
 
 **Parallel groups.**
 
@@ -244,7 +249,7 @@ graph TD
 
 **Gate node.**
 
-- **`G1`** — `kind: gate`, owns **no packet**, is **never dispatched**. **Condition:** after T10, the operator rebuilds `pre-filter-worker` and `enrichment-batcher` images, restarts compose, and lets each gate submit **two** batches on the same cache key. G1 passes when the poller's completion log line for the second batch of at least one key reports `cache_read_tokens > 0`; it fails if all keys report `cache_read_zero` across two consecutive batches. A failure is a §7 amendment trigger, not a waiver. An explicit operator budget waiver ("accept full input price for now") is the only alternative close, and it must be recorded against this condition by name.
+- **`G1`** — `kind: gate`, owns **no packet**, is **never dispatched**. **Condition:** after T10-bis (amendment round 4: T10 HALTed on its row-20 mechanical post-check and never committed), the operator rebuilds `pre-filter-worker` and `enrichment-batcher` images, restarts compose, and lets each gate submit **two** batches on the same cache key. G1 passes when the poller's completion log line for the second batch of at least one key reports `cache_read_tokens > 0`; it fails if all keys report `cache_read_zero` across two consecutive batches. A failure is a §7 amendment trigger, not a waiver. An explicit operator budget waiver ("accept full input price for now") is the only alternative close, and it must be recorded against this condition by name.
 
 ---
 
@@ -451,6 +456,23 @@ graph TD
 | **Model class** | `standard` |
 | **Risks & mitigations** | This subtask writes narrative and therefore must **not** own any self-hash recomputation; none is asserted in this plan, so no terminal hash subtask is required. Its own Files-to-touch excludes every production path, which makes the "no production edits during verification" fence mechanically checkable. |
 
+**HALT record (do not edit above this line).** T10 HALTed before writing any code: its own mandatory §2 row 20 mechanical post-check (`git log b919fdb..HEAD -- <full 13-path list>`) returned exactly one non-empty commit, `26b78b6` ("pre prompt cache fold of misc stuff I guess"), touching 6 of the 13 frozen paths. Row 9 (`test_no_inline_cache_control_literals`) had already passed in-tree and in a detached worktree; the full non-heavy suite matched the pre-existing baseline in-tree and out-of-tree. The declared-scope `git diff --stat` sweep was not reached — the row-20 HALT fired first. Full report: `.dev/plans/prompt-caching/runs/T10-brief.md`. Resolved by amendment round 4 (§7) as a scoped baseline-correction fix (fork b). T10's packet is retained unmodified as the historical record; nothing was staged or committed under this node.
+
+### T10-bis — Continuation of T10: closeout, token-floor gate, docs, tracked artifacts, scope sweep (amendment round 4, v1.4.0)
+
+| Field | Content |
+|---|---|
+| **ID** | `T10-bis` |
+| **Scope** | Re-run T10's full original closeout DoD unchanged (prove all three cache keys clear the floor, refresh the as-built caching docs, ensure every plan artifact is tracked, run the declared-scope sweep) from current HEAD, against the row-20 frozen-path range re-baselined by this amendment. Writes no production code — same fence as T10. |
+| **Files to touch** | Identical to T10's: `tests/test_prompt_cache_token_floor.py` (new), `tests/test_prompt_cache.py` (**verify only**), `.dev/llm-models-and-cache.md`, `.dev/caching_strategy.md` (checklist boxes only; spec group stays unchecked per D6), `.dev/plans/prompt-caching/plan.md` (§8 back-fill), `.dev/plans/prompt-caching/artifacts/T10-closure-report.md` (new — records this is the T10-bis closure, not T10's), `CHANGELOG.MD`. No new path is added by this amendment (unlike rounds 1–3, this HALT was not a Files-to-touch omission). |
+| **Contract bindings** | Identical to T10's: rows 8, 9 (verifier), 16, 20 (verifier, under the re-baselined range), 21. |
+| **Inputs** | T1-bis, T5, T6, T7-bis, T8, T9-bis — identical to T10's Inputs (unchanged by this amendment; the HALT was not an Inputs problem). |
+| **Outputs** | Identical to T10's Outputs. |
+| **Kill criteria** | Identical to T10's, with **one substitution**: the frozen-path mechanical post-check reads `git log 26b78b6..HEAD -- <full row-20 path list, literalized inline in this packet>` (re-baselined by this amendment for row-20 purposes only — **not** `b919fdb`). The declared-scope `git diff --stat` sweep keeps `b919fdb..HEAD` unchanged (the plan's overall baseline is not moved). Every other kill criterion — the detached-worktree §8.1 run, the isolated row-9 re-verification (still your duty; T7-bis already landed it), the "no production edits during verification" fence, the §18 spec-checkbox HALT — is unchanged from T10's packet. If the re-baselined row-20 sweep is **still** non-empty, HALT and open a **new** §7 row rather than waiving further or patching the offending file. |
+| **Log tier** | `standard` |
+| **Model class** | `standard` |
+| **Risks & mitigations** | Identical to T10's: no self-hash recomputation is owned here; the Files-to-touch fence excludes all production paths. |
+
 ---
 
 ## 5. Adversarial pass
@@ -476,15 +498,15 @@ Confirmed at planning time on `anthropic` 0.100.0: `CacheControlEphemeralParam.t
 
 **A2** · `derived` — premise: strategy §1b citing Anthropic docs as of 2026-06-14
 ```
-(Claude Haiku 4.5's minimum cacheable prefix is 4096 tokens | §2 row 8 token-floor gate | if the real floor is higher or has changed, all three annexes are authored to a wrong target and nothing caches while every test is green | T2,T3,T4,T10)
+(Claude Haiku 4.5's minimum cacheable prefix is 4096 tokens | §2 row 8 token-floor gate | if the real floor is higher or has changed, all three annexes are authored to a wrong target and nothing caches while every test is green | T2,T3,T4,T10-bis)
 ```
-Falsifiable only by G1's live `cache_creation_input_tokens`. The 10% margin in row 8 exists to absorb a small error in this premise, not a large one.
+Falsifiable only by G1's live `cache_creation_input_tokens`. The 10% margin in row 8 exists to absorb a small error in this premise, not a large one. **Amendment round 4:** tuple relabeled `T10` → `T10-bis` (T10 HALTed before reaching the token-floor gate).
 
 **A3** · `derived` — premise: `cl100k_base` approximates Anthropic's tokenizer
 ```
-(cl100k_base token counts are a safe proxy for Anthropic's own tokenization | §2 row 8 + tests/test_prompt_cache_token_floor.py | an annex measured at 4,100 tokens could be under 4,096 for Anthropic and silently not cache, with a green test suite asserting otherwise | T2,T3,T4,T10)
+(cl100k_base token counts are a safe proxy for Anthropic's own tokenization | §2 row 8 + tests/test_prompt_cache_token_floor.py | an annex measured at 4,100 tokens could be under 4,096 for Anthropic and silently not cache, with a green test suite asserting otherwise | T2,T3,T4,T10-bis)
 ```
-This is why row 8 targets **4,506** rather than 4,096. G1 is the real falsifier; the gate test is a proxy check that can only fail loudly, never pass truthfully.
+This is why row 8 targets **4,506** rather than 4,096. G1 is the real falsifier; the gate test is a proxy check that can only fail loudly, never pass truthfully. **Amendment round 4:** tuple relabeled `T10` → `T10-bis`.
 
 **A4** · `invariant`
 ```
@@ -517,9 +539,9 @@ Mitigated structurally: every packet carries an explicit line marking the spec i
 
 **A9** · `derived` — premise: compose state observed at planning time
 ```
-(A live stack is available for G1 | §3 gate G1 | if compose is down or the ANTHROPIC_API_KEY is unset at gate time, G1 cannot run and the plan's only real cache falsifier disappears, leaving A2 and A3 unfalsified | T10,G1)
+(A live stack is available for G1 | §3 gate G1 | if compose is down or the ANTHROPIC_API_KEY is unset at gate time, G1 cannot run and the plan's only real cache falsifier disappears, leaving A2 and A3 unfalsified | T10-bis,G1)
 ```
-Compose was verified up (nine containers, `state-worker` healthy). Note `.env` leaves `ANTHROPIC_API_KEY` commented, so it must come from a Windows user env var — G1's condition includes confirming the key resolves before the run counts.
+Compose was verified up (nine containers, `state-worker` healthy). Note `.env` leaves `ANTHROPIC_API_KEY` commented, so it must come from a Windows user env var — G1's condition includes confirming the key resolves before the run counts. **Amendment round 4:** tuple relabeled `T10` → `T10-bis` (T10 HALTed with no code).
 
 ### 5.3 Highest re-plan risk
 
@@ -529,7 +551,7 @@ The predicted failure mode is specific, and it is *not* a token shortfall: **T3 
 
 Mitigation is structural rather than hopeful: T3's spot-check artifact is a required **Output**, not a suggestion, and its kill criteria halt on observed `challenge_hooks` degradation. If T3 HALTs, the likely re-plan is to split it into "author" and "validate against a new Call 1 eval slice", which would push this plan past its subtask ceiling and therefore become a new plan version rather than an amendment.
 
-**Process risk, kept out of 5.3 deliberately** and routed to §5.4 / commit-order guards: three parallel subtasks appending one CHANGELOG, and the T1-import commit-order hazard. **Amendment round 3 process note (not a 5.3 change):** T7 HALTed on a Files-to-touch omission (supersession banner vs M5 log), not on a Call 2 design surprise. Highest technical re-plan risk remains T3.
+**Process risk, kept out of 5.3 deliberately** and routed to §5.4 / commit-order guards: three parallel subtasks appending one CHANGELOG, and the T1-import commit-order hazard. **Amendment round 3 process note (not a 5.3 change):** T7 HALTed on a Files-to-touch omission (supersession banner vs M5 log), not on a Call 2 design surprise. **Amendment round 4 process note (not a 5.3 change):** T10 HALTed on a stale-baseline discovery in its own row-20 mechanical post-check (a pre-existing, pre-plan commit already touched 6 of 13 frozen paths), not on a caching design surprise, a token-floor miss, or any landed subtask's regression. Highest technical re-plan risk remains T3.
 
 ### 5.4 Hidden couplings
 
@@ -632,7 +654,7 @@ Mitigation is structural rather than hopeful: T3's spot-check artifact is a requ
 
 ## 6. Executor packets
 
-Thirteen packets at `.dev/plans/prompt-caching/packets/T<n>.md` (T1 through T10, plus **T1-bis** added by amendment round 1 / v1.1.0, **T9-bis** added by amendment round 2 / v1.2.0, and **T7-bis** added by amendment round 3 / v1.3.0), plus the machine surface `.dev/plans/prompt-caching/dag.json`. `T1`'s, `T9`'s, and **`T7`'s** packets are each retained byte-unmodified as historical HALT records and are never re-dispatched. `G1` owns no packet and is never dispatched.
+Fourteen packets at `.dev/plans/prompt-caching/packets/T<n>.md` (T1 through T10, plus **T1-bis** added by amendment round 1 / v1.1.0, **T9-bis** added by amendment round 2 / v1.2.0, **T7-bis** added by amendment round 3 / v1.3.0, and **T10-bis** added by amendment round 4 / v1.4.0), plus the machine surface `.dev/plans/prompt-caching/dag.json`. `T1`'s, `T9`'s, `T7`'s, and **`T10`'s** packets are each retained byte-unmodified as historical HALT records and are never re-dispatched. `G1` owns no packet and is never dispatched.
 
 Each packet contains, in order: YAML frontmatter (`subtask_id`, `tier`, `model_class`, `skills`, `decision_log_path` for architectural tiers); §1 verbatim; §2 verbatim including the row-22 glossary; that subtask's own §4 block verbatim; only the §5.2 assumptions and §5.4 couplings whose tuples name that subtask; and resolved inputs. Every packet also carries the D6 note marking `bishop_spec_0_6.md` informational and known-stale on caching, so no executor halts on the "no code change" language.
 
@@ -710,6 +732,28 @@ Each packet contains, in order: YAML frontmatter (`subtask_id`, `tier`, `model_c
 
 ---
 
+### Round 4 (v1.4.0) — T10-bis
+
+**Condition (orchestrator-planning §7 table, row 1):** "A subtask's kill criterion failed, or the subtask landed partially." T10 HALTed before writing any code: its own mandatory §2 row 20 mechanical post-check — `git log b919fdb..HEAD -- <full 13-path list>` — returned a non-empty result. Full HALT report: `.dev/plans/prompt-caching/runs/T10-brief.md`. Unlike T1/T7/T9, this HALT was not caused by any prior subtask's declared scope: the offending commit, `26b78b6`, is a confirmed ancestor of this plan's own opening commit `3682c38` (`git merge-base --is-ancestor 26b78b6 3682c38` succeeds) — it landed **before the plan existed**. None of T1-bis, T5, T6, T7-bis, T8, or T9-bis touch any of the six paths `26b78b6` modified (`bishop_shared/batch_custom_id.py`, `bishop_shared/content_truncation.py`, `bishop_spec_0_6.md`, `services/state-worker/app/models/http.py`, `services/state-worker/app/routers/parked.py`, `services/state-worker/app/transitions.py`). Row 9 and the full non-heavy suite were both independently verified green by T10 before the row-20 HALT fired (see T10's own completion brief in the HALT report); neither blocks this amendment.
+
+**Blast-radius routing.** Non-charter plan (Mode: Standard) — the charter escalation ladder does not apply. This finding is within-plan: it corrects one §2 row's SHA-range parameter to reflect where this plan's execution window actually began; it does not extend a hub, cross a milestone, or reopen any landed subtask's design. It routes through this §7 amendment path rather than a re-plan.
+
+**Chosen fork.** The HALT report offered three forks. **Fork (b) is chosen**: re-baseline the row-20 SHA range, for frozen-path-emptiness purposes only, from `b919fdb` to `26b78b6`. Fork (a) — waive row 20 for the six affected paths with a documented rationale — was rejected: it would be the fourth consecutive amendment round to grow an exception list item-by-item (rounds 1–3 each added exactly one Files-to-touch path to a continuation node), and per orchestrator-planning's "two-round exception-list growth escalates" guidance, a third-plus round of item-by-item allow-list growth on the same class of gate is the signal to name the shared class and fix it there instead — even though rounds 1–3 were Files-to-touch additions on different rows, not row-20 growth itself, waiving six paths one-by-one on row 20 specifically would be exactly that pattern starting fresh on this row. Fork (c) — "something else" — was not exercised; no alternative surfaced that closes the gap more honestly than re-baselining a single SHA parameter. Re-baselining is also the **smaller** edit: one SHA constant changes instead of six path-level carve-outs, and it is honest about what actually happened — `26b78b6` predates this plan, so measuring "byte-unchanged since this plan began" from `26b78b6` rather than `b919fdb` is not a weaker guarantee, it is the **same** guarantee measured from the correct start line. **No new architectural fork is introduced** — the frozen-path list, the pytest-enforced + closure-`git-diff` proof mode, and the requirement to re-run the check immediately before T10-bis's sweep and again before G1 are all unchanged; only the range's start SHA moves, and only for this one row.
+
+**Continuation node.** Per the "continued HALT keeps its own node" rule: `T10` → `T10-bis`. T10's packet is retained unmodified; T10-bis is a new self-contained packet at `.dev/plans/prompt-caching/packets/T10-bis.md`. No T10 decision log existed to supersede (T10 never reached a commit — it is `standard` tier, not `architectural`, so no decision log was ever required of it).
+
+**Explicit DAG edges.** `T10 --> T10-bis` (continuation). `T10-bis --> G1` (G1 is the sole downstream consumer of T10; its hard edge is rebound onto T10-bis, since T10 never committed and T10-bis is the node that actually runs the closeout DoD and unblocks the gate). No soft edges named `T10` (it was the plan's sink before G1), so none require relabeling. See `dag.json` for the machine-readable edge set; §3 above carries the human-readable mermaid update.
+
+**DoD — code and narrative.** (a) T10-bis re-runs T10's full original closeout DoD (token-floor gate, docs refresh, tracked-artifact check, declared-scope sweep, row-9 re-verification) from current HEAD against the re-baselined row-20 range, and commits it. (b) §2 row 20 is back-annotated in place with an amendment banner at first mention (done above — not only a trailing *Landed:* bullet), naming the re-baselined range and explicitly preserving `b919fdb` for every other range check in the plan. (c) §5.2 tuples A2, A3, A9 are relabeled `T10` → `T10-bis` (done above); §5.4 has no tuple naming T10, so none requires relabeling. §5.3's highest-replan-risk subtask is unaffected (still T3) — a process note is added there (done above) rather than a 5.3 rewrite, matching round 3's precedent. (d) T10's own spec block gains a HALT record (done above, §4); T10-bis's spec block is added immediately after it. No §5.1 change: this amendment rejects no new decomposition beyond the fork analysis above.
+
+**Retired-string / superseded-ID sweep (this round).** Grepped this plan and `.dev/plans/prompt-caching/packets/*.md` for the bare token `T10` (word-boundary matched, excluding `T10-bis`'s own references) and for `b919fdb` in row-20 context specifically. Plan hits requiring refresh: the header status banners (added, not replaced — prior banners are historical narrative), §2 row 20 (re-baselined, amendment banner added), the mermaid graph and its round 3 DAG-rebind paragraph (round 4 paragraph added), the G1 bullet in §3 (added "after T10-bis"), §4's T10 block (HALT record appended; T10-bis block added), §5.2 A2/A3/A9 tuples (relabeled), §5.3's process-risk line (round 4 note added), §6's packet-count paragraph (thirteen → fourteen), this §7 section (round 4 added), and §8 (below). `T10.md`'s own packet is left byte-unmodified — historical HALT record, per the same rule applied to T1.md/T7.md/T9.md. No packet other than the new `T10-bis.md` names `T10` as a downstream Input or coordination partner (T10 was the plan's sink before G1), so no other packet in `packets/` requires a superseded-ID refresh this round — a narrower sweep than rounds 1–3, because nothing in this plan's DAG sits downstream of T10 except the gate.
+
+**Runner-ledger bypass note.** This §7 amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop — it was invoked mid-wave after plan-runner's T10 dispatch HALTed, directly by the operator, not through a scheduled orchestrator pickup. It does **not** add to or edit `runs/ledger.md` or `runs/execution-summary.md` (runner-owned, append-only). Whoever accepts the gap: the operator who invoked this amendment. Plan-runner's own next pre-flight is responsible for reconciling the ledger against this out-of-band round before dispatching T10-bis.
+
+**Amendment commit.** This round's commit contains only the plan amendment artifacts (this file, `dag.json`, `packets/T10-bis.md`). It does **not** contain T10-bis's implementation files (`tests/test_prompt_cache_token_floor.py`, the docs refresh, the closure report, etc.) — those remain uncommitted until T10-bis is dispatched and lands them per its own DoD. `packets/T10.md` is retained byte-unmodified as the historical HALT record and is not part of this commit's refreshed set.
+
+---
+
 Routing for what comes later, so the path is not invented under pressure:
 
 - A **G1 failure** (all keys report `cache_read_zero` across two consecutive batches) is a §7 amendment with explicit DAG edges from G1 into the amendment node, not a waiver and not a silent retry. The likely root causes are A1 (SDK/ttl), A2/A3 (floor or tokenizer premise), or a per-request prefix that is not byte-identical — each implies a different amendment scope, so the amendment names which before it starts.
@@ -726,16 +770,16 @@ Routing for what comes later, so the path is not invented under pressure:
 
 §8 is handoff **preparation**, not verification. It is assembled from the same executor narratives that produced the artifacts, so it cannot see a defect those narratives do not mention. No coverage verdict is claimed below; per-row evidence pointers only.
 
-### 8.1 Completion snapshot — *to be back-filled by T10 at closure*
+### 8.1 Completion snapshot — *to be back-filled by T10-bis at closure (amendment round 4: T10 HALTed and never committed)*
 
 | Field | Value |
 |---|---|
-| Closure tree SHA | `<T10 fills>` |
+| Closure tree SHA | `<T10-bis fills>` |
 | Verification command (declared **and** operative — identical, no waiver) | `pytest tests/ -m "not heavy"` |
 | Run environment | detached worktree at the closure SHA — **not** the working tree |
-| Raw counts | `<T10 pastes passed / failed / skipped / errored / exit code>` |
-| Collected count | `<T10 fills>` — must confirm `tests/test_prompt_cache.py`, `tests/test_rubric_assets.py`, and `tests/test_prompt_cache_token_floor.py` are actually collected |
-| Per-subtask commit map | `<T10 fills from `git log` / `git blame`, not from dispatch order; any commit carrying more than one subtask names every subtask ID in its message>` |
+| Raw counts | `<T10-bis pastes passed / failed / skipped / errored / exit code>` |
+| Collected count | `<T10-bis fills>` — must confirm `tests/test_prompt_cache.py`, `tests/test_rubric_assets.py`, and `tests/test_prompt_cache_token_floor.py` are actually collected |
+| Per-subtask commit map | `<T10-bis fills from `git log` / `git blame`, not from dispatch order; any commit carrying more than one subtask names every subtask ID in its message>` |
 
 **Plan-time collection parity check (done now):** `pyproject.toml` declares `testpaths = ["tests"]`, `pythonpath = ["."]`, no `addopts`, and no declared markers. `-m "not heavy"` therefore filters only the single `@pytest.mark.heavy` test in `tests/test_g5_quality_gate.py` and collects everything else in `tests/`, including new modules. The command gates what it claims to gate.
 
@@ -743,24 +787,24 @@ The handoff SHA must contain only this plan's declared scope. If the closure com
 
 ### 8.2 Artifact chain
 
-Every path must satisfy `git show HEAD:<path>` at the §8.1 SHA. `<T10 verifies>`
+Every path must satisfy `git show HEAD:<path>` at the §8.1 SHA. `<T10-bis verifies>`
 
 1. `.dev/plans/prompt-caching/context-map.md` — **staleness disposition: refreshed-not-required.** The map's recorded SHA `b919fdb` **equals** the planning HEAD, so zero committed files in direct scope diverged. Pin semantics: the SHA means code HEAD at scouting time, and it is still code HEAD at plan time. If the closure SHA diverges from `b919fdb` on files in direct scope — which it will, since this plan edits them — T10 records **deferred** with the diverged file list and follow-up **`FU-CACHE-MAP-01`**, per §8.2's requirement that divergence be a decision rather than a note. Two planning-time corrections to the map are already recorded: D16 (compose is up, not down) and P1 (the profiles mount mechanism).
 2. `.dev/plans/prompt-caching/plan.md` — this file
 3. `.dev/plans/prompt-caching/dag.json`
-4. `.dev/plans/prompt-caching/packets/T1.md` … `T10.md`, plus `.dev/plans/prompt-caching/packets/T1-bis.md` (amendment round 1, v1.1.0), `.dev/plans/prompt-caching/packets/T9-bis.md` (amendment round 2, v1.2.0), and `.dev/plans/prompt-caching/packets/T7-bis.md` (amendment round 3, v1.3.0)
+4. `.dev/plans/prompt-caching/packets/T1.md` … `T10.md`, plus `.dev/plans/prompt-caching/packets/T1-bis.md` (amendment round 1, v1.1.0), `.dev/plans/prompt-caching/packets/T9-bis.md` (amendment round 2, v1.2.0), `.dev/plans/prompt-caching/packets/T7-bis.md` (amendment round 3, v1.3.0), and `.dev/plans/prompt-caching/packets/T10-bis.md` (amendment round 4, v1.4.0)
 5. `.dev/decision-logs/prompt-caching/T1-bis-cache-and-rubric-contract.md` (T1's own `T1-cache-and-rubric-contract.md` was never written — T1 never committed), `T2-prefilter-rubric.md`, `T3-call1-rubric.md`, `T4-call2-rubric.md`, `T6-call1-wiring.md`, `T7-bis-call2-breakpoint-move.md` (T7's own `T7-call2-breakpoint-move.md` was never written — T7 never committed), `T9-bis-batch-amortization.md` (T9's own `T9-batch-amortization.md` was never written — T9 never committed). After T7-bis lands: `.dev/decision-logs/m5-enrichment/T4-call2-cache-control.md` (supersession banner).
 6. `.dev/plans/prompt-caching/artifacts/T3-call1-spotcheck.md`, `.dev/plans/prompt-caching/artifacts/T10-closure-report.md`
 7. `.dev/caching_strategy.md` — binding for rejected alternatives and the 4,096 floor
 8. Not consumed: no audit file exists at version 1.0.0
 
-**Operator-attested evidence.** T3's spot-check artifact and T10's closure report are operator/executor-produced evidence, and *Complete* requires both **tracked at the closure SHA**. Handoff halts if either exists only in an uncommitted working tree. G1's log evidence is likewise pasted into the closure report rather than left in a terminal scrollback.
+**Operator-attested evidence.** T3's spot-check artifact and T10-bis's closure report (amendment round 4: T10 never wrote one) are operator/executor-produced evidence, and *Complete* requires both **tracked at the closure SHA**. Handoff halts if either exists only in an uncommitted working tree. G1's log evidence is likewise pasted into the closure report rather than left in a terminal scrollback.
 
-### 8.3 §2 evidence — *per-row pointers to be back-filled by T10*
+### 8.3 §2 evidence — *per-row pointers to be back-filled by T10-bis*
 
 One row per §2 contract (1, 1a, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22), each naming the shipped `file:symbol` and the test or check that proves it. Rows 17, 23, 24, 25 are `deferred` and carry their follow-up ID instead of evidence.
 
-### 8.4 §5 disposition — *to be back-filled by T10*
+### 8.4 §5 disposition — *to be back-filled by T10-bis*
 
 Every A1–A9 and C1–C13 item must be marked **closed** (evidence cited), **open** (with what would close it and whether it blocks merge), or **treat-as-prediction**. Pre-marked where the disposition is already determined:
 
@@ -788,7 +832,7 @@ Recommended for the auditor's narrative-blind Phase 0 read, chosen where contrac
 
 ### 8.6 Audit remediation cross-link
 
-No §7 amendment fired during version 1.0.0, so this subsection was omitted at that version. **Amendment rounds 1 (v1.1.0, T1-bis), 2 (v1.2.0, T9-bis), and 3 (v1.3.0, T7-bis) have since fired** — this subsection is no longer omittable and is `<to be back-filled by T10 at closure>`, pointing to `.dev/plans/prompt-caching/runs/T1-brief.md` / this file's §7 Round 1 for the T1-bis finding, `.dev/plans/prompt-caching/runs/T9-brief.md` / §7 Round 2 for the T9-bis finding, `.dev/plans/prompt-caching/runs/T7-brief.md` / §7 Round 3 for the T7-bis finding, `packets/T1-bis.md` / `packets/T9-bis.md` / `packets/T7-bis.md`, and the §2 *Landed:*-equivalent amendment banners on rows 9 (round 1), 18/19 (round 2), and 5/9/10/11/12 (round 3) that closed each finding.
+No §7 amendment fired during version 1.0.0, so this subsection was omitted at that version. **Amendment rounds 1 (v1.1.0, T1-bis), 2 (v1.2.0, T9-bis), 3 (v1.3.0, T7-bis), and 4 (v1.4.0, T10-bis) have since fired** — this subsection is no longer omittable and is `<to be back-filled by T10-bis at closure>`, pointing to `.dev/plans/prompt-caching/runs/T1-brief.md` / this file's §7 Round 1 for the T1-bis finding, `.dev/plans/prompt-caching/runs/T9-brief.md` / §7 Round 2 for the T9-bis finding, `.dev/plans/prompt-caching/runs/T7-brief.md` / §7 Round 3 for the T7-bis finding, `.dev/plans/prompt-caching/runs/T10-brief.md` / §7 Round 4 for the T10-bis finding, `packets/T1-bis.md` / `packets/T9-bis.md` / `packets/T7-bis.md` / `packets/T10-bis.md`, and the §2 *Landed:*-equivalent amendment banners on rows 9 (round 1), 18/19 (round 2), 5/9/10/11/12 (round 3), and 20 (round 4) that closed each finding.
 
 ---
 
@@ -797,25 +841,25 @@ No §7 amendment fired during version 1.0.0, so this subsection was omitted at t
 | # | Rule | Status |
 |---|---|---|
 | 1 | Every subtask has all required fields; no TBD in kill criteria or contract bindings | **pass** |
-| 2 | DAG has no cycles, no orphans; every node has correct intent | **v1.3.0: pass** — 13 executable + 1 gate (T1-bis added round 1; T9-bis added round 2; T7-bis added round 3), single sink `G1`; T1 retained as a halted node feeding only `T1 --> T1-bis`; T9 retained as a halted node feeding only `T9 --> T9-bis`; T7 retained as a halted node feeding only `T7 --> T7-bis`; T10 hard-depends on T7-bis, not T7 |
+| 2 | DAG has no cycles, no orphans; every node has correct intent | **v1.4.0: pass** — 14 executable + 1 gate (T1-bis added round 1; T9-bis added round 2; T7-bis added round 3; T10-bis added round 4), single sink `G1`; T1 retained as a halted node feeding only `T1 --> T1-bis`; T9 retained as a halted node feeding only `T9 --> T9-bis`; T7 retained as a halted node feeding only `T7 --> T7-bis`; T10 retained as a halted node feeding only `T10 --> T10-bis`; T10-bis hard-depends on T7-bis (not T7) and is the sole predecessor of `G1` |
 | 3 | Parallel safety: no two parallel subtasks touch the same interface | **pass with documented merge strategy** — `{T2,T3,T4}` and `{T5,T6,T7}` share only `CHANGELOG.MD`, governed by the ascending-`Tn` commit-order guards in §3 |
 | 4 | At least one rejected alternative and one load-bearing assumption | **pass** — 4 rejected, 9 assumptions |
 | 5 | Log tiers match scope; no `trivial` subtask owns a contract-anchor string | **pass** — no `trivial` tier in this plan; T8 held at `standard` because its five log keys are consumed by G1 |
-| 6 | Packet emission completed; self-containment verified | **pass (v1.3.0)** — T7-bis packet emitted; T7.md retained unmodified; T10 refreshed |
+| 6 | Packet emission completed; self-containment verified | **pass (v1.4.0)** — T10-bis packet emitted; T10.md retained unmodified |
 | 7 | Typed-surface binding satisfied for every §2 key | **pass** — rows 1, 2, 4, 7, 14, 18 each name owner, typed site, and test; no prose-only keys, no `getattr` defaults |
 | 8 | CLI strings frozen before downstream packets emit | **pass** — `scripts/rubric_hash.py <path> [--render]` frozen in T1 (row 6) before T2/T3/T4 packets, which consume it to stamp |
-| 9 | Amendment DoD includes narrative back-annotation | **pass (v1.3.0)** — Amendment round 1 back-annotates §2 row 9 with a banner at first mention and refreshes §5.4 C1. Amendment round 2 back-annotates §2 rows 18/19 and refreshes §5.4 C9/C10. Amendment round 3 back-annotates §2 rows 5/9/10/11/12 with a banner at first mention of T7 as Call 2 owner, refreshes §5.4 C1/C2/C4/C9, and adds C13; amendment commit carries only plan artifacts, not T7-bis's implementation — see §7 rounds 1–3 |
+| 9 | Amendment DoD includes narrative back-annotation | **pass (v1.4.0)** — Amendment round 1 back-annotates §2 row 9 with a banner at first mention and refreshes §5.4 C1. Amendment round 2 back-annotates §2 rows 18/19 and refreshes §5.4 C9/C10. Amendment round 3 back-annotates §2 rows 5/9/10/11/12 with a banner at first mention of T7 as Call 2 owner, refreshes §5.4 C1/C2/C4/C9, and adds C13. Amendment round 4 back-annotates §2 row 20 with a banner at first mention (re-baselined range) and relabels §5.2 A2/A3/A9; amendment commit carries only plan artifacts, not T10-bis's implementation — see §7 rounds 1–4 |
 | 10 | Wire contract matches shipped behaviour; no illustrative values presented as binding | **pass** — row 1 fixes `{"type": "ephemeral", "ttl": "1h"}` as the single binding literal; there are no illustrative wire examples in §2 |
 | 11 | Decision log paths frozen; architectural log preambles current | **pass (v1.3.0)** — `.dev/decision-logs/prompt-caching/T<n>-<slug>.md` for T1-bis, T2, T3, T4, T6, **T7-bis**, T9-bis (T1, T7, and T9 each never reached a commit, so none has a decision log of its own). **Supersession obligation recorded and scoped:** T7-bis changes the behaviour narrated by `.dev/decision-logs/m5-enrichment/T4-call2-cache-control.md` (which records the breakpoint on the profile block only, and rejects omitting `cache_control` for short profiles). That path is in T7-bis's Files to touch; T7-bis's Outputs must add a supersession banner at that log's first mention, not only append to §2. T7's own packet still records the duty but omitted the path from Files to touch — that is the HALT this round closes. |
 | 12 | §5.2/§5.4 conform to tuple shape and name explicit `Tn` IDs; §2 internally consistent | **pass (v1.3.0)** — all 22 items (A1–A9, C1–C13) are tuples with `Tn` lists. §2 rows read against each other: row 20 freezes `content_truncation.py` while row 22 separates 4000 from 4096, so no row requires editing a frozen file; row 16's no-mount rule and row 8's token gate are jointly satisfiable because the gate measures repo files, not container files; row 21 forbids new `conftest.py` and no row requires one |
 | 13 | §5 answered through the packet-only executor lens | **pass** — and it earned its place: C4, C7, and C9 were produced by it and appear in no map flag |
 | 14 | Context map present where required | **pass** — no subtask's Files to touch is "unknown — discovery required" |
-| 15 | §8.1 snapshot valid; gate-command collection parity confirmed | **pass at plan time** for collection parity (see §8.1); the snapshot itself is T10's to fill on a detached worktree |
+| 15 | §8.1 snapshot valid; gate-command collection parity confirmed | **pass at plan time** for collection parity (see §8.1); the snapshot itself is T10-bis's to fill on a detached worktree (amendment round 4: T10 HALTed before reaching it) |
 | 16 | §8.2 chain resolves at HEAD; no out-of-tree binding artifacts | **conditional — D1 must land first.** The map and this plan are untracked at the moment of writing; committing `.dev/plans/prompt-caching/` is a precondition to dispatch, not a closeout task |
-| 17 | §8.4 disposition complete with matching closure vocabulary | **pending T10** — pre-marked items in §8.4 use `ruled-out` only where the premise was shown not to apply; no `verified-compatible` claims are made anywhere |
+| 17 | §8.4 disposition complete with matching closure vocabulary | **pending T10-bis** (amendment round 4: T10 HALTed and never committed) — pre-marked items in §8.4 use `ruled-out` only where the premise was shown not to apply; no `verified-compatible` claims are made anywhere |
 | 18 | Charter binding declared | **n/a** — non-charter plan (Standard mode); no milestone stub in the inputs |
-| 19 | Carryability check | **v1.0.0: pass** — 10 executable subtasks, at the ceiling of the 4–10 budget. No split proposal required, no `merge-candidate` flag. **v1.1.0: amendment crosses ceiling, as predicted** — T1-bis is an 11th executable subtask; the required budget-amendment line (prior count, new count, what T1-bis closes) is recorded in this file's header before T1-bis's packet was emitted. **v1.2.0: amendment crosses ceiling further** — T9-bis is a 12th executable subtask; the required budget-amendment line (prior count 11 executable + 1 gate, new count 12 executable + 1 gate, what T9-bis closes) is recorded in this file's header before T9-bis's packet was emitted. **v1.3.0: amendment crosses ceiling further** — T7-bis is a 13th executable subtask; the required budget-amendment line (prior count 12 executable + 1 gate, new count 13 executable + 1 gate, what T7-bis closes) is recorded in this file's header before T7-bis's packet was emitted |
-| 20 | Declared-scope sweep at closure | **assigned** — T10, with the frozen path list literalized inline in its packet and a "no production edits during verification" fence in its own kill criteria |
+| 19 | Carryability check | **v1.0.0: pass** — 10 executable subtasks, at the ceiling of the 4–10 budget. No split proposal required, no `merge-candidate` flag. **v1.1.0: amendment crosses ceiling, as predicted** — T1-bis is an 11th executable subtask; the required budget-amendment line (prior count, new count, what T1-bis closes) is recorded in this file's header before T1-bis's packet was emitted. **v1.2.0: amendment crosses ceiling further** — T9-bis is a 12th executable subtask; the required budget-amendment line (prior count 11 executable + 1 gate, new count 12 executable + 1 gate, what T9-bis closes) is recorded in this file's header before T9-bis's packet was emitted. **v1.3.0: amendment crosses ceiling further** — T7-bis is a 13th executable subtask; the required budget-amendment line (prior count 12 executable + 1 gate, new count 13 executable + 1 gate, what T7-bis closes) is recorded in this file's header before T7-bis's packet was emitted. **v1.4.0: amendment crosses ceiling further** — T10-bis is a 14th executable subtask; the required budget-amendment line (prior count 13 executable + 1 gate, new count 14 executable + 1 gate, what T10-bis closes) is recorded in this file's header before T10-bis's packet was emitted |
+| 20 | Declared-scope sweep at closure | **assigned** — T10-bis (amendment round 4: T10 HALTed and never committed), with the frozen path list literalized inline in its packet — row-20 range re-baselined `26b78b6..<closure>`, all other range checks unchanged at `b919fdb..<closure>` — and a "no production edits during verification" fence in its own kill criteria |
 
 
 

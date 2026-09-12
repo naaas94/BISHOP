@@ -1,6 +1,6 @@
 {
   "plan": "prompt-caching",
-  "plan_version": "1.3.0",
+  "plan_version": "1.4.0",
   "run_status": "amended",
   "baseline_sha": "b919fdba09e07a77700d57cf3b360c001058bb84",
   "amendments": [
@@ -49,6 +49,18 @@
       ],
       "runner_bypass": true,
       "runner_bypass_note": "This amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop, invoked mid-wave after the T7 dispatch HALTed (T6 subsequently completed). It does not write runs/ledger.md or runs/execution-summary.md (runner-owned, append-only). Plan-runner's own next pre-flight reconciles the ledger against this round."
+    },
+    {
+      "round": 4,
+      "plan_version": "1.4.0",
+      "trigger": "T10 kill-criterion HALT on section 2 row 20's frozen-path mechanical post-check (see runs/T10-brief.md)",
+      "fork_chosen": "b",
+      "fork_description": "Re-baseline the section 2 row 20 SHA range, for frozen-path-emptiness purposes only, from b919fdb to 26b78b6 -- the commit immediately preceding this plan's own opening commit 3682c38, which 26b78b6 is a confirmed ancestor of. Closes the gap for all six affected paths as one class-level correction rather than six item-by-item path waivers. No new architectural fork; all other range checks (declared-scope Files-to-touch union) keep b919fdb.",
+      "superseded_node": "T10",
+      "added_nodes": ["T10-bis"],
+      "rebound_edges": ["T10->G1"],
+      "runner_bypass": true,
+      "runner_bypass_note": "This amendment ran out-of-band from plan-runner's normal per-subtask dispatch loop, invoked mid-wave after the T10 dispatch HALTed. It does not write runs/ledger.md or runs/execution-summary.md (runner-owned, append-only). Plan-runner's own next pre-flight reconciles the ledger against this round."
     }
   ],
   "nodes": [
@@ -164,7 +176,17 @@
       "packet": ".dev/plans/prompt-caching/packets/T10.md",
       "tier": "standard",
       "model_class": "standard",
-      "note": "Amendment round 1 adds section 2 row 9 verification ownership: T10 must run tests/test_prompt_cache.py::test_no_inline_cache_control_literals at closure and HALT (new section 7 row) if it is not green. Amendment round 2 rebinds T10's Inputs from T9 to T9-bis (T9 never committed). Amendment round 3 rebinds T10's Inputs from T7 to T7-bis (T7 never committed); row-9 green depends on T7-bis's Call 2 migration, not T7."
+      "status": "halted",
+      "note": "Amendment round 1 adds section 2 row 9 verification ownership: T10 must run tests/test_prompt_cache.py::test_no_inline_cache_control_literals at closure and HALT (new section 7 row) if it is not green. Amendment round 2 rebinds T10's Inputs from T9 to T9-bis (T9 never committed). Amendment round 3 rebinds T10's Inputs from T7 to T7-bis (T7 never committed); row-9 green depends on T7-bis's Call 2 migration, not T7. HALTed at dispatch on its own row-20 mechanical post-check (see runs/T10-brief.md): git log b919fdb..HEAD -- <13 frozen paths> returned commit 26b78b6, a pre-plan commit (ancestor of the plan's own opening commit 3682c38) touching 6 of the 13 paths -- not a regression by any landed subtask. No code written; nothing staged or committed. Packet retained unmodified as the historical HALT record. Not re-dispatched. Continuation node is T10-bis (amendment round 4)."
+    },
+    {
+      "id": "T10-bis",
+      "kind": "executable",
+      "packet": ".dev/plans/prompt-caching/packets/T10-bis.md",
+      "tier": "standard",
+      "model_class": "standard",
+      "round": 4,
+      "note": "Amendment round 4 continuation of halted T10. T10 left no working-tree state (no code written), so T10-bis executes T10's full original closeout DoD from a clean slate, against section 2 row 20's SHA range re-baselined (for row-20 frozen-path purposes only) from b919fdb to 26b78b6."
     },
     {
       "id": "G1",
@@ -189,7 +211,8 @@
     ["T8", "T10"],
     ["T9", "T9-bis"],
     ["T9-bis", "T10"],
-    ["T10", "G1"]
+    ["T10", "T10-bis"],
+    ["T10-bis", "G1"]
   ],
   "soft_edges": [
     {
@@ -251,6 +274,7 @@
   "preconditions": [
     "D1: .dev/plans/prompt-caching/ (context-map.md, plan.md, dag.json, packets/) must be committed before the first dispatch. Until then the plan is not dispatchable regardless of run_status.",
     "Amendment round 1: this amendment's own artifacts (plan.md, dag.json, packets/T1-bis.md, refreshed packets/T2.md..T10.md) are committed in an amendment-only commit before T1-bis is dispatched. T1-bis's implementation files remain uncommitted until T1-bis itself lands them.",
-    "Amendment round 3: this amendment's own artifacts (plan.md, dag.json, packets/T7-bis.md, refreshed T10.md and superseded-ID sweep hits) are committed in an amendment-only commit before T7-bis is dispatched. T7-bis's implementation files remain uncommitted until T7-bis itself lands them. T7-bis consumes current HEAD (includes T6 at ba49bb1), not the T7 HALT report's stale HEAD c47248e."
+    "Amendment round 3: this amendment's own artifacts (plan.md, dag.json, packets/T7-bis.md, refreshed T10.md and superseded-ID sweep hits) are committed in an amendment-only commit before T7-bis is dispatched. T7-bis's implementation files remain uncommitted until T7-bis itself lands them. T7-bis consumes current HEAD (includes T6 at ba49bb1), not the T7 HALT report's stale HEAD c47248e.",
+    "Amendment round 4: this amendment's own artifacts (plan.md, dag.json, packets/T10-bis.md) are committed in an amendment-only commit before T10-bis is dispatched. T10-bis's implementation files remain uncommitted until T10-bis itself lands them. T10-bis's row-20 frozen-path kill criterion uses the re-baselined range 26b78b6..HEAD; the plan's overall baseline SHA and every other range check stay b919fdb."
   ]
 }

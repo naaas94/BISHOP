@@ -1,0 +1,223 @@
+---
+subtask_id: T10-bis
+plan: prompt-caching
+plan_version: 1.4.0
+tier: standard
+model_class: standard
+skills: [executor-subtask-execution]
+amendment_round: 4
+supersedes: T10
+---
+
+# Packet T10-bis — Continuation of T10: Closeout: token-floor gate, docs, tracked artifacts, scope sweep (amendment round 4, v1.4.0)
+
+## Orientation
+
+- You receive only this packet plus the executor SKILL.md. Do not consult the parent plan; everything binding is reproduced below.
+- **You are re-running T10's DoD from a clean slate, unlike T1-bis.** T10 HALTed before writing any code: nothing was staged or committed under that node. There is no partial working tree to consume. Implement the full scope below from the current committed state of the repo (current HEAD).
+- **Why T10 HALTed (do not repeat this mistake, but do not re-litigate it either).** T10's own mandatory §2 row 20 mechanical post-check — `git log b919fdb..HEAD -- <the 13 frozen paths>` — returned a non-empty result: exactly one commit, `26b78b6` ("pre prompt cache fold of misc stuff I guess"), touching 6 of the 13 paths (`bishop_shared/batch_custom_id.py`, `bishop_shared/content_truncation.py`, `bishop_spec_0_6.md`, `services/state-worker/app/models/http.py`, `services/state-worker/app/routers/parked.py`, `services/state-worker/app/transitions.py`). That commit's parent is `b919fdb` itself, and it is a confirmed ancestor of this plan's own opening commit `3682c38` — it landed **before this plan's execution window began**, and none of T1-bis/T5/T6/T7-bis/T8/T9-bis touch those six paths. This is not a regression by any subtask in this plan. Full HALT report: `.dev/plans/prompt-caching/runs/T10-brief.md`.
+- **What this amendment (§7 round 4) changed, and what it did not.** For **row-20 frozen-path-emptiness purposes only**, the SHA range is re-baselined from `b919fdb` to `26b78b6` — the commit immediately preceding the plan's own opening commit. This closes the gap for all six paths at once as a single class-level correction. It does **not** change the plan's overall baseline SHA for any other range check: the declared-scope Files-to-touch union sweep below still runs against `b919fdb..HEAD`. Do not use `26b78b6` for anything except the row-20 frozen-path check.
+- T10 had already independently verified, before its row-20 HALT fired: row 9 (`tests/test_prompt_cache.py::test_no_inline_cache_control_literals`) green both in-tree and in a detached worktree at `1fe3ef4b`; the full `pytest tests/ -m "not heavy"` suite identical in-tree and out-of-tree (`87 failed, 791 passed, 3 skipped, 14 errors`), cross-checked against a baseline-SHA worktree as pre-existing and unrelated to this plan. Neither finding blocks you, but you must still re-run both yourself per the kill criteria below — do not treat T10's prior run as a substitute for your own.
+- **Spec note (plan disposition D6):** `bishop_spec_0_6.md` is INFORMATIONAL for this work and is known-stale on caching — its §12.1/§12.3 still say prompt caching "applies automatically" with "no code change required". That language is wrong and the operator has explicitly chosen not to fix it in this plan. Do not HALT on it and do not edit that file. Note: `bishop_spec_0_6.md` is also one of the six paths `26b78b6` touched — it remains frozen under the re-baselined range exactly like the other twelve paths; nothing about this amendment authorizes editing it.
+- HALT and report rather than guessing forward whenever a kill criterion below fires.
+
+## 1. Task statement
+
+Wire Anthropic prompt caching across all three BISHOP Anthropic batch paths — pre-filter, enrichment Call 1, and enrichment Call 2 — so that each path emits a `cache_control` breakpoint with `ttl: "1h"` on the **last** system block, and so that each path's cached prefix actually clears Claude Haiku 4.5's 4,096-token minimum. Clearing the floor is a content problem, not a padding problem: three quality-bearing rubric annexes are authored (source-shape law for pre-filter, extraction guidance for Call 1, relevance-scoring guidance for Call 2), each becoming a hash-verified asset under the same abort-before-Anthropic discipline the NL profile already has. The batch-poller learns to parse and log `usage` cache fields so enablement is observable rather than blind, and batch assembly gains minimum-volume and maximum-hold controls so batches are large enough to amortize a cache write. The three cache keys stay separate by construction.
+
+**Non-goals:**
+
+- **No model switch.** `ANTHROPIC_MODEL_PREFILTER` and `ANTHROPIC_MODEL_ENRICHMENT` remain `claude-haiku-4-5-20251001`. Switching to Sonnet for its 1,024-token floor is rejected (strategy §17) and would break the G3 pinned-model gate.
+- **No padding.** Lorem ipsum, whitespace, or filler to reach 4,096 is rejected (strategy §17). Every token added must carry gate quality.
+- **No merged prefixes.** Three cache keys (A pre-filter, B Call 1, C Call 2) stay independent. Putting `source` in a system prompt is rejected (strategy §11b option C) — it destroys prefix identity within a batch.
+- **No `BatchRecord` schema change.** No Alembic revision, no `domain.py` / `http.py` / `transitions.py` edit, no new wire fields on `BatchPatchRequest`. Observability is logs only (D8).
+- **No spec edit.** `bishop_spec_0_6.md` is not touched by this plan (D6).
+- **No profile pin bump for enrichment.** Call 2 stays on `professional_v1.0.0.yaml` (D5).
+- **No pre-filter pin revert.** The soft-launch overlay stays live; it gets committed, not reverted (D3).
+- **No parked-route change**, no `eval/prefilter_v*/items.json` or `labels.json` edit, no `bishop_shared/content_truncation.py` edit, no change to `stage1_loop._profile_render_hash` semantics.
+- **No G7 backfill enablement.** This plan makes backfill *affordable*; turning it on is a separate operator call.
+- **No Phase 2 cosine / Gemini / OpenAI work.**
+
+## 2. Shared contracts
+
+Binding on every subagent. Enforcement mode is one token per row; rows whose verification would mix modes are split.
+
+### Types / interfaces
+
+| # | Contract | Owner | Binding site | Enforcement | Falsifier |
+|---|---|---|---|---|---|
+| 1 | **New** `bishop_shared/prompt_cache.py`: `HAIKU_CACHE_MIN_TOKENS: Final[int] = 4096`; `CACHE_TTL: Final[str] = "1h"`; `cached_system_blocks(*texts: str) -> list[dict[str, object]]` | T1 | `module-function` (+ two module constants) | `pytest-enforced` | `tests/test_prompt_cache.py`: (a) N inputs → N blocks; (b) `cache_control` present on **last** block only; (c) equals `{"type": "ephemeral", "ttl": "1h"}` exactly; (d) two calls return **equal but not identical** dicts (no aliasing across requests); (e) empty input raises `ValueError` |
+| 1a | `anthropic` pin floor raised `>=0.40` → `>=0.100` in all three service `requirements.txt` **and** `pyproject.toml` dev extra | T1 | `parser-key` (requirements line) | `pytest-enforced` | `tests/test_prompt_cache.py::test_sdk_supports_1h_ttl` asserts `"ttl" in anthropic.types.cache_control_ephemeral_param.CacheControlEphemeralParam.__annotations__`. Falsifies P2 directly. |
+| 2 | **New** `bishop_shared/rubric_assets.py`: `PROMPTS_CONTAINER_DIR = Path("/app/config/prompts")`; `RubricId = Literal["prefilter_rubric", "call1_rubric", "call2_rubric"]`; `_RUBRIC_FILENAME: dict[RubricId, str]`; `RubricDocument` (pydantic: `rubric_id: str`, `version: str`, `canonical_hash: str`, `body: str`); `resolve_rubric_path(rubric_id: RubricId) -> Path`; `load_rubric(path: Path) -> RubricDocument`; `compute_rubric_hash(rubric: Path \| str) -> str`; `verify_rubric_hash(rubric_id: RubricId, *, rubric_path: Path \| None = None) -> tuple[str, str, str] \| None` | T1 | `module-function` ×5, `pydantic-model` ×1, `dataclass-field` n/a | `pytest-enforced` | `tests/test_rubric_assets.py`: front-matter parse; `resolve_rubric_path` for all three IDs; stamp→verify round trip; mismatch returns `None`; unknown `rubric_id` raises `ValueError` |
+| 3 | `render_profile_prompt(profile: ProfileDocument, *, include_output: bool = True) -> str` — new keyword-only param. Default `True` preserves current byte-for-byte output. | T1 | `module-function` (signature extension) | `pytest-enforced` | `tests/test_profile_renderer.py`: (a) default render of `professional_v1.2.0_soft_launch.yaml` is **byte-identical** to the pre-change render (pin the current 10,799-char / 2,280-token render); (b) `include_output=False` omits the `## Output format` section and nothing else |
+| 4 | `AnthropicBatchResultItem` gains `input_tokens: int \| None = None`, `output_tokens: int \| None = None`, `cache_creation_input_tokens: int \| None = None`, `cache_read_input_tokens: int \| None = None` | T8 | `pydantic-model` fields | `pytest-enforced` | `tests/test_batch_poller_anthropic_client.py`: construction round-trip with and without `usage`; extraction from a fixture whose `message.usage` carries all four |
+| 5 | `build_requests` / `build_stage2_requests` accept the system prefix as `list[dict[str, object]]`; `params["system"]` is a block list on **all three** gates. Pre-filter: `build_requests(*, system_blocks: list[dict[str, object]], entries: list[PreFilterBatchEntry])` — the `system_prompt: str` parameter is **retired**. Enrichment Call 1: `build_requests(*, entries: list[Stage1BatchEntry])` signature unchanged; blocks are assembled inside. Call 2: `build_stage2_requests(*, profile_prompt: str, rubric_body: str, entries: list[Stage2BatchEntry])`. Call 2's share of this row is owned by **T7-bis** (T7 HALTed with no code). T5 and T6 have already landed. | T5 / T6 / T7-bis | `instance-method` ×3 | `pytest-enforced` | Per-gate payload tests asserting `isinstance(params["system"], list)` and the retired `system_prompt` kwarg raising `TypeError` |
+
+### Naming
+
+| # | Contract | Owner | Enforcement | Falsifier |
+|---|---|---|---|---|
+| 6 | New assets: `config/prompts/prefilter_rubric_v1.md` (T2), `config/prompts/call1_rubric_v1.md` (T3), `config/prompts/call2_rubric_v1.md` (T4). New script `scripts/rubric_hash.py` (T1). New modules `bishop_shared/prompt_cache.py`, `bishop_shared/rubric_assets.py` (T1). | T1–T4 | `docs-structural` | Path-existence assertions in each owner's test. **Semantic falsifier** (structural presence proves nothing about content): row 8's token-floor gate plus row 7's hash round-trip. |
+| 7 | Rubric front-matter schema, exactly: `---\nrubric_id: <RubricId>\nversion: "<semver>"\ncanonical_hash: "<64-hex>"\n---\n<body>`. `compute_rubric_hash` hashes **body only**, LF-normalized (`\r\n` → `\n`), excluding front matter. | T1 | `parser-key` | `pytest-enforced` | `tests/test_rubric_assets.py`: CRLF body and LF body yield the **same** hash; a front-matter `version` edit does **not** change the hash; a one-character body edit **does** |
+
+### Cache-shape contracts
+
+| # | Contract | Owner | Enforcement | Falsifier |
+|---|---|---|---|---|
+| 8 | **Token floor.** Total measured system-prefix tokens per cache key ≥ **4,506** (`cl100k_base`) = 4,096 × 1.10. The 10% margin exists because `cl100k_base` is a proxy for Anthropic's tokenizer, not the tokenizer itself. Measured on the **total prefix**, not the annex, so the contract cannot go stale when a profile render changes. | T10-bis (gate); T2/T3/T4 size their annexes to meet it | `pytest-enforced` | **New** `tests/test_prompt_cache_token_floor.py`: one point-literal assertion per key (A, B, C) that the assembled prefix ≥ 4506, printing the measured margin. **Named semantic gap:** a proxy tokenizer cannot prove Anthropic cached anything — the live falsifier is G1's `cache_creation_input_tokens > 0`. |
+| 9 | **Single emitter.** No `cache_control` dict literal may appear anywhere outside `bishop_shared/prompt_cache.py`. All three gates obtain blocks from `cached_system_blocks`. **This is your verification duty.** `T7-bis` (Call 2 wiring owner) has already landed by the time you run. Assert the grep test green after T5/T6/T7-bis have landed; do not patch T7-bis's files if it is still red — HALT and open a new §7 row instead. | T1-bis (author); T10-bis (verify — this is you); T7-bis (removed the remaining Call 2 literal) | `pytest-enforced` | `tests/test_prompt_cache.py::test_no_inline_cache_control_literals` — tree grep over `bishop_shared/**` and `services/**` excluding `prompt_cache.py`; asserts zero hits. This is the mechanical guard for §5.4 C1. **You must run this specific test and paste its result as part of your own closure sweep** (see §3 below); HALT and open a new §7 row if it is not green. |
+| 10 | **Breakpoint placement.** Exactly **one** `cache_control` per request, on the **last** system block, on all three gates. Block order: key A `[profile_render, prefilter_rubric]`; key B `[call1_system, call1_rubric]`; key C `[profile_render(include_output=False), call2_rubric, call2_instructions]`. | T5 / T6 / T7-bis | `pytest-enforced` | Per-gate: `sum(1 for b in blocks if "cache_control" in b) == 1` **and** the index equals `len(blocks) - 1`. Both assertions required — a count-only test passes with the breakpoint on block 0. |
+| 11 | **Batch identity.** Every request within one batch carries byte-identical system blocks. Dynamic per-entry content stays in the user message. | T5 / T6 / T7-bis | `pytest-enforced` | Per-gate multi-entry test asserting all requests' `params["system"]` compare equal |
+
+### Error envelope
+
+| # | Contract | Owner | Enforcement | Falsifier |
+|---|---|---|---|---|
+| 12 | **Rubric hash-or-abort.** Each gate verifies its rubric asset before touching Anthropic: `compute_rubric_hash(path) != doc.canonical_hash` → abort the cycle, no submit. The abort mirrors the existing profile-hash abort in the *same module*. Asymmetry preserved deliberately: **pre-filter** additionally emits the existing CRITICAL alert path in `services/pre-filter-worker/app/alerts.py`; **stage1 and stage2 log only**, matching the M5 T4 deferral. Changing that asymmetry is out of scope. | T5 / T6 / T7-bis | `pytest-enforced` | Per-gate: tampered rubric body → Anthropic client **never called**; pre-filter additionally asserts the CRITICAL alert fired; stage1/stage2 assert log-only and **no** alert |
+| 13 | **Call 1 gains an abort path it did not have.** `stage1_loop` currently trusts the YAML `canonical_hash` without recompute (`_profile_render_hash`). This plan adds a rubric recompute-and-abort to Call 1 **without** changing `_profile_render_hash`'s profile semantics. | T6 | `pytest-enforced` | `tests/test_enrichment_batcher_stage1_loop.py`: rubric mismatch aborts; **and** a regression test asserting `_profile_render_hash` still returns `load_profile(path).canonical_hash` with no recompute |
+
+### Logging
+
+| # | Contract | Owner | Enforcement | Falsifier |
+|---|---|---|---|---|
+| 14 | **Poller cache-usage fields.** The existing completion `logger.info("<msg>", extra={...})` lines in all three `_handle_*_complete` functions gain exactly these keys: `cache_read_tokens`, `cache_write_tokens`, `input_tokens`, `output_tokens`, `cache_hit_ratio` (float, `cache_read / (cache_read + cache_write)`, `None` when both are zero). Existing keys (`batch_id`, `external_batch_id`, `event`, `passed`, `failed`/`rejected`) are unchanged. Idiom is preserved: static message string, structured `extra` dict, stdlib `logging`, no f-strings, no structlog. | T8 | `pytest-enforced` | `caplog`-based test per handler asserting the **exact key names** at the emit site (a logging-contract literal needs a print-key assertion, not adjacent line coverage). Plus a reserved-name test: none of the five keys collides with `logging.LogRecord` reserved attributes, since a collision raises at call time. |
+| 15 | **Zero-read warning.** When a completed batch reports `cache_read_tokens == 0 and cache_write_tokens == 0`, emit `logger.warning("no cache usage reported", extra={..., "event": "cache_read_zero"})`. This is the misconfiguration detector from strategy §15a. | T8 | `pytest-enforced` | Fixture with zero usage → warning emitted with `event="cache_read_zero"`; fixture with nonzero → **not** emitted (positive and negative path both required) |
+
+### Deployment
+
+| # | Contract | Owner | Enforcement | Falsifier |
+|---|---|---|---|---|
+| 16 | **Rubric assets are image-baked, never bind-mounted.** `services/pre-filter-worker/Dockerfile` and `services/enrichment-batcher/Dockerfile` gain `COPY config/prompts ./config/prompts`. `docker-compose.yml` **must not** contain any mount whose target is `/app/config/prompts`. Rationale (P1): the profiles mount already masks image-baked files with a hand-populated host dir; an empty-dir mount over baked rubrics would make all three gates abort with no repo-visible cause. Consequence accepted: a rubric change requires an image rebuild, which correctly couples the asset and its stamped hash to one artifact. | T1; verified T10-bis | `pytest-enforced` | `tests/test_prompt_cache.py::test_no_prompts_bind_mount` parses `docker-compose.yml` and asserts no mount targets `/app/config/prompts`. T1 additionally creates `config/prompts/` at its own commit so the new `COPY` cannot break the build in the window before T2–T4 land. |
+| 17 | **Mixed provenance is acknowledged, not fixed.** Key A's prefix = host-mounted profile render + image-baked rubric. A host-side profile edit changes key A without an image rebuild; the existing `_verify_profile_hash` abort is the only guard and it only fires if the stamped hash also moved. Not in scope to unify. | — | `deferred` | Follow-up **`FU-CACHE-MOUNT-01`**, owner = operator. Recorded so §5.2 A4 is a bound deferral, not a missed coupling. |
+
+### Config / amortization
+
+| # | Contract | Owner | Enforcement | Falsifier |
+|---|---|---|---|---|
+| 18 | **Typed env surface.** New and changed keys, each with a typed parse path in its own service `config.py` and a round-trip test. Pre-filter: `BISHOP_PREFILTER_BATCH_SIZE` (unchanged, 50), `BISHOP_PREFILTER_MIN_BATCH_SIZE` (**new**, 25), `BISHOP_PREFILTER_MAX_HOLD_MINUTES` (**new**, 120). Enrichment, **stage 1 and stage 2 tracked separately**: `BISHOP_ENRICHMENT_STAGE1_BATCH_SIZE` (10 → **50**), `BISHOP_ENRICHMENT_STAGE1_MIN_BATCH_SIZE` (**new**, 10), `BISHOP_ENRICHMENT_STAGE1_MAX_HOLD_MINUTES` (**new**, 120), and the identical STAGE2 triad. No `getattr`-papered defaults; every key parses through the typed path or the row is unsatisfied. | T9-bis | `pytest-enforced` | Per-key: default value, env override, and invalid-value handling. Plus a hold-deadline test (row 19). `tests/test_enrichment_batcher_config.py::test_enrichment_stage1_batch_size_default` and `::test_enrichment_stage2_batch_size_default` assert `50`. |
+| 19 | **No starvation.** Minimum-volume hold is bounded: a gate submits below `MIN_BATCH_SIZE` once `MAX_HOLD_MINUTES` has elapsed since that gate's last submit. The hold clock is per-gate and in-process; it resets on service restart, and that is accepted and documented. | T9-bis | `pytest-enforced` | Time-injected test: entries below min are held, then submitted after the deadline passes. **And** a negative test: a hash abort must not extend the hold indefinitely. |
+
+### Frozen surfaces
+
+| # | Contract | Owner | Enforcement | Falsifier |
+|---|---|---|---|---|
+| 20 | **Byte-unchanged through closure:** `bishop_shared/anthropic_config.py`, `bishop_shared/content_truncation.py`, `bishop_shared/batch_custom_id.py`, `eval/prefilter_v0/**`, `eval/prefilter_v1/items.json`, `eval/prefilter_v1/labels.json`, `services/state-worker/app/models/domain.py`, `services/state-worker/app/models/http.py`, `services/state-worker/app/transitions.py`, `services/state-worker/app/routers/parked.py`, `alembic/**`, `bishop_spec_0_6.md`, `config/profiles/professional_v1.0.0.yaml`. **Amendment banner (v1.4.0, round 4) — read before the SHA range below:** at T10's original dispatch this row's own mechanical post-check found `26b78b6` (a pre-plan commit, ancestor of this plan's opening commit `3682c38`) touching 6 of the 13 paths. **For row-20 frozen-path-emptiness purposes only**, the SHA range is re-baselined `26b78b6..<closure>`. This does **not** change the plan's overall baseline SHA or the declared-scope Files-to-touch union check below, both of which stay `b919fdb`. | T10-bis | `pytest-enforced` + closure `git diff` | **Your** kill criteria literalize the **full** path list and the re-baselined SHA range `26b78b6..<closure>`; a partial list is not a discharge. Immediately before your sweep and again before G1, re-run `git log <frozen paths>` — the assumption expires. |
+
+### Tests
+
+| # | Contract | Owner | Enforcement | Falsifier |
+|---|---|---|---|---|
+| 21 | pytest ≥8, files `tests/test_<area>_<topic>.py`, plain `def test_*() -> None` functions, `unittest.mock` / `httpx.MockTransport`, existing `_load_*_stack()` sys.path idiom for service imports. **No new `conftest.py`** (the repo has none). No new markers. **Declared command:** `pytest tests/ -m "not heavy"`. **Operative command:** identical — no §8 waiver scopes this gate. Collection parity is checked at plan time and again at closure. | all | `pytest-enforced` | You record the collected count and confirm the new test modules are actually collected |
+
+### Vocabulary (binding glossary — resolves Flag 8, copied verbatim into every packet)
+
+| # | Term | In this plan it means | It does **not** mean |
+|---|---|---|---|
+| 22 | **cached prefix** / **prefix** | The concatenated `system` content blocks up to and including the block bearing `cache_control`. | The user message; the Call 1 content tail |
+| 22 | **4096** | Claude Haiku 4.5's minimum cacheable prefix, in tokens. Plan target with margin: **4,506**. | The Call 1 `content_raw` truncation ceiling |
+| 22 | **4000** | The Call 1 user-tail truncation ceiling in `content_truncation.py` (spec §13.1). **Frozen; unrelated to caching.** | Any cache floor |
+| 22 | **profile hash** / `canonical_hash` (profile) | SHA-256 of the JSON-canonical **YAML dict minus `canonical_hash`**. Not the rendered text. | The rendered prompt hash the spec §7.3 prose describes |
+| 22 | **rubric hash** / `canonical_hash` (rubric) | SHA-256 of the rubric **body only**, LF-normalized, front matter excluded. | The profile hash; a composite |
+| 22 | **`profile_render_hash`** | The existing `BatchRecord` column. Semantics **unchanged** by this plan despite its name. | Anything this plan recomputes |
+| 22 | **system** | The Anthropic `params.system` field, a **list of content blocks** after this plan on all three gates. | A plain string |
+
+### Deferred rows
+
+| # | Deferred contract | Why not closed here | What forces it open | Owner |
+|---|---|---|---|---|
+| 23 | `bishop_spec_0_6.md` §12.1/§12.3 keep asserting Phase 1.5 needs "no code change" and imply a ~1,024 floor, directly contradicting what this plan builds. | Operator decision D6. | Any future reader treating the spec as current on caching. | **`FU-CACHE-SPEC-01`** — operator, outside this plan |
+| 24 | Key A's mixed provenance (host-mounted profile + baked rubric) — see row 17. | Unifying the deployment model is a separate ops change with live-traffic risk. | A host-side profile edit that changes cache key A without a rebuild. | **`FU-CACHE-MOUNT-01`** — operator |
+| 25 | Call 2 hash mismatch is log-only (no CRITICAL alert), inherited from M5 T4. | Pre-existing asymmetry; changing it widens scope beyond caching. | An unnoticed Call 2 abort during backfill. | **`FU-CACHE-ALERT-01`** — future milestone |
+
+### Decision log path
+
+**`.dev/decision-logs/prompt-caching/T<n>-<slug>.md`** — required for every `architectural` subtask (T1-bis, T2, T3, T4, T6, T7-bis, T9-bis). Neither `T10` nor `T10-bis` is architectural tier, so neither requires one.
+
+### CHANGELOG convention
+
+`CHANGELOG.MD` is a Files-to-touch entry on **every** subtask in this plan, not only T10-bis. Each subtask appends its own bullet in its own commit.
+
+## 3. Your subtask
+
+### T10-bis — Continuation of T10: closeout, token-floor gate, docs, tracked artifacts, scope sweep (amendment round 4, v1.4.0)
+
+| Field | Content |
+|---|---|
+| **ID** | `T10-bis` |
+| **Scope** | Re-run T10's full original closeout DoD, unchanged, from current HEAD: prove all three cache keys clear the floor, refresh the as-built caching docs, ensure every plan artifact is tracked, and run the declared-scope sweep. Writes no production code. |
+| **Files to touch** | `tests/test_prompt_cache_token_floor.py` (new), `tests/test_prompt_cache.py` (**verify only** — do not edit its content), `.dev/llm-models-and-cache.md`, `.dev/caching_strategy.md` (checklist boxes only — §18 wiring/ops items this plan lands; the **spec** group stays unchecked per D6), `.dev/plans/prompt-caching/plan.md` (§8 back-fill), `.dev/plans/prompt-caching/artifacts/T10-closure-report.md` (new — records this is the T10-bis closure, not T10's), `CHANGELOG.MD` |
+| **Contract bindings** | Rows 8, 9 (verifier), 16, 20 (verifier, under the re-baselined range), 21. |
+| **Inputs** | T1-bis (row-9 grep test), T5, T6, T7-bis, T8, T9-bis |
+| **Outputs** | Token-floor gate with one point-literal assertion per key and the measured margins; refreshed as-built table; checked strategy §18 boxes for landed items only; closure report carrying the clean-worktree test counts, the collected-test count, the frozen-path `git log` output (re-baselined range), the declared-scope `git diff --stat` (unchanged `b919fdb` range), **and the row-9 verification result**; §8.1–§8.5 back-filled |
+| **Kill criteria** | **(mechanical post-check)** Run the §8.1 verification in a **detached worktree** at the closure SHA — not the working tree — and paste raw passed/failed/skipped/errored counts. In-tree counts do not discharge this: `config/prompts/**` is baked-and-tracked, but the profiles the tests read come from a host directory, so a fresh checkout is the only way to see what a clone sees. **(mechanical post-check)** As part of that same run, isolate and paste the result of `pytest tests/test_prompt_cache.py::test_no_inline_cache_control_literals` specifically. Call 2's migrator, T7-bis, has already landed. HALT — opening a **new** §7 row, not a silent fix here — if it is still red at your closure sweep; do not weaken the test or patch T7-bis's files yourself to make it pass. **(mechanical post-check, amendment round 4)** Re-run `git log 26b78b6..HEAD -- <full row-20 path list, literalized inline in this packet>` and paste the output; the frozen-path assumption expires and a partial path list is not a discharge. **This range starts at `26b78b6`, not `b919fdb`** — that substitution is this amendment's whole point; do not revert it. If the output is **still non-empty**, HALT and open a **new** §7 row — do not waive further paths yourself and do not patch the offending file. **(mechanical post-check)** Run `git diff --stat b919fdb..HEAD` (this range is **unchanged** by this amendment — do not substitute `26b78b6` here) and fail on any tracked change outside the union of all **fourteen** executable subtasks' declared Files to touch (T1-bis, T9-bis, T7-bis, and T10-bis included; T1, T9, T7, and T10 excluded since none ever committed). **No production edits during verification** — if the sweep surfaces a defect, HALT and route to §7; do not fix it inside the verification window. HALT if any strategy §18 **spec** checkbox is ticked (D6 leaves them open). |
+| **Log tier** | `standard` |
+| **Model class** | `standard` |
+| **Risks & mitigations** | This subtask writes narrative and therefore must **not** own any self-hash recomputation; none is asserted in this plan, so no terminal hash subtask is required. Its own Files-to-touch excludes every production path, which makes the "no production edits during verification" fence mechanically checkable. |
+
+## 4. Load-bearing assumptions that name this subtask
+
+**A2** · `derived` — premise: strategy §1b citing Anthropic docs as of 2026-06-14
+```
+(Claude Haiku 4.5's minimum cacheable prefix is 4096 tokens | §2 row 8 token-floor gate | if the real floor is higher or has changed, all three annexes are authored to a wrong target and nothing caches while every test is green | T2,T3,T4,T10-bis)
+```
+Falsifiable only by G1's live `cache_creation_input_tokens`. The 10% margin in row 8 exists to absorb a small error in this premise, not a large one.
+
+**A3** · `derived` — premise: `cl100k_base` approximates Anthropic's tokenizer
+```
+(cl100k_base token counts are a safe proxy for Anthropic's own tokenization | §2 row 8 + tests/test_prompt_cache_token_floor.py | an annex measured at 4,100 tokens could be under 4,096 for Anthropic and silently not cache, with a green test suite asserting otherwise | T2,T3,T4,T10-bis)
+```
+This is why row 8 targets **4,506** rather than 4,096. G1 is the real falsifier; the gate test is a proxy check that can only fail loudly, never pass truthfully.
+
+**A4** · `invariant`
+```
+(The host-mounted profile copy and the repo copy stay byte-identical | docker-compose.yml:52,84 mount ${BISHOP_DATA_ROOT}/profiles + profile_renderer._verify_profile_hash | a host-side profile edit changes cache key A with no repo diff and no image rebuild; hash-or-abort catches it only if the stamped hash also moved | T5,T10-bis)
+```
+Verified at planning time — both pinned files hash-match between host and repo (`1FD10EA6…04A7`, `1B46A23C…EE9D`). Bound as deferred §2 row 24 / `FU-CACHE-MOUNT-01`.
+
+**A7** · `invariant`
+```
+(config/prompts has no compose bind mount | §2 row 16 + docker-compose.yml | mounting an empty host dir over the baked rubrics makes resolve_rubric_path point at nothing, and all three gates abort with no repo-visible cause — exactly the masking that already hides the baked config/profiles | T1,T10-bis)
+```
+Confirmed mechanism at planning time: the container's `/app/config` holds only `profiles`, and its two files come from the host mount, not the image.
+
+**A8** · `invariant`
+```
+(The spec's Phase 1.5 "no code change" language stays uncorrected and executors will not halt on it | §2 row 23 deferred + D6 | an executor reads bishop_spec_0_6.md §12.3 as authority and halts, or hedges its implementation to match a document the operator has chosen not to fix | all subtasks)
+```
+Mitigated structurally: every packet carries an explicit line marking the spec informational and known-stale on caching.
+
+**A9** · `derived` — premise: compose state observed at planning time
+```
+(A live stack is available for G1 | §3 gate G1 | if compose is down or the ANTHROPIC_API_KEY is unset at gate time, G1 cannot run and the plan's only real cache falsifier disappears, leaving A2 and A3 unfalsified | T10-bis,G1)
+```
+Compose was verified up (nine containers, `state-worker` healthy). Note `.env` leaves `ANTHROPIC_API_KEY` commented, so it must come from a Windows user env var — G1's condition includes confirming the key resolves before the run counts.
+
+## 5. Hidden couplings that name this subtask
+
+**C11** · **ruled out**
+```
+(BatchRecord / BatchPatchRequest / Alembic if usage columns were chosen | state-worker domain.py + http.py + transitions.py + alembic m1_001/m3_001)
+```
+**Ruled out** by the context map's own stated disproof condition: operator chose logs-only (D8), and no `domain.py`, `http.py`, `transitions.py`, or `alembic/**` path appears in any subtask's Files to touch. Additionally frozen by row 20, so the premise cannot quietly reappear mid-execution.
+
+**C12** · **ruled out**
+```
+(4096 cache floor confused with the 4000-token Call 1 user tail | bishop_shared/content_truncation.py cl100k_base 4000 vs the Haiku 4096 floor)
+```
+**Ruled out** by the map's own condition: `content_truncation.py` appears in no subtask's Files to touch and is frozen (row 20), and §2 row 22 binds the two numbers as distinct terms in every packet.
+
+## 6. Coordination
+
+You are the final executable node and the sole sink before gate G1. You depend on T1-bis, T5, T6, T7-bis, T8 and T9-bis all being committed (all six are already committed by the time you run). Your Files to touch contain NO production code path, and that is deliberate: it makes your own "no production edits during verification" fence mechanically checkable against your diff. If your sweep surfaces a defect, HALT and route it to the plan's section 7 amendment path — do not fix it inside the verification window, because a production edit landing inside your verification commit is exactly what the sweep exists to catch.
+
+**Row-9 verification duty.** §2 row 9's amendment banner assigns you verification ownership of `tests/test_prompt_cache.py::test_no_inline_cache_control_literals`. T1-bis authored this test; T7-bis migrated Call 2 off its inline literal. By the time you run, T7-bis has landed, so this test should be green. Run it explicitly and paste the result as part of your closure sweep; if it is red, that is a **new** finding, and you open a new §7 row for it rather than patching T7-bis's files yourself.
+
+**Row-20 verification duty, re-baselined (this is the amendment that created you).** §2 row 20's amendment banner (round 4) re-baselines the frozen-path SHA range to `26b78b6..HEAD` for this row only. T10 (your predecessor) ran the check against the old range `b919fdb..HEAD` and found `26b78b6` itself as the sole offending commit — a pre-plan commit, not a subtask regression. You run the check against the corrected range. If it is **still** non-empty, that is a genuinely new finding (something landed after `26b78b6` touched a frozen path), and you HALT and open a new §7 row rather than waiving it or patching the file.
+
+## 7. Resolved inputs
+
+From T1-bis: `tests/test_prompt_cache.py::test_no_inline_cache_control_literals` (verification of its pass state is your row-9 duty). From T5, T6, T7-bis: the three wired gates. From T8: the poller cache-usage log fields. From T9-bis: the amortization config. All supplied at execution time as committed code (current HEAD). Measured planning-time baselines for your token-floor gate, all cl100k_base: professional_v1.0.0 render = 383; professional_v1.2.0 render = 1882; professional_v1.2.0_soft_launch render = 2280; build_call1_system_prompt() = 267; Call 2 post-breakpoint instructions = 82. The plan target is 4,506 tokens per key (4,096 x 1.10). Plan-time pytest configuration, confirmed: pyproject.toml declares only testpaths = ["tests"] and pythonpath = ["."], with no addopts and no declared markers, so `pytest tests/ -m "not heavy"` deselects only the single @pytest.mark.heavy test in tests/test_g5_quality_gate.py.
+
+**Two different baseline SHAs are in play — do not conflate them.** The plan's overall baseline SHA, used for the declared-scope Files-to-touch union sweep, is `b919fdba09e07a77700d57cf3b360c001058bb84` — **unchanged by this amendment**. The row-20 frozen-path range, and **only** the row-20 frozen-path range, is re-baselined by this amendment to `26b78b68c040eac72e6fd5768e12115175845e21`.
+
+**Frozen-path list, literalized here because a cross-reference is not a discharge.** Your row-20 kill criterion requires `git log 26b78b68c040eac72e6fd5768e12115175845e21..HEAD -- <these paths>` to return empty, and you must paste the output: bishop_shared/anthropic_config.py, bishop_shared/content_truncation.py, bishop_shared/batch_custom_id.py, eval/prefilter_v0/, eval/prefilter_v1/items.json, eval/prefilter_v1/labels.json, services/state-worker/app/models/domain.py, services/state-worker/app/models/http.py, services/state-worker/app/transitions.py, services/state-worker/app/routers/parked.py, alembic/, bishop_spec_0_6.md, config/profiles/professional_v1.0.0.yaml. That is thirteen paths; a check run against fewer is not a discharge. Your declared-scope `git diff --stat` kill criterion, separately, still runs against `b919fdba09e07a77700d57cf3b360c001058bb84..HEAD` — do not substitute `26b78b6` there.
