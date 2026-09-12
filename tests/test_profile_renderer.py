@@ -158,3 +158,45 @@ def test_legacy_profiles_default_peripheral_disposition_pass() -> None:
     profile = load_profile(V1_2_PROFILE_PATH)
     assert profile.peripheral_disposition == "pass"
     assert "Pass them with decision 1" in render_profile_prompt(profile)
+
+
+# prompt-caching plan T1 — §2 row 3: render_profile_prompt(profile, *, include_output=True).
+# Default True must be byte-for-byte identical to the pre-change render (pinned below).
+_SOFT_LAUNCH_DEFAULT_RENDER_LEN = 10799
+_SOFT_LAUNCH_DEFAULT_RENDER_SHA256 = (
+    "2518f24b3df2736b19d34c6129bdc35a37529ce116902331c371e1df84d630fd"
+)
+
+
+def test_default_render_is_byte_identical_to_pre_change_pin() -> None:
+    import hashlib
+
+    profile = load_profile(SOFT_LAUNCH_PROFILE_PATH)
+    rendered = render_profile_prompt(profile)
+    assert len(rendered) == _SOFT_LAUNCH_DEFAULT_RENDER_LEN
+    assert hashlib.sha256(rendered.encode("utf-8")).hexdigest() == _SOFT_LAUNCH_DEFAULT_RENDER_SHA256
+    # include_output defaults to True and must match calling it explicitly.
+    assert rendered == render_profile_prompt(profile, include_output=True)
+
+
+def test_include_output_false_omits_output_section_and_nothing_else() -> None:
+    profile = load_profile(SOFT_LAUNCH_PROFILE_PATH)
+    with_output = render_profile_prompt(profile, include_output=True)
+    without_output = render_profile_prompt(profile, include_output=False)
+
+    assert "## Output format" in with_output
+    assert "## Output format" not in without_output
+    assert profile.output.instruction.strip() not in without_output
+
+    # Nothing else differs: reconstruct with_output by re-appending the
+    # output section that include_output=False dropped.
+    output_block = "\n\n## Output format\n\n" + profile.output.instruction.rstrip()
+    assert without_output.rstrip("\n") + output_block + "\n" == with_output
+
+
+def test_include_output_false_does_not_change_hash_inputs() -> None:
+    """include_output only changes rendering, never the profile's canonical_hash."""
+    profile = load_profile(SOFT_LAUNCH_PROFILE_PATH)
+    assert compute_profile_hash(SOFT_LAUNCH_PROFILE_PATH) == profile.canonical_hash
+    render_profile_prompt(profile, include_output=False)
+    assert compute_profile_hash(SOFT_LAUNCH_PROFILE_PATH) == profile.canonical_hash

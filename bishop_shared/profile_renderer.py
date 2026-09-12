@@ -115,8 +115,15 @@ def load_profile(path: Path) -> ProfileDocument:
     return ProfileDocument.model_validate(_load_yaml_dict(path))
 
 
-def render_profile_prompt(profile: ProfileDocument) -> str:
-    """Deterministic Anthropic system prompt from profile fields (not hashed)."""
+def render_profile_prompt(profile: ProfileDocument, *, include_output: bool = True) -> str:
+    """Deterministic Anthropic system prompt from profile fields (not hashed).
+
+    ``include_output`` defaults to ``True`` so every existing call site is
+    byte-for-byte unchanged. Pass ``False`` to omit the "## Output format"
+    section — used by enrichment Call 2, whose gate-1-specific output
+    instruction (e.g. a binary decision) would otherwise contradict the
+    relevance-scoring schema supplied elsewhere in that gate's prompt.
+    """
     sections: list[str] = [profile.context.rstrip()]
 
     sections.append("## Evaluation principles")
@@ -160,7 +167,8 @@ def render_profile_prompt(profile: ProfileDocument) -> str:
                 f'- "{example.title}" -> {verdict}\n  {" ".join(example.why.split())}'
             )
 
-    sections.append("## Output format")
-    sections.append(profile.output.instruction.rstrip())
+    if include_output:
+        sections.append("## Output format")
+        sections.append(profile.output.instruction.rstrip())
 
     return "\n\n".join(sections) + "\n"
