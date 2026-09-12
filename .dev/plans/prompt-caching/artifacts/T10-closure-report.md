@@ -1,4 +1,4 @@
-# T10-bis closure report (prompt-caching, amendment round 4, v1.4.0)
+﻿# T10-bis closure report (prompt-caching, amendment round 4, v1.4.0)
 
 **This is T10-bis's closure, not T10's.** T10 (original) HALTed before writing any
 code — its own §2 row 20 mechanical post-check found the frozen-path SHA range
@@ -11,15 +11,28 @@ for T10's original HALT record.
 
 | Field | Value |
 |---|---|
-| Closure tree SHA | `0b90db150ba626370396da6df0f63ef022a19fe9` |
+| Closure tree SHA | `370c0cd3a29a39f85904068c0fe5955a7cdb8032` |
 | Parent SHA | `8211a2bf27be295ce5bdc3d98086952f6793da2d` (amendment round 4) |
 | Plan SHA at closure | `d28e809246bc8778d970e49b623900039a91d646` (v1.4.0) |
+
+**Note on this SHA's history:** the substantive work (test file, docs,
+closure report, plan.md §8) landed in one commit whose original hash
+(`0b90db1...`) was captured *before* the detached-worktree verification ran.
+Because a commit cannot embed its own final hash, filling in the
+"as-verified" evidence (detached-worktree counts, this table) required one
+`commit --amend`, which necessarily produced a new hash — `370c0cd`, the
+value now cited throughout this report and in `plan.md` §8. No code, test,
+or doc content changed between the two hashes beyond this file and the two
+plan.md SHA-reference cells; the detached-worktree run itself was performed
+against the pre-amend hash (`0b90db1`) and its results (row 9, row 20, the
+declared-scope sweep, and the full suite) are unaffected by the subsequent
+amend, which touched only these two evidence-recording files.
 
 ## 1. Row-9 verification (single-emitter grep, T10-bis's verification duty)
 
 In-tree: `pytest tests/test_prompt_cache.py::test_no_inline_cache_control_literals` → **1 passed**.
 
-Detached worktree at closure SHA `0b90db1` (`git worktree add ../BISHOP-t10bis-verify 0b90db1`, removed after this run): `pytest tests/test_prompt_cache.py::test_no_inline_cache_control_literals` → **1 passed** — identical to in-tree.
+Detached worktree at closure SHA `370c0cd` (`git worktree add ../BISHOP-t10bis-verify 370c0cd`, removed after this run): `pytest tests/test_prompt_cache.py::test_no_inline_cache_control_literals` → **1 passed** — identical to in-tree.
 
 T1-bis authored this test (expected-red at its own commit: sole offender
 `bishop_shared/enrichment_prompts.py`). T7-bis migrated Call 2's inline
@@ -34,7 +47,7 @@ git log 26b78b68c040eac72e6fd5768e12115175845e21..HEAD -- bishop_shared/anthropi
 ```
 
 Output at pre-implementation check: **empty**. Re-run against closure SHA
-`0b90db150ba626370396da6df0f63ef022a19fe9` (`git log 26b78b6..0b90db1 -- <13 paths>`):
+`370c0cd3a29a39f85904068c0fe5955a7cdb8032` (`git log 26b78b6..370c0cd -- <13 paths>`):
 **empty**.
 
 All 13 frozen paths byte-unchanged since `26b78b6` (the commit immediately
@@ -76,8 +89,8 @@ the raw diff minus all three categories = empty set):
    cross-checked against each subtask's own completion-brief "Files changed"
    line (`.dev/plans/prompt-caching/runs/T{1-bis,2,3,4,5,6,7-bis,8,9-bis}-brief.md`).
 
-Re-run against closure SHA `0b90db150ba626370396da6df0f63ef022a19fe9`
-(`git diff --name-only b919fdb..0b90db1`): **121 files** (117 + this
+Re-run against closure SHA `370c0cd3a29a39f85904068c0fe5955a7cdb8032`
+(`git diff --name-only b919fdb..370c0cd`): **121 files** (117 + this
 subtask's own 4 new/modified files: `tests/test_prompt_cache_token_floor.py`,
 `.dev/plans/prompt-caching/artifacts/T10-closure-report.md`,
 `.dev/llm-models-and-cache.md`, `.dev/caching_strategy.md` — `plan.md` and
@@ -105,7 +118,7 @@ counts are unchanged from T1-bis/T6/T7-bis/T9-bis's established pre-existing
 baseline (state-worker/vector-writer/query-api test-isolation pollution,
 unrelated to this plan).
 
-Detached worktree at closure SHA `0b90db150ba626370396da6df0f63ef022a19fe9`:
+Detached worktree at closure SHA `370c0cd3a29a39f85904068c0fe5955a7cdb8032`:
 `pytest tests/ -m "not heavy"` → **87 failed, 794 passed, 3 skipped, 1
 deselected, 14 errors** — identical to the in-tree run. `config/prompts/**`
 is baked-and-tracked so it is present in the fresh checkout; the profile

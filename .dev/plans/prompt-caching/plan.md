@@ -1,4 +1,4 @@
-# Plan — prompt-caching
+﻿# Plan — prompt-caching
 
 **Version:** 1.4.0
 **run_status:** `amended`
@@ -774,12 +774,12 @@ Routing for what comes later, so the path is not invented under pressure:
 
 | Field | Value |
 |---|---|
-| Closure tree SHA | `0b90db150ba626370396da6df0f63ef022a19fe9` — see `.dev/plans/prompt-caching/artifacts/T10-closure-report.md` for the same SHA and the full evidence trail |
+| Closure tree SHA | `370c0cd3a29a39f85904068c0fe5955a7cdb8032` — see `.dev/plans/prompt-caching/artifacts/T10-closure-report.md` for the same SHA and the full evidence trail |
 | Verification command (declared **and** operative — identical, no waiver) | `pytest tests/ -m "not heavy"` |
 | Run environment | detached worktree at the closure SHA — **not** the working tree (see closure report §4) |
 | Raw counts | detached worktree: `87 failed, 794 passed, 3 skipped, 1 deselected, 14 errors`; in-tree pre-commit cross-check: identical |
 | Collected count | `tests/test_prompt_cache.py` (9 tests), `tests/test_rubric_assets.py`, and `tests/test_prompt_cache_token_floor.py` (3 tests, new this subtask) all confirmed collected — `87 failed / 794 passed` is +3 over T7-bis's last recorded 791-passed baseline, exactly this subtask's own 3 new tests, with failed/error counts unchanged |
-| Per-subtask commit map | `8d9af01` T1-bis · `d0f37d3` T2 · `c6d9f80` T3 · `e4b7e9d` T4 · `eb9b873` T5 · `ba49bb1` T6 · `1fe3ef4` T7-bis · `c8fc67d` T8 · `c47248e` T9-bis · `0b90db1` T10-bis — one subtask per commit, none carries more than one subtask ID |
+| Per-subtask commit map | `8d9af01` T1-bis · `d0f37d3` T2 · `c6d9f80` T3 · `e4b7e9d` T4 · `eb9b873` T5 · `ba49bb1` T6 · `1fe3ef4` T7-bis · `c8fc67d` T8 · `c47248e` T9-bis · `370c0cd` T10-bis — one subtask per commit, none carries more than one subtask ID |
 
 **Plan-time collection parity check (done now):** `pyproject.toml` declares `testpaths = ["tests"]`, `pythonpath = ["."]`, no `addopts`, and no declared markers. `-m "not heavy"` therefore filters only the single `@pytest.mark.heavy` test in `tests/test_g5_quality_gate.py` and collects everything else in `tests/`, including new modules. The command gates what it claims to gate.
 
