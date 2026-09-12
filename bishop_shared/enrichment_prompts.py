@@ -61,8 +61,20 @@ def build_call1_user_message(title: str, truncated_content: str) -> str:
     return f"Title: {title}\nContent: {truncated_content}"
 
 
-def build_call2_system_prompt(profile_prompt: str) -> list[dict[str, object]]:
-    """Return Anthropic system content blocks with ephemeral cache_control on profile."""
+def build_call2_system_prompt(profile_prompt: str, rubric_body: str) -> list[dict[str, object]]:
+    """Appendix A Call 2 system content blocks (cache key C, §2 row 10).
+
+    Block order is ``[profile_render, call2_rubric, call2_instructions]``;
+    ``cached_system_blocks`` attaches the sole ``cache_control`` breakpoint
+    to the last block (the instructions), so the entire static prefix —
+    profile render, rubric annex, and schema instructions — is covered by
+    one cacheable span. ``profile_prompt`` must already be rendered with
+    ``render_profile_prompt(profile, include_output=False)`` by the caller
+    (stage2_loop) — this function does not strip the gate-1 output
+    instruction itself (§5.4 C4). ``rubric_body`` is the already
+    hash-verified rubric text from the caller's hash-or-abort gate (§2 row
+    12); this function does not load or verify the rubric file itself.
+    """
     instructions = (
         "Evaluate the relevance of the provided content to the profile above.\n"
         "Respond only with a valid JSON object matching the schema below.\n\n"
@@ -74,17 +86,7 @@ def build_call2_system_prompt(profile_prompt: str) -> list[dict[str, object]]:
         "to the profile's owner\"\n"
         "}"
     )
-    return [
-        {
-            "type": "text",
-            "text": profile_prompt,
-            "cache_control": {"type": "ephemeral"},
-        },
-        {
-            "type": "text",
-            "text": instructions,
-        },
-    ]
+    return cached_system_blocks(profile_prompt, rubric_body, instructions)
 
 
 def build_call2_user_message(title: str, summary: str) -> str:

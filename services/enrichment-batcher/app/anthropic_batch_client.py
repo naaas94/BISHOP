@@ -93,10 +93,18 @@ class AnthropicBatchClient:
         self,
         *,
         profile_prompt: str,
+        rubric_body: str,
         entries: list[Stage2BatchEntry],
     ) -> list[dict[str, Any]]:
-        """Build Call 2 wire payload with cache_control system blocks."""
-        system_blocks = build_call2_system_prompt(profile_prompt)
+        """Build wire payload; exposed for contract tests asserting custom_id encoding.
+
+        ``system`` is the cache key C content-block list from
+        ``build_call2_system_prompt`` (§2 rows 5/10/11) — built once per
+        batch so every request in the batch shares byte-identical system
+        blocks. ``rubric_body`` is the caller's already hash-verified call2
+        rubric text (§2 row 12).
+        """
+        system_blocks = build_call2_system_prompt(profile_prompt, rubric_body)
         requests: list[dict[str, Any]] = []
         for entry in entries:
             requests.append(
@@ -124,10 +132,13 @@ class AnthropicBatchClient:
         self,
         *,
         profile_prompt: str,
+        rubric_body: str,
         entries: list[Stage2BatchEntry],
     ) -> AnthropicBatchSubmitResult:
         """Submit Call 2 batch to Anthropic; raises BadRequestError on HTTP 400."""
-        requests = self.build_stage2_requests(profile_prompt=profile_prompt, entries=entries)
+        requests = self.build_stage2_requests(
+            profile_prompt=profile_prompt, rubric_body=rubric_body, entries=entries
+        )
         batch = self._client.messages.batches.create(requests=requests)
         return AnthropicBatchSubmitResult(
             external_batch_id=batch.id,
@@ -156,11 +167,14 @@ def submit_stage2_batch_or_fatal(
     client: AnthropicBatchClient,
     *,
     profile_prompt: str,
+    rubric_body: str,
     entries: list[Stage2BatchEntry],
 ) -> AnthropicBatchSubmitResult | None:
     """Submit Call 2 batch; log structured 400 event and return None on HTTP 400."""
     try:
-        return client.submit_stage2_batch(profile_prompt=profile_prompt, entries=entries)
+        return client.submit_stage2_batch(
+            profile_prompt=profile_prompt, rubric_body=rubric_body, entries=entries
+        )
     except BadRequestError as exc:
         event = anthropic_batch_400_event(exc)
         logger.error(

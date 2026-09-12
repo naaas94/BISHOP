@@ -5,6 +5,8 @@
 
 ## Chosen approach
 
+> **Superseded by T7-bis** (`.dev/decision-logs/prompt-caching/T7-bis-call2-breakpoint-move.md`, prompt-caching plan v1.3.0): the `cache_control` breakpoint on the profile block described below has moved to the last of a three-block `[profile_render, call2_rubric, call2_instructions]` system, gained `ttl: "1h"`, and the profile block is now rendered with `include_output=False`. The description immediately below reflects the pre-T7-bis (M5 T4) state only.
+
 - Added `stage2_cycle()` in `services/enrichment-batcher/app/stage2_loop.py`: poll `ENRICHMENT_STAGE2_QUEUED`, verify profile hash via `compute_profile_hash` vs YAML `canonical_hash` (pre-filter-worker pattern), submit Call 2 Anthropic batch with `build_call2_system_prompt` (ephemeral `cache_control` on profile block), register `enrichment_stage2` batch via state-worker.
 - Extended `AnthropicBatchClient` with `build_stage2_requests` / `submit_stage2_batch`; Call 2 user message uses **title + summary only** — never `content_raw`.
 - Dual-task scheduler in `main.py` runs `asyncio.gather(stage1_cycle, stage2_cycle)` each interval on a shared `StateWorkerClient`.
@@ -14,7 +16,7 @@
 
 - **Reuse stage1 `_profile_render_hash` (canonical only, no compute):** Rejected — Call 2 must detect tampered profile at batch time per error envelope; pre-filter `compute_profile_hash` comparison is the binding pattern.
 - **Sequential stage1 then stage2 per tick:** Rejected — plan charter specifies dual asyncio tasks; `gather` allows both stages to progress within the same poll interval.
-- **Omit `cache_control` when profile is short:** Rejected — spec Appendix A requires ephemeral cache on profile block; Anthropic may no-op below caching threshold.
+- **Omit `cache_control` when profile is short:** Rejected — spec Appendix A requires ephemeral cache on profile block; Anthropic may no-op below caching threshold. *(Superseded context: T7-bis's rubric annex plus the `ttl: "1h"` breakpoint move made this moot — the wired key-C prefix now clears the token floor without relying on the profile block alone.)*
 
 ## Assumptions made
 
@@ -24,6 +26,6 @@
 
 ## Items deferred
 
-- **Profile below Anthropic caching threshold:** `cache_control` still emitted per spec; caching may be no-op until profile grows — acceptable per plan risk note.
-- **CRITICAL alert on profile hash mismatch:** enrichment-batcher logs `event=profile_hash_mismatch` only; pre-filter-worker emits `emit_profile_hash_mismatch_alert` — not in T4 error envelope for enrichment-batcher.
+- **Profile below Anthropic caching threshold:** `cache_control` still emitted per spec; caching may be no-op until profile grows — acceptable per plan risk note. **Closed by T7-bis:** the wired key-C prefix (profile render `include_output=False` + `call2_rubric_v1.md` annex + Call 2 instructions) clears the 4,506-token floor with margin (T4's rubric decision log has the measurement); this deferral no longer applies.
+- **CRITICAL alert on profile hash mismatch:** enrichment-batcher logs `event=profile_hash_mismatch` only; pre-filter-worker emits `emit_profile_hash_mismatch_alert` — not in T4 error envelope for enrichment-batcher. Still open — unchanged by T7-bis (row 12 asymmetry is deliberate; see `FU-CACHE-ALERT-01`).
 - **Orchestrator packet files-to-touch amendment:** supporting `app/` files touched beyond explicit T4 list; no functional gap.

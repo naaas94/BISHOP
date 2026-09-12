@@ -80,12 +80,49 @@ def test_call1_system_prompt_fresh_blocks_each_call() -> None:
     assert first[-1] is not second[-1]
 
 
-def test_call2_system_has_cache_control() -> None:
-    blocks = build_call2_system_prompt("profile text here")
+def test_call2_system_is_three_block_list_with_rubric_annex_second() -> None:
+    """Row 10 block order for cache key C: [profile_render, call2_rubric,
+    call2_instructions]. ``rubric_body`` is threaded in by the caller
+    (stage2_loop's hash-or-abort gate) — this builder does not load it."""
+    blocks = build_call2_system_prompt("profile text here", "rubric body here")
     assert isinstance(blocks, list)
-    assert blocks[0]["cache_control"] == {"type": "ephemeral"}
+    assert len(blocks) == 3
+    for block in blocks:
+        assert block["type"] == "text"
     assert blocks[0]["text"] == "profile text here"
-    assert blocks[0]["type"] == "text"
+    assert blocks[1]["text"] == "rubric body here"
+    assert "relevance_score" in blocks[2]["text"]
+
+
+def test_call2_system_single_cache_control_breakpoint_on_last_block() -> None:
+    """Row 10 falsifier: exactly one cache_control, and it is on the last block —
+    a count-only assertion would pass even with the breakpoint on block 0
+    (the pre-move shape this subtask retires)."""
+    blocks = build_call2_system_prompt("profile text here", "rubric body here")
+    cache_control_indices = [i for i, b in enumerate(blocks) if "cache_control" in b]
+    assert cache_control_indices == [len(blocks) - 1]
+    assert blocks[-1]["cache_control"] == {"type": "ephemeral", "ttl": CACHE_TTL}
+
+
+def test_call2_system_prompt_fresh_blocks_each_call() -> None:
+    """No aliasing across calls — cached_system_blocks contract (row 1d)."""
+    first = build_call2_system_prompt("profile text here", "rubric body here")
+    second = build_call2_system_prompt("profile text here", "rubric body here")
+    assert first == second
+    assert first is not second
+    assert first[-1] is not second[-1]
+
+
+def test_call2_system_prompt_does_not_reintroduce_gate1_output_contract() -> None:
+    """C4: the assembled prefix must not carry a ``{"decision": ...}``
+    instruction anywhere. The caller (stage2_loop) is responsible for
+    passing a profile_prompt already rendered with include_output=False —
+    this builder must not concatenate anything that reintroduces it."""
+    blocks = build_call2_system_prompt(
+        "profile text without an output section", "rubric body here"
+    )
+    for block in blocks:
+        assert '"decision"' not in block["text"]
 
 
 def test_call2_user_message_shape() -> None:

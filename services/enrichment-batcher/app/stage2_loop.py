@@ -26,6 +26,7 @@ from bishop_shared.profile_renderer import (
     render_profile_prompt,
     resolve_profile_path,
 )
+from bishop_shared.rubric_assets import compute_rubric_hash, load_rubric, resolve_rubric_path
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,12 @@ def _now() -> float:
 
 
 def _verify_profile_hash(profile_path: Path) -> tuple[str, str, str] | None:
-    """Return (profile_version, render_hash, profile_prompt) or None on mismatch."""
+    """Return (profile_version, render_hash, profile_prompt) or None on mismatch.
+
+    ``include_output=False``: Call 2's cached prefix must not carry the
+    gate-1-specific ``{"decision": 0 or 1}`` output instruction (§5.4 C4) —
+    the real relevance schema is supplied by ``build_call2_system_prompt``.
+    """
     profile = load_profile(profile_path)
     computed = compute_profile_hash(profile_path)
     if computed != profile.canonical_hash:
@@ -55,7 +61,31 @@ def _verify_profile_hash(profile_path: Path) -> tuple[str, str, str] | None:
             },
         )
         return None
-    return profile.version, computed, render_profile_prompt(profile)
+    return profile.version, computed, render_profile_prompt(profile, include_output=False)
+
+
+def _verify_rubric_hash(rubric_path: Path) -> str | None:
+    """Return rubric body on hash match, or None on mismatch.
+
+    Log-only on mismatch — no CRITICAL alert. §2 row 12 asymmetry: only
+    pre-filter emits the CRITICAL alert path; stage 1 and stage 2 log only,
+    matching the M5 T4 deferral. Changing that asymmetry is out of scope.
+    Mirrors stage1_loop._verify_rubric_hash.
+    """
+    doc = load_rubric(rubric_path)
+    computed = compute_rubric_hash(rubric_path)
+    if computed != doc.canonical_hash:
+        logger.error(
+            "rubric canonical_hash mismatch at batch time",
+            extra={
+                "event": "rubric_hash_mismatch",
+                "rubric_id": doc.rubric_id,
+                "expected_hash": doc.canonical_hash,
+                "computed_hash": computed,
+            },
+        )
+        return None
+    return doc.body
 
 
 async def stage2_cycle(
@@ -63,6 +93,7 @@ async def stage2_cycle(
     anthropic_client: AnthropicBatchClient | None = None,
     *,
     profile_path: Path | None = None,
+    rubric_path: Path | None = None,
 ) -> None:
     """Run one Call 2 cycle: poll stage2 queued, verify hash, submit, register."""
     owns_state = state_client is None
@@ -126,6 +157,13 @@ async def stage2_cycle(
 
         profile_version, profile_render_hash, profile_prompt = verified
 
+        resolved_rubric_path = rubric_path or resolve_rubric_path("call2_rubric")
+        rubric_body = _verify_rubric_hash(resolved_rubric_path)
+        if rubric_body is None:
+            # Hash abort: retain pending entries and hold_started_at unchanged so a
+            # persistent mismatch cannot extend the hold deadline indefinitely (C9).
+            return
+
         if not ensure_g3_verified():
             return
 
@@ -153,6 +191,7 @@ async def stage2_cycle(
             submit_stage2_batch_or_fatal,
             anthropic_client,
             profile_prompt=profile_prompt,
+            rubric_body=rubric_body,
             entries=batch_entries,
         )
 
