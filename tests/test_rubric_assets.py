@@ -122,6 +122,30 @@ def test_one_character_body_edit_changes_hash() -> None:
     assert original != tampered
 
 
+def test_call1_rubric_v1_asset_exists_and_verifies() -> None:
+    """T3 (prompt-caching, cache key B): the real, committed
+    ``config/prompts/call1_rubric_v1.md`` asset must exist on disk, parse as
+    a well-formed rubric document, and its stamped ``canonical_hash`` must
+    match a fresh recompute of its body. The generic round-trip tests above
+    only exercise synthetic ``tmp_path`` fixtures — they cannot catch a
+    stamping mistake, a line-ending drift, or a malformed front-matter edit
+    in the actual authored file T3 ships, which is exactly the failure mode
+    that would silently abort Call 1's rubric-verify-or-abort gate (§2 row
+    12) in production."""
+    path = REPO_ROOT / "config" / "prompts" / "call1_rubric_v1.md"
+    assert path.is_file()
+
+    doc = load_rubric(path)
+    assert doc.rubric_id == "call1_rubric"
+
+    verified = verify_rubric_hash("call1_rubric", rubric_path=path)
+    assert verified is not None
+    rubric_id, version, canonical_hash = verified
+    assert rubric_id == "call1_rubric"
+    assert version == doc.version
+    assert canonical_hash == doc.canonical_hash
+
+
 def test_rubric_hash_cli_exits_nonzero_when_canonical_hash_line_missing(tmp_path: Path) -> None:
     """T1-bis adversarial micro-pass falsifier (§2.1): scripts/rubric_hash.py's
     stamping path assumes exactly one `canonical_hash:` line exists to rewrite
