@@ -1,5 +1,9 @@
 # Changelog
 
+## harvest-mill-loop — 2026-09-17
+
+- T1 (harvest mill interval config): Added env-backed `BISHOP_HARVEST_MILL_INTERVAL_SEC` (default 5) to scraper config. This is the mill loop's sleep between ticks, distinct from the 90s slice budget; not pinned in compose or `.env.example`, matching WINDOW_DAYS / SLICE_BUDGET / QUERY_ID.
+
 ## harvest-pool — 2026-09-17
 
 - Harvest sidecar + `$N` tap (first landing, not GitHub cutover). Sidecar `${BISHOP_DATA_ROOT}/harvest/ledger.sqlite` (not `bishop.db`, not `BISHOP_VOLUME_MOUNTS`). Economics yaml pins units; `N_cap=1413` at `$2`; env `BISHOP_HARVEST_DAILY_BUDGET_USD=0` kills the GitHub tap. Persist typed GitHub Search facts + `extras_json`. Incremental GitHub still writes `DISCOVERED`. Live mill is a 90s hitchhiker on the 6h scrape tick (PB-011). Write-up: `.dev/decision-logs/ops/harvest-pool-first-landing.md`.

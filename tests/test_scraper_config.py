@@ -219,3 +219,22 @@ def test_backfill_window_override_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS", "60")
     config = _load_config_module()
     assert config.BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS == 60
+
+
+def test_harvest_mill_interval_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("BISHOP_HARVEST_MILL_INTERVAL_SEC", raising=False)
+    config = _load_config_module()
+    assert config.BISHOP_HARVEST_MILL_INTERVAL_SEC == 5
+
+
+def test_harvest_mill_interval_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BISHOP_HARVEST_MILL_INTERVAL_SEC", "20")
+    config = _load_config_module()
+    assert config.BISHOP_HARVEST_MILL_INTERVAL_SEC == 20
+
+
+def test_harvest_mill_interval_empty_env_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Falsifier: empty string must go through _int_from_env (int('')), not optional-or-default."""
+    monkeypatch.setenv("BISHOP_HARVEST_MILL_INTERVAL_SEC", "")
+    with pytest.raises(ValueError):
+        _load_config_module()
