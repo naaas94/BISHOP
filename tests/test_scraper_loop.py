@@ -262,10 +262,12 @@ async def test_scrape_cycle_escalatable_failure_skips_batch() -> None:
 
 
 @pytest.mark.asyncio
-async def test_scheduler_invokes_scrape_and_release() -> None:
+async def test_scheduler_invokes_scrape_release_and_mill() -> None:
     _, _, loop_mod, main_mod, _ = _load_scraper_loop_stack()
+    assert hasattr(main_mod, "_mill_loop")
     scraped = asyncio.Event()
     released = asyncio.Event()
+    milled = asyncio.Event()
 
     async def fake_cycle(client=None) -> None:
         scraped.set()
@@ -275,17 +277,43 @@ async def test_scheduler_invokes_scrape_and_release() -> None:
         released.set()
         await asyncio.Event().wait()
 
+    async def fake_mill(*args: object, **kwargs: object) -> None:
+        milled.set()
+        await asyncio.Event().wait()
+
     with patch.object(main_mod, "StateWorkerClient", return_value=AsyncMock()):
         with patch.object(main_mod, "scrape_cycle", side_effect=fake_cycle):
             with patch.object(main_mod, "release_once", side_effect=fake_release):
-                task = asyncio.create_task(main_mod.run_scheduler())
-                await asyncio.wait_for(
-                    asyncio.gather(scraped.wait(), released.wait()),
-                    timeout=2,
-                )
-                task.cancel()
-                with pytest.raises(asyncio.CancelledError):
-                    await task
+                with patch.object(
+                    main_mod, "harvest_github_slices", side_effect=fake_mill
+                ):
+                    task = asyncio.create_task(main_mod.run_scheduler())
+                    await asyncio.wait_for(
+                        asyncio.gather(
+                            scraped.wait(), released.wait(), milled.wait()
+                        ),
+                        timeout=2,
+                    )
+                    task.cancel()
+                    with pytest.raises(asyncio.CancelledError):
+                        await task
+
+
+def test_mill_loop_symbol_exists() -> None:
+    _, _, _, main_mod, _ = _load_scraper_loop_stack()
+    assert callable(main_mod._mill_loop)
+
+
+def test_mill_loop_does_not_gate_on_harvest_enabled() -> None:
+    """Falsifier: _mill_loop must not wrap harvest in if BISHOP_HARVEST_ENABLED."""
+    source = (_REPO_ROOT / "services" / "scraper" / "app" / "main.py").read_text(
+        encoding="utf-8"
+    )
+    start = source.index("async def _mill_loop()")
+    end = source.index("async def run_scheduler()")
+    mill_src = source[start:end]
+    assert "BISHOP_HARVEST_ENABLED" not in mill_src
+    assert "harvest_github_slices" in mill_src
 
 
 def test_registry_lists_all_expected_sources() -> None:

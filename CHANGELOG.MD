@@ -4,6 +4,7 @@
 
 - T1 (harvest mill interval config): Added env-backed `BISHOP_HARVEST_MILL_INTERVAL_SEC` (default 5) to scraper config. This is the mill loop's sleep between ticks, distinct from the 90s slice budget; not pinned in compose or `.env.example`, matching WINDOW_DAYS / SLICE_BUDGET / QUERY_ID.
 - T2 (remove harvest mill hitchhike from scrape_cycle): `scrape_cycle` no longer calls `harvest_github_slices` after the adapter loop, so the mill is no longer starved to a 90s slice on the 6h scrape tick. The mill's own asyncio loop lands in a later subtask. Deferred: the source-grep falsifier does not execute `scrape_cycle`; T3's mill-loop wiring test (harvest patched on `main.py`) is the execution-path proof.
+- T3 (harvest mill own asyncio loop): Added `_mill_loop` as a third `asyncio.gather` sibling in the scraper process so GitHub Search harvest walks on its own 5s cadence with a 90s slice budget, instead of waiting on the 6h scrape tick. Single call site, dedicated rest interval, per-tick 30s httpx client; `harvest_github_slices` still no-ops when the harvest flag is off. See `.dev/decision-logs/ops/harvest-mill-loop.md`.
 
 ## harvest-pool — 2026-09-17
 

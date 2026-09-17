@@ -425,7 +425,7 @@ async def test_harvest_uses_search_rate_limit_not_rest_budget(
 
 def test_harvest_http_client_uses_30s_timeout() -> None:
     """Live GitHub Search exceeded httpx's 5s default; harvest must not."""
-    source = (_REPO_ROOT / "services" / "scraper" / "app" / "loop.py").read_text(
+    source = (_REPO_ROOT / "services" / "scraper" / "app" / "main.py").read_text(
         encoding="utf-8"
     )
     assert "httpx.Timeout(30.0)" in source
