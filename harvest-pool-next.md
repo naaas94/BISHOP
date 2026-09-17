@@ -1,10 +1,10 @@
 # Harvest pool — pickup
 
-**Status:** first landing shipped 2026-09-17. Tap is live (`released_today` hit `N_cap`). Harvest mill is still a 90s hitchhiker on the 6h scrape tick — that is a miss, not the philosophy. Incremental GitHub still writes `DISCOVERED`. Not cut over. HF not rewound.
+**Status:** first landing shipped 2026-09-17. Tap is live (`released_today` hit `N_cap`). Harvest mill now has its own asyncio loop in the scraper process (`_mill_loop`) — see `.dev/decision-logs/ops/harvest-mill-loop.md`. Incremental GitHub still writes `DISCOVERED`. Not cut over. HF not rewound.
 
-**Next:** PB-011 harvest mill loop, then PB-012 GitHub cutover. Do not start paper exhaust or cutover while the mill sleeps 6h.
+**Next:** PB-012 GitHub cutover, after the mill is filling. Do not start paper exhaust.
 
-**Related:** `.dev/decision-logs/ops/harvest-pool-first-landing.md`, `repo-gate-next.md`, `.dev/decision-logs/ops/soft-launch-precision-overlay.md`, `config/source-notes/github.md`, `.dev/sqlite.md`, `.dev/persist-vendor-payloads.md`, `.dev/ui/harvest-dashboard.md`
+**Related:** `.dev/decision-logs/ops/harvest-mill-loop.md`, `.dev/decision-logs/ops/harvest-pool-first-landing.md`, `repo-gate-next.md`, `.dev/decision-logs/ops/soft-launch-precision-overlay.md`, `config/source-notes/github.md`, `.dev/sqlite.md`, `.dev/persist-vendor-payloads.md`, `.dev/ui/harvest-dashboard.md`
 
 ---
 
@@ -38,7 +38,7 @@ Do not dump the pool into `DISCOVERED`. Today that state means “pre-filter wil
 
 **GitHub exhaust.** Closed ranges `pushed:START..END stars:>10`. Recursive date split until `total_count` ≤ 1000 (a slice with `(end-start).days <= 1` that still overflows is recorded `incomplete_results`, capped at 10 Search pages / 1000 hits, then the cursor advances — `.days` truncates, so ~42h counts as 1). Search **30 req/min**. Sibling harvest, not a break of `fetch_manifest(since)`. Cursor in the sidecar, not `scraper_state.last_successful_run_at`.
 
-**Cadence (as-built, wrong vs philosophy).** Harvest runs at the **end** of `scrape_cycle` with `BISHOP_HARVEST_SLICE_BUDGET_SEC` default 90, then waits `BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC` (live **21600**). Release is a separate 60s loop. First landing over-weighted “don’t interrupt daily ingest.” Next landing: harvest gets its own loop in the same scraper process. Do not treat “time-boxed on the scrape tick” as the intended mill.
+**Cadence (as-built, wrong vs philosophy).** First landing: harvest ran at the **end** of `scrape_cycle` with `BISHOP_HARVEST_SLICE_BUDGET_SEC` default 90, then waited `BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC` (live **21600**). Release is a separate 60s loop. First landing over-weighted “don’t interrupt daily ingest.” **Mill loop landed 2026-09-17** — harvest is no longer coupled to `BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC`. See `.dev/decision-logs/ops/harvest-mill-loop.md`.
 
 **Persist (typed + extras_json + harvest_runs).** GitHub Search already returns id, owner, created/updated/pushed, fork/archived/disabled, language, license, stars/forks/issues/size, topics, homepage, visibility, score. We currently keep title/tagline/url/pushed_at only. Keep the rest. `harvest_runs` stores query, window, `total_count`, `incomplete_results`, pages, rate-limit headers.
 
@@ -80,7 +80,6 @@ N_remaining    = min(N_cap - released_today, max(0, N_cap - github_in_queue))
 
 ## Deferred (with cause)
 
-- **Harvest mill loop (PB-011) — next.** Hitchhiker on the scrape tick starves the 2y GitHub walk. Same process, new asyncio loop, not a new worker.
 - GitHub cutover (PB-012) — after the mill is filling. Tap already inserts. Do not cut incremental over while harvest only moves every 6h.
 - Paper/LW/OR/SS exhaust — would dump Haiku if it went to `DISCOVERED`. After GitHub cutover, into the sidecar.
 - Mechanical drops / extra rank at release — persist now, use after we see the mix.
