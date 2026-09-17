@@ -102,7 +102,6 @@ async def test_scrape_cycle_posts_batch_and_updates_state() -> None:
 
     with (
         patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
-        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
     ):
         await loop_mod.scrape_cycle(client)
 
@@ -133,7 +132,6 @@ async def test_scrape_cycle_skips_state_update_on_batch_failure() -> None:
 
     with (
         patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
-        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
     ):
         await loop_mod.scrape_cycle(client)
 
@@ -160,7 +158,6 @@ async def test_scrape_cycle_rerun_reports_skipped_idempotent_rows() -> None:
 
     with (
         patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
-        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
     ):
         await loop_mod.scrape_cycle(client)
         await loop_mod.scrape_cycle(client)
@@ -200,7 +197,6 @@ async def test_scrape_cycle_survives_429_via_failure_envelope() -> None:
 
     with (
         patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
-        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
     ):
         await loop_mod.scrape_cycle(client)
 
@@ -229,7 +225,6 @@ async def test_scrape_cycle_logs_permanent_failure_and_continues() -> None:
 
     with (
         patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
-        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
     ):
         with patch.object(loop_mod, "log_permanent_failure") as log_failure:
             await loop_mod.scrape_cycle(client)
@@ -259,7 +254,6 @@ async def test_scrape_cycle_escalatable_failure_skips_batch() -> None:
 
     with (
         patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
-        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
     ):
         await loop_mod.scrape_cycle(client)
 

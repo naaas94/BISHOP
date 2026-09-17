@@ -362,6 +362,14 @@ async def test_harvest_does_not_call_post_manifest_batch(
         conn.close()
 
 
+def test_scrape_cycle_no_longer_calls_harvest_github_slices() -> None:
+    """Falsifier: hitchhike removed — scrape_cycle must not import/call the mill."""
+    source = (
+        _REPO_ROOT / "services" / "scraper" / "app" / "loop.py"
+    ).read_text(encoding="utf-8")
+    assert "harvest_github_slices" not in source
+
+
 @pytest.mark.asyncio
 async def test_harvest_uses_search_rate_limit_not_rest_budget(
     tmp_path: Path,
@@ -413,56 +421,6 @@ async def test_harvest_uses_search_rate_limit_not_rest_budget(
     rest = github.SOURCE_RATE_LIMITS[SourceEnum.GITHUB.value]
     assert getattr(limit, "calls") != rest.calls
     assert getattr(limit, "period_seconds") != rest.period_seconds
-
-
-@pytest.mark.asyncio
-async def test_scrape_cycle_harvest_failure_still_posts_discovered() -> None:
-    """Harvest exceptions must not fail the incremental DISCOVERED scrape."""
-    loop_mod, models = _load_scraper_loop_stack()
-    entry = models.ManifestIngestEntry(
-        source_id="arxiv:2406.00001",
-        source=SourceEnum.ARXIV,
-        url="http://arxiv.org/abs/2406.00001",
-        title="Example Paper",
-        domain=DomainEnum.PROFESSIONAL,
-    )
-
-    class _StubAdapter:
-        source = SourceEnum.ARXIV
-        domain = DomainEnum.PROFESSIONAL
-
-        def __init__(self) -> None:
-            self.fetch_manifest = AsyncMock(return_value=[entry])
-
-    adapter = _StubAdapter()
-
-    def _factory() -> object:
-        return adapter
-
-    client = AsyncMock()
-    client.get_scraper_state.return_value = models.ScraperStateSnapshot(
-        source=SourceEnum.ARXIV,
-        last_successful_run_at=datetime(2026, 6, 10, 8, 0, 0, tzinfo=UTC),
-        updated_at=datetime(2026, 6, 12, 12, 0, 0, tzinfo=UTC),
-    )
-    client.post_manifest_batch.return_value = models.ManifestBatchResult(
-        inserted=1,
-        skipped=0,
-    )
-
-    with (
-        patch.object(loop_mod, "ADAPTER_REGISTRY", [_factory]),
-        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", True),
-        patch.object(
-            loop_mod,
-            "harvest_github_slices",
-            AsyncMock(side_effect=RuntimeError("harvest boom")),
-        ),
-    ):
-        await loop_mod.scrape_cycle(client)
-
-    client.post_manifest_batch.assert_awaited_once_with([entry])
-    client.post_scraper_state.assert_awaited_once()
 
 
 def test_harvest_http_client_uses_30s_timeout() -> None:
