@@ -1,0 +1,38 @@
+{
+  "plan_version": "v1",
+  "nodes": [
+    {
+      "id": "T1",
+      "kind": "executable",
+      "packet": ".dev/plans/harvest-mill-loop/packets/T1.md"
+    },
+    {
+      "id": "T2",
+      "kind": "executable",
+      "packet": ".dev/plans/harvest-mill-loop/packets/T2.md"
+    },
+    {
+      "id": "T3",
+      "kind": "executable",
+      "packet": ".dev/plans/harvest-mill-loop/packets/T3.md"
+    },
+    {
+      "id": "T4",
+      "kind": "executable",
+      "packet": ".dev/plans/harvest-mill-loop/packets/T4.md"
+    }
+  ],
+  "hard_edges": [
+    { "from": "T1", "to": "T3" },
+    { "from": "T2", "to": "T3" },
+    { "from": "T3", "to": "T4" }
+  ],
+  "soft_edges": [],
+  "parallel_groups": [
+    {
+      "nodes": ["T1", "T2"],
+      "rank": 0,
+      "resilience_claim": "throughput-only"
+    }
+  ]
+}
