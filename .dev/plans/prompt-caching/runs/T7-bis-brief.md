@@ -1,0 +1,19 @@
+## Completion Brief
+
+- **Subtask ID · Status:** T7-bis · **complete**
+- **Files changed:** `bishop_shared/enrichment_prompts.py`, `services/enrichment-batcher/app/anthropic_batch_client.py`, `services/enrichment-batcher/app/stage2_loop.py`, `tests/test_enrichment_prompts.py`, `tests/test_enrichment_batcher_stage2_loop.py`, `CHANGELOG.MD`, `.dev/decision-logs/prompt-caching/T7-bis-call2-breakpoint-move.md` (new), `.dev/decision-logs/m5-enrichment/T4-call2-cache-control.md` — all a subset of the declared Files to touch (confirmed via `git status --porcelain` / staged diff before commit).
+- **Tests run + result:** Targeted suite (`test_enrichment_prompts.py`, `test_enrichment_batcher_stage2_loop.py`, `test_enrichment_batcher_stage1_loop.py`, `test_prompt_cache.py`, `test_rubric_assets.py`, `test_profile_renderer.py`) — 89 passed. Full repo suite `pytest tests/ -m "not heavy"` — 791 passed, 87 failed, 14 errors, 3 skipped (unchanged pre-existing baseline per T1-bis/T6's characterization; no net-new failures).
+- **Commit SHA:** `1fe3ef4`
+- **Changelog entry location:** `CHANGELOG.MD`, under `## prompt-caching — 2026-09-12`, new T7-bis bullet appended after T6's (verified isolated in the staged diff).
+- **Decision log path:** `.dev/decision-logs/prompt-caching/T7-bis-call2-breakpoint-move.md` (new); `.dev/decision-logs/m5-enrichment/T4-call2-cache-control.md` amended with a supersession banner at first mention.
+- **Kill-criterion evidence:**
+ - Single `cache_control`, last block only: `test_call2_system_single_cache_control_breakpoint_on_last_block`, `test_stage2_cycle_happy_path_...` (both count+index assertions).
+ - No `{"decision"...}` in cached prefix (C4): `test_call2_system_prompt_does_not_reintroduce_gate1_output_contract` + happy-path integration assertion against the real production call path (`anthropic_client._client.messages.batches.create.call_args`) — mutation-checked live: reverting `include_output=False`→default made the happy-path test fail with the exact `"decision"` string, then reverted.
+ - Enrichment pin unchanged: no edit to `professional_v1.0.0.yaml` or `resolve_profile_path` (diff scope confirms).
+ - C2 (stale line-number tests updated at current HEAD lines): `test_enrichment_prompts.py::test_call2_system_has_cache_control` replaced; `test_enrichment_batcher_stage2_loop.py` line-182 assertion replaced with count+index+ttl checks. Call 1 tests (`test_call1_*`) untouched — confirmed by diff.
+ - T6 Call 1 builder/tests not reverted: diff touches only `build_call2_system_prompt` in `enrichment_prompts.py`; `build_call1_system_prompt` untouched (confirmed by diff).
+ - Row 9 single-emitter grep now green: `tests/test_prompt_cache.py::test_no_inline_cache_control_literals` passes (previously the sole documented red case per T1-bis/T6 logs).
+ - M5 log banner at first mention, not appended at end: banner placed directly under "## Chosen approach" heading, before the first bullet describing the profile-block-only decision.
+ - `git ls-files .dev/decision-logs/m5-enrichment/T4-call2-cache-control.md` → non-empty (tracked-path premise confirmed at start of this run).
+
+T7-bis lands Call 2's cache-key-C wiring that T7 HALTed on: the breakpoint moved from the profile block to the last of a three-block `[profile_render, call2_rubric, call2_instructions]` system (via `cached_system_blocks`, now with `ttl:"1h"`), stage 2 gained a log-only rubric hash-or-abort mirroring stage 1's, and the profile is now rendered with `include_output=False` so gate-1's binary-decision instruction no longer rides along in Call 2's cached (and now prepaid) prefix — a mutation-verified fix, not just a passing assertion. The M5 T4 decision log got its required supersession banner at first mention. All work is committed at `1fe3ef4` with no scope drift and no regressions in either the targeted or full suite.

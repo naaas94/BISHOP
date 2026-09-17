@@ -194,6 +194,37 @@ def test_submit_pre_filter_batch_or_fatal_logs_model_string_fatal_on_model_400()
     assert mock_log.call_args.kwargs["extra"]["event"] == "model_string_fatal"
 
 
+def test_warm_cache_calls_messages_create_with_prefilter_model() -> None:
+    """FU-CACHE-WARMUP-01: cache key A's warmup ping uses
+    ANTHROPIC_MODEL_PREFILTER and the exact system_blocks passed in, via the
+    synchronous Messages API, not messages.batches.create."""
+    anthropic_mod, _ = _load_anthropic_client_stack()
+    mock_sdk = MagicMock()
+    mock_sdk.messages.create.return_value = SimpleNamespace(usage=SimpleNamespace())
+    client = anthropic_mod.AnthropicBatchClient(client=mock_sdk)
+    system_blocks = _sample_system_blocks()
+
+    result = client.warm_cache(system_blocks)
+
+    assert result is True
+    mock_sdk.messages.batches.create.assert_not_called()
+    mock_sdk.messages.create.assert_called_once_with(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1,
+        system=system_blocks,
+        messages=[{"role": "user", "content": "."}],
+    )
+
+
+def test_warm_cache_swallows_failure_and_returns_false() -> None:
+    anthropic_mod, _ = _load_anthropic_client_stack()
+    mock_sdk = MagicMock()
+    mock_sdk.messages.create.side_effect = RuntimeError("boom")
+    client = anthropic_mod.AnthropicBatchClient(client=mock_sdk)
+
+    assert client.warm_cache(_sample_system_blocks()) is False
+
+
 def test_submit_pre_filter_batch_or_fatal_logs_custom_id_rejected_on_custom_id_400() -> None:
     anthropic_mod, models = _load_anthropic_client_stack()
     mock_sdk = MagicMock()

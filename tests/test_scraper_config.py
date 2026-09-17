@@ -216,6 +216,6 @@ def test_backfill_window_override_default_none(monkeypatch: pytest.MonkeyPatch) 
 
 
 def test_backfill_window_override_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS", "1")
+    monkeypatch.setenv("BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS", "60")
     config = _load_config_module()
-    assert config.BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS == 1
+    assert config.BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS == 60

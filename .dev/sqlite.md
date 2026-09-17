@@ -15,12 +15,14 @@ Spec tables: `bishop_spec_0_6.md` §7. Enums: `services/state-worker/app/enums.p
 | Domain models | `services/state-worker/app/models/domain.py` |
 | Transitions | `services/state-worker/app/transitions.py` |
 | Query-api read | `services/query-api/app/sqlite_reader.py` (`file:…?mode=ro`) |
+| Harvest sidecar | `${BISHOP_DATA_ROOT}/harvest/ledger.sqlite` (this host `C:/Users/Ale/bishop_data/harvest/ledger.sqlite`). **Not** `bishop.db`. Scraper writes. query-api `mode=ro`. See `harvest-pool-next.md`. |
 
 `.env` is gitignored. `BISHOP_DATA_ROOT` must be an explicit path on Windows.
 
 ## Access doctrine
 
-- **Single writer:** `state-worker` (aiosqlite pool, WAL). Migrations run sync at startup (`run_migrations()`), then the async pool starts.
+- **Single writer (`bishop.db`):** `state-worker` (aiosqlite pool, WAL). Migrations run sync at startup (`run_migrations()`), then the async pool starts.
+- **Harvest ledger:** scraper is the single writer of `harvest/ledger.sqlite`. Do not open it from state-worker. Do not fold harvest columns into `manifest`.
 - **Readers:** query-api (stdlib `sqlite3` read-only URI), humans/scripts with `mode=ro`.
 - **Workers** (scraper, pre-filter, content-scraper, enrichment, batch-poller, vector-writer) never open the file. They POST `/manifest/*`, `/entries/*`, `/batches/*`.
 - **Transactions:** aiosqlite `async with conn` is not a transaction. Multi-step writes use explicit `BEGIN` / `COMMIT` / `ROLLBACK`.

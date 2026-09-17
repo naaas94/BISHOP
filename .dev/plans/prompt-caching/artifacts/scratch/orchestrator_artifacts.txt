@@ -1,0 +1,17 @@
+.dev/plans/prompt-caching/dag.json
+.dev/plans/prompt-caching/plan.md
+.dev/plans/prompt-caching/context-map.md
+.dev/plans/prompt-caching/packets/T1.md
+.dev/plans/prompt-caching/packets/T2.md
+.dev/plans/prompt-caching/packets/T3.md
+.dev/plans/prompt-caching/packets/T4.md
+.dev/plans/prompt-caching/packets/T5.md
+.dev/plans/prompt-caching/packets/T6.md
+.dev/plans/prompt-caching/packets/T7.md
+.dev/plans/prompt-caching/packets/T8.md
+.dev/plans/prompt-caching/packets/T9.md
+.dev/plans/prompt-caching/packets/T10.md
+.dev/plans/prompt-caching/packets/T1-bis.md
+.dev/plans/prompt-caching/packets/T7-bis.md
+.dev/plans/prompt-caching/packets/T9-bis.md
+.dev/plans/prompt-caching/packets/T10-bis.md

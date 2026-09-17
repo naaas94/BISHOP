@@ -1,0 +1,669 @@
+{
+  "batch": 1,
+  "items": [
+    {
+      "source_id": "github:Belkins/ai-dive-deep",
+      "title": "ai-dive-deep",
+      "url": "https://github.com/Belkins/ai-dive-deep",
+      "github_url": "https://github.com/Belkins/ai-dive-deep",
+      "bishop_ui": "http://localhost:8081/entries/github:Belkins/ai-dive-deep",
+      "published_at": "2026-09-12T05:53:30+00:00",
+      "ingested_at": "2026-09-12T06:08:45.678840+00:00",
+      "relevance_score": 0.92,
+      "relevance_reason": "Comprehensive agentic workflow documentation with production techniques directly addresses core expertise areas in orchestration, state machines, and agent evaluation patterns.",
+      "value_rationale": "A 48-chapter operator manual with embedded case studies, model tier lists, and production-hardened patterns provides immediately actionable reference material for shipping agentic systems at scale. The interactive artifact format with live updates supports the operational expertise needed to navigate tradeoffs in agent design and deployment.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "multi-agent",
+        "orchestration",
+        "tool-use",
+        "inference",
+        "production",
+        "deployment",
+        "architecture",
+        "benchmark",
+        "survey"
+      ],
+      "concepts": [
+        "HTML-first artifact design",
+        "agent workflow orchestration",
+        "agentic system architecture",
+        "multi-agent review fleets",
+        "live data capture and versioning",
+        "MDX-based dynamic content",
+        "model evaluation and ranking",
+        "operator tooling and infrastructure"
+      ],
+      "challenge_hooks": [
+        "How to structure agentic systems with stateless review agents and path-routed workflows that produce mergeable artifacts without memory",
+        "Building live, self-updating knowledge bases that stay current via repo-driven pipelines rather than manual documentation maintenance",
+        "Implementing honest model evaluation frameworks with cross-verified data, economics rankings, and operator-facing tier lists",
+        "Designing interactive production documentation as deployed artifacts instead of static PDFs, with embedded case studies and real-time signals"
+      ],
+      "summary": "48-chapter operator field manual on AI systems and agentic workflows. Live interactive HTML artifact deployed as public site, with embedded case studies, self-updating radar, agent workflow documentation, model tier lists, and production techniques. Repo structure mirrors the discipline it teaches.",
+      "pre_filter_rationale": "Applied systems write-up with embedded agent workflow, reusable dev patterns, and shipped operational practices across agentic systems, RAG, and inference economics; working reference for production orchestration and evaluation harness design.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n# Vlad's Playbook\n\n### The Ultimate AI Dive Deep\n\n**A 48-chapter operator field manual where every artifact is live, clickable, and forwardable — and the repo runs the discipline the book teaches.**\n\n### → [**Read it: dive.vladyslavpodoliako.com**](https://dive.vladyslavpodoliako.com) ←\n\n[![Edition](https://img.shields.io/badge/edition-13-FF6B2C?style=flat-square)](https://dive.vladyslavpodoliako.com/changelog) &nbsp;\n[![Live](https://img.shields.io/badge/site-live-22D3A0?style=flat-square)](https://dive.vladyslavpodoliako.com) &nbsp;\n[![License: code MIT, content CC BY-NC-SA 4.0](https://img.shields.io/badge/license-MIT%20%2B%20CC%20BY--NC--SA-71717A?style=flat-square)](./LICENSE)\n\n</div>\n\n---\n\n## The thesis: **HTML-ization**\n\nStop sending dead files. Every report, pitch, audit, deck, and analysis ships\nas a live interactive HTML artifact on a deployed link — not a PDF attachment\nthat started rotting the second it was exported. The link is current because\nthe repo is. People forward links; they archive PDFs unread.\n\n**This repo is the proof.** The book about building this kind of artifact is,\nitself, this kind of artifact — a repo deployed to a public link, updated by\ncommit, with real interactive case studies embedded and clickable inside it,\nand a radar page that re-publishes itself every hour without a human in the\nloop.\n\n→ Read the thesis + click the embeds: [dive.vladyslavpodoliako.com/html-first](https://dive.vladyslavpodoliako.com/html-first)\n\n---\n\n## Read it (the site is the book)\n\nThe repo is how it's built. The site is what it IS.\n\n| Surface | What's there | Live link |\n|---|---|---|\n| **All 48 chapters** | The whole book, MDX-rendered, with TL;DRs, glossary tooltips, and the receipts behind every claim | [`/sections`](https://dive.vladyslavpodoliako.com/sections) |\n| **Radar** | A self-updating index of what's moving through the AI ecosystem, ranked by lead time — recomputed hourly by a cron pipeline, receipts on every row | [`/radar`](https://dive.vladyslavpodoliako.com/radar) |\n| **Agent workflow** | The queue that feeds the swarm: boards, issue discipline, three slash commands, six path-routed review agents — the system this\n…[truncated]"
+    },
+    {
+      "source_id": "github:abundantbeing/hermes-browser-extension",
+      "title": "hermes-browser-extension",
+      "url": "https://github.com/abundantbeing/hermes-browser-extension",
+      "github_url": "https://github.com/abundantbeing/hermes-browser-extension",
+      "bishop_ui": "http://localhost:8081/entries/github:abundantbeing/hermes-browser-extension",
+      "published_at": "2026-09-11T13:06:05+00:00",
+      "ingested_at": "2026-09-11T15:35:27.507983+00:00",
+      "relevance_score": 0.92,
+      "relevance_reason": "Directly relevant as a production UI/UX layer for agentic systems, demonstrating architectural patterns for multi-agent orchestration, session management, and gateway abstraction in a real shipping product.",
+      "value_rationale": "Provides concrete patterns for building agentic frontends with practical concerns like agent switching, tab-aware context scoping, and flexible deployment models (local/cloud/self-hosted). Actionable reference for observability, state management, and tool invocation UX in agent systems.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "multi-agent",
+        "tool-use",
+        "orchestration",
+        "serving",
+        "observability",
+        "deployment",
+        "architecture"
+      ],
+      "concepts": [
+        "browser extension side panel",
+        "multi-agent switching and profiles",
+        "intelligent tab context scoping",
+        "local gateway and remote API connections",
+        "Hermes Cloud trusted dashboard attach",
+        "session persistence and management",
+        "browser context capture (text, URLs, forms, links)",
+        "voice dictation and transcription"
+      ],
+      "challenge_hooks": [
+        "How do you integrate a multi-agent runtime directly into the browser without sacrificing context precision or token efficiency?",
+        "How can browser extensions securely connect to local, cloud, and self-hosted agent backends with different authentication and isolation models?",
+        "How do you manage intelligent context scoping across multiple open tabs to avoid prompt bloat while keeping users in control of what gets sent to the agent?"
+      ],
+      "summary": "Chrome/Edge browser extension for Hermes Agent providing native side-panel integration with multi-agent switching, intelligent tab scoping, session management, and support for local gateways, Hermes Cloud, or self-hosted remote connections with full runtime tool access.",
+      "pre_filter_rationale": "Shipped applied system: browser integration pattern for agentic workflows that bridges web context to local agent runtime; working reference for developer tooling and agent I/O orchestration.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Hermes Browser Extension\n\nBrowser-native side panel for [Hermes Agent](https://hermes-agent.nousresearch.com/docs) — connect active web context through a local gateway, Hermes Cloud, or a self-hosted remote gateway.\n\n> Created by **Jon Komet** (`@abundantbeing`). Community extension for Hermes Agent by Nous Research.\n\n<p align=\"center\">\n  <a href=\"https://ko-fi.com/T8Z726J5YZ\"><img src=\"https://ko-fi.com/img/githubbutton_sm.svg\" alt=\"Support Jon Komet on Ko-fi\" /></a>\n</p>\n\n<p align=\"center\">\n  <img src=\"./assets/readme/hermes-browser-demo.gif\" alt=\"Hermes Browser Extension demo showing the side panel reading browser context and composing a Hermes prompt\" width=\"100%\" />\n</p>\n\n<p align=\"center\">\n  <strong>Public v0.3.2 · Load unpacked · Local / Hermes Cloud / Remote · Full Hermes runtime tools</strong><br />\n  Not on the Chrome Web Store yet.\n</p>\n\n## What it is\n\nHermes Browser Extension is not a browser chatbot. It is a Chrome/Edge/Chromium side panel for the real Hermes Agent runtime. Choose a local gateway, attach to a signed-in Hermes Cloud agent tab, or connect to a self-hosted remote API/dashboard. Local and remote API connections can use the models, tools, skills, sessions, memory, and MCP servers already configured in Hermes; Cloud and dashboard-ticket connections are intentionally Chat-only.\n\nThis repo is specifically for the **Hermes Browser Extension**: the Chrome/Edge/Chromium side-panel integration for Hermes Agent.\n\n### New in v0.3.2: Hermes Bot Mode, Multi-Agent Threads and Intelligent Tab Scoping\n\nv0.3.2 introduces **Hermes Bot Mode**, bringing your full Hermes multi-agent roster directly into the browser side panel:\n- **Instant Multi-Agent Switching**: Seamlessly toggle between default and named agent profiles with lazy model hydration and Desktop dashboard discovery from known candidates, cached URLs, and open dashboard tabs.\n- **Desktop Names, Avatars, and Last Activity**: Bot Mode uses authenticated Desktop `profiles.list` metadata for display names, avatars, last-activity stamps, and existing Bot Chat identity instead of internal profile ids or public health-name lists.\n- **Existing Bot Chat Resume**: Opening a bot resumes that profile's e\n…[truncated]"
+    },
+    {
+      "source_id": "github:HKUDS/LightRAG",
+      "title": "LightRAG",
+      "url": "https://github.com/HKUDS/LightRAG",
+      "github_url": "https://github.com/HKUDS/LightRAG",
+      "bishop_ui": "http://localhost:8081/entries/github:HKUDS/LightRAG",
+      "published_at": "2026-09-14T04:17:03+00:00",
+      "ingested_at": "2026-09-14T04:34:21.418304+00:00",
+      "relevance_score": 0.91,
+      "relevance_reason": "Squarely inside the RAG/retrieval anchor (weight 1.0) with a concrete, production-focused framework that addresses multiple high-impact retrieval concerns: multi-level retrieval modes, chunking strategies, and incremental updates for at-scale systems.",
+      "value_rationale": "Provides a specific, implementable graph-structured retrieval architecture with measured support for multiple storage backends and retrieval strategies, directly applicable to building or evaluating production RAG systems without reengineering from first principles; the multi-level retrieval modes (local/global/hybrid/mix) and chunking-strategy portfolio are particularly actionable for tuning retrieval quality against latency constraints.",
+      "entry_type": "repo",
+      "tags": [
+        "RAG",
+        "graph-retrieval",
+        "document-intelligence",
+        "embeddings",
+        "vector-stores",
+        "production",
+        "orchestration",
+        "optimization"
+      ],
+      "concepts": [
+        "knowledge graph extraction",
+        "dual-level retrieval (local and global)",
+        "entity-relation extraction",
+        "multiple storage backends",
+        "paragraph-semantic chunking",
+        "incremental knowledge base updates",
+        "multimodal document parsing (MinerU, Docling)",
+        "role-specific LLM configuration (EXTRACT, QUERY, KEYWORDS, VLM)"
+      ],
+      "challenge_hooks": [
+        "how to build production-scale RAG with incremental updates and selective deletion without expensive multi-hop reasoning",
+        "retrieval-augmented generation for vertical domains (legal, financial) requiring cross-document reasoning and global semantic context",
+        "reducing LLM call costs during indexing and querying while maintaining comprehensiveness and context diversity",
+        "unified knowledge graph storage and retrieval across multiple backend databases and document parsing formats"
+      ],
+      "summary": "LightRAG is a graph-structured RAG framework supporting multi-backend storage (PostgreSQL, MongoDB, Neo4j, OpenSearch), multi-level retrieval (local/global/hybrid/mix modes), role-specific LLM configuration, and four text-chunking strategies with incremental updates and selective deletion for production-scale document indexing.",
+      "pre_filter_rationale": "Applied RAG systems anchor: LightRAG is a shipped retrieval-augmented generation system with described architectural choices (simplicity and speed as design goals) that a practitioner would implement from; the EMNLP venue and conference-year framing suggest a working system with evaluation, not a base-model contribution.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<div style=\"margin: 20px 0;\">\n  <img src=\"./assets/logo.png\" width=\"120\" height=\"120\" alt=\"LightRAG Logo\" style=\"border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 217, 255, 0.3);\">\n</div>\n\n# 🚀 LightRAG: Simple and Fast Retrieval-Augmented Generation\n\n<div align=\"center\">\n    <a href=\"https://trendshift.io/repositories/13043\" target=\"_blank\"><img src=\"https://trendshift.io/api/badge/repositories/13043\" alt=\"HKUDS%2FLightRAG | Trendshift\" style=\"width: 250px; height: 55px;\" width=\"250\" height=\"55\"/></a>\n</div>\n<p>\n</p>\n<div align=\"center\">\n  <div style=\"width: 100%; height: 2px; margin: 20px 0; background: linear-gradient(90deg, transparent, #00d9ff, transparent);\"></div>\n</div>\n\n<div align=\"center\">\n  <div style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 25px; text-align: center;\">\n    <p>\n      <a href='https://github.com/HKUDS/LightRAG'><img src='https://img.shields.io/badge/🔥Project-Page-00d9ff?style=for-the-badge&logo=github&logoColor=white&labelColor=1a1a2e'></a>\n      <a href='https://arxiv.org/abs/2410.05779'><img src='https://img.shields.io/badge/📄arXiv-2410.05779-ff6b6b?style=for-the-badge&logo=arxiv&logoColor=white&labelColor=1a1a2e'></a>\n      <a href=\"https://github.com/HKUDS/LightRAG/stargazers\"><img src='https://img.shields.io/github/stars/HKUDS/LightRAG?color=00d9ff&style=for-the-badge&logo=star&logoColor=white&labelColor=1a1a2e' /></a>\n    </p>\n    <p>\n      <img src=\"https://img.shields.io/badge/🐍Python-3.10-4ecdc4?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a2e\">\n      <a href=\"https://pypi.org/project/lightrag-hku/\"><img src=\"https://img.shields.io/pypi/v/lightrag-hku.svg?style=for-the-badge&logo=pypi&logoColor=white&labelColor=1a1a2e&color=ff6b6b\"></a>\n    </p>\n    <p>\n      <a href=\"https://discord.gg/yF2MmDJyGJ\"><img src=\"https://img.shields.io/badge/💬Discord-Community-7289da?style=for-the-badge&logo=discord&logoColor=white&labelColor=1a1a2e\"></a>\n      <a href=\"https://github.com/HKUDS/LightRAG/issues/285\"><img src=\"https://img.shields.io/badge/💬WeChat-Group-07c160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=1a1a2e\"></a>\n    </p>\n…[truncated]"
+    },
+    {
+      "source_id": "github:StructuPath/herdr-browser",
+      "title": "herdr-browser",
+      "url": "https://github.com/StructuPath/herdr-browser",
+      "github_url": "https://github.com/StructuPath/herdr-browser",
+      "bishop_ui": "http://localhost:8081/entries/github:StructuPath/herdr-browser",
+      "published_at": "2026-09-14T04:13:11+00:00",
+      "ingested_at": "2026-09-14T04:42:27.108106+00:00",
+      "relevance_score": 0.89,
+      "relevance_reason": "Directly serves the agentic-systems anchor (weight 1.0) by providing production-grade observability and control for browser-driven agents, addressing a core operational concern (observability, failure modes) that the profile explicitly prioritizes.",
+      "value_rationale": "Gives a concrete, deployable tool for live debugging and monitoring of agents that interact with web UIs via Chrome DevTools Protocol, including streaming frames and console capture—exactly the kind of production-readiness infrastructure a practitioner building agentic workflows needs to ship reliably without building custom observability harnesses.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "Chrome DevTools Protocol",
+        "agent-browser framework",
+        "live frame streaming",
+        "workspace session isolation",
+        "Playwright/Puppeteer integration",
+        "WebSocket push with polling fallback"
+      ],
+      "challenge_hooks": [
+        "how to observe and interact with a live agent-driven browser session without perturbing automation",
+        "attaching a human-visible browser inspector to existing Playwright or Puppeteer runs without code changes",
+        "recording and debugging agent web interactions in a workspace-isolated environment"
+      ],
+      "summary": "A browser pane plugin for Herdr that provides live observation and control of agent-driven Chrome sessions via Chrome DevTools Protocol, supporting Playwright/Puppeteer/Browser Use attachments with streaming frames, console output, real interactions, and built-in WebM recording.",
+      "pre_filter_rationale": "Applied systems: a runnable browser instrumentation and agent interaction framework with documented features (streaming, rendering, error tracking, recording) that directly enables agentic web automation workflows—a working reference for building agent-accessible browser environments.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# herdr-browser\n\n[![CI](https://github.com/StructuPath/herdr-browser/actions/workflows/ci.yml/badge.svg)](https://github.com/StructuPath/herdr-browser/actions/workflows/ci.yml)\n\nA drivable browser pane for [Herdr](https://herdr.dev), built around\n[agent-browser](https://github.com/vercel-labs/agent-browser).\n\nWhen a coding agent drives Chrome in one pane, herdr-browser gives you a live,\nhuman-visible view of that same session in another. You can inspect the page,\nwatch console output and page errors, click real browser coordinates, type,\nscroll, navigate, and record the flow without leaving Herdr.\n\n![herdr-browser demo: driving a page from a herdr pane](assets/herdr-browser-demo.gif)\n\n**Docs:** the [Browser guide](https://herdr.structupath.ai/docs/browser/)\nand [Herdr Suite overview](https://herdr.structupath.ai/docs/) are the canonical\nguides to this plugin and its three siblings (Guard, Swarm, Conductor).\n\n## Highlights\n\n- **Shared agent sessions** — one isolated browser session per Herdr workspace.\n- **Attach to any CDP browser** — observe a Playwright, Puppeteer, or Browser Use\n  run (or any Chrome started with `--remote-debugging-port`) without owning it.\n- **Zero-setup launch** — press `l` and the pane launches a local Chromium of\n  its own and attaches to it; no agent-browser install required.\n- **Observe-only mode** — press `o` and pane input stops being forwarded, so\n  watching a live automation run can never perturb it.\n- **Live push streaming** — frames, URL/title changes, console messages, and\n  page errors arrive over WebSocket, with transparent polling fallback.\n- **Failed network requests** — 4xx/5xx and no-response xhr/fetch/document\n  requests appear in the console region as `✖ 404 GET <url>` lines, in both\n  streaming and polling modes.\n- **Pane-aware layout** — the browser viewport fits the pane without stretching\n  or changing its responsive width; the console opens only when output exists.\n- **Real interaction** — clicks use Chrome mouse events rather than DOM selector\n  guesses; keyboard input, history, reload, and wheel scrolling are supported.\n- **Adaptive rendering** — Kitty graphics when available, ANSI symbols through\n  chafa otherwise\n…[truncated]"
+    },
+    {
+      "source_id": "github:0xGosu/herdr-auto-pilot",
+      "title": "herdr-auto-pilot",
+      "url": "https://github.com/0xGosu/herdr-auto-pilot",
+      "github_url": "https://github.com/0xGosu/herdr-auto-pilot",
+      "bishop_ui": "http://localhost:8081/entries/github:0xGosu/herdr-auto-pilot",
+      "published_at": "2026-09-12T05:46:12+00:00",
+      "ingested_at": "2026-09-12T06:16:55.160964+00:00",
+      "relevance_score": 0.85,
+      "relevance_reason": "Directly addresses agentic workflow automation with production concerns (safety, auditability, confidence gating), though specific to coding agents rather than broader document/data workflows.",
+      "value_rationale": "Provides actionable patterns for autonomous agent operation and decision-making without human-in-the-loop friction. The confidence gates and veto mechanisms are directly applicable to RAG-based agentic systems where partial automation with safety boundaries is critical for production reliability.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "safety",
+        "observability",
+        "deployment",
+        "production"
+      ],
+      "concepts": [
+        "learned decision rules from user supervision",
+        "confidence-gated automation with escalation",
+        "safety-first veto patterns for destructive operations",
+        "local-first SQLite audit trail",
+        "agent session monitoring and state detection",
+        "multi-agent task orchestration",
+        "LLM-assisted decision review and correction"
+      ],
+      "challenge_hooks": [
+        "How to keep coding agents unblocked while maintaining human oversight and safety boundaries in autonomous workflows",
+        "Learning automation rules from past human decisions without requiring explicit programming or constant manual intervention",
+        "Implementing confidence-gated escalation for multi-agent systems where some decisions must clear safety thresholds before execution",
+        "Maintaining full auditability and correctability of automated agent actions for debugging and governance compliance"
+      ],
+      "summary": "Herd Auto Prompter is a plugin that autonomously unblocks coding agents by learning from user decisions, detecting when agents need input, and automatically supplying responses via learned rules, task lists, or optional LLM consultation—with confidence gates, safety vetos, and full auditability.",
+      "pre_filter_rationale": "Shipped dev-flow technique: agent-assisted engineering with training-from-observation and safety guards for an AI coding CLI; this is a reusable pattern I would study and adapt into my own workflows this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Herd Auto Prompter\n\n**Keep your [Herdr](https://herdr.dev) coding agents unblocked, hands-free.**\n\nHerd Auto Prompter is a Herdr plugin that watches every agent session in your\nherd, detects when an agent needs input — finished a step, waiting on an\napproval, stuck on a multiple-choice question, or stalled on an error — and\nautomatically supplies the next prompt or the correct response, *the way you\nwould*. It learns from your own past decisions in a supervised shadow mode, can\nfollow task lists you explicitly configure, and can optionally consult an\nLLM/agent CLI. Autonomous actions must clear the applicable confidence and\nsafety gates; uncertain ones escalate to you. Everything it does is audited and\ncorrectable.\n\n- **Learned rules, not guesses** — every action taken from a learned rule traces\n  back to your confirmed decisions. Explicit task sources and the opt-in LLM\n  helper are separate, clearly audited paths.\n- **Confidence-gated** — learned rules and optional LLM suggestions use their\n  own configured thresholds; below the applicable threshold they escalate.\n- **Safety first** — never-auto patterns (force-push, destructive ops, deploys,\n  credential changes, …), a global pause/kill switch, a runaway-loop guard, and\n  an error-retry ceiling all veto automation.\n- **Local by default** — learning data, history, and the audit log live in\n  SQLite on your machine. Hap sends no telemetry. Its only outbound call in the\n  default configuration is a version check asking GitHub for the newest release\n  (at most every 6h, nothing about you is sent), so the TUI can flag an\n  available update; switch it off with\n  `hap config set tui.disable_check_for_update true`. Two things you can turn on\n  do talk to a service: an LLM CLI you configure may use its provider, and\n  setting a task source's storage provider to `github_gist` puts that source's\n  checklist in a gist you own — its task text and nothing else.\n\n> [!IMPORTANT]\n> **Agent compatibility.** Herd Auto Prompter is developed and extensively\n> tested against **Claude Code** (`claude`) and the **OpenAI Codex CLI**\n> (`codex`). Other agents are best-effort: **OpenCode** (`opencode`),\n> **Antigravity CLI** (`agy`)\n…[truncated]"
+    },
+    {
+      "source_id": "github:augety121/MCP-State-Twin",
+      "title": "MCP-State-Twin",
+      "url": "https://github.com/augety121/MCP-State-Twin",
+      "github_url": "https://github.com/augety121/MCP-State-Twin",
+      "bishop_ui": "http://localhost:8081/entries/github:augety121/MCP-State-Twin",
+      "published_at": "2026-09-12T05:51:17+00:00",
+      "ingested_at": "2026-09-12T06:10:50.345010+00:00",
+      "relevance_score": 0.85,
+      "relevance_reason": "Directly addresses agent evaluation infrastructure and testing patterns for agentic systems, with clear production safety considerations around tool execution and state isolation.",
+      "value_rationale": "Provides actionable patterns for building reproducible evaluation environments for LangGraph-style agents, solving a critical operational gap in agent testing where tool execution isolation and canonical state diffing are needed for reliable evaluation and debugging of multi-step trajectories.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "evaluation",
+        "benchmark",
+        "architecture",
+        "safety"
+      ],
+      "concepts": [
+        "deterministic world snapshots",
+        "state forking and isolation",
+        "transactional tool execution",
+        "canonical state diffing",
+        "CEL-based preconditions/effects",
+        "MCP Streamable HTTP",
+        "deterministic entropy streams",
+        "episode-based evaluation"
+      ],
+      "challenge_hooks": [
+        "How to reproducibly compare different agent trajectories against the same initial world state without side effects?",
+        "How to isolate and rollback tool mutations across concurrent agent evaluations while maintaining state consistency?",
+        "How to build deterministic test harnesses for LLM agents that guarantee environment identity and ordered tool execution?",
+        "How to generate canonical evidence artifacts from agent evaluation episodes for auditable comparison?"
+      ],
+      "summary": "MCP State Twin enables reproducible AI Agent evaluation via deterministic, forkable, stateful MCP test worlds. Agents safely execute different tool trajectories from shared snapshots, with isolated state mutations and canonical diffs—no production writes.",
+      "pre_filter_rationale": "Applied systems artifact: a reusable test harness for agent evaluation with deterministic state management and fork semantics—directly applicable to building reproducible eval pipelines for agentic systems I would ship.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<h1>MCP State Twin</h1>\n\n<p><strong>用于可复现 AI Agent 评测的确定性、可分叉、有状态 MCP 测试世界</strong></p>\n<p>从同一世界快照出发，让不同 Agent 安全地执行不同工具轨迹，再比较最终状态——不写入生产服务。</p>\n\n<p>\n  <strong>简体中文</strong> ·\n  <a href=\"README.en.md\">English</a> ·\n  <a href=\"README.ja.md\">日本語</a> ·\n  <a href=\"README.ko.md\">한국어</a>\n</p>\n\n<p>\n  <a href=\"https://github.com/augety121/MCP-State-Twin/actions/workflows/ci.yml\"><img alt=\"CI\" src=\"https://img.shields.io/github/actions/workflow/status/augety121/MCP-State-Twin/ci.yml?branch=main&style=flat-square&label=CI&logo=githubactions&logoColor=white\"></a>\n  <a href=\"LICENSE\"><img alt=\"MIT License\" src=\"https://img.shields.io/github/license/augety121/MCP-State-Twin?style=flat-square&label=License\"></a>\n  <img alt=\"Go 1.26.x\" src=\"https://img.shields.io/badge/Go-1.26.x-00ADD8?style=flat-square&logo=go&logoColor=white\">\n  <img alt=\"MCP\" src=\"https://img.shields.io/badge/MCP-Streamable_HTTP-5B5BD6?style=flat-square\">\n  <img alt=\"Development Preview\" src=\"https://img.shields.io/badge/status-development_preview-D97706?style=flat-square\">\n</p>\n\n<p><strong>Fork the tool world, not production.</strong></p>\n<p><code>snapshot</code> → <code>fork</code> → <code>act</code> → <code>assert</code> → <code>diff</code></p>\n\n</div>\n\n> [!IMPORTANT]\n> **Development Preview · `0.1.0-dev` · latest prerelease `v0.1.0-alpha.1` · 非 production-ready。**\n> 当前实现究竟可以声明什么，以 [Implementation Status](docs/IMPLEMENTATION-STATUS.md)、RFC、已接受 ADR、规范文档和可执行测试证据为准。Roadmap 中的能力不会被当作当前功能宣传。\n\n<p align=\"center\">\n  <a href=\"#快速开始\"><strong>快速开始</strong></a> ·\n  <a href=\"#30-秒看懂工作原理\">工作原理</a> ·\n  <a href=\"#当前状态\">当前状态</a> ·\n  <a href=\"#twinspec\">TwinSpec</a> ·\n  <a href=\"#架构与安全边界\">安全边界</a> ·\n  <a href=\"#文档地图\">文档地图</a>\n</p>\n\n<table>\n<tr>\n<td width=\"25%\" align=\"center\"><strong>Reproducible</strong><br><sub>从同一不可变 Snapshot 起步</sub></td>\n<td width=\"25%\" align=\"center\"><strong>Forkable</strong><br><sub>每次评测拥有隔离 Branch</sub></td>\n<td width=\"25%\" align=\"center\"><strong>Stateful</strong><br><sub>跨工具调用保留真实状态演化</sub></td>\n<td width=\"25%\" align=\"center\"><strong>Comparable</strong><br><sub>用 Assertion 与 Canonical Diff 比较终态</sub></td>\n</tr>\n</table>\n\n## MCP State Twin 是什么？\n\nMCP State Twin 是一个面向 AI Agent 评\n…[truncated]"
+    },
+    {
+      "source_id": "github:chunxiaoxx/nautilus-compass",
+      "title": "nautilus-compass",
+      "url": "https://github.com/chunxiaoxx/nautilus-compass",
+      "github_url": "https://github.com/chunxiaoxx/nautilus-compass",
+      "bishop_ui": "http://localhost:8081/entries/github:chunxiaoxx/nautilus-compass",
+      "published_at": "2026-09-14T04:13:49+00:00",
+      "ingested_at": "2026-09-14T04:38:25.499521+00:00",
+      "relevance_score": 0.84,
+      "relevance_reason": "Squarely inside the agentic-systems anchor (weight 1.0) with a concrete production memory architecture combining RAG retrieval (weight 1.0) and observability through drift detection, though presented as a tool/library rather than a technique or architectural pattern.",
+      "value_rationale": "Documents a specific hybrid retrieval approach for agent memory (time-bucketed, semantic+keyword, drift-aware) with measured benchmarks against a known baseline (97.8% vs mem0's 91.6%), plus cost and integration details (14× cheaper, MCP plugin support) that a practitioner could directly evaluate for their own agent orchestration stack.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "memory-architecture",
+        "orchestration",
+        "benchmark",
+        "evaluation",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "long-term memory for agents",
+        "time-bucketed retrieval",
+        "hybrid semantic-keyword search (BGE-m3)",
+        "drift detection with anchor scoring",
+        "memory recall evaluation (LongMemEval-S, EverMemBench)",
+        "Model Context Protocol (MCP) integration",
+        "agent-to-agent memory contracts"
+      ],
+      "challenge_hooks": [
+        "long-term memory system for AI agents that stays local and runs 14× cheaper than SaaS alternatives",
+        "detecting memory drift and stale facts in agent session history without human intervention",
+        "sharing memory state across multiple agents with scoped access and mTLS contracts",
+        "benchmarking memory recall quality and relevance in multi-turn agent conversation traces"
+      ],
+      "summary": "Local-first long-term memory layer for AI agents with time-bucketed hybrid retrieval (BGE-m3 semantic+keyword), drift detection via anchor scoring, and cross-agent contracts; benchmarks 97.8% on LongMemEval-S vs mem0's 91.6%, 14× cheaper, integrates as MCP plugin across Claude/Cline/Cursor/Continue.",
+      "pre_filter_rationale": "Applied systems anchor: a shipped reliability pattern for multi-agent coordination (cross-dialog contracts, drift detection, memory without extraction) that addresses production orchestration and state management I would implement.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# nautilus-compass\n\n<!-- mcp-name: io.github.chunxiaoxx/nautilus-compass -->\n\n> **Open-source memory & reliability layer for AI agents.**\n> Long-term memory that now **beats mem0 on all three LongMemEval-S metrics**\n> while staying fully local & 14× cheaper — plus drift detection and\n> cross-agent contracts that no other memory layer ships.\n>\n> Plugin for Claude Code / Desktop · Cline · Cursor · Continue.dev · Zed ·\n> any MCP client.\n>\n> **Built by [Nautilus Platform](https://nautilus.social)** · open agent ecosystem · [join as agent →](https://nautilus.social)\n\n🇬🇧 English (this file) · [🇨🇳 中文](README.zh-CN.md)\n\n[![CI](https://github.com/chunxiaoxx/nautilus-compass/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/chunxiaoxx/nautilus-compass/actions/workflows/ci.yml)\n[![arXiv build](https://github.com/chunxiaoxx/nautilus-compass/actions/workflows/build-paper.yml/badge.svg?branch=main)](https://github.com/chunxiaoxx/nautilus-compass/actions/workflows/build-paper.yml)\n[![LongMemEval-S](https://img.shields.io/badge/LongMemEval--S-full500%20P%405%2097.8%25%20%C2%B7%20vs%20mem0%2091.6%25-brightgreen)](docs/evidence/headhead_mem0_full500_20260826.json)\n[![EverMemBench](https://img.shields.io/badge/EverMemBench-44.4%E2%80%9347.3%25-brightgreen)](paper/sections/paper2_06_5_evermembench.tex)\n[![drift-AUC](https://img.shields.io/badge/drift_AUC-0.83_held--out-brightgreen)](#how-it-works)\n[![PyPI](https://img.shields.io/pypi/v/nautilus-compass?label=PyPI&color=blue)](https://pypi.org/project/nautilus-compass/)\n[![MCP](https://img.shields.io/badge/MCP-17%20tools%20%C2%B7%20TLS%20%C2%B7%20RBAC-blue)](docs/mcp-usage.md)\n[![A2A](https://img.shields.io/badge/A2A-mTLS%20%C2%B7%20scoped%20peers-blue)](examples/a2a_tls_demo.py)\n[![license](https://img.shields.io/badge/license-Modified%20MIT-blue)](LICENSE)\n\n---\n\n## What this is (2026-08 state)\n\nThree pillars, one plugin:\n\n**1 · Black-box long-term memory — now with SOTA retrieval.**\nRaw text embedded locally with BGE-m3. No extraction LLM at ingest, no graph,\nno data leaving your machine. In Aug 2026 we added **utterance-routed chunk\nretrieval**: single-session and knowledge-update questions route to\nturn-window\n…[truncated]"
+    },
+    {
+      "source_id": "github:antonyrag/ragleap-core",
+      "title": "ragleap-core",
+      "url": "https://github.com/antonyrag/ragleap-core",
+      "github_url": "https://github.com/antonyrag/ragleap-core",
+      "bishop_ui": "http://localhost:8081/entries/github:antonyrag/ragleap-core",
+      "published_at": "2026-09-12T05:55:38+00:00",
+      "ingested_at": "2026-09-12T06:16:53.746691+00:00",
+      "relevance_score": 0.82,
+      "relevance_reason": "Directly addresses agentic orchestration, RAG extension patterns, and production deployment concerns with multi-channel support and configurable autonomy modes.",
+      "value_rationale": "Provides a reference architecture for combining RAG with agent orchestration, knowledge graphs, and multi-modal I/O—key patterns for production agentic systems. The outcome-weighted memory and autonomy mode design are architecturally relevant for evaluating agent design tradeoffs.",
+      "entry_type": "repo",
+      "tags": [
+        "RAG",
+        "agentic",
+        "multi-agent",
+        "tool-use",
+        "orchestration",
+        "embeddings",
+        "vector-stores",
+        "graph-retrieval",
+        "hybrid-retrieval",
+        "memory-architecture",
+        "deployment",
+        "observability",
+        "document-intelligence"
+      ],
+      "concepts": [
+        "autonomous agent orchestration with think-act-decide loops",
+        "multi-channel bot adapters (WhatsApp, Telegram, Discord, Twilio voice)",
+        "pluggable embeddings and vector backends (FAISS, PgVector, Pinecone, Weaviate, Qdrant, Milvus, Chroma)",
+        "knowledge graph retrieval (Neo4j) alongside semantic search",
+        "outcome-weighted memory and preference learning",
+        "tool-use dispatch registry with dead-code detection",
+        "real-time external data service integration for live business data",
+        "hybrid search combining dense retrieval and entity-based graph traversal"
+      ],
+      "challenge_hooks": [
+        "How to build self-hosted multi-channel autonomous agents (WhatsApp/Telegram/Discord/voice) that learn from corrections and maintain outcome-weighted memory without vendor lock-in?",
+        "How to orchestrate tool-use dispatch with proper integration patterns, avoiding unreachable dead code and ensuring manager AI shares live query access with customer-facing RAG systems?",
+        "How to combine semantic RAG retrieval with knowledge graph traversal and real-time business data lookups in a unified agent loop across heterogeneous channels?",
+        "How to deploy and observe autonomous agent systems at scale using Kubernetes, Prometheus metrics, and pluggable vector/embedding backends while maintaining data privacy?"
+      ],
+      "summary": "RagLeap Core is a self-hosted autonomous AI agent framework extending beyond RAG with multi-channel orchestration (WhatsApp, Telegram, Discord, voice), knowledge graphs, pluggable embeddings/vector stores, outcome-weighted memory, and think-act-decide agentic loops with full/semi-autonomy modes.",
+      "pre_filter_rationale": "Applied systems: a shipped, multi-agent orchestration stack with Graph RAG, tool-use patterns, multi-model routing, and fallback logic—working references for agentic workflows and RAG integration I would implement from.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<img src=\"assets/logo.png\" alt=\"RagLeap Core logo\" width=\"120\">\n\n# RagLeap Core\n\n**Autonomous AI Agents — Not Just RAG.**\n\n[![license MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE) [![Core Release](https://img.shields.io/github/v/release/antonyrag/ragleap-core?filter=v*&label=ragleap-core&color=blue)](https://github.com/antonyrag/ragleap-core/releases) [![46 AI Employees](https://img.shields.io/badge/46-AI%20Employees-brightgreen)](https://github.com/antonyrag/ragleap-core) [![Autonomous](https://img.shields.io/badge/Autonomous-brightgreen)](https://github.com/antonyrag/ragleap-core) [![Self--Hosted](https://img.shields.io/badge/Self--Hosted-brightgreen)](https://github.com/antonyrag/ragleap-core)\n[![PyPI ragleap-rag](https://img.shields.io/pypi/v/ragleap-rag?label=ragleap-rag)](https://pypi.org/project/ragleap-rag/) [![Downloads](https://img.shields.io/pepy/dt/ragleap-rag?label=downloads)](https://pypi.org/project/ragleap-rag/)\n[![PyPI ragleap-graph](https://img.shields.io/pypi/v/ragleap-graph?label=ragleap-graph)](https://pypi.org/project/ragleap-graph/) [![Downloads](https://img.shields.io/pepy/dt/ragleap-graph?label=downloads)](https://pypi.org/project/ragleap-graph/)\n[![PyPI ragleap-vectorstores](https://img.shields.io/pypi/v/ragleap-vectorstores?label=ragleap-vectorstores)](https://pypi.org/project/ragleap-vectorstores/) [![Downloads](https://img.shields.io/pepy/dt/ragleap-vectorstores?label=downloads)](https://pypi.org/project/ragleap-vectorstores/)\n[![PyPI ragleap-ops](https://img.shields.io/pypi/v/ragleap-ops?label=ragleap-ops)](https://pypi.org/project/ragleap-ops/) [![Downloads](https://img.shields.io/pepy/dt/ragleap-ops?label=downloads)](https://pypi.org/project/ragleap-ops/)\n[![PyPI ragleap-app-chart](https://img.shields.io/pypi/v/ragleap-app-chart?label=ragleap-app-chart)](https://pypi.org/project/ragleap-app-chart/) [![Downloads](https://img.shields.io/pepy/dt/ragleap-app-chart?label=downloads)](https://pypi.org/project/ragleap-app-chart/)\n[![PyPI ragleap-observability](https://img.shields.io/pypi/v/ragleap-observability?label=ragleap-observability)](https://pypi.org/project/ragleap-observability/) [![Downloads\n…[truncated]"
+    },
+    {
+      "source_id": "github:clavia-labs/tardigrade",
+      "title": "tardigrade",
+      "url": "https://github.com/clavia-labs/tardigrade",
+      "github_url": "https://github.com/clavia-labs/tardigrade",
+      "bishop_ui": "http://localhost:8081/entries/github:clavia-labs/tardigrade",
+      "published_at": "2026-09-13T04:17:56+00:00",
+      "ingested_at": "2026-09-13T04:30:29.745841+00:00",
+      "relevance_score": 0.82,
+      "relevance_reason": "Squarely inside the agentic-systems anchor (weight 1.0) with a production-oriented architecture centered on event-sourced state management, immutability, and composable tool harnesses — the kind of orchestration pattern the profile prioritizes over theoretical novelty.",
+      "value_rationale": "Demonstrates a concrete architectural pattern for agent durability and replay via immutable event logs, plus composable harness abstractions for tools and budgets, giving the profile owner a reference implementation for handling agent state persistence and tool composition without rebuilding those patterns from first principles.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "architecture",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "event-sourced agents",
+        "immutable event log",
+        "component state machines",
+        "declarative agent composition",
+        "durable execution with replay",
+        "Effect TS",
+        "tool binding and execution",
+        "budget scoping"
+      ],
+      "challenge_hooks": [
+        "building modular, composable agent harnesses without rigid boilerplate",
+        "ensuring agent state durability and recovery across process restarts without external orchestration",
+        "enabling self-improving agents to modify their own harness at runtime"
+      ],
+      "summary": "TypeScript framework for building modular agents around an immutable event log, inspired by React's declarative approach. Components derive views and transitions from events; supports durability via replay, serverless deployment, and composable harnesses for tools, code execution, and budgets.",
+      "pre_filter_rationale": "Applied systems: a concrete, runnable agent framework with an immutable event-log architecture — a working reference for agentic orchestration and state management I would evaluate this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <br>\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"docs/assets/mark-dark.svg\">\n    <img alt=\"Tardigrade\" src=\"docs/assets/mark.svg\" width=\"120\">\n  </picture>\n</p>\n\n<p align=\"center\">\n  <a href=\"https://www.npmjs.com/package/tardie\"><img alt=\"npm version\" src=\"https://img.shields.io/npm/v/tardie.svg\"></a>\n  <a href=\"https://discord.gg/Z74jwRxz4k\"><img alt=\"Join Discord\" src=\"https://img.shields.io/badge/Discord-join-5865F2?logo=discord&amp;logoColor=white\"></a>\n</p>\n\n# Tardigrade\n\nTardigrade is a typescript framework for building modular agents around an immutable event log. It is built on [Effect TS](https://effect.website/) and is inspired by [React](https://react.dev/)'s declarative approach to building user interfaces.\n\n### Agents that can self-improve\nAs models get increasingly smart, they will be capable of writing their own harnesses to improve themselves ([Meta-Harness](https://arxiv.org/abs/2603.28052)). A harness that is too rigid and complex is a bottleneck to this. We need something more composable, and easy to author.\n\nWe took inspiration from React. React derives its component tree and declared effects from state. Tardigrade applies the same idea to agent harnesses. Each component derives a view and enabled transitions from an event log.\n\n<p align=\"center\"><code>{ view, transitions } = f(event log)</code></p>\n\n## Why Tardigrade\n\n- **Composable harness.** Add tools, code execution, budgets, compaction, and replies as independent components.\n- **Strongly typed, built on Effect.** Typed services and Layers make each component's dependencies explicit. A missing service fails during compile.\n- **Crash proof.** A durable host derives unfinished work from the stored log.\n- **Serverless.** All you need is a durable store, no process has to stay alive. Any new invocation reads the log, runs the transitions it owes, and settles.\n- **Inspect and improve every run.** Log as core supports native debugging, replay, and experiments with state forked from any checkpoint.\n\n## Quickstart\n\nInstall Tardigrade and initialize an editable template actor. Use Bun 1.4 or later. If you are using a coding agent, the [Tardigrade skil\n…[truncated]"
+    },
+    {
+      "source_id": "github:hanyeol/model-compose",
+      "title": "model-compose",
+      "url": "https://github.com/hanyeol/model-compose",
+      "github_url": "https://github.com/hanyeol/model-compose",
+      "bishop_ui": "http://localhost:8081/entries/github:hanyeol/model-compose",
+      "published_at": "2026-09-11T13:09:50+00:00",
+      "ingested_at": "2026-09-11T15:32:02.983195+00:00",
+      "relevance_score": 0.82,
+      "relevance_reason": "Directly relevant to agentic systems orchestration and production deployment patterns, with strong alignment to RAG and tool-use workflows, though value depends on actual composability and latency characteristics.",
+      "value_rationale": "Offers production-grade orchestration for multi-component AI systems (models + agents + RAG + tools) which is core to current work; declarative YAML approach reduces complexity of wiring complex agentic patterns. Key question is runtime performance and observability coverage for inference latency debugging.",
+      "entry_type": "repo",
+      "tags": [
+        "RAG",
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "deployment",
+        "serving",
+        "embeddings",
+        "vector-stores",
+        "hybrid-retrieval",
+        "architecture",
+        "production"
+      ],
+      "concepts": [
+        "declarative workflow composition",
+        "hybrid local-cloud model deployment",
+        "streaming multi-modal pipelines",
+        "protocol adapters (HTTP/WebSocket/MCP)",
+        "agent orchestration with tool-use",
+        "vector store integration",
+        "distributed job queuing",
+        "runtime abstraction layer"
+      ],
+      "challenge_hooks": [
+        "How do I define multi-step AI workflows (RAG, agents, tool-use) declaratively without writing framework code?",
+        "How do I deploy the same AI service across local, Docker, and cloud runtimes without re-engineering?",
+        "How do I compose heterogeneous models (local LLMs, cloud APIs, embeddings, vector stores) into streaming end-to-end pipelines?",
+        "How do I expose AI workflows as MCP servers or HTTP APIs with built-in protocols and queue-based scaling?"
+      ],
+      "summary": "model-compose is a declarative YAML-based framework for building and deploying production AI services without application code. Supports composable workflows combining models, agents, RAG, tools, and protocols (HTTP/WebSocket/MCP) across hybrid local-cloud runtimes.",
+      "pre_filter_rationale": "Applied systems and shipped practice: a production deployment orchestration tool for agentic workflows, RAG pipelines, and tool servers—a working reference for operationalizing multi-component AI systems that I would evaluate and potentially adopt this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n![model-compose - Compose Any AI, Deploy Anywhere](docs/images/main-banner.png)\n\n[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)\n[![PyPI version](https://img.shields.io/pypi/v/model-compose.svg)](https://pypi.org/project/model-compose/)\n[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)\n[![Downloads](https://pepy.tech/badge/model-compose)](https://pepy.tech/project/model-compose)\n[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)\n\n[한국어](README.ko.md) | [中文](README.zh-cn.md)\n\n</div>\n\n---\n\n# model-compose\n\n**Deploy production-ready AI services in minutes.**\n\nOne YAML file. Any model. Any protocol. Any runtime. Build chat APIs, RAG pipelines, autonomous agents, and MCP servers without writing application code — then deploy the same file anywhere, like `docker-compose`.\n\nAI systems should not be locked into a single provider, runtime, or cloud. model-compose is built on four principles:\n\n- **Composable** — Models, agents, workflows, tools, memory, and protocols are interchangeable building blocks.\n- **Portable** — Define your AI system once, deploy anywhere without re-engineering.\n- **Hybrid-First** — Bridge cloud APIs and local models on your own terms.\n- **Stream-Native** — Data flows through workflows as it arrives — tokens, audio, frames, and events as first-class values.\n\n<div align=\"center\">\n\n[Quick Start](#quick-start) · [What You Can Build](#what-you-can-build) · [Documentation](docs/user-guide/README.md) · [Examples](examples/README.md)\n\n</div>\n\n---\n\n## Quick Start\n\nInstall with pip:\n\n```bash\npip install model-compose\n```\n\nOr with [uv](https://docs.astral.sh/uv/):\n\n```bash\nuv pip install model-compose\n```\n\nCreate `model-compose.yml`:\n\n```yaml\ncontroller:\n  adapter:\n    type: http-server\n    port: 8080\n  webui:\n    port: 8081\n\nworkflow:\n  job:\n    component: chatgpt\n    input:\n      prompt: ${input.prompt}\n\ncomponent:\n  id: chatgpt\n  type: http-client\n  base_url: https://api.openai.com/v1\n  action:\n    path: /chat/completions\n    method: POST\n    headers:\n      Authorization: Bearer ${\n…[truncated]"
+    },
+    {
+      "source_id": "github:pathwaycom/pathway",
+      "title": "pathway",
+      "url": "https://github.com/pathwaycom/pathway",
+      "github_url": "https://github.com/pathwaycom/pathway",
+      "bishop_ui": "http://localhost:8081/entries/github:pathwaycom/pathway",
+      "published_at": "2026-09-12T05:55:49+00:00",
+      "ingested_at": "2026-09-12T06:02:42.931196+00:00",
+      "relevance_score": 0.82,
+      "relevance_reason": "Pathway directly addresses RAG pipeline orchestration, LLM integration, and production deployment—core to applied AI work—though relevance is tempered by focus on ETL/streaming rather than core retrieval or agent reasoning patterns.",
+      "value_rationale": "Enables building production RAG systems with incremental computation and unified batch/streaming semantics, reducing latency and complexity in retrieval updates; the Rust engine and built-in LLM tooling are valuable for shipping low-latency document processing pipelines at scale.",
+      "entry_type": "repo",
+      "tags": [
+        "RAG",
+        "NLP",
+        "inference",
+        "serving",
+        "deployment",
+        "optimization",
+        "architecture",
+        "tool-use"
+      ],
+      "concepts": [
+        "stream processing",
+        "ETL framework",
+        "differential dataflow",
+        "incremental computation",
+        "real-time analytics",
+        "RAG pipelines",
+        "data connectors",
+        "stateful transformations"
+      ],
+      "challenge_hooks": [
+        "How to build production-ready LLM and RAG pipelines that handle both batch and streaming data with a single codebase",
+        "Need for incremental computation engine that outperforms Flink/Spark while supporting Python ML libraries natively",
+        "Deploying real-time analytics and ETL pipelines at scale with Kubernetes while maintaining data consistency and persistence",
+        "Integrating multiple data sources (Kafka, GDrive, PostgreSQL, etc.) with LLM processing for live document indexing and retrieval"
+      ],
+      "summary": "Pathway is a Python ETL framework for stream processing, real-time analytics, LLM pipelines, and RAG. Built on a scalable Rust engine using Differential Dataflow, it enables incremental computation with unified batch/streaming APIs, LLM tooling, persistence, and deployment via Docker/Kubernetes.",
+      "pre_filter_rationale": "Applied systems infrastructure for building RAG and agentic LLM pipelines in production; directly relevant to orchestration and streaming eval patterns I would evaluate or deploy.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n  <a href=\"https://pathway.com/\">\n    <picture>\n      <source media=\"(prefers-color-scheme: dark)\" srcset=\"https://pathway.com/logo-light.svg\">\n      <img src=\"https://pathway.com/logo-dark.svg\">\n    </picture>\n  </a>\n  <br /><br />\n  <a href=\"https://trendshift.io/repositories/10388\" target=\"_blank\"><img src=\"https://trendshift.io/api/badge/repositories/10388\" alt=\"pathwaycom%2Fpathway | Trendshift\" style=\"width: 250px; height: 55px;\" width=\"250\" height=\"55\"/></a>\n  <br /><br />\n</div>\n<p align=\"center\">\n        <a href=\"https://github.com/pathwaycom/pathway/actions/workflows/ubuntu_test.yml\">\n        <img src=\"https://github.com/pathwaycom/pathway/actions/workflows/ubuntu_test.yml/badge.svg\" alt=\"ubuntu\"/>\n        <br>\n        <a href=\"https://github.com/pathwaycom/pathway/actions/workflows/release.yml\">\n        <img src=\"https://github.com/pathwaycom/pathway/actions/workflows/release.yml/badge.svg\" alt=\"Last release\"/></a>\n        <a href=\"https://badge.fury.io/py/pathway\"><img src=\"https://badge.fury.io/py/pathway.svg\" alt=\"PyPI version\" height=\"18\"></a>\n        <a href=\"https://badge.fury.io/py/pathway\"><img src=\"https://static.pepy.tech/badge/pathway\" alt=\"PyPI downloads\" height=\"18\"></a>\n        <a href=\"https://github.com/pathwaycom/pathway/blob/main/LICENSE.txt\">\n        <img src=\"https://img.shields.io/badge/license-BSL-green\" alt=\"License: BSL\"/></a>\n      <br>\n        <a href=\"https://discord.gg/pathway\">\n        <img src=\"https://img.shields.io/discord/1042405378304004156?logo=discord\"\n            alt=\"chat on Discord\"></a>\n        <a href=\"https://twitter.com/intent/follow?screen_name=pathway_com\">\n        <img src=\"https://img.shields.io/twitter/follow/pathwaycom\"\n            alt=\"follow on Twitter\"></a>\n        <a href=\"https://linkedin.com/company/pathway\">\n        <img src=\"https://img.shields.io/badge/pathway-0077B5?style=social&logo=linkedin\" alt=\"follow on LinkedIn\"></a>\n      <a href=\"https://github.com/dylanhogg/awesome-python/blob/main/README.md\">\n      <img src=\"https://awesome.re/badge.svg\" alt=\"Awesome Python\"></a>\n      <a href=\"https://gurubase.io/g/pathway\">\n      <img src=\"https://img.shields.io/badge/Gurubase-\n…[truncated]"
+    },
+    {
+      "source_id": "github:promptfoo/promptfoo",
+      "title": "promptfoo",
+      "url": "https://github.com/promptfoo/promptfoo",
+      "github_url": "https://github.com/promptfoo/promptfoo",
+      "bishop_ui": "http://localhost:8081/entries/github:promptfoo/promptfoo",
+      "published_at": "2026-09-14T04:18:03+00:00",
+      "ingested_at": "2026-09-14T04:36:23.407170+00:00",
+      "relevance_score": 0.82,
+      "relevance_reason": "Squarely on the LLM evaluation and observability anchor (weight 0.7) with concrete tooling for prompt testing and model comparison; also touches agentic systems through red-teaming and vulnerability scanning, though the core value is in eval/observability.",
+      "value_rationale": "Provides a production-ready evaluation framework with multi-provider model comparison, automated vulnerability scanning, and CI/CD integration—directly applicable to the profile owner's need to benchmark and monitor LLM-based systems in production without requiring bespoke evaluation infrastructure.",
+      "entry_type": "repo",
+      "tags": [
+        "evaluation",
+        "safety",
+        "prompt-engineering",
+        "production",
+        "orchestration"
+      ],
+      "concepts": [
+        "LLM evaluation framework",
+        "red teaming",
+        "vulnerability scanning",
+        "prompt testing",
+        "multi-provider model comparison",
+        "CI/CD integration",
+        "local execution"
+      ],
+      "challenge_hooks": [
+        "how to systematically test and compare LLM prompts across multiple providers without manual trial-and-error",
+        "identifying and remediating security vulnerabilities in LLM applications through automated red teaming",
+        "integrating LLM evaluation and compliance checks into CI/CD pipelines for production deployments"
+      ],
+      "summary": "A CLI and library for evaluating and red-teaming LLM applications, supporting automated prompt testing, model comparison across providers (OpenAI, Anthropic, Bedrock, Ollama), vulnerability scanning, and CI/CD integration with local execution and caching.",
+      "pre_filter_rationale": "Applied dev-skills anchor: a runnable eval harness and testing framework for prompts, agents, and RAG systems with declared production adoption (OpenAI, Anthropic) and reusable CI/CD integration patterns I would implement this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Promptfoo: LLM evals & red teaming\n\n<p align=\"center\">\n  <a href=\"https://npmjs.com/package/promptfoo\"><img src=\"https://img.shields.io/npm/v/promptfoo\" alt=\"npm\"></a>\n  <a href=\"https://npmjs.com/package/promptfoo\"><img src=\"https://img.shields.io/npm/dm/promptfoo\" alt=\"npm\"></a>\n  <a href=\"https://github.com/promptfoo/promptfoo/actions/workflows/main.yml\"><img src=\"https://img.shields.io/github/actions/workflow/status/promptfoo/promptfoo/main.yml\" alt=\"GitHub Workflow Status\"></a>\n  <a href=\"https://github.com/promptfoo/promptfoo/blob/main/LICENSE\"><img src=\"https://img.shields.io/github/license/promptfoo/promptfoo\" alt=\"MIT license\"></a>\n  <a href=\"https://discord.gg/promptfoo\"><img src=\"https://img.shields.io/discord/1146610656779440188?logo=discord&label=promptfoo\" alt=\"Discord\"></a>\n</p>\n\n<p align=\"center\">\n  <code>promptfoo</code> is a CLI and library for evaluating and red-teaming LLM apps. Stop the trial-and-error approach - start shipping secure, reliable AI apps.\n</p>\n\n<p align=\"center\">\n  <a href=\"https://www.promptfoo.dev\">Website</a> ·\n  <a href=\"https://www.promptfoo.dev/docs/getting-started/\">Getting Started</a> ·\n  <a href=\"https://www.promptfoo.dev/docs/red-team/\">Red Teaming</a> ·\n  <a href=\"https://www.promptfoo.dev/docs/\">Documentation</a> ·\n  <a href=\"https://discord.gg/promptfoo\">Discord</a>\n</p>\n\n> Promptfoo is now part of OpenAI. Promptfoo remains open source and MIT licensed. Read the [company update](https://www.promptfoo.dev/blog/promptfoo-joining-openai/).\n\n## Quick Start\n\nRequires [Node.js](https://nodejs.org/en/download) `>=22.22.0` for npm and npx usage. Node.js 24 LTS\nis recommended; see the [runtime support guide](https://www.promptfoo.dev/docs/installation/#nodejs-runtime-support).\n\n```sh\nnpm install -g promptfoo\npromptfoo init --example getting-started\n```\n\nAlso available via `brew install promptfoo` and `pip install promptfoo`. You can also use `npx promptfoo@latest` to run any command without installing.\n\nMost LLM providers require an API key. Set yours as an environment variable:\n\n```sh\nexport OPENAI_API_KEY=sk-abc123\n```\n\nOnce you're in the example directory, run an eval and view results:\n\n```sh\ncd getting-started\nprompt\n…[truncated]"
+    },
+    {
+      "source_id": "github:rajudandigam/agent-inspect",
+      "title": "agent-inspect",
+      "url": "https://github.com/rajudandigam/agent-inspect",
+      "github_url": "https://github.com/rajudandigam/agent-inspect",
+      "bishop_ui": "http://localhost:8081/entries/github:rajudandigam/agent-inspect",
+      "published_at": "2026-09-13T04:13:50+00:00",
+      "ingested_at": "2026-09-13T04:26:27.471455+00:00",
+      "relevance_score": 0.82,
+      "relevance_reason": "Squarely serves the agentic-systems anchor (weight 1.0) with a production-focused observability and testing tool, though the value is narrower than a core exemplar because it addresses instrumentation/inspection rather than core orchestration patterns.",
+      "value_rationale": "Provides a concrete pattern for capturing deterministic agent execution traces locally and validating them in CI without external dependencies, which directly solves a failure-mode detection problem (trajectory correctness) that production agentic systems face; the JSONL + contract approach is immediately applicable to debugging and testing agent behavior.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "observability",
+        "evaluation",
+        "safety",
+        "production"
+      ],
+      "concepts": [
+        "execution tree visualization",
+        "deterministic trajectory checks",
+        "trace contracts",
+        "redacted evidence bundles",
+        "JSONL trace capture",
+        "LangGraph/AI SDK adapters",
+        "metadata-only capture by default"
+      ],
+      "challenge_hooks": [
+        "how to inspect and debug TypeScript agent execution without sending traces to a remote service",
+        "enforcing deterministic tool-call order and completion expectations in CI for agentic workflows",
+        "creating shareable, hash-verifiable offline evidence artifacts for agent runs without PII exposure"
+      ],
+      "summary": "Local-first TypeScript agent execution inspector that captures runs as JSONL traces, enables deterministic trajectory checks in CI via provider-free contracts, and exports redacted Evidence v2 bundles for offline review—metadata-only by default, no account or collector required.",
+      "pre_filter_rationale": "Applied dev-skills anchor: a runnable TypeScript agent debugging and testing toolkit with CI integration and trajectory inspection—exactly the kind of reusable dev-flow technique for agent development I would integrate this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <img src=\"https://raw.githubusercontent.com/rajudandigam/agent-inspect/main/docs/assets/agent-inspect-logo-mark.svg?sanitize=true\" width=\"56\" height=\"56\" alt=\"AgentInspect\">\n</p>\n<p align=\"center\"><strong>agent-inspect</strong></p>\n<p align=\"center\">Local-first evidence for TypeScript AI agents</p>\n\n<h1 align=\"center\">\n  See what your agent did.<br>\n  Catch the wrong path in CI.<br>\n  Keep the evidence local.\n</h1>\n\n<p align=\"center\">\n  AgentInspect turns TypeScript agent runs into readable execution trees,\n  deterministic trajectory checks, and portable Evidence v2—without requiring\n  an account, collector, or default upload.\n</p>\n\n<p align=\"center\"><strong>Capture once. Debug, prevent, and share from the same local trace.</strong></p>\n\n<p align=\"center\"><sub>No account · no collector · no default upload · metadata-only by default</sub></p>\n\n<p align=\"center\">\n  <a href=\"https://agentinspect.vercel.app/\">Website</a> ·\n  <a href=\"https://agentinspect.vercel.app/docs/\">Docs</a> ·\n  <a href=\"https://www.npmjs.com/package/agent-inspect\">npm</a> ·\n  <a href=\"https://github.com/rajudandigam/agent-inspect\">GitHub</a>\n</p>\n\n<p align=\"center\">\n  <a href=\"https://www.npmjs.com/package/agent-inspect\"><img src=\"https://img.shields.io/npm/v/agent-inspect.svg\" alt=\"npm version\"></a>\n  <a href=\"LICENSE\"><img src=\"https://img.shields.io/badge/license-MIT-blue.svg\" alt=\"MIT license\"></a>\n  <a href=\"package.json\"><img src=\"https://img.shields.io/badge/node-%3E%3D20-brightgreen\" alt=\"Node.js 20 or newer\"></a>\n</p>\n\n**Support level:** Stable — see [SUPPORT-LEVELS.md](docs/SUPPORT-LEVELS.md). Network behavior: [NETWORK-BEHAVIOR.md](docs/NETWORK-BEHAVIOR.md).\n\n```bash\nnpm install agent-inspect\n```\n\n<p align=\"center\">\n  <img src=\"https://raw.githubusercontent.com/rajudandigam/agent-inspect/main/docs/assets/showcase/gif/debug-tree.gif\" alt=\"AgentInspect lists a local demo-good run, then you inspect the execution tree from the same JSONL\" width=\"900\">\n</p>\n\nAgent code rarely fails as one function call. It plans, retrieves, calls tools, invokes a model, retries, and produces side effects. Flat logs show fragments. AgentInspect keeps the run as local JSONL and gives\n…[truncated]"
+    },
+    {
+      "source_id": "github:decionis/agent-safe-pipeline",
+      "title": "agent-safe-pipeline",
+      "url": "https://github.com/decionis/agent-safe-pipeline",
+      "github_url": "https://github.com/decionis/agent-safe-pipeline",
+      "bishop_ui": "http://localhost:8081/entries/github:decionis/agent-safe-pipeline",
+      "published_at": "2026-09-14T04:14:47+00:00",
+      "ingested_at": "2026-09-14T04:36:24.292008+00:00",
+      "relevance_score": 0.81,
+      "relevance_reason": "Squarely inside the agentic-systems anchor (weight 1.0) with a concrete, production-focused architecture pattern for agent safety and authorization that addresses a critical failure mode in multi-agent deployments.",
+      "value_rationale": "Provides a reference implementation of a verifiable execution-control boundary (Intent → Approval → Grant → Outcome logging) that a practitioner could adapt directly into their agent orchestration layer to enforce policy compliance and create an audit trail, moving beyond unauthenticated agent tool-use patterns.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "safety",
+        "tool-use",
+        "architecture",
+        "production"
+      ],
+      "concepts": [
+        "Execution Authority architecture",
+        "authorization boundary",
+        "Decision Dossier",
+        "intent capture",
+        "policy-driven approval",
+        "safe execution",
+        "verifiable evidence records",
+        "trust boundary enforcement"
+      ],
+      "challenge_hooks": [
+        "how to enforce policy-based authorization for agent actions without trusting the agent itself",
+        "building verifiable evidence trails for every authorized agent execution to enable audit and incident response",
+        "gating consequential agent actions (refunds, CRM updates, deployments) through an independent human or system decision boundary"
+      ],
+      "summary": "Reference implementation of the Execution Authority architecture for AI agents: an independent authorization boundary that gates agent actions through policy-driven decisions, with verifiable evidence records (Intent, Approval, Grant, Dossier, Outcome) and zero-trust execution enforcement across capture, authorization, and outcome logging.",
+      "pre_filter_rationale": "Applied systems anchor: a shipped reference architecture for production agent safety with concrete components (intent capture, policy verdict, approval, executor) that I would implement from this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Agent-Safe Pipeline\n\n[![Continuous integration](https://github.com/decionis/agent-safe-pipeline/actions/workflows/deploy.yml/badge.svg?branch=master)](https://github.com/decionis/agent-safe-pipeline/actions/workflows/deploy.yml)\n[![CodeQL](https://github.com/decionis/agent-safe-pipeline/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/decionis/agent-safe-pipeline/actions/workflows/codeql.yml)\n[![Secret scanning](https://github.com/decionis/agent-safe-pipeline/actions/workflows/secrets.yml/badge.svg?branch=master)](https://github.com/decionis/agent-safe-pipeline/actions/workflows/secrets.yml)\n[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/decionis/agent-safe-pipeline/badge)](https://scorecard.dev/viewer/?uri=github.com/decionis/agent-safe-pipeline)\n[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/14098/badge)](https://www.bestpractices.dev/projects/14098)\n[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)\n\n**Let agents propose. Let policy decide.**\n\nAgent-Safe Pipeline is the reference implementation of the Execution Authority architecture: AI-agent actions execute only through an independent authorization boundary, and every authorization decision leaves a verifiable evidence record.\n\nThis repository is a library and runnable reference implementation, not a hosted authorization service or a substitute for provider-side identity, least privilege, network isolation, and incident response. Its safety claims apply only when the documented trust boundary is preserved.\n\nCanonical source: <https://github.com/decionis/agent-safe-pipeline>. Copies of this repository at other hosts — including sites that reverse-proxy github.com wholesale — are not maintained by Decionis, lag security fixes, and are not what the npm package, the Zenodo record, or decionis.com cite. Verify any copy against the signed release tags ([docs/release-tag-signing.md](./docs/release-tag-signing.md)).\n\nFive records matter and are easy to blur in a summary: the captured intent, the verified human approval, the execution grant, the Decision Dossier, and the outcome. Only the grant authorizes a\n…[truncated]"
+    },
+    {
+      "source_id": "github:Apra-Labs/apra-fleet",
+      "title": "apra-fleet",
+      "url": "https://github.com/Apra-Labs/apra-fleet",
+      "github_url": "https://github.com/Apra-Labs/apra-fleet",
+      "bishop_ui": "http://localhost:8081/entries/github:Apra-Labs/apra-fleet",
+      "published_at": "2026-09-12T05:48:58+00:00",
+      "ingested_at": "2026-09-12T06:14:52.655960+00:00",
+      "relevance_score": 0.78,
+      "relevance_reason": "Directly addresses production agentic systems orchestration, LLM provider integration, and observability—core to shipping multi-agent workflows at scale.",
+      "value_rationale": "Provides architectural patterns for agent scheduling, isolation, and credential management that are immediately applicable to production agent deployments. MCP compatibility and multi-cycle sprint execution are valuable for complex orchestration beyond single-agent patterns, though the platform-level abstraction may be more relevant for infrastructure architects than day-to-day prompt/tool engineering.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "multi-agent",
+        "orchestration",
+        "deployment",
+        "observability",
+        "production",
+        "safety"
+      ],
+      "concepts": [
+        "agent orchestration and scheduling",
+        "multi-provider LLM dispatch",
+        "credential isolation and secrets management",
+        "workflow engine with phases and retries",
+        "session forking and context reuse",
+        "fleet supervision and watchdog monitoring",
+        "MCP (Model Context Protocol) integration",
+        "distributed execution across real devices"
+      ],
+      "challenge_hooks": [
+        "How do you schedule and coordinate multiple AI agents across heterogeneous devices and LLM providers in production?",
+        "How can you isolate agent execution, manage secrets, and provide observability for long-running multi-cycle agentic workflows?",
+        "How do you enable agents to fork execution sessions and reuse primed context without credential exposure or cross-contamination?"
+      ],
+      "summary": "apra-fleet is a Kubernetes-like orchestration platform for AI agents, enabling scheduling, credential management, isolation, and observability across heterogeneous devices, LLM providers, and workflows with MCP compatibility and multi-cycle sprint execution.",
+      "pre_filter_rationale": "Shipped multi-agent orchestration system with code generation, review loops, and distributed coordination — a working reference for agentic systems and dev-flow automation I would study and build from.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<picture>\n  <source media=\"(prefers-color-scheme: dark)\" srcset=\"assets/marketing/hero-banner-dark.svg\">\n  <img src=\"assets/marketing/hero-banner-light.svg\" alt=\"apra-fleet: run a fleet of AI agents across your devices, your providers, your workflows.\" width=\"100%\">\n</picture>\n\n# apra-fleet\n\n**Run a fleet of AI agents across your devices, your providers, your workflows.**\n\nWhat Kubernetes did for containers, apra-fleet does for AI agents:\nscheduling, credentials, isolation, and observability for an agentic\nworkforce -- on any machine, anywhere, using every LLM provider at once.\n\n[![CI](https://github.com/Apra-Labs/apra-fleet/actions/workflows/ci.yml/badge.svg)](https://github.com/Apra-Labs/apra-fleet/actions/workflows/ci.yml)\n[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)\n[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](https://github.com/Apra-Labs/apra-fleet/releases)\n[![MCP](https://img.shields.io/badge/MCP-compatible-8A2BE2.svg)](https://modelcontextprotocol.io)\n[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Apra-Labs/apra-fleet)\n\n[Quick Start](#quick-start-5-minutes) - [Live Demo](#watch-a-fleet-work) - [How It Works](#how-it-works) - [fleet-sprint Getting Started Guide](docs/fleet-sprint-getting-started.md) - [Website](https://apra-labs.github.io/apra-fleet)\n\n</div>\n\n---\n\n<img src=\"assets/marketing/dashboard-demo.gif\" alt=\"apra-fleet fleet-sprint dashboard, real recording: the sprint's own integration tester finds two real bugs, files them against itself, then a second cycle plans, fixes, and closes them -- captions burned in.\" width=\"100%\">\n\n> **This repository is built by the product you are looking at.** An\n> autonomous apra-fleet workflow plans, codes, reviews, tests, and ships\n> this codebase in multi-hour sprints -- filing bugs against itself and\n> fixing them. The recording above is a real run, not a mockup.\n\n---\n\n## Why a fleet?\n\nRunning one AI agent is a demo. Running fifty -- across a MacBook in the\noffice, a GPU box in the lab, three cloud VMs, and your CI -- is an\noper\n…[truncated]"
+    },
+    {
+      "source_id": "github:Dicklesworthstone/eidetic_engine_cli",
+      "title": "eidetic_engine_cli",
+      "url": "https://github.com/Dicklesworthstone/eidetic_engine_cli",
+      "github_url": "https://github.com/Dicklesworthstone/eidetic_engine_cli",
+      "bishop_ui": "http://localhost:8081/entries/github:Dicklesworthstone/eidetic_engine_cli",
+      "published_at": "2026-09-11T13:08:41+00:00",
+      "ingested_at": "2026-09-11T15:34:06.387856+00:00",
+      "relevance_score": 0.78,
+      "relevance_reason": "Directly relevant to agentic systems and memory architectures; local-first design and provenance tracking align with production observability concerns, though the Rust/CLI focus is orthogonal to core NLP/RAG specialization.",
+      "value_rationale": "Provides a concrete pattern for agent memory management and context retrieval with explainability—critical for multi-agent coordination and debugging. The zero-dependency, durable storage approach solves real production challenges in stateful agent workflows, particularly useful for building reliable agentic systems without external infrastructure dependencies.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "multi-agent",
+        "memory-architecture",
+        "tool-use",
+        "orchestration",
+        "observability",
+        "production",
+        "architecture"
+      ],
+      "concepts": [
+        "procedural memory systems",
+        "local-first persistent storage",
+        "provenance-tracked retrieval",
+        "graph snapshots for agent state",
+        "relevance scoring with decay",
+        "multi-agent work coordination",
+        "explainable context ranking"
+      ],
+      "challenge_hooks": [
+        "How do coding agents maintain durable, explainable memory across tasks without external cloud storage or runtime coupling?",
+        "How can multi-agent systems coordinate work and track decision provenance for debugging and auditability?",
+        "How do agents efficiently retrieve contextually relevant information while maintaining local-first operation and scoring transparency?",
+        "How can agent memory decay gracefully over time while remaining queryable and inspectable?"
+      ],
+      "summary": "Eidetic Engine is a durable, local-first memory system for coding agents built in Rust. It provides explainable context retrieval with provenance tracking, graph-based memory snapshots, and multi-agent coordination via a single CLI binary with JSON output and zero external runtime dependencies.",
+      "pre_filter_rationale": "Applied systems: a shipped memory substrate and CLI tool for agent-assisted engineering with working reference value for dev-flow enhancement and agent orchestration patterns.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<img src=\"./ee_illustration.webp\" alt=\"Eidetic Engine illustration\" width=\"720\">\n\n# Eidetic Engine (`ee`)\n\n**Durable, local-first, explainable memory for coding agents.**\n\n[![CI](https://img.shields.io/github/actions/workflow/status/Dicklesworthstone/eidetic_engine_cli/ci.yml?branch=main&label=CI)](https://github.com/Dicklesworthstone/eidetic_engine_cli/actions)\n[![Latest release](https://img.shields.io/github/v/release/Dicklesworthstone/eidetic_engine_cli?label=release)](https://github.com/Dicklesworthstone/eidetic_engine_cli/releases/latest)\n[![License: MIT+Rider](https://img.shields.io/badge/License-MIT%2BOpenAI%2FAnthropic%20Rider-yellow.svg)](./LICENSE)\n[![Rust 2024](https://img.shields.io/badge/rust-2024-orange.svg)](rust-toolchain.toml)\n[![No Tokio](https://img.shields.io/badge/runtime-Asupersync-blueviolet.svg)](#hard-requirements)\n\n**Install**\n\n```bash\nf=\"$(mktemp)\"\ncurl -fsSL \"https://cdn.jsdelivr.net/gh/Dicklesworthstone/eidetic_engine_cli@main/install.sh\" -o \"$f\" \\\n  || curl -fsSL \"https://raw.githubusercontent.com/Dicklesworthstone/eidetic_engine_cli/main/install.sh\" -o \"$f\"\nif [ -s \"$f\" ]; then bash \"$f\" --easy-mode --verify; else echo \"Installer download failed - retry in a few minutes\" >&2; fi\n```\n\nAlways verifies the release binary's SHA-256 checksum, verifies its Sigstore\nbundle when one is published and `cosign` is available, drops `ee` into\n`~/.local/bin`, repairs `PATH`, installs shell completions, runs a self-test,\nand prints guidance for detected agent harnesses; settings remain untouched. Pass\n`--require-provenance` for fail-closed signature and SLSA provenance\nverification. Pass `--help` (e.g. `bash install.sh --help`) for offline\ntarballs, proxy options, `--no-gum`, and `--force` reinstall.\n\n</div>\n\n---\n\n## TL;DR\n\n### Why This Exists\n\nCoding agents forget.\n\nA fresh session re-discovers project conventions, re-reads the same files, and\nwalks into traps another agent already hit. Bad assumptions become \"facts\"\nbecause the harness has no durable place to look for decisions, failures,\nrules, and evidence from prior runs.\n\nThe agent harness owns the loop. `ee` handles the memory layer.\n\n### What `ee` Does\n\n`ee` is a Rus\n…[truncated]"
+    }
+  ]
+}

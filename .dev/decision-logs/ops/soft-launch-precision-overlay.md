@@ -27,14 +27,14 @@ Revert or formally promote it after the first-week spend and inbox quality are v
 1. Prefilter pin → `professional_v1.2.0_soft_launch.yaml`. Precision-first: core only when the item is a working reference this week (`applied_systems`, `dev_skills`, or a build-from anchor). Uncertain / adjacent → park.
 2. `decision=1` + `tier=peripheral` → `RELEVANCE_PARKED` on the manifest. No scrape, no enrichment, no index. Title + abstract stay readable.
 3. Manual promote `RELEVANCE_PARKED` → `RELEVANCE_PASSED` (`POST /parked/promote`, query-api proxy, UI `/parked`). Then the existing scrape → enrich → index path runs.
-4. `BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS` (compose default `1`) caps cold-start lookback for every registered source without editing `BACKFILL_CONFIG`.
+4. `BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS` (compose default `60` as of 2026-09-15 after option 1; was `7`, originally `1`) caps cold-start lookback for every registered source without editing `BACKFILL_CONFIG`. Still overlay — not spec §18.2 windows.
 
 ## Why overlay, not a milestone
 
 - Spec §18.1: backfill uses the same pipeline as steady state — no special mode.
 - Spec §11 / v1.2.0: peripheral is a **pass** class (16 of 49 gold passes). Parking it changes the calibrated gate.
 - Adding `RELEVANCE_PARKED` to `ProcessingState` and spec §6.1 is a contract mutation made so the overlay is executable, not because the intended machine gained a new happy-path state.
-- The 1-day lookback is a spend cap for first-week multi-source noise (GitHub, hubs, paper feeds). The intended windows stay in `BACKFILL_CONFIG`.
+- The lookback overlay is a spend cap for first-week multi-source noise (GitHub, hubs, paper feeds). Originally 1 day; retuned to 7, then **60** on 2026-09-15 after option 1 Shape 2 went live. The intended windows stay in `BACKFILL_CONFIG`.
 
 ## Revert / promote
 
@@ -61,5 +61,5 @@ Revert or formally promote it after the first-week spend and inbox quality are v
 - `services/query-api/app/routers/parked.py`
 - `services/ui/app/templates/parked.html` + `/parked` routes
 - `services/scraper/app/config.py` / `loop.py` (`BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS`)
-- `docker-compose.yml` (override default `1`)
+- `docker-compose.yml` (override default `60` as of 2026-09-15 after option 1; was `7`, originally `1`)
 - `bishop_spec_0_6.md` §5.2 step 8 and §6.1 (overlay-shaped; revert with the overlay)

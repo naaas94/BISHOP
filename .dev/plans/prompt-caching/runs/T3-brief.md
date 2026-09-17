@@ -1,0 +1,15 @@
+## Completion Brief
+
+- **Subtask ID · Status:** T3 · **complete**
+- **Files changed:** `config/prompts/call1_rubric_v1.md` (new), `tests/test_rubric_assets.py` (extended, 1 new test), `CHANGELOG.MD` (T3 bullet under `## prompt-caching — 2026-09-12`), `.dev/decision-logs/prompt-caching/T3-call1-rubric.md` (new), `.dev/plans/prompt-caching/artifacts/T3-call1-spotcheck.md` (new — named in packet's Outputs field though not literally repeated in Files-to-touch; created as the packet's own explicit, unambiguous required deliverable).
+- **Tests run + result:** `pytest tests/test_rubric_assets.py -v` → 12 passed (isolated to T3's own hunk); combined slice with T2/T4's concurrently-authored tests also verified green (20 passed) before restoring their pending work to the working tree. Adversarial micro-pass: added `test_call1_rubric_v1_asset_exists_and_verifies`, mutation-checked by corrupting the on-disk `canonical_hash` (test failed as expected), then restoring the file byte-for-byte (test passed again).
+- **Commit SHA:** `c6d9f806852c9a5bd920ae670a5171a59492829b`
+- **Changelog entry location:** `CHANGELOG.MD`, `## prompt-caching — 2026-09-12` section, T3 bullet.
+- **Decision log path:** `.dev/decision-logs/prompt-caching/T3-call1-rubric.md`
+- **Kill-criterion evidence:**
+ - No padding: annex is 4,619 `cl100k_base` tokens of guidance/examples/boundary-case content, zero filler — reviewed by hand, itemized in decision log §Chosen approach.
+ - No second schema: worked-example JSON blocks match the existing 5-key schema exactly; annex text never redefines the schema block.
+ - `challenge_hooks` non-degradation: `.dev/plans/prompt-caching/artifacts/T3-call1-spotcheck.md` — 6 live entries, before/after comparison, no degradation in any case (3 of 6 improved).
+ - Token floor: measured 4,619-token annex + 267-token base = 4,886 ≥ 4,506 target (margin ~380 tokens), asserted by `test_call1_rubric_v1_asset_exists_and_verifies` implicitly via hash and independently measured with `tiktoken` during authoring.
+ - `TAG_TAXONOMY_ORDERED` not restated: annex only cites individual valid tags inside worked examples, never the full list.
+- **Summary:** Authored the Call 1 rubric annex (cache key B) with per-`entry_type` guidance for all nine types, per-source content-shape notes for all seven sources, four full worked examples, boundary-case disambiguation, and a failure-modes checklist; stamped and hash-verified it, added a mutation-checked test against the real committed asset, and ran the packet's required live spot-check against 6 real DB entries showing no `challenge_hooks` degradation (noting, as a named coverage gap, that the live DB currently has no non-arxiv `content_raw` to exercise the other six sources). Because T2 and T4 packets were executing concurrently against the same shared `CHANGELOG.MD` and `tests/test_rubric_assets.py`, isolated my staged diff to exactly T3's own hunks before committing (verified via `git diff --staged`), then restored their in-progress uncommitted edits to the working tree afterward so no sibling work was lost.

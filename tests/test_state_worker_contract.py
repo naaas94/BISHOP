@@ -62,9 +62,10 @@ SPEC_ROUTE_METHOD_PATHS: frozenset[tuple[str, str]] = frozenset(
         ("POST", "/entries/indexed"),
         ("POST", "/entries/failed"),
         ("POST", "/entries/retry"),
-        ("PATCH", "/entries/{source_id}/reading-status"),
+        ("PATCH", "/entries/{source_id:path}/reading-status"),
         ("POST", "/entries/permanent-fail"),
         ("GET", "/manifest/poll"),
+        ("GET", "/manifest/count"),
         ("GET", "/entries/poll"),
         ("GET", "/scraper-state/{source}"),
         ("POST", "/scraper-state/{source}"),
@@ -102,6 +103,22 @@ def _batch_payload(source_id: str = _SOURCE) -> dict:
                 "url": "https://arxiv.org/abs/2301.00001",
                 "title": "Contract Paper",
                 "abstract": "An abstract",
+                "published_at": _NOW.isoformat().replace("+00:00", "Z"),
+                "domain": DomainEnum.PROFESSIONAL.value,
+            }
+        ]
+    }
+
+
+def _github_batch_payload(source_id: str) -> dict:
+    return {
+        "entries": [
+            {
+                "source_id": source_id,
+                "source": SourceEnum.GITHUB.value,
+                "url": f"https://github.com/{source_id.removeprefix('github:')}",
+                "title": "Contract Repo",
+                "abstract": "A tagline",
                 "published_at": _NOW.isoformat().replace("+00:00", "Z"),
                 "domain": DomainEnum.PROFESSIONAL.value,
             }
@@ -332,6 +349,31 @@ def test_manifest_poll_atomic_double_poll_empty(
     assert second.status_code == 200
     assert second.json()["claimed_count"] == 0
     assert second.json()["entries"] == []
+
+
+def test_manifest_count_github_discovered(
+    contract_client: tuple[TestClient, Path],
+) -> None:
+    client, _ = contract_client
+    client.post("/manifest/batch", json=_github_batch_payload("github:a/one"))
+    client.post("/manifest/batch", json=_github_batch_payload("github:a/two"))
+    client.post("/manifest/batch", json=_batch_payload())
+    response = client.get(
+        "/manifest/count",
+        params={"source": SourceEnum.GITHUB.value, "state": ProcessingState.DISCOVERED.value},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"count": 2}
+
+
+def test_manifest_count_rejects_empty_and_invalid_state(
+    contract_client: tuple[TestClient, Path],
+) -> None:
+    client, _ = contract_client
+    empty = client.get("/manifest/count")
+    assert empty.status_code == 400
+    invalid = client.get("/manifest/count", params={"state": "NOT_A_STATE"})
+    assert invalid.status_code == 400
 
 
 def test_enrichment_stage1_results_rolls_back_on_mid_sequence_failure(

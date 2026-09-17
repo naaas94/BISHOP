@@ -1,0 +1,13 @@
+# Committed harvest query spec. Not 356k rows.
+# Census and GitHub exhaust use these strings. Changing a query is a git commit.
+
+version: 1
+github:
+  id: github-pushed-stars10-v1
+  qualifier: "stars:>10"
+  # Closed range, not pushed:>DATE. Adapter incremental fetch_manifest is unchanged.
+  pushed_range: "pushed:{start}..{end}"
+huggingface:
+  rewind: false
+paperswithcode:
+  harvest: false

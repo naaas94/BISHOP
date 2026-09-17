@@ -1,0 +1,167 @@
+﻿docker : INFO:__main__:scraper starting scheduler
+At C:\Users\Ale\AppData\Local\Temp\ps-script-8ff7d320-4bc2-4a72-8278-43e6e1481af2.ps1:78 char:1
++ docker logs bishop-scraper-1 --since 15m 2>&1 | Out-File -Encoding ut ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:__main__:scraper starting scheduler:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:app.loop:scrape cycle started
+INFO:httpx:HTTP Request: GET http://state-worker:8000/scraper-state/arxiv "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://export.arxiv.org/api/query?search_query=%28cat%3Acs.AI+OR+cat%3Acs.CL+OR+cat%3Acs.
+LG%29+AND+submittedDate%3A%5B20260917000000+TO+20260917235959%5D&max_results=100 "HTTP/1.1 200 OK"
+INFO:app.adapters.arxiv:arxiv category gate evaluated
+WARNING:app.loop:empty manifest fetch
+INFO:httpx:HTTP Request: POST http://state-worker:8000/manifest/batch "HTTP/1.1 200 OK"
+INFO:app.loop:manifest batch posted
+INFO:httpx:HTTP Request: POST http://state-worker:8000/scraper-state/arxiv "HTTP/1.1 204 No Content"
+INFO:app.loop:scraper state updated
+INFO:httpx:HTTP Request: GET http://state-worker:8000/scraper-state/github "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET 
+http://state-worker:8000/manifest/count?source=github&state=DISCOVERED&state=RELEVANCE_QUEUED "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://api.github.com/search/repositories?q=pushed%3A%3E2026-09-17+stars%3A%3E10&sort=upd
+ated&order=desc&per_page=100&page=1 "HTTP/1.1 200 OK"
+INFO:app.adapters.github:github manifest fetched
+WARNING:app.loop:empty manifest fetch
+INFO:httpx:HTTP Request: POST http://state-worker:8000/manifest/batch "HTTP/1.1 200 OK"
+INFO:app.loop:manifest batch posted
+INFO:httpx:HTTP Request: POST http://state-worker:8000/scraper-state/github "HTTP/1.1 204 No Content"
+INFO:app.loop:scraper state updated
+INFO:httpx:HTTP Request: GET http://state-worker:8000/scraper-state/huggingface "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/models?sort=createdAt&direction=-1&limit=100 "HTTP/1.1 200 OK"
+INFO:app.adapters.huggingface:huggingface manifest slice fetched
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/datasets?sort=createdAt&direction=-1&limit=100 "HTTP/1.1 200 
+OK"
+INFO:app.adapters.huggingface:huggingface manifest slice fetched
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/spaces?sort=createdAt&direction=-1&limit=100 "HTTP/1.1 200 OK"
+INFO:app.adapters.huggingface:huggingface manifest slice fetched
+INFO:httpx:HTTP Request: POST http://state-worker:8000/manifest/batch "HTTP/1.1 200 OK"
+INFO:app.loop:manifest batch posted
+INFO:httpx:HTTP Request: POST http://state-worker:8000/scraper-state/huggingface "HTTP/1.1 204 No Content"
+INFO:app.loop:scraper state updated
+INFO:httpx:HTTP Request: GET http://state-worker:8000/scraper-state/lesswrong "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://www.lesswrong.com/graphql?query=query%28%24after%3A+String%2C+%24limit%3A+Int%29+%
+7B+posts%28input%3A+%7Bterms%3A+%7Bview%3A+%22new%22%2C+limit%3A+%24limit%2C+after%3A+%24after%7D%7D%29+%7B+results+%7B
++_id+title+postedAt+pageUrl+%7D+%7D+%7D&variables=%7B%22after%22%3A+%222026-09-17T12%3A59%3A41.669490%2B00%3A00%22%2C+%
+22limit%22%3A+50%7D "HTTP/1.1 200 OK"
+WARNING:app.loop:empty manifest fetch
+INFO:httpx:HTTP Request: POST http://state-worker:8000/manifest/batch "HTTP/1.1 200 OK"
+INFO:app.loop:manifest batch posted
+INFO:httpx:HTTP Request: POST http://state-worker:8000/scraper-state/lesswrong "HTTP/1.1 204 No Content"
+INFO:app.loop:scraper state updated
+INFO:httpx:HTTP Request: GET http://state-worker:8000/scraper-state/openreview "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://api2.openreview.net/notes/search?term=machine+learning&type=terms&content=all&grou
+p=all&source=forum&sort=cdate%3Adesc&limit=100 "HTTP/1.1 200 OK"
+WARNING:app.loop:empty manifest fetch
+INFO:httpx:HTTP Request: POST http://state-worker:8000/manifest/batch "HTTP/1.1 200 OK"
+INFO:app.loop:manifest batch posted
+INFO:httpx:HTTP Request: POST http://state-worker:8000/scraper-state/openreview "HTTP/1.1 204 No Content"
+INFO:app.loop:scraper state updated
+INFO:httpx:HTTP Request: GET http://state-worker:8000/scraper-state/paperswithcode "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://paperswithcode.com/api/v1/papers/?page=1&items_per_page=50 "HTTP/1.1 302 Found"
+WARNING:app.adapters.paperswithcode:paperswithcode API discontinued; skipping manifest fetch
+WARNING:app.loop:empty manifest fetch
+INFO:httpx:HTTP Request: POST http://state-worker:8000/manifest/batch "HTTP/1.1 200 OK"
+INFO:app.loop:manifest batch posted
+INFO:httpx:HTTP Request: POST http://state-worker:8000/scraper-state/paperswithcode "HTTP/1.1 204 No Content"
+INFO:app.loop:scraper state updated
+INFO:httpx:HTTP Request: GET http://state-worker:8000/scraper-state/semantic_scholar "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://api.semanticscholar.org/graph/v1/paper/search?query=machine+learning+artificial+in
+telligence&publicationDateOrYear=2026-09-17%3A2026-09-17&fields=paperId%2Ctitle%2Cabstract%2Curl%2CpublicationDate&limi
+t=100 "HTTP/1.1 429 "
+INFO:httpx:HTTP Request: GET https://api.semanticscholar.org/graph/v1/paper/search?query=machine+learning+artificial+in
+telligence&publicationDateOrYear=2026-09-17%3A2026-09-17&fields=paperId%2Ctitle%2Cabstract%2Curl%2CpublicationDate&limi
+t=100 "HTTP/1.1 429 "
+INFO:httpx:HTTP Request: GET https://api.semanticscholar.org/graph/v1/paper/search?query=machine+learning+artificial+in
+telligence&publicationDateOrYear=2026-09-17%3A2026-09-17&fields=paperId%2Ctitle%2Cabstract%2Curl%2CpublicationDate&limi
+t=100 "HTTP/1.1 429 "
+INFO:httpx:HTTP Request: GET https://api.semanticscholar.org/graph/v1/paper/search?query=machine+learning+artificial+in
+telligence&publicationDateOrYear=2026-09-17%3A2026-09-17&fields=paperId%2Ctitle%2Cabstract%2Curl%2CpublicationDate&limi
+t=100 "HTTP/1.1 429 "
+ERROR:app.loop:adapter retry exhausted
+INFO:httpx:HTTP Request: GET https://api.github.com/search/repositories?q=pushed%3A2024-09-17..2024-09-24+stars%3A%3E10
+&sort=updated&order=desc&per_page=1&page=1 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://api.github.com/search/repositories?q=pushed%3A2024-09-17..2024-09-21+stars%3A%3E10
+&sort=updated&order=desc&per_page=1&page=1 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://api.github.com/search/repositories?q=pushed%3A2024-09-17..2024-09-19+stars%3A%3E10
+&sort=updated&order=desc&per_page=1&page=1 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://api.github.com/search/repositories?q=pushed%3A2024-09-17..2024-09-19+stars%3A%3E10
+&sort=updated&order=desc&per_page=100&page=1 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://api.github.com/search/repositories?q=pushed%3A2024-09-17..2024-09-19+stars%3A%3E10
+&sort=updated&order=desc&per_page=100&page=2 "HTTP/1.1 200 OK"
+ERROR:app.loop:github harvest failed
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "/usr/local/lib/python3.12/site-packages/httpx/_transports/default.py", line 394, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpcore/_async/connection_pool.py", line 256, in handle_async_request
+    raise exc from None
+  File "/usr/local/lib/python3.12/site-packages/httpcore/_async/connection_pool.py", line 236, in handle_async_request
+    response = await connection.handle_async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpcore/_async/connection.py", line 103, in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpcore/_async/http11.py", line 136, in handle_async_request
+    raise exc
+  File "/usr/local/lib/python3.12/site-packages/httpcore/_async/http11.py", line 106, in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpcore/_async/http11.py", line 177, in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpcore/_async/http11.py", line 217, in _receive_event
+    data = await self._network_stream.read(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpcore/_backends/anyio.py", line 32, in read
+    with map_exceptions(exc_map):
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/usr/local/lib/python3.12/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ReadTimeout
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/app/loop.py", line 141, in scrape_cycle
+    await harvest_github_slices(
+  File "/app/app/harvest_github.py", line 122, in harvest_github_slices
+    await _harvest_into(conn, http_client=http_client, deadline=_as_utc(deadline))
+  File "/app/app/harvest_github.py", line 210, in _harvest_into
+    page_response = await _search(
+                    ^^^^^^^^^^^^^^
+  File "/app/app/harvest_github.py", line 311, in _search
+    response = await http_client.get(
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpx/_client.py", line 1768, in get
+    return await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpx/_client.py", line 1540, in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpx/_client.py", line 1629, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpx/_client.py", line 1730, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/httpx/_transports/default.py", line 393, in handle_async_request
+    with map_httpcore_exceptions():
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/usr/local/lib/python3.12/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+INFO:app.loop:scrape cycle complete
+INFO:httpx:HTTP Request: GET 
+http://state-worker:8000/manifest/count?source=github&state=DISCOVERED&state=RELEVANCE_QUEUED "HTTP/1.1 200 OK"

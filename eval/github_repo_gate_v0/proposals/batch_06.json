@@ -1,0 +1,227 @@
+{
+  "batch": 6,
+  "reviewer": "agent",
+  "items": [
+    {
+      "source_id": "github:gregbarbosa/fm-proxy",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Working OpenAI-compat shim that documents specific fm-serve protocol breaks (tool-calling, schema $ref, template leaks) and pins behavior to a macOS 27 RC build. A practitioner writing a local serving adapter would steal the correction layer.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "fm-proxy sits in front of it and corrects those departures."
+        },
+        {
+          "field": "summary",
+          "quote": "correcting protocol deviations, schema issues, tool-calling bugs, and template marker leaks"
+        }
+      ]
+    },
+    {
+      "source_id": "github:snomiao/agent-yes",
+      "agent_verdict": "junk",
+      "confidence": "high",
+      "why": "Productized auto-yes wrapper around existing agent CLIs (ay claude, ay serve --share, live console). Automatically answering Yes, proceed is on-topic noise, not a codebase to study.",
+      "signals": ["clone_wrapper", "product_landing", "boilerplate"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "A wrapper tool that automates interactions with various AI CLI tools by automatically handling common prompts and responses."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "`ay claude` (run an agent with auto-yes) · `ay serve --share` (web console + shareable link) · live console at https://agent-yes.com"
+        }
+      ]
+    },
+    {
+      "source_id": "github:vshulcz/deja-vu",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Indexes on-disk coding-agent sessions and returns them with published hit-rates, shipped harnesses, and credential stripping at index time. Marketing-heavy README, but the start-full-from-disk pattern is stealable.",
+      "signals": ["runnable_artifact", "real_technique", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "deja indexes the sessions Claude Code, Codex, Cursor and every other agent on this machine already wrote to disk"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "85.3% hit@1</b> on LongMemEval-S &middot; <b>69.7%</b> on LoCoMo &middot; <b>millisecond</b> lookups over gigabytes of history"
+        }
+      ]
+    },
+    {
+      "source_id": "github:DeusData/codebase-memory-mcp",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Native tree-sitter/SQLite code-intel engine with concrete scale claims (Linux kernel in 3 minutes, sub-ms structural queries) a practitioner would open. Badge wall is noisy, so this is not a high-confidence keep from excerpt alone.",
+      "signals": ["runnable_artifact", "real_technique", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Full-indexes an average repository in milliseconds, the Linux kernel (28M LOC, 75K files) in 3 minutes. Answers structural queries in under 1ms."
+        },
+        {
+          "field": "summary",
+          "quote": "indexes entire codebases into an in-memory SQLite graph with 162 vendored tree-sitter languages"
+        }
+      ]
+    },
+    {
+      "source_id": "github:brekkylab/backlot",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Runnable local SaaS API emulator with official-SDK base-URL swap, bundled deterministic corpus, pagination and ACLs. Clear steal-from artifact for agent and integration tests without vendor accounts.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "so you build and test against the official vendor SDKs with **no vendor account**, **no OAuth approval**, **no secrets in CI** and **no network**."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "slack = WebClient(token=\"admin-service-token\", base_url=\"http://127.0.0.1:8000/slack/api/\")"
+        }
+      ]
+    },
+    {
+      "source_id": "github:block/schemabot",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Block production schema tool: declarative SQL, computed DDL, lint/safety gates, online copy migrations, PR timeline. Agentic-era copy is marketing; the migration machinery is a real artifact to study.",
+      "signals": ["runnable_artifact", "real_technique", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "SchemaBot computes the DDL, lints it, gates anything destructive behind explicit approval, and executes with smart defaults"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Block runs SchemaBot today for the majority of its production schema changes, across a large fleet of MySQL and Vitess databases"
+        }
+      ]
+    },
+    {
+      "source_id": "github:lulu-loopp/folio-terminal",
+      "agent_verdict": "unsure",
+      "confidence": "medium",
+      "why": "Excerpt is a real signed Windows-terminal install, not a thin wrapper, but the only agent content is a waiting-tab marker. Cannot tell whether there is a stealable technique versus a polished UX product.",
+      "signals": ["runnable_artifact", "product_landing"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Folio is an open-source Windows terminal. It typesets LaTeX where a command prints it, previews files beside the prompt, and marks the tab of an agent that is waiting for you."
+        },
+        {
+          "field": "title",
+          "quote": "folio-terminal"
+        }
+      ]
+    },
+    {
+      "source_id": "github:platformatic/pg-hooks",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Concrete webhook/outbox queue with delayed invoke, retries, leader election, DLQ, and cron, plus a curl tutorial. Stealable reliability patterns; not LLM-specific, but the excerpt shows a real artifact rather than a landing page.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "1. delayed/scheduled invocation\n2. automatic retries\n3. leader/follower system (with election)\n4. dead letter queue\n5. cron"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "`@platformatic/pg-hooks` is also useful to create an outbox."
+        }
+      ]
+    },
+    {
+      "source_id": "github:Dicklesworthstone/ntm",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Go control plane over tmux with named sessions, graph-aware triage, approvals, Agent Mail, checkpoints, and robot/REST surfaces. More than a CLI wrapper; a practitioner building local multi-agent ops would read it.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "NTM turns `tmux` into a local control plane for multi-agent software development."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "protecting dangerous operations with policy, approvals, and guards"
+        }
+      ]
+    },
+    {
+      "source_id": "github:sbluemin/fleet-harness",
+      "agent_verdict": "junk",
+      "confidence": "medium",
+      "why": "Marketing console that wraps Claude/Codex/Cursor CLIs on a canvas. Server-owned PTY is named, but the excerpt is a product landing for an agent-fleet wrapper, not a technique write-up.",
+      "signals": ["product_landing", "clone_wrapper", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Every frontier coding agent.<br/>One console. Any screen."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Fleet turns every agent session into an **Operation**: a real PTY owned by a local server, laid out on an infinite canvas"
+        }
+      ]
+    },
+    {
+      "source_id": "github:openclaw/Peekaboo",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Shipped macOS CLI and menu-bar app for screenshot, accessibility trees, and native UI automation, with MCP for agent clients. Concrete Homebrew/npm/DMG install paths; a practitioner wiring desktop tool-use would study it.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Peekaboo is a macOS CLI and menu-bar app for screen capture, accessibility inspection, and native UI automation."
+        },
+        {
+          "field": "summary",
+          "quote": "automates native UI interactions through semantic commands or natural-language agent runs"
+        }
+      ]
+    },
+    {
+      "source_id": "github:etr/groundwork",
+      "agent_verdict": "unsure",
+      "confidence": "medium",
+      "why": "Excerpt is a multi-harness skills installer matrix. Portable export could be a real technique, or the repo could be a prompt pack; skill bodies are not in the excerpt.",
+      "signals": ["boilerplate"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "A comprehensive skills library for Claude Code and Codex, consolidating proven techniques for planning, design, TDD, debugging, collaboration, and problem-solving."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "the installer transforms Claude Code-specific constructs for those harnesses, but hooks, invocation, and skill chaining may not behave identically."
+        }
+      ]
+    },
+    {
+      "source_id": "github:gardnmi/boomux",
+      "agent_verdict": "junk",
+      "confidence": "medium",
+      "why": "Native tiling-terminal product page; agents appear as a bundled tab over Claude/Codex/Kiro CLIs. On-topic paint on a mux, not a codebase a practitioner would study for agent technique.",
+      "signals": ["product_landing", "hype_tagline", "clone_wrapper"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Hyprland-inspired control for your terminals."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Follow supported coding-agent activity in the Agents tab and check repositories, worktrees, and available PR status in Git."
+        }
+      ]
+    }
+  ]
+}

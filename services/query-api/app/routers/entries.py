@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any
 
@@ -59,7 +60,7 @@ def _proxy_state_worker(
     return JSONResponse(status_code=status, content=payload)
 
 
-@router.get("/entries/{source_id}", response_model=EntryResponse)
+@router.get("/entries/{source_id:path}", response_model=EntryResponse)
 def get_entry(source_id: str) -> EntryResponse | JSONResponse:
     try:
         entry = read_entry(source_id)
@@ -81,7 +82,7 @@ def get_entry(source_id: str) -> EntryResponse | JSONResponse:
     return entry
 
 
-@router.post("/entries/{source_id}/retry")
+@router.post("/entries/{source_id:path}/retry")
 def post_entry_retry(source_id: str) -> JSONResponse:
     logger.info(
         "manual retry proxy",
@@ -94,7 +95,7 @@ def post_entry_retry(source_id: str) -> JSONResponse:
     )
 
 
-@router.post("/entries/{source_id}/permanent-fail")
+@router.post("/entries/{source_id:path}/permanent-fail")
 def post_entry_permanent_fail(source_id: str) -> JSONResponse:
     logger.info(
         "manual permanent-fail proxy",
@@ -107,7 +108,7 @@ def post_entry_permanent_fail(source_id: str) -> JSONResponse:
     )
 
 
-@router.patch("/entries/{source_id}/reading-status")
+@router.patch("/entries/{source_id:path}/reading-status")
 def patch_entry_reading_status(
     source_id: str,
     body: ReadingStatusPatchBody,
@@ -125,8 +126,9 @@ def patch_entry_reading_status(
             "reading_status": body.reading_status,
         },
     )
+    quoted = urllib.parse.quote(source_id, safe="")
     return _proxy_state_worker(
         "PATCH",
-        f"/entries/{source_id}/reading-status",
+        f"/entries/{quoted}/reading-status",
         body={"reading_status": body.reading_status},
     )

@@ -212,7 +212,7 @@ async def post_entries_retry(
 
 
 @router.patch(
-    "/entries/{source_id}/reading-status",
+    "/entries/{source_id:path}/reading-status",
     response_model=ReadingStatusPatchResponse,
 )
 async def patch_reading_status(

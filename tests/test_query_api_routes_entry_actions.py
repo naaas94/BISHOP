@@ -125,6 +125,27 @@ def test_patch_reading_status_invalid_enum_returns_422(
     assert response.status_code == 422
 
 
+def test_slash_source_id_retry_and_reading_status_match(
+    actions_client: TestClient,
+) -> None:
+    retry = actions_client.post("/entries/github:owner/repo/retry")
+    assert retry.status_code == 200
+
+    with patch(
+        "urllib.request.urlopen",
+        return_value=_mock_upstream(
+            {"source_id": "github:owner/repo", "reading_status": "read"},
+        ),
+    ):
+        response = actions_client.patch(
+            "/entries/github:owner/repo/reading-status",
+            json={"reading_status": "read"},
+        )
+    assert response.status_code == 200
+    assert response.json()["source_id"] == "github:owner/repo"
+    assert response.json()["reading_status"] == "read"
+
+
 def test_entry_action_upstream_error_envelope() -> None:
     entries_router, _config_mod = _load_entries_router()
     saved = _clear_app_modules()
@@ -188,3 +209,34 @@ def test_retry_proxy_passes_source_id_in_body() -> None:
     assert captured["method"] == "POST"
     assert captured["url"].endswith("/entries/retry")
     assert json.loads(captured["body"]) == {"source_id": "arxiv:9"}
+
+
+def test_reading_status_proxy_quotes_slash_source_id() -> None:
+    entries_router, _config_mod = _load_entries_router()
+    saved = _clear_app_modules()
+    path_str = str(_QUERY_API_ROOT)
+    inserted = None
+    if path_str not in sys.path:
+        sys.path.insert(0, path_str)
+        inserted = path_str
+
+    captured: dict[str, object] = {}
+
+    def _capture_request(request, timeout=30):
+        captured["url"] = request.full_url
+        return _mock_upstream({"source_id": "github:owner/repo", "reading_status": "read"})
+
+    try:
+        app = FastAPI()
+        app.include_router(entries_router.router)
+        with patch("urllib.request.urlopen", side_effect=_capture_request):
+            with TestClient(app) as client:
+                response = client.patch(
+                    "/entries/github:owner/repo/reading-status",
+                    json={"reading_status": "read"},
+                )
+    finally:
+        _restore_app_modules(saved, inserted)
+
+    assert response.status_code == 200
+    assert "/entries/github%3Aowner%2Frepo/reading-status" in str(captured["url"])

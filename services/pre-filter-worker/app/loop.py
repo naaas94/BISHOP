@@ -227,6 +227,11 @@ async def prefilter_cycle(
         if anthropic_client is None:
             anthropic_client = AnthropicBatchClient()
 
+        # Best-effort cache-priming ping (FU-CACHE-WARMUP-01) — fires only
+        # right here, once the hold criteria have already passed and a real
+        # submit is about to happen. Never blocks or aborts the submit below.
+        await asyncio.to_thread(anthropic_client.warm_cache, system_blocks)
+
         submit_result = await asyncio.to_thread(
             submit_pre_filter_batch_or_fatal,
             anthropic_client,

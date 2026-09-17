@@ -18,15 +18,16 @@ SERVICE_VOLUME_SUFFIXES: dict[str, tuple[str, ...]] = {
     "state-worker": ("sqlite", "logs"),
     "batch-poller": ("logs",),
     "vector-writer": ("lancedb", "duckdb", "bm25", "logs"),
-    "query-api": ("lancedb", "duckdb", "bm25", "sqlite", "logs"),
+    "query-api": ("lancedb", "duckdb", "bm25", "sqlite", "logs", "harvest"),
     "pre-filter-worker": ("profiles", "logs"),
     "enrichment-batcher": ("profiles", "logs"),
-    "scraper": ("logs",),
+    "scraper": ("logs", "harvest"),
     "content-scraper": ("logs",),
     "ui": (),
 }
 
 SUFFIX_TO_CONTAINER = {m.host_suffix: m.container_path for m in BISHOP_VOLUME_MOUNTS}
+SUFFIX_TO_CONTAINER["harvest"] = "/app/data/harvest"
 
 
 def _service_block(text: str, service: str) -> str:
@@ -131,6 +132,33 @@ def test_ui_query_api_url_env(compose_text: str) -> None:
     """Falsifier: ui compose block lacks QUERY_API_URL for in-network query-api."""
     block = _service_block(compose_text, "ui")
     assert "QUERY_API_URL: http://query-api:8000" in block
+
+
+def test_scraper_backfill_window_override_compose_default(compose_text: str) -> None:
+    """Soft-launch overlay retune: compose default is 60, not spec BACKFILL_CONFIG."""
+    block = _service_block(compose_text, "scraper")
+    assert (
+        "BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS: ${BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS:-60}"
+        in block
+    )
+
+
+def test_scraper_harvest_env_passthrough(compose_text: str) -> None:
+    block = _service_block(compose_text, "scraper")
+    assert (
+        "BISHOP_HARVEST_DAILY_BUDGET_USD: ${BISHOP_HARVEST_DAILY_BUDGET_USD:-2}"
+        in block
+    )
+    assert "BISHOP_HARVEST_ENABLED: ${BISHOP_HARVEST_ENABLED:-1}" in block
+
+
+def test_query_api_harvest_budget_env_passthrough(compose_text: str) -> None:
+    """Dashboard N_cap follows the same kill switch as the scraper tap."""
+    block = _service_block(compose_text, "query-api")
+    assert (
+        "BISHOP_HARVEST_DAILY_BUDGET_USD: ${BISHOP_HARVEST_DAILY_BUDGET_USD:-2}"
+        in block
+    )
 
 
 def test_vector_writer_stop_grace_period(compose_text: str) -> None:

@@ -1,0 +1,278 @@
+{
+  "batch": 1,
+  "reviewer": "agent",
+  "items": [
+    {
+      "source_id": "github:Belkins/ai-dive-deep",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "The excerpt describes a substantial 48-chapter operator manual plus a live HTML/MDX site with a cron radar and path-routed review agents, which a practitioner could study as an ops playbook. Confidence is only medium because the visible README is thesis/marketing and does not show the techniques themselves.",
+      "signals": ["runnable_artifact", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "A 48-chapter operator field manual where every artifact is live, clickable, and forwardable — and the repo runs the discipline the book teaches."
+        },
+        {
+          "field": "summary",
+          "quote": "48-chapter operator field manual on AI systems and agentic workflows. Live interactive HTML artifact deployed as public site"
+        }
+      ]
+    },
+    {
+      "source_id": "github:abundantbeing/hermes-browser-extension",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "This is a versioned Chrome/Edge side panel for a real agent runtime, with concrete I/O patterns (gateway attach, tab scoping, multi-agent switching) rather than a generic chatbot skin. A practitioner building browser-to-agent context would steal from it.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Hermes Browser Extension is not a browser chatbot. It is a Chrome/Edge/Chromium side panel for the real Hermes Agent runtime."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "v0.3.2 introduces Hermes Bot Mode, bringing your full Hermes multi-agent roster directly into the browser side panel"
+        }
+      ]
+    },
+    {
+      "source_id": "github:HKUDS/LightRAG",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "LightRAG is a published graph-structured RAG system with a paper, PyPI package, and a concrete retrieval architecture (dual-level / multi-backend). The README is badge-heavy, but the artifact is something a practitioner would implement from.",
+      "signals": ["runnable_artifact", "real_technique", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "LightRAG: Simple and Fast Retrieval-Augmented Generation"
+        },
+        {
+          "field": "summary",
+          "quote": "graph-structured RAG framework supporting multi-backend storage (PostgreSQL, MongoDB, Neo4j, OpenSearch), multi-level retrieval (local/global/hybrid/mix modes)"
+        }
+      ]
+    },
+    {
+      "source_id": "github:StructuPath/herdr-browser",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "The excerpt lists stealable browser-agent observability details: CDP attach without owning the process, observe-only mode, WebSocket frame/console push, and Chrome mouse events instead of selector guesses. That is a real instrumentation pane, not a landing page.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Attach to any CDP browser — observe a Playwright, Puppeteer, or Browser Use run (or any Chrome started with `--remote-debugging-port`) without owning it."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Observe-only mode — press `o` and pane input stops being forwarded, so watching a live automation run can never perturb it."
+        }
+      ]
+    },
+    {
+      "source_id": "github:0xGosu/herdr-auto-pilot",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Learned rules from supervised shadow mode, per-path confidence gates, never-auto safety vetoes, and a local SQLite audit log are reusable automation-control techniques. The excerpt names tested harnesses and what is not auto-applied.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "It learns from your own past decisions in a supervised shadow mode, can follow task lists you explicitly configure, and can optionally consult an LLM/agent CLI."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Safety first — never-auto patterns (force-push, destructive ops, deploys, credential changes, …), a global pause/kill switch, a runaway-loop guard"
+        }
+      ]
+    },
+    {
+      "source_id": "github:augety121/MCP-State-Twin",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Forkable MCP test worlds with snapshot → fork → act → assert → diff is a reusable eval-harness technique, and the README points at ADRs plus executable tests. Medium because it is an explicit 0.1.0-dev preview, so depth of the implementation is not proven in the excerpt.",
+      "signals": ["real_technique", "runnable_artifact"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "snapshot → fork → act → assert → diff"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Development Preview · `0.1.0-dev` · latest prerelease `v0.1.0-alpha.1` · 非 production-ready。"
+        }
+      ]
+    },
+    {
+      "source_id": "github:chunxiaoxx/nautilus-compass",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "The excerpt names a specific local memory design (BGE-m3, no extract-LLM, utterance-routed chunks) plus linked benchmark evidence, which is stealable. Heavy SOTA/price badges keep confidence at medium rather than treating it as a product landing.",
+      "signals": ["real_technique", "runnable_artifact", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Raw text embedded locally with BGE-m3. No extraction LLM at ingest, no graph, no data leaving your machine."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Long-term memory that now beats mem0 on all three LongMemEval-S metrics while staying fully local & 14× cheaper"
+        }
+      ]
+    },
+    {
+      "source_id": "github:antonyrag/ragleap-core",
+      "agent_verdict": "junk",
+      "confidence": "high",
+      "why": "The visible README is a kitchen-sink agent/RAG product page: “Not Just RAG,” “46 AI Employees,” and a stack of self-referential package badges. That is on-topic wrapper hype, not a technique a practitioner would study.",
+      "signals": ["boilerplate", "product_landing", "hype_tagline", "thin_readme"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Autonomous AI Agents — Not Just RAG."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "46 AI Employees"
+        }
+      ]
+    },
+    {
+      "source_id": "github:clavia-labs/tardigrade",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Event-sourced agent harnesses on Effect TS, with views/transitions derived from an immutable log and a durable replay host, is a concrete architecture to steal. npm plus a stated composition model beat a generic agent-framework landing.",
+      "signals": ["real_technique", "runnable_artifact"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Tardigrade is a typescript framework for building modular agents around an immutable event log."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "{ view, transitions } = f(event log)"
+        }
+      ]
+    },
+    {
+      "source_id": "github:hanyeol/model-compose",
+      "agent_verdict": "junk",
+      "confidence": "medium",
+      "why": "Positioned as “production-ready AI services in minutes” with no application code; the only workflow shown is a YAML HTTP client to ChatGPT. That is the boilerplate compose-wrapper genre, not a reusable technique visible in the excerpt.",
+      "signals": ["boilerplate", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Deploy production-ready AI services in minutes."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Build chat APIs, RAG pipelines, autonomous agents, and MCP servers without writing application code — then deploy the same file anywhere, like `docker-compose`."
+        }
+      ]
+    },
+    {
+      "source_id": "github:pathwaycom/pathway",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Pathway is a real streaming/ETL engine (Rust + Differential Dataflow) used to build incremental RAG/LLM pipelines, with CI, PyPI, and a license—not a thin wrapper. The README header is marketing, but the artifact is study-worthy infrastructure.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "summary",
+          "quote": "Pathway is a Python ETL framework for stream processing, real-time analytics, LLM pipelines, and RAG. Built on a scalable Rust engine using Differential Dataflow"
+        },
+        {
+          "field": "title",
+          "quote": "pathway"
+        }
+      ]
+    },
+    {
+      "source_id": "github:promptfoo/promptfoo",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "A widely used eval/red-team CLI with a real install path, provider matrix, and CI-oriented workflow. This is a practitioner tool, not a demo wrapper.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "promptfoo is a CLI and library for evaluating and red-teaming LLM apps."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "npm install -g promptfoo\npromptfoo init --example getting-started"
+        }
+      ]
+    },
+    {
+      "source_id": "github:rajudandigam/agent-inspect",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Local JSONL traces, deterministic CI trajectory contracts, and redacted Evidence v2 bundles are a stealable agent-debug pattern. npm plus explicit local-only defaults make it a real artifact rather than an observability landing page.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "AgentInspect turns TypeScript agent runs into readable execution trees, deterministic trajectory checks, and portable Evidence v2—without requiring an account, collector, or default upload."
+        },
+        {
+          "field": "summary",
+          "quote": "captures runs as JSONL traces, enables deterministic trajectory checks in CI via provider-free contracts, and exports redacted Evidence v2 bundles"
+        }
+      ]
+    },
+    {
+      "source_id": "github:decionis/agent-safe-pipeline",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Reference implementation of an independent authorization boundary (intent, approval, grant, dossier, outcome) with an explicit non-hosted scope. That policy-gate pattern is worth studying for production agent tool-use.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "AI-agent actions execute only through an independent authorization boundary, and every authorization decision leaves a verifiable evidence record."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "This repository is a library and runnable reference implementation, not a hosted authorization service"
+        }
+      ]
+    },
+    {
+      "source_id": "github:Apra-Labs/apra-fleet",
+      "agent_verdict": "junk",
+      "confidence": "medium",
+      "why": "The visible excerpt is a product hero plus the Kubernetes-for-agents tagline and a self-building-sprint story. No stealable scheduler or isolation design is shown—on-topic landing noise.",
+      "signals": ["product_landing", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "What Kubernetes did for containers, apra-fleet does for AI agents: scheduling, credentials, isolation, and observability for an agentic workforce"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "This repository is built by the product you are looking at."
+        }
+      ]
+    },
+    {
+      "source_id": "github:Dicklesworthstone/eidetic_engine_cli",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "A released Rust CLI for local, explainable agent memory with checksummed install, CI, and a clear harness-vs-memory split. That is a real durable-memory artifact a coding-agent practitioner would inspect.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Durable, local-first, explainable memory for coding agents."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "The agent harness owns the loop. `ee` handles the memory layer."
+        }
+      ]
+    }
+  ]
+}

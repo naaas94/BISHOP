@@ -662,6 +662,27 @@ async def ingest_manifest_batch(
     return IngestManifestResult(inserted=inserted, skipped=skipped)
 
 
+async def count_manifest(
+    conn: aiosqlite.Connection,
+    *,
+    source: str | None,
+    states: list[ProcessingState],
+) -> int:
+    """Count manifest rows in the given processing states, optionally by source."""
+    _prepare_conn(conn)
+    if not states:
+        return 0
+    placeholders = ", ".join("?" for _ in states)
+    sql = f"SELECT COUNT(*) FROM manifest WHERE processing_state IN ({placeholders})"
+    params: list[object] = [state.value for state in states]
+    if source is not None:
+        sql += " AND source = ?"
+        params.append(source)
+    cursor = await conn.execute(sql, params)
+    row = await cursor.fetchone()
+    return int(row[0]) if row is not None else 0
+
+
 async def claim_manifest_poll(
     conn: aiosqlite.Connection,
     state: ProcessingState,

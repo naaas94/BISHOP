@@ -11,8 +11,18 @@ from fastapi.responses import JSONResponse
 from app.db import get_db
 from app.enums import DomainEnum, ProcessingState
 from app.models.domain import ManifestEntry
-from app.models.http import ManifestBatchRequest, ManifestBatchResponse, PollResponse
-from app.transitions import MANIFEST_CLAIM_MAP, claim_manifest_poll, ingest_manifest_batch
+from app.models.http import (
+    ManifestBatchRequest,
+    ManifestBatchResponse,
+    ManifestCountResponse,
+    PollResponse,
+)
+from app.transitions import (
+    MANIFEST_CLAIM_MAP,
+    claim_manifest_poll,
+    count_manifest,
+    ingest_manifest_batch,
+)
 
 router = APIRouter(tags=["manifest"])
 
@@ -55,6 +65,30 @@ async def post_manifest_batch(
 ) -> ManifestBatchResponse:
     result = await ingest_manifest_batch(conn, body.entries)
     return ManifestBatchResponse(inserted=result.inserted, skipped=result.skipped)
+
+
+@router.get("/manifest/count", response_model=ManifestCountResponse)
+async def get_manifest_count(
+    conn: DbConn,
+    state: list[str] = Query(default=[]),
+    source: str | None = None,
+) -> ManifestCountResponse | JSONResponse:
+    if not state:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "invalid_state", "state": None},
+        )
+    parsed: list[ProcessingState] = []
+    for raw in state:
+        try:
+            parsed.append(ProcessingState(raw))
+        except ValueError:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "invalid_state", "state": raw},
+            )
+    count = await count_manifest(conn, source=source, states=parsed)
+    return ManifestCountResponse(count=count)
 
 
 @router.get("/manifest/poll", response_model=PollResponse)

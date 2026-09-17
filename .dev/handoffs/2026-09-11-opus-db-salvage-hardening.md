@@ -65,7 +65,7 @@ Operator ran `docker compose up` after M8 source expansion + a soft-launch overl
 - OpenReview empty chunks were 200s (nothing in window), not errors.
 - vector-writer warned about unauthenticated HF Hub downloads for `all-MiniLM-L6-v2`. Unrelated to the scraper HF adapter.
 
-**Soft-launch overlay (ad hoc, not long-term):** `.dev/decision-logs/ops/soft-launch-precision-overlay.md`, `CHANGELOG.MD` top section. `BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS=1`, parked inbox, profile `professional_v1.2.0_soft_launch.yaml`. Do not silently revert.
+**Soft-launch overlay (ad hoc, not long-term):** `.dev/decision-logs/ops/soft-launch-precision-overlay.md`, `CHANGELOG.MD` top section. `BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS=60` (1 → 7 → 60 on 2026-09-15 after option 1), parked inbox, profile `professional_v1.2.0_soft_launch.yaml`. Do not silently revert the overlay; the window retune is a controlled faucet step, not a revert.
 
 After rebuild, all 9 containers stayed up. PwC warned and skipped. Pre-filter registered batches. GitHub authenticated. Then the DB died mid-session.
 

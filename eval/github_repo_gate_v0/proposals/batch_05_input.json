@@ -1,0 +1,627 @@
+{
+  "batch": 5,
+  "items": [
+    {
+      "source_id": "github:vitali87/code-graph-rag",
+      "title": "code-graph-rag",
+      "url": "https://github.com/vitali87/code-graph-rag",
+      "github_url": "https://github.com/vitali87/code-graph-rag",
+      "bishop_ui": "http://localhost:8081/entries/github:vitali87/code-graph-rag",
+      "published_at": "2026-09-12T05:53:04+00:00",
+      "ingested_at": "2026-09-12T06:10:48.923151+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly applicable RAG system for code intelligence with hybrid retrieval (graph + AST), but narrower scope than production document intelligence pipelines and lacks detail on inference serving/latency tradeoffs.",
+      "value_rationale": "Demonstrates practical knowledge graph construction for retrieval (Memgraph pattern), structured extraction via Tree-sitter, and multi-modal reasoning (code semantics + language), valuable for designing agentic code-understanding systems. Missing: evaluation metrics, serving architecture, and production observability details that would increase shipping relevance.",
+      "entry_type": "repo",
+      "tags": [
+        "RAG",
+        "document-intelligence",
+        "graph-retrieval",
+        "tool-use",
+        "orchestration",
+        "structured-output",
+        "prompt-engineering",
+        "evaluation",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "Tree-sitter multi-language parsing",
+        "Knowledge graph construction (Memgraph)",
+        "Cypher query generation",
+        "AST-based code analysis",
+        "Dynamic call tracing and runtime behavior overlay",
+        "Code pattern matching with ast-grep",
+        "Semantic vector search",
+        "MCP server integration"
+      ],
+      "challenge_hooks": [
+        "How to query and understand large multi-language codebases without manual documentation or extensive codebase navigation",
+        "Automating code retrieval, analysis, and refactoring at scale across mixed-language repositories with semantic understanding",
+        "Bridging static code analysis with runtime behavior to expose dispatch relationships and dead code in production systems",
+        "Enabling natural language code editing and optimization with surgical AST-based patching and diff preview workflows"
+      ],
+      "summary": "Code-Graph-RAG parses multi-language codebases with Tree-sitter, builds a knowledge graph in Memgraph, and enables natural language querying, editing, and optimization of code through an AI-powered RAG system with AST-based analysis.",
+      "pre_filter_rationale": "Applied systems write-up of a shipped RAG pipeline for code understanding and editing; directly relevant to retrieval architecture, knowledge-graph retrieval patterns, and multi-document context assembly I would implement.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"assets/logo-dark-any.png\">\n    <source media=\"(prefers-color-scheme: light)\" srcset=\"assets/logo-light-any.png\">\n    <img src=\"assets/logo-light-any.png\" alt=\"Code-Graph-RAG Logo\" width=\"480\">\n  </picture>\n\n  <p>\n    <a href=\"https://trendshift.io/repositories/99619\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://trendshift.io/api/badge/repositories/99619\" alt=\"vitali87/code-graph-rag | Trendshift\" width=\"250\" height=\"55\"/></a>\n  </p>\n\n  <p>\n  <a href=\"https://github.com/vitali87/code-graph-rag/actions/workflows/ci.yml\">\n    <img src=\"https://img.shields.io/github/actions/workflow/status/vitali87/code-graph-rag/ci.yml?branch=main\" alt=\"CI\" />\n  </a>\n  <a href=\"https://codecov.io/gh/vitali87/code-graph-rag\">\n    <img src=\"https://codecov.io/gh/vitali87/code-graph-rag/graph/badge.svg\" alt=\"Codecov\" />\n  </a>\n  <a href=\"https://sonarcloud.io/summary/overall?id=vitali87_code-graph-rag\">\n    <img src=\"https://sonarcloud.io/api/project_badges/measure?project=vitali87_code-graph-rag&metric=alert_status\" alt=\"Quality Gate Status\" />\n  </a>\n  <a href=\"https://code-graph-rag.com\">\n    <img src=\"https://img.shields.io/badge/Enterprise-Support%20%26%20Services-6366f1\" alt=\"Enterprise Support\" />\n  </a>\n  <a href=\"https://pypi.org/project/code-graph-rag/\">\n    <img src=\"https://img.shields.io/pypi/v/code-graph-rag\" alt=\"PyPI Version\" />\n  </a>\n  <a href=\"https://pepy.tech/projects/code-graph-rag\">\n    <img src=\"https://static.pepy.tech/personalized-badge/code-graph-rag?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads\" alt=\"PyPI Downloads\" />\n  </a>\n  <a href=\"https://skillsllm.com/security-check/DHsMGRb1Ysys\">\n    <img src=\"https://skillsllm.com/security-check/badge.svg?owner=vitali87&repo=code-graph-rag\" alt=\"SkillsLLM Security Check\" />\n  </a>\n  <a href=\"https://scorecard.dev/viewer/?uri=github.com/vitali87/code-graph-rag\">\n    <img src=\"https://api.scorecard.dev/projects/github.com/vitali87/code-graph-rag/badge\" alt=\"OpenSSF Scorecard\" />\n  </a>\n  <a href=\"https://www.bestpractices.dev/projects/13757\">\n    <img src=\"https://w\n…[truncated]"
+    },
+    {
+      "source_id": "github:elevenlabs/packages",
+      "title": "packages",
+      "url": "https://github.com/elevenlabs/packages",
+      "github_url": "https://github.com/elevenlabs/packages",
+      "bishop_ui": "http://localhost:8081/entries/github:elevenlabs/packages",
+      "published_at": "2026-09-11T13:08:18+00:00",
+      "ingested_at": "2026-09-11T15:35:27.018933+00:00",
+      "relevance_score": 0.65,
+      "relevance_reason": "Directly relevant to agentic systems orchestration and multi-platform deployment, but focuses on SDK implementation details rather than architectural patterns or production deployment tradeoffs.",
+      "value_rationale": "The WebRTC real-time audio streaming and event-driven architecture for agent integration across JavaScript/TypeScript platforms is applicable to building production agent systems. However, without specifics on state management, failure handling, observability, or agent coordination patterns, the value is moderate—useful as a toolkit reference but limited for architectural decision-making.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "deployment",
+        "architecture",
+        "orchestration"
+      ],
+      "concepts": [
+        "multimodal agent integration",
+        "WebRTC audio streaming",
+        "event-driven architecture",
+        "client-side tools",
+        "cross-platform SDK (React/React Native)",
+        "widget embedding",
+        "real-time communication",
+        "agent session lifecycle management"
+      ],
+      "challenge_hooks": [
+        "How to integrate voice-based multimodal agents into web and mobile applications with low-latency audio",
+        "Building event-driven agent systems that support custom client-side tools and function calls",
+        "Creating cross-platform agent experiences across React, React Native, and embedded widget contexts",
+        "Managing agent session lifecycle and real-time bidirectional communication with WebRTC"
+      ],
+      "summary": "ElevenAgents SDK provides multimodal AI agent integration across JavaScript/TypeScript platforms via React, React Native, and core client libraries with WebRTC-based real-time audio streaming, event-driven architecture, and client-side tool support.",
+      "pre_filter_rationale": "Agentic Systems and Orchestration anchor: a shipped SDK for multi-agent orchestration with tool use and state management is a working reference I would implement from this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "![hero](assets/hero.png)\n\n# ElevenAgents SDK\n\nBuild multimodal agents with [ElevenAgents](https://elevenlabs.io/docs/eleven-agents/overview). Our SDKs provide seamless integration with popular JavaScript/TypeScript frameworks, enabling you to create multimodal AI agents.\n\n## Installation\n\n```bash\nnpm install @elevenlabs/react\n```\n\n## Usage\n\n```typescript\nimport { useConversation } from \"@elevenlabs/react\";\n\nconst conversation = useConversation({\n  agentId: \"your-agent-id\",\n});\n\n// Start conversation\nconversation.startSession();\n```\n\n## Overview\n\nThe ElevenAgents SDKs provide a unified interface for integrating multimodal AI agents into your applications.\n\n### Available Packages\n\n| Package                                               | Description                                      | Version                                                                                                                               | Links                                                                                                               |\n| ----------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |\n| [`@elevenlabs/client`](#elevenlabsclient)             | Core TypeScript/JavaScript client                | [![npm](https://img.shields.io/npm/v/@elevenlabs/client)](https://www.npmjs.com/package/@elevenlabs/client)                           | [README](packages/client/README.md) • [Docs](https://elevenlabs.io/docs/eleven-agents/libraries/java-script)        |\n| [`@elevenlabs/react`](#elevenlabsreact)               | React hooks and components for web applications  | [![npm](https://img.shields.io/npm/v/@elevenlabs/react)](https://www.npmjs.com/package/@elevenlabs/react)                             | [README](packages/react/README.md) • [Docs](https://elevenlabs.io/docs/eleven-agents/libraries/react)               |\n| [`@elevenlabs/react-native`](#elevenlabsreact-native) | Re\n…[truncated]"
+    },
+    {
+      "source_id": "github:AgamiAI/agami-core",
+      "title": "agami-core",
+      "url": "https://github.com/AgamiAI/agami-core",
+      "github_url": "https://github.com/AgamiAI/agami-core",
+      "bishop_ui": "http://localhost:8081/entries/github:AgamiAI/agami-core",
+      "published_at": "2026-09-15T02:08:19+00:00",
+      "ingested_at": "2026-09-15T02:23:33.953931+00:00",
+      "relevance_score": 0.64,
+      "relevance_reason": "Touches document intelligence (schema introspection, structured output) and observability (audit receipts, reproducible traces) anchors at moderate depth, but is narrower in scope than a core exemplar — a specific database-governance layer rather than a generalizable retrieval or agentic pattern.",
+      "value_rationale": "Provides a concrete pattern for enforcing semantic consistency and auditability on AI-generated SQL queries, useful for production systems that need deterministic, traceable database interactions; the portable YAML schema introspection and signed metric definitions offer a reference architecture for query governance that could be adapted to other structured-output contexts.",
+      "entry_type": "repo",
+      "tags": [
+        "tool-use",
+        "document-intelligence",
+        "production",
+        "deployment",
+        "safety"
+      ],
+      "concepts": [
+        "semantic model",
+        "database introspection",
+        "governed joins",
+        "metric sign-off",
+        "audit receipts",
+        "MCP server",
+        "portable YAML schema",
+        "multi-dialect support"
+      ],
+      "challenge_hooks": [
+        "how to enforce correct joins and metric definitions when querying messy, undocumented enterprise schemas via AI agents",
+        "building reproducible, auditable query results with full lineage and sign-off state for governed database access",
+        "integrating semantic model governance into Claude Code without backend infrastructure or credential egress"
+      ],
+      "summary": "A trust layer for AI-to-database interaction that enforces governed semantic models with FK-derived joins, signed-off metric definitions, and full audit receipts on every query result. Runs locally in Claude Code, introspects live database schemas into portable YAML, and outputs reproducible SQL traces.",
+      "pre_filter_rationale": "Applied systems: a shipped data-governance and semantic-layer pipeline for grounding LLM-to-SQL in production, with Docker deployment and observability ('receipt on every answer') — a working reference for building trust and auditability into agent-database interactions.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"plugins/agami/shared/agami-logo-light.svg\">\n    <img src=\"plugins/agami/shared/agami-logo-dark.svg\" alt=\"Agami logo\" width=\"240\">\n  </picture>\n</p>\n\n<p align=\"center\"><strong>The trust layer between AI and your data. Local. Private. Yours.</strong></p>\n\n<p align=\"center\">\n  <a href=\"LICENSE\"><img src=\"https://img.shields.io/badge/license-fair--code-blue.svg\" alt=\"License: fair-code\"></a>\n  <a href=\"https://github.com/AgamiAI/agami-core/releases\"><img src=\"https://img.shields.io/github/v/tag/AgamiAI/agami-core?label=version&sort=semver&color=blue\" alt=\"Version\"></a>\n  <a href=\"#get-started-in-2-minutes\"><img src=\"https://img.shields.io/badge/try%20the%20sample-no%20database%20needed-brightgreen\" alt=\"Try the sample\"></a>\n</p>\n\n\n\n\n\n\n\n**agami-core** is the trust layer between an AI agent and your database — a governed, self-improving semantic model that enforces correct joins, signed-off metric definitions, and a full audit receipt on every answer. Same question, same answer, every time. It builds itself from your live schema, messy or clean. The rules live in the model, not the prompt.\n\nReal enterprise schemas have thousands of tables, mostly undocumented, with columns named `col_47` and three definitions of \"revenue\". That's the problem this solves.\n\n## Get started in 2 minutes\n\nIn the **Claude Code CLI**:\n\n```bash\n/plugin marketplace add AgamiAI/agami-core\n/plugin install agami-core@agami\n/agami-connect sample          # zero setup: no database, no credentials\nwho are the top 5 customers by total spend?\n```\n\n> **In VS Code or Cursor**, the two `/plugin …` commands above don't work from the chat input —\n> type `/plugin` to open the **Manage Plugins** dialog and add the marketplace + install the plugin\n> there instead (see [Install](#install)). The `/agami-connect` line and everything after it work the\n> same everywhere.\n\nThat last line returns a **governed answer with a receipt** (the exact SQL, the joins used, the model version) — and the governance runs *before* the query, so the kind of silent join mistake an ungoverned agent would hand back as a confident wrong number neve\n…[truncated]"
+    },
+    {
+      "source_id": "github:kenryu42/cc-safety-net",
+      "title": "cc-safety-net",
+      "url": "https://github.com/kenryu42/cc-safety-net",
+      "github_url": "https://github.com/kenryu42/cc-safety-net",
+      "bishop_ui": "http://localhost:8081/entries/github:kenryu42/cc-safety-net",
+      "published_at": "2026-09-14T04:16:22+00:00",
+      "ingested_at": "2026-09-14T04:36:23.020455+00:00",
+      "relevance_score": 0.64,
+      "relevance_reason": "Touches the agentic-systems anchor (weight 1.0) by addressing a concrete failure mode in agent CLIs — preventing destructive command execution — but is narrower in scope than a core exemplar, focusing on a single safety control rather than broader agent orchestration or evaluation patterns.",
+      "value_rationale": "Provides a specific, deployable safety guard for agentic workflows that execute shell commands, with measurable failure modes (rm -rf, git reset --hard, secret exposure) and a shareable rulebook pattern, making it directly applicable to production agent setups that currently lack command-level interception.",
+      "entry_type": "repo",
+      "tags": [
+        "safety",
+        "tool-use",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "command parsing and semantic analysis",
+        "pre-execution interception hooks",
+        "secret detection and path blocking",
+        "policy configuration and GUI customization",
+        "rulebook extensibility (Terraform, AWS, Azure)",
+        "git-shared team policy distribution"
+      ],
+      "challenge_hooks": [
+        "how to safely sandbox agentic tool calls that invoke destructive shell commands without breaking legitimate workflows",
+        "preventing accidental secret exfiltration when coding agents have read/write access to filesystem and credentials",
+        "enforcing consistent command safety policies across a team's local and cloud development environments"
+      ],
+      "summary": "A command-line safety net that intercepts and blocks destructive commands (rm -rf, git reset --hard, git push --force) and secret access (SSH keys, .env, AWS credentials) before execution in coding agent CLIs, with customizable GUI policies, git-shareable rulebooks, and an embeddable library API.",
+      "pre_filter_rationale": "Applied dev-flow technique for agent safety and observability — a reusable guard harness I would integrate into agentic code-execution pipelines this week to prevent destructive operations.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<h1>\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"./.github/assets/cc-safety-net-header-logo-dark.svg\">\n    <source media=\"(prefers-color-scheme: light)\" srcset=\"./.github/assets/cc-safety-net-header-logo-light.svg\">\n    <img alt=\"CC Safety Net\" src=\"./.github/assets/cc-safety-net-header-logo-light.svg\">\n  </picture>\n</h1>\n\n[![CI](https://github.com/kenryu42/cc-safety-net/actions/workflows/ci.yml/badge.svg)](https://github.com/kenryu42/cc-safety-net/actions/workflows/ci.yml)\n[![codecov](https://codecov.io/github/kenryu42/cc-safety-net/branch/main/graph/badge.svg?token=C9QTION6ZF)](https://codecov.io/github/kenryu42/cc-safety-net)\n[![Version](https://img.shields.io/github/v/tag/kenryu42/cc-safety-net?label=version&color=blue)](https://github.com/kenryu42/cc-safety-net)\n[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)\n\n<div align=\"center\">\n\n**English** · [简体中文](https://ccsafetynet.com/docs/zh-Hans) · [日本語](https://ccsafetynet.com/docs/ja)\n\n[![CC Safety Net](./.github/assets/cc-safety-net-v2.png)](./.github/assets/cc-safety-net-v2.png)\n\n</div>\n\nCC Safety Net (Coding CLI Safety Net) blocks destructive commands and access to secrets such as SSH keys and `.env` files before the tool call runs. It parses what the command does. Wrapping the command or reordering flags does not hide it. A broken config file never blocks anything.\n\n> [!NOTE]\n> **[Full documentation →](https://ccsafetynet.com/docs)** covers installation, configuration, reference material, guides, and the security model. This README is the short version.\n\n## Supported coding CLIs\n\nCC Safety Net supports the coding agent CLIs below on Windows, macOS, and Linux. Automated tests cover the analyzer and some Windows integrations. Windows support for the remaining CLIs is best effort and has not been tested.\n\n<table align=\"center\">\n  <tr>\n    <td align=\"center\"><a href=\"https://ccsafetynet.com/docs/installation#amp-code-installation\"><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"./.github/assets/amp-dark.svg\"><img alt=\"Amp Code\" src=\"./.github/assets/amp-light.svg\" height=\"32\"></picture><br>Amp Code</a></td>\n    <td al\n…[truncated]"
+    },
+    {
+      "source_id": "github:Ephemeral-AI-Lab/layerfs",
+      "title": "layerfs",
+      "url": "https://github.com/Ephemeral-AI-Lab/layerfs",
+      "github_url": "https://github.com/Ephemeral-AI-Lab/layerfs",
+      "bishop_ui": "http://localhost:8081/entries/github:Ephemeral-AI-Lab/layerfs",
+      "published_at": "2026-09-14T04:23:13+00:00",
+      "ingested_at": "2026-09-14T04:28:16.171096+00:00",
+      "relevance_score": 0.62,
+      "relevance_reason": "Touches the agentic-systems anchor (weight 1.0) through ephemeral workspace management for parallel agent exploration, but the value is primarily infrastructure-level storage optimization rather than agent orchestration, planning, or state-management patterns.",
+      "value_rationale": "Provides a concrete filesystem-level deduplication pattern (CAS + COW) for running multiple agent rollouts without full environment clones, which could reduce resource costs in multi-agent exploration loops—useful if the profile owner is running large-scale agent sweeps, but offers limited insight into agent coordination or failure handling.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "architecture",
+        "optimization"
+      ],
+      "concepts": [
+        "content-addressed storage",
+        "copy-on-write",
+        "content-defined chunking",
+        "immutable commits",
+        "ephemeral workspaces",
+        "deduplication",
+        "branching"
+      ],
+      "challenge_hooks": [
+        "how to store parallel agent workspace forks without multiplying storage overhead",
+        "filesystem versioning and rollback for recursive multi-agent exploration",
+        "reducing storage cost when agents fork, run, and discard failed trajectories"
+      ],
+      "summary": "SQLite-backed content-addressed filesystem with copy-on-write branching for ephemeral agent workspaces. Uses CAS, CDC, and COW to deduplicate immutable commits across parallel rollouts and zero-copy branches, reducing storage for multi-agent exploration without cloning full environments.",
+      "pre_filter_rationale": "Applied systems: a concrete, runnable artifact (filesystem abstraction for agent state isolation) that solves a production concern (parallel agent execution, rollback, and state reuse) I would integrate into multi-agent orchestration or long-horizon agentic workflows this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <img src=\"docs/assets/branding/layerfs-icon.png\" alt=\"LayerFS icon\" width=\"128\">\n</p>\n\n<h1 align=\"center\">LayerFS</h1>\n\n<p align=\"center\"><strong>Ephemeral Workspaces. Durable Shared History.</strong></p>\n\n<p align=\"center\">\n  <a href=\"https://github.com/Ephemeral-AI-Lab/layerfs/actions/workflows/ci.yml\"><img src=\"https://github.com/Ephemeral-AI-Lab/layerfs/actions/workflows/ci.yml/badge.svg\" alt=\"CI status\"></a>\n  <a href=\"LICENSE\"><img src=\"https://img.shields.io/badge/license-MIT-blue.svg\" alt=\"MIT license\"></a>\n  <a href=\"release-notes/0.1.3/README.md\"><img src=\"https://img.shields.io/badge/status-developer%20preview-orange.svg\" alt=\"Developer preview\"></a>\n  <a href=\"docs/assets/community/wechat-ephemeral-ai-lab.jpg\"><img src=\"https://img.shields.io/badge/WeChat-Scan%20QR-07C160?logo=wechat&amp;logoColor=white\" alt=\"WeChat QR invite\"></a>\n  <a href=\"https://discord.gg/DrgJ4DX9E\"><img src=\"https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&amp;logoColor=white\" alt=\"Join Discord\"></a>\n  <a href=\"https://x.com/yifanxu_ephai\"><img src=\"https://img.shields.io/badge/X-%40yifanxu_ephai-000000?logo=x&amp;logoColor=white\" alt=\"Follow @yifanxu_ephai on X\"></a>\n</p>\n\n\n> **v0.1.5 Developer Preview:** [release and downloads](https://github.com/Ephemeral-AI-Lab/layerfs/releases/tag/v0.1.5),\n> [every benchmark family and case](release-notes/0.1.5/benchmark-closeout.md), and\n> [schema-10 compatibility boundary](docs/versioned/0.1.5/storage-format.md).\n> Ordinary storage, pending-edit capacity and packed metadata are qualified;\n> known performance regressions, one waived Tier-1 miss and every WARN stay explicit.\n\n\n## 🚀 What is LayerFS?\n\n### Ephemeral Workspaces. Durable Shared History.\n\nLayerFS is a **SQLite-backed, content-addressed time machine for agent\nWorkspaces**. Give every filesystem-affecting tool call its own ephemeral\nWorkspace; when retained, that call becomes one immutable Commit—the base unit\nof the filesystem timeline. CAS, CDC, and COW store one shared base plus unique\ndeltas instead of cloning full environments. From any Layer or eligible Commit,\nagents can fork zero-copy Branches, run parallel rollouts, discard failures,\nrol\n…[truncated]"
+    },
+    {
+      "source_id": "github:cortexkit/aft",
+      "title": "aft",
+      "url": "https://github.com/cortexkit/aft",
+      "github_url": "https://github.com/cortexkit/aft",
+      "bishop_ui": "http://localhost:8081/entries/github:cortexkit/aft",
+      "published_at": "2026-09-12T05:53:13+00:00",
+      "ingested_at": "2026-09-12T06:14:52.228331+00:00",
+      "relevance_score": 0.62,
+      "relevance_reason": "AFT provides practical agent tooling for code interaction, but is tangential to core RAG/document intelligence focus unless applied to code-as-document extraction or agentic code workflows.",
+      "value_rationale": "Relevant for agentic systems that involve code manipulation or analysis (e.g., agents that modify documents/configs, code-based knowledge graphs). Useful architectural reference for structured perception and precise state mutation in agent loops, but not directly applicable to most document intelligence or retrieval-centric use cases.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "production",
+        "architecture"
+      ],
+      "concepts": [
+        "sensorimotor abstraction for agents",
+        "code structure perception (outline, callgraph, semantic search)",
+        "language-aware code manipulation (AST-based editing, imports)",
+        "background task execution and PTY sessions",
+        "undo/checkpoint safety with disk persistence",
+        "multi-tier output compression",
+        "hybrid semantic+lexical code search",
+        "codebase health inspection and linting"
+      ],
+      "challenge_hooks": [
+        "How can agents perceive and navigate code structure beyond raw text scrolling?",
+        "How to enable reliable, multi-file code edits with atomicity and rollback safety?",
+        "How to manage long-running background tasks, PTY sessions, and environment state for coding agents?",
+        "How to ground code search in semantic meaning while maintaining lexical precision?"
+      ],
+      "summary": "AFT is a sensorimotor cortex framework for coding agents, providing structured code perception (outline, zoom, search, callgraph), precise editing (edit, write, patch, import), and environment management (bash, PTY, background tasks, undo stack) with language-aware capabilities.",
+      "pre_filter_rationale": "Applied systems and reusable dev skill: a shipped toolkit (CortexKit/OpenCode) for agent-assisted engineering with symbol-aware edits, semantic search, and code health — patterns I would integrate into an agent-scaffolding pipeline this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<h1 align=\"center\">AFT</h1>\n\n<p align=\"center\">\n  <strong>Give your agent a proper IDE and OS.</strong><br>\n  The sensorimotor cortex for coding agents. <br>\n</p>\n\n<!-- BANNER: replace with the new cortex/family banner (see banner prompts). Path is repo-relative for the final location. -->\n<p align=\"center\">\n  <img src=\"assets/aft_banner.jpg\" alt=\"AFT, the sensorimotor cortex for coding agents\" width=\"80%\">\n</p>\n\n<p align=\"center\">\n  <a href=\"https://crates.io/crates/agent-file-tools\"><img src=\"https://img.shields.io/crates/v/agent-file-tools?label=crate&color=blue&style=flat-square\" alt=\"crates.io\"></a>\n  <a href=\"https://www.npmjs.com/package/@cortexkit/aft\"><img src=\"https://img.shields.io/npm/v/@cortexkit/aft?label=cli&color=blue&style=flat-square\" alt=\"npm @cortexkit/aft\"></a>\n  <a href=\"https://www.npmjs.com/package/@cortexkit/aft-opencode\"><img src=\"https://img.shields.io/npm/v/@cortexkit/aft-opencode?label=opencode&color=blue&style=flat-square\" alt=\"npm @cortexkit/aft-opencode\"></a>\n  <a href=\"https://www.npmjs.com/package/@cortexkit/aft-pi\"><img src=\"https://img.shields.io/npm/v/@cortexkit/aft-pi?label=pi&color=blue&style=flat-square\" alt=\"npm @cortexkit/aft-pi\"></a>\n  <a href=\"https://discord.gg/DSa65w8wuf\"><img src=\"https://img.shields.io/discord/1488852091056295957?style=flat-square&logo=discord&logoColor=white&label=Discord&color=5865F2\" alt=\"Discord\"></a>\n  <a href=\"https://github.com/cortexkit/aft/blob/main/LICENSE\"><img src=\"https://img.shields.io/badge/license-MIT-green?style=flat-square\" alt=\"MIT License\"></a>\n</p>\n\n<p align=\"center\">\n  <a href=\"#what-is-aft\">What is AFT?</a> ·\n  <a href=\"#quick-start\">Quick Start</a> ·\n  <a href=\"#uninstall\">Uninstall</a> ·\n  <a href=\"#part-of-cortexkit\">CortexKit</a> ·\n  <a href=\"#-sensory-cortex-perceive\">Sensory</a> ·\n  <a href=\"#-motor-cortex-act\">Motor</a> ·\n  <a href=\"#-brainstem-keep-it-alive\">Brainstem</a> ·\n  <a href=\"#architecture\">Architecture</a> ·\n  <a href=\"https://discord.gg/DSa65w8wuf\">💬 Discord</a>\n</p>\n\n---\n\n## What is AFT?\n\nYou give yourself the best tools for the job: an IDE that shows you the whole codebase at a glance, the fastest terminal you can find, an operating system that runs a doz\n…[truncated]"
+    },
+    {
+      "source_id": "github:daidaiJ/websearch-mcpserver",
+      "title": "websearch-mcpserver",
+      "url": "https://github.com/daidaiJ/websearch-mcpserver",
+      "github_url": "https://github.com/daidaiJ/websearch-mcpserver",
+      "bishop_ui": "http://localhost:8081/entries/github:daidaiJ/websearch-mcpserver",
+      "published_at": "2026-09-11T13:10:06+00:00",
+      "ingested_at": "2026-09-11T15:32:03.612025+00:00",
+      "relevance_score": 0.62,
+      "relevance_reason": "Relevant as a tool infrastructure component for agentic systems and RAG pipelines, but limited by narrow scope and Go-specific implementation constraints in a Python-centric ML ecosystem.",
+      "value_rationale": "Provides a practical reference implementation for integrating search capabilities into agent tool use and retrieval systems without API overhead; the deduplication and local scoring patterns are applicable to multi-source retrieval architectures. However, the Go codebase and web search focus limit direct applicability compared to Python-based RAG/agent frameworks.",
+      "entry_type": "repo",
+      "tags": [
+        "tool-use",
+        "orchestration",
+        "RAG",
+        "document-intelligence",
+        "production",
+        "deployment",
+        "optimization",
+        "architecture"
+      ],
+      "concepts": [
+        "MCP (Model Context Protocol) tool integration",
+        "multi-engine search fusion with RRF ranking",
+        "local relevance scoring and deduplication",
+        "academic search with citation metrics",
+        "SSRF-protected web content fetching",
+        "SQLite result caching",
+        "zero-cost fallback chains",
+        "LLM-optimized structured output"
+      ],
+      "challenge_hooks": [
+        "How to integrate real-time web search into Claude/Qwen agents without expensive per-query API costs",
+        "Building multi-engine search with local relevance ranking and deduplication optimized for LLM consumption",
+        "Deploying self-hosted retrieval infrastructure that handles academic search, web scraping, and PDF parsing in a single tool",
+        "Maintaining data privacy while providing production-grade web search with automatic fallback chains and local caching"
+      ],
+      "summary": "Lightweight Go-based MCP web search server supporting multiple search engines (Baidu, Bing, DuckDuckGo, academic sources) with zero API Key requirement, local result scoring, deduplication, and integrated web fetching/PDF parsing for LLM consumption.",
+      "pre_filter_rationale": "Applied systems write-up of a shipped search-integration pipeline with caching, pooling, and LLM integration patterns directly reusable in RAG and agentic workflows.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# websearch-mcpserver\n\n> 轻量级 Web Search MCP Server — 零 API Key 即可运行\n\n<p align=\"center\">\n  <a href=\"README.EN.md\">English</a> · <a href=\"README.MD\">中文</a>\n</p>\n\n<p align=\"center\">\n  <a href=\"https://go.dev/\"><img src=\"https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go\" alt=\"Go\"></a>\n  <a href=\"https://github.com/daidaiJ/websearch-mcpserver/releases\"><img src=\"https://img.shields.io/github/v/release/daidaiJ/websearch-mcpserver\" alt=\"Release\"></a>\n  <img src=\"https://img.shields.io/badge/MCP-Streamable%20HTTP%20%2F%20stdio-7C3AED\" alt=\"MCP\">\n  <img src=\"https://img.shields.io/badge/API%20Key-optional-22C55E\" alt=\"Zero API Key\">\n  <a href=\"LICENSE\"><img src=\"https://img.shields.io/badge/License-MIT-yellow.svg\" alt=\"MIT\"></a>\n</p>\n\n<p align=\"center\">\n  <img src=\"docs/images/hero-banner.png\" alt=\"多引擎搜索融合示意：百度 / Bing / DuckDuckGo / 学术源汇入本地编排，输出结构化结果\" width=\"900\">\n</p>\n\n用 Go 编写的 MCP 搜索服务。内置百度网页、Bing、DuckDuckGo 等通用引擎和 9 个学术引擎，搜索、评分、缓存全部在本地完成。可作为 MCP 工具接入 Claude Code、Qwen Code、Cursor，也可作为 Go 模块嵌入自有服务。\n\n**免费、国内可用、结果可直接给 LLM 消费。** 无 Key 也能搜；有 Key 才用 Key。\n\n---\n\n## 架构一览\n\n分层设计：客户端只面对 4 个 MCP 工具；引擎组由 `mode` 组装；评分、缓存、代理、抓取都在本进程内完成，查询不会经过第三方聚合服务。\n\n<p align=\"center\">\n  <img src=\"docs/images/architecture.png\" alt=\"系统组成架构：接入层、协议层、编排层、通用/学术引擎、支撑组件\" width=\"900\">\n</p>\n\n| 层 | 做什么 |\n|----|--------|\n| **接入** | Claude Code / Qwen Code / Cursor / HTTP API / 嵌入 Go 模块 |\n| **协议** | `/mcp` 四个工具 · `/searxng/search` 兼容 LiteLLM · `/__admin` 进程管理 |\n| **编排** | `factory` 按 mode 组装 · `hybrid` 并发去重合并 · RRF / Boost / MMR 评分 |\n| **引擎** | 通用：百度网页 / 千帆 / Bing / DDG / Tavily / Exa / AnySearch / 豆包；学术 9 源并行 |\n| **支撑** | SQLite 缓存、系统代理自动检测、webfetch（SSRF 防护）、MinerU、LLM 流式摘要 |\n\n更完整的回退链、代理检测与嵌入方式见 [docs/architecture.md](docs/architecture.md)。\n\n---\n\n## 面向 LLM 的工具链\n\n四个工具覆盖联网工作流，结果互相衔接，一次配置全链路可用：\n\n<p align=\"center\">\n  <img src=\"docs/images/toolchain.png\" alt=\"smartsearch → academicsearch → cleanfetch → pdf_parser 工具链\" width=\"900\">\n</p>\n\n---\n\n## 核心特性\n\n| 能力 | 说明 |\n|------|------|\n| 零 Key 搜索 | `engine` 模式内置百度网页搜索 + Bing 并发，无需任何 API Key |\n| 多引擎融合 | 多种搜索模式、8 个通用引擎 + 9 个学术引擎，主引擎失败自动回退 |\n| 相关性评分 | RRF 融合排名 + 词汇对齐 / 域名品质 / 共识 / 权威 / 时效加分，低分自动裁剪；MMR 打散转载 / 镜像 |\n| 学术搜索 | 9 大学术引擎并行，按引用数 / 期刊权威 / PDF 可用性 / 新鲜度评分；DOI 跨引擎去重 |\n…[truncated]"
+    },
+    {
+      "source_id": "github:dlants/magenta.nvim",
+      "title": "magenta.nvim",
+      "url": "https://github.com/dlants/magenta.nvim",
+      "github_url": "https://github.com/dlants/magenta.nvim",
+      "bishop_ui": "http://localhost:8081/entries/github:dlants/magenta.nvim",
+      "published_at": "2026-09-14T04:19:20+00:00",
+      "ingested_at": "2026-09-14T04:32:19.291034+00:00",
+      "relevance_score": 0.62,
+      "relevance_reason": "Directly implements agentic-systems patterns (weight 1.0 anchor) in a production tool with concrete orchestration mechanics (thread management, token-aware compaction, sub-agent parallelization), but is a single IDE plugin rather than a generalizable architecture or framework, and lacks measured failure modes or tradeoff analysis.",
+      "value_rationale": "Demonstrates a working pattern for agent state management (thread-based conversation + token compaction) and sub-agent coordination (Docker workers) that a profile owner building agentic systems could adapt, though the Neovim-specific context limits direct transfer; most value is in the thread + token-management pattern rather than novel orchestration theory.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "production",
+        "safety"
+      ],
+      "concepts": [
+        "agentic AI workflows",
+        "Claude Opus",
+        "Edit Description Language (EDL)",
+        "OS-level sandboxing (seatbelt/bubblewrap)",
+        "Docker sub-agents",
+        "prompt caching",
+        "tool-use architecture",
+        "thread-based conversation management"
+      ],
+      "challenge_hooks": [
+        "how to enable reliable agentic coding workflows in neovim comparable to Cursor or Windsurf",
+        "managing multi-threaded AI agent interactions with transparent sandbox enforcement and approval controls",
+        "scaling unsupervised agent work via Docker sub-agents while maintaining security and context efficiency"
+      ],
+      "summary": "A neovim plugin enabling agentic AI workflows with transparent developer-AI control shifting, featuring Claude Opus integration via Anthropic's sandbox-runtime, Edit Description Language for efficient code edits, Docker sub-agents for parallel work, and thread-based conversation management with token-aware auto-compaction.",
+      "pre_filter_rationale": "Applied dev-skills artifact: a working neovim plugin that integrates tool-use patterns into a development editor, directly reusable this week as a reference for agent-assisted engineering workflows.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# magenta.nvim\n\n```\n  ___ ___\n/' __` __`\\\n/\\ \\/\\ \\/\\ \\\n\\ \\_\\ \\_\\ \\_\\\n \\/_/\\/_/\\/_/\n magenta is for agentic flow\n```\n\nMagenta provides transparent tools to empower AI workflows in neovim. It allows fluid shifting of control between the developer and the AI, from AI automation and agent-led feature planning and development.\n\nDeveloped by [dlants.me](https://dlants.me?ref=magenta.nvim): I was tempted by other editors due to lack of high-quality agentic coding support in neovim. I missed neovim a lot, though, so I decided to go back and implement my own. I now happily code in neovim using magenta, and find that it's just as good as cursor, windsurf, ampcode & claude code.\n\nI sometimes write about AI, neovim and magenta specifically:\n\n- [With AI, you barely need a frontend framework](https://dlants.me/vamp.html?ref=magenta.nvim)\n- [How does AI change software engineering?](https://dlants.me/ai-se.html?ref=magenta.nvim)\n- [Why I don't think AGI is imminent](https://dlants.me/agi-not-imminent.html?ref=magenta.nvim)\n- [AI whiplash, and neovim in the age of AI](https://dlants.me/ai-whiplash.html?ref=magenta.nvim)\n- [AI is not mid](https://dlants.me/ai-mid.html?ref=magenta.nvim)\n\n🔍 **Also check out [pkb](https://github.com/dlants/pkb)**: A CLI for building a local knowledge base with LLM-based context augmentation and embeddings for semantic search. Can be used as a claude skill.\n\n**Note**: I mostly develop using the Anthropic provider, so Claude Opus is recommended. I decided to drop support for other providers for now, since I am more interested in exploring the features space. If another provider becomes significantly better or cheaper, I'll probably add it.\n\n📖 **Documentation**: Run `:help magenta.nvim` or ask magenta for complete documentation.\n\n## Demos\n\n![completion commands (July 2025)](https://github.com/user-attachments/assets/70eb1ddc-a592-47cb-a803-19414829c5d2)\n\n[![June 2025 demo](https://img.youtube.com/vi/W_YctNT20NQ/0.jpg)](https://www.youtube.com/watch?v=W_YctNT20NQ)\n\n# Why would I use this instead of claude code / another cli agent harness?\n\nIt's neovim, baby! Use your muscle memory to browse agent output, gather context, and edit your prompt. Jump into\n…[truncated]"
+    },
+    {
+      "source_id": "github:objectstack-ai/objectstack",
+      "title": "objectstack",
+      "url": "https://github.com/objectstack-ai/objectstack",
+      "github_url": "https://github.com/objectstack-ai/objectstack",
+      "bishop_ui": "http://localhost:8081/entries/github:objectstack-ai/objectstack",
+      "published_at": "2026-09-14T04:22:04+00:00",
+      "ingested_at": "2026-09-14T04:28:17.948924+00:00",
+      "relevance_score": 0.62,
+      "relevance_reason": "Touches the agentic-systems anchor (weight 1.0) through LLM reasoning about application structure and the document-intelligence anchor (weight 0.9) via schema-driven extraction and generation, but the framing is primarily a full-stack framework rather than a focused technique or pattern for agents or retrieval.",
+      "value_rationale": "Demonstrates how to package a complete application model as LLM-digestible metadata that enables agent reasoning and refactoring, which is actionable for agentic-workflow design; however, the value is distributed across framework concerns (database, REST, UI) rather than concentrated on agent orchestration or retrieval specifically, limiting how directly a practitioner could extract and apply the core agentic pattern.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "structured-output",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "business ontology as metadata",
+        "context-window-sized app definition",
+        "Zod schema validation",
+        "MCP server generation",
+        "agent-driven app refactoring",
+        "typed metadata governance"
+      ],
+      "challenge_hooks": [
+        "how to represent an entire application as metadata small enough for an agent to hold and reason about in a single context window",
+        "enabling AI agents to autonomously refactor or extend full-stack applications while enforcing type safety and permissions",
+        "deriving a complete runtime (database, API, UI, MCP) from a single versioned schema definition"
+      ],
+      "summary": "TypeScript framework that encodes an entire application (data model, UI, workflows, permissions) as typed, versioned business ontology metadata small enough to fit in a single LLM context window, enabling agents to reason about and refactor whole apps. Derives database, REST API, UI, and MCP server from schema; enforces permissions and audit at runtime.",
+      "pre_filter_rationale": "Applied systems: a shipped pattern for fitting entire application state (data, UI, workflows, permissions) into a single context window for agentic reasoning and refactoring — directly actionable for agent-assisted engineering and context budgeting decisions.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# ObjectStack\n\n[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)\n![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)\n[![Docs](https://img.shields.io/badge/docs-objectstack.ai-0a0a0a.svg)](https://objectstack.ai/docs)\n\n> ## Apps small enough for AI to hold whole.\n>\n> ObjectStack turns the whole app — data model, UI, workflows, permissions —\n> into typed metadata that fits in a single context window. Agents read it\n> whole, reason it whole, refactor it whole.\n>\n> That metadata is your **business ontology** — an open, versioned definition of\n> your objects, permissions, and flows that you own, not code scattered across a\n> framework. Strict TypeScript, Zod schemas, and a validation gate catch the\n> agent's mistakes at authoring time; the runtime derives the database, REST API,\n> UI, and MCP server, and enforces permissions and audit on every call.\n\n`Fits in an agent's context` · `Typed, validated, governed` · `Self-host anywhere` · Apache-2.0\n\n<p align=\"center\">\n  <a href=\"https://youtu.be/CX_FlOoOtr0\">\n    <img src=\"docs/screenshots/hero-cover-dark.png\" width=\"900\" alt=\"ObjectStack in 90 Seconds — watch the overview on YouTube\">\n  </a>\n  <br>\n  <a href=\"https://youtu.be/CX_FlOoOtr0\"><b>▶&nbsp; Watch: ObjectStack in 90 Seconds</b></a>\n</p>\n\n**Everything in this repo is the open stack** — protocol, microkernel, SDK,\nCLI, and the production runtime, Apache-2.0 with no open-core asterisks\n([LICENSING.md](./LICENSING.md)). You build & ask with Claude Code or any coding\nagent: the agent writes the metadata in your repo and operates the running app\nover MCP. Want the same loop hosted, in the browser, nothing to install? That's\n[ObjectOS](https://www.objectos.ai), the commercial runtime environment built on\nthis stack.\n\n<p align=\"center\">\n  <img src=\"docs/screenshots/architecture.png\" width=\"940\" alt=\"ObjectStack architecture: author typed Zod metadata (objects, flows, views, policies); the microkernel compiles it into a versioned JSON artifact and loads plugins, drivers, and services; it generates a REST API, client SDK, Console and Studio UI, and MCP tools used by developers and AI agents, governed by Auth, R\n…[truncated]"
+    },
+    {
+      "source_id": "github:redhat-et/ripwire",
+      "title": "ripwire",
+      "url": "https://github.com/redhat-et/ripwire",
+      "github_url": "https://github.com/redhat-et/ripwire",
+      "bishop_ui": "http://localhost:8081/entries/github:redhat-et/ripwire",
+      "published_at": "2026-09-12T05:50:12+00:00",
+      "ingested_at": "2026-09-12T06:16:54.678010+00:00",
+      "relevance_score": 0.62,
+      "relevance_reason": "Ripwire is a codebase analysis tool with potential value for agentic systems that need to understand and navigate code, but it's language-specific (C++) and more of a developer productivity tool than a core production ML/NLP system component.",
+      "value_rationale": "Relevant for building code-understanding agents and reducing token overhead in code-based RAG systems, which could improve cost and latency. However, utility is limited to C++ codebases and represents infrastructure tooling rather than core AI system architecture.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "document-intelligence",
+        "optimization",
+        "production",
+        "benchmark"
+      ],
+      "concepts": [
+        "call graph construction",
+        "static code analysis",
+        "symbol ranking and BM25 scoring",
+        "code context compression",
+        "dependency resolution",
+        "complexity metrics",
+        "subtoken-based search",
+        "deterministic output"
+      ],
+      "challenge_hooks": [
+        "How can AI agents efficiently navigate and understand large codebases without reading entire files or grepping randomly?",
+        "How do you reduce token consumption when passing code context to LLMs while maintaining semantic understanding?",
+        "How can you provide deterministic, ranked code context that disambiguates between multiple definitions and prioritizes high-risk code regions?",
+        "How do you generate reliable call graphs and dependency maps that account for ambiguous symbol resolution in real-world repositories?"
+      ],
+      "summary": "Ripwire is a C++ static analysis tool that generates ranked, deterministic call graphs for code repositories to help AI agents understand codebases efficiently. It reduces token consumption and improves context quality by providing symbol rankings, dependency maps, and risk annotations instead of grepping entire files.",
+      "pre_filter_rationale": "Reusable dev-flow technique for agent-assisted engineering: a CLI tool that enables coding agents to efficiently navigate codebases, understand blast radius, and validate changes—directly applicable to agentic systems and RAG-augmented development workflows.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\"><img src=\"docs/assets/banner.svg\" alt=\"ripwire — the ripgrep of AI context\" width=\"880\"></p>\n\n[![CI](https://github.com/redhat-et/ripwire/actions/workflows/ci.yml/badge.svg)](https://github.com/redhat-et/ripwire/actions/workflows/ci.yml)\n[![Release](https://img.shields.io/github/v/release/redhat-et/ripwire)](https://github.com/redhat-et/ripwire/releases/latest)\n[![Licence](https://img.shields.io/badge/licence-Apache%202.0-blue.svg)](LICENSE)\n[![Standard](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](CONTRIBUTING.md)\n[![Runtime dependencies](https://img.shields.io/badge/runtime%20dependencies-none-blue.svg)](THIRD_PARTY.md)\n[![Slides](https://img.shields.io/badge/slides-the%20showcase%20deck-56d6e8.svg)](present/ripwire-showcase.pdf)\n\n# Rip'n Fast. Fewer Tokens. Better Code.\n\n**The ripgrep of AI context. Give your coding agent a map before it reads the repo.**\n\nPoint it at any repository and your agent gets a ranked, deterministic call graph — what to touch,\nwhat it breaks, which tests to run — instead of grepping around and reading whole files.\n\n<p align=\"center\"><a href=\"https://trendshift.io/repositories/217924?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-217924\"><img src=\"https://trendshift.io/api/badge/trendshift/repositories/217924/daily?language=C%2B%2B\" alt=\"Trendshift: C++ Repository of the Day badge for redhat-et/ripwire\" width=\"250\" height=\"55\"></a></p>\n\n<details>\n<summary><b>Fifty years of software-engineering results, and research from last month.</b> 49 repositories and 70 papers folded — McCabe (1976) through to <b>seven published in the last two months</b> — each row in <a href=\"docs/LINEAGE.md\"><b>docs/LINEAGE.md</b></a> naming the lesson taken and the file it lives in</summary>\n\nBeside those sits a labelled survey of **237 tools** that contributed nothing and says so. The two\nsets are disjoint by construction, so they add rather than nest — a tool that gave a lesson is never\ncounted twice.\n\n**Both halves are load-bearing, and they are doing different jobs.** The settled results are what\nmake the quality lens trustworthy: McCabe on complexity (1976), Halstead on volume (1977), Spärck\nJo\n…[truncated]"
+    },
+    {
+      "source_id": "github:siropkin/chrome-bridge",
+      "title": "chrome-bridge",
+      "url": "https://github.com/siropkin/chrome-bridge",
+      "github_url": "https://github.com/siropkin/chrome-bridge",
+      "bishop_ui": "http://localhost:8081/entries/github:siropkin/chrome-bridge",
+      "published_at": "2026-09-13T04:16:27+00:00",
+      "ingested_at": "2026-09-13T04:26:27.061530+00:00",
+      "relevance_score": 0.62,
+      "relevance_reason": "Sits at the intersection of agentic systems (weight 1.0) and tool-use patterns, but is a single-purpose browser-control utility rather than a generalizable orchestration or planning technique, and lacks production-deployment detail on reliability, error handling, or failure modes.",
+      "value_rationale": "Provides a concrete browser-automation interface that an agentic system could use as a tool, useful as a reference implementation for agent-to-browser I/O patterns, though it does not address how to integrate this into a larger multi-tool orchestration or how to handle the reliability concerns (timeouts, stale elements, race conditions) that arise in production agent workflows.",
+      "entry_type": "repo",
+      "tags": [
+        "tool-use",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "Chrome extension",
+        "WebSocket bridge",
+        "browser automation",
+        "accessibility snapshots",
+        "CDP (Chrome DevTools Protocol)",
+        "element reference targeting",
+        "local-only server binding"
+      ],
+      "challenge_hooks": [
+        "how to let AI agents control your real logged-in Chrome browser without Playwright or MCP setup",
+        "automating browser tasks that require SSO, anti-bot walls, or internal dashboards behind existing login state",
+        "driving a browser while remaining able to detect and stop agent actions mid-execution"
+      ],
+      "summary": "A Chrome extension and Node CLI that lets AI agents control your logged-in Chrome browser via WebSocket commands (snap, click, fill, eval, screenshot) without requiring a separate profile or MCP server, with visual narration via a purple pill UI.",
+      "pre_filter_rationale": "Applied systems: a shipped browser-automation CLI tool that enables agents to interact with real logged-in Chrome instances with observability and human oversight — directly applicable to agentic workflows requiring web interaction and tool use.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\"><img src=\"docs/creation-of-adam.png\" width=\"600\" alt=\"The Creation of Adam — two hands nearly touching, a spark between them\"></p>\n\n# chrome-bridge\n\n**English** | [中文](README.zh-CN.md)\n\n[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Node ≥ 18](https://img.shields.io/badge/node-%E2%89%A5%2018-339933)](https://nodejs.org) [![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)\n\n**Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/chrome-bridge/kmhjlnokjigmnimgjjmiahlinjbcebkg)** — or `git clone` and load the unpacked folder.\n\nLet **any AI agent** drive the Chrome you're already using — your existing Chrome profile, logged in: open tabs, cookies, SSO. Playwright and friends drive a browser they launched, with a profile of their own; MCP bridges need an MCP-capable client and a configured server. chrome-bridge needs neither: it drives the Chrome you're logged into — that's the only mode — with one small extension and one zero-dependency Node CLI. Every tab the agent touches wears a 🟣 pill that narrates what it's doing.\n\n![a driven tab in motion — the 🟣 pill narrates each action, a purple frame lights up while a command runs, the pointer flashes where the agent clicks](docs/demo.gif)\n\nA tiny Chrome extension (from the [Chrome Web Store](https://chromewebstore.google.com/detail/chrome-bridge/kmhjlnokjigmnimgjjmiahlinjbcebkg), or load the unpacked folder) connects over WebSocket to a local Node server; anything that can run a shell command can drive the browser:\n\n```bash\nnode server.mjs &                        # start the bridge (Node ≥ 18, no deps)\nnode cli.mjs snap localhost:8082         # compact a11y snapshot with element refs\nnode cli.mjs click localhost:8082 @e4    # click by ref\nnode cli.mjs fill localhost:8082 @e2 \"hello@example.com\"\nnode cli.mjs shot localhost:8082 out.png --max 800 --format jpeg\n```\n\nA `snap` looks like this — the whole page as a compact text tree with refs you act on:\n\n```\ntable \"Hacker News new | past | comments | ask | show | jobs | submit\" @e1\n  link \"Hacker News\" @e5\n  link \"new\" @e6\n  link \"submit\" @e12\n  link \"login\" @e13\n…[truncated]"
+    },
+    {
+      "source_id": "github:smithersai/smithers",
+      "title": "smithers",
+      "url": "https://github.com/smithersai/smithers",
+      "github_url": "https://github.com/smithersai/smithers",
+      "bishop_ui": "http://localhost:8081/entries/github:smithersai/smithers",
+      "published_at": "2026-09-14T04:22:29+00:00",
+      "ingested_at": "2026-09-14T04:28:16.570740+00:00",
+      "relevance_score": 0.62,
+      "relevance_reason": "Touches the agentic-systems anchor (weight 1.0) through agent-driven automation and declarative workflows, but the focus is code-change automation rather than retrieval, orchestration patterns, or multi-agent coordination that the profile prioritizes.",
+      "value_rationale": "Demonstrates a concrete agent orchestration pattern (planning → execution → review) with a state-machine-like flow structure that could inform agentic-system design, though the application domain (code maintenance) and limited depth on failure modes or multi-agent patterns constrain its direct transferability to the profile owner's current work.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "tool-use",
+        "production"
+      ],
+      "concepts": [
+        "agentic code automation",
+        "repository instrumentation",
+        "declarative change flows",
+        "agent-driven planning and review",
+        "CLI and hosted deployment",
+        "GitHub integration"
+      ],
+      "challenge_hooks": [
+        "how to automate routine code changes and repository maintenance tasks using an agent that understands project context",
+        "declaring and executing multi-step code modification workflows declaratively alongside source files"
+      ],
+      "summary": "Smithers is an agent-driven codebase maintainer that automates repository changes through declarative flows, enabling planning, execution, and review of code modifications via a hosted web app or local CLI with Node.js runtime.",
+      "pre_filter_rationale": "Applied systems: a shipped agentic workflow orchestration framework with a concrete implementation pattern (TypeScript config + execution engine) that I would evaluate for production agent pipelines.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<!-- Generated from apps/site/src/data/project.json by apps/site/scripts/generate-project-copy.mjs. -->\n\n<pre align=\"center\">\n███████╗███╗   ███╗██╗████████╗██╗  ██╗███████╗██████╗ ███████╗\n██╔════╝████╗ ████║██║╚══██╔══╝██║  ██║██╔════╝██╔══██╗██╔════╝\n███████╗██╔████╔██║██║   ██║   ███████║█████╗  ██████╔╝███████╗\n╚════██║██║╚██╔╝██║██║   ██║   ██╔══██║██╔══╝  ██╔══██╗╚════██║\n███████║██║ ╚═╝ ██║██║   ██║   ██║  ██║███████╗██║  ██║███████║\n╚══════╝╚═╝     ╚═╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝\n</pre>\n\n<p align=\"center\"><strong>The codebase maintainer agent</strong></p>\n\nSmithers instruments and automates a code repository so changes get cheaper, faster, and smarter. Agents plan, run, and review changes through flows declared beside the code.\n\n## Open Smithers\n\nOpen [the Smithers repository](https://smithers.sh/smithersai/smithers) in your browser.\nExplore its files, ask for a task in chat, and inspect runs and changes in the conversation.\nThe hosted private alpha is free for selected public repositories. Sign in with GitHub\nwhen you are ready to contribute. Follow the [app quickstart](https://smithers.sh/docs/quickstart/).\n\n![The Smithers app with its repository home, featured flows, and conversation.](apps/site/public/images/app/home.png)\n\nFor local execution and authoring, use the CLI and libraries described below.\n\n## Supported platforms\n\nThe release candidate's required package platform is Linux with Node 22.19.0. macOS and Windows package checks are advisory and do not establish a support guarantee.\n\nOffline Chromium tests cover the included web UI. Packaged desktop and hosted deployments require separate acceptance evidence.\n\n## Install\n\nThe 1.0 release candidate is not on npm yet. Use the\n[source-checkout installation](https://smithers.sh/docs/installation/#use-the-source-checkout-before-publication)\nuntil publication. After publication, install it with:\n\n```bash\nnpm install --global @smthrs/cli@next\n```\n\n## Get started\n\nRun these commands from your project directory. Before launching, edit the\nscaffolded flow and configure the credential its `model:` field requires.\nThe [CLI quickstart](https://smithers.sh/docs/cli-quickstart/) covers each ste\n…[truncated]"
+    },
+    {
+      "source_id": "github:yinnho/aginxbrowser",
+      "title": "aginxbrowser",
+      "url": "https://github.com/yinnho/aginxbrowser",
+      "github_url": "https://github.com/yinnho/aginxbrowser",
+      "bishop_ui": "http://localhost:8081/entries/github:yinnho/aginxbrowser",
+      "published_at": "2026-09-15T02:07:32+00:00",
+      "ingested_at": "2026-09-15T02:23:34.862566+00:00",
+      "relevance_score": 0.62,
+      "relevance_reason": "Touches the agentic-systems anchor (weight 1.0) by providing a tool for agent-environment interaction, but is narrower in scope — a browser implementation detail rather than orchestration, coordination, or workflow patterns that constitute the anchor's core.",
+      "value_rationale": "Offers a measurable performance tradeoff (7.6× faster extraction, 10× lower memory vs. Chromium) and a concrete API surface (HTTP/MCP/CDP) that an agent-system builder could evaluate as a drop-in replacement for headless Chrome, particularly where memory or latency constraints are tight; the session management and caching layer add some tooling value, but the contribution is fundamentally a component choice, not an architectural pattern.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "serving",
+        "tool-use",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "agent-optimized browser",
+        "V8 rendering engine",
+        "stateful sessions",
+        "TLS fingerprint spoofing",
+        "MCP server",
+        "CDP bridge",
+        "meta-search integration",
+        "CAPTCHA detection",
+        "deterministic rendering",
+        "interactive session replay"
+      ],
+      "challenge_hooks": [
+        "building a browser backend optimized for agent efficiency rather than human UX, eliminating Chromium overhead",
+        "maintaining stateful login sessions and browser state across multi-step agent workflows",
+        "passing anti-bot and fingerprint-based access controls (Cloudflare, TLS checks) from agent automation",
+        "extracting structured data and rendering interactive content for agent vision tasks without human browser latency"
+      ],
+      "summary": "A Rust-native browser engine for AI agents (no Chromium) with HTTP/MCP/CDP APIs, achieving 7.6× faster text extraction and 10× lower memory than headless Chrome. Includes stateful sessions, TLS fingerprint spoofing, meta-search across 15 engines, CAPTCHA handling, screenshot/video/PDF rendering, and local SQLite cache with full-text search.",
+      "pre_filter_rationale": "Applied systems: a production-ready browser toolkit purpose-built for agent-driven web interaction, with concrete integration points (MCP native, Claude Code, Cursor) and runnable artifacts (Rust binary) I would evaluate and potentially integrate into agentic workflows this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# AginxBrowser\n\n**The Browser for AI Agents. See the live web. Read it. Act on it. Remember it.**\n\n[![skills.sh](https://skills.sh/b/yinnho/aginxbrowser)](https://skills.sh/yinnho/aginxbrowser)\n[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)\n[![MCP](https://img.shields.io/badge/MCP-compatible-brightgreen)](https://browser.aginx.net/mcp)\n[![Hosted](https://img.shields.io/badge/hosted-browser.aginx.net-4dd0ff)](https://browser.aginx.net/)\n[![X](https://img.shields.io/badge/X-%40aginxbrowser-black?logo=x)](https://x.com/aginxbrowser)\n\n**[English](README.md)** | [中文文档](README.zh-CN.md)\n\nA browser built for agents from the first line of code — not a human browser bolted onto automation. See the world, read it, search it, act on it, and keep what you read: one Rust binary with built-in V8, **no Chromium required**.\n\n> Humans have Chrome. Agents have AginxBrowser.\n\nOne binary, zero dependencies, instant service. HTTP API + native MCP + CDP — agents plug in and go, and existing Playwright / Puppeteer / browser-use code attaches directly.\n\n*Real pages rendered by AginxBrowser's diting engine (no Chromium) — Wikipedia, this repo, Rust. [Screenshot it yourself →](docs/API.md#screenshot)*\n\n![AginxBrowser rendering real pages](docs/demo.gif)\n\n## Why Agents Need Their Own Browser\n\nMeasured against headless Chrome on the same 20 pages, same network ([bench](bench/README.md), 2026-08-28): **7.6× faster** to agent-usable text (p50 532 ms vs 4 053 ms), **~10× less memory** (227 MB for the whole process vs ~2.1 GB per Chrome page), and 0 hard failures where Chrome's `--dump-dom` produced no DOM on 5 of 40 loads. An agent's total cost is browser efficiency × model efficiency — this is the browser half.\n\nExisting \"browser automation\" was built for humans or for one-shot scraping — not for agents:\n\n| | AginxBrowser | Puppeteer/Playwright | Firecrawl | Browser-use |\n|---|---|---|---|---|\n| Designed for | **Agents first** | Human debugging | Scraping service | LLM wrapper |\n| Dependencies | Single binary, no Chromium | Chromium ~500MB | Docker ~1GB | Chromium |\n| Sees (screenshots) | ✅ built-in diting rendering engine | Needs Chromium | ❌ | Needs Chromi\n…[truncated]"
+    },
+    {
+      "source_id": "github:Sonofg0tham/Quell",
+      "title": "Quell",
+      "url": "https://github.com/Sonofg0tham/Quell",
+      "github_url": "https://github.com/Sonofg0tham/Quell",
+      "bishop_ui": "http://localhost:8081/entries/github:Sonofg0tham/Quell",
+      "published_at": "2026-09-14T04:18:40+00:00",
+      "ingested_at": "2026-09-14T04:34:21.866347+00:00",
+      "relevance_score": 0.52,
+      "relevance_reason": "Tangentially touches observability and production reliability concerns (credential leakage detection, prompt sanitization) but is tooling-layer focused rather than system-architecture or technique-focused, and does not directly serve any of the five core anchors.",
+      "value_rationale": "Offers a concrete safeguard for developers working with LLM systems—automatic credential masking and hidden-instruction detection in prompts—though the value is primarily defensive (preventing mishaps) rather than enabling new retrieval, agentic, or inference capabilities that the profile prioritizes.",
+      "entry_type": "repo",
+      "tags": [
+        "safety",
+        "production",
+        "tool-use"
+      ],
+      "concepts": [
+        "credential detection",
+        "prompt sanitization",
+        "OS Keychain integration",
+        "hidden instruction detection",
+        "VS Code extension",
+        "client-side secret management"
+      ],
+      "challenge_hooks": [
+        "how to prevent accidental leakage of API keys and credentials when sending prompts to AI assistants",
+        "detecting and decoding hidden instructions embedded in source files that are targeting AI tools rather than humans",
+        "maintaining secure secret storage across multiple AI code-completion engines without external services"
+      ],
+      "summary": "A VS Code extension that guards against credential leakage and hidden AI instructions by scanning outbound prompts for secrets (replacing with placeholders stored in OS Keychain) and detecting inbound hidden text directives embedded in files, with 100% offline operation and zero telemetry.",
+      "pre_filter_rationale": "Applied dev-skills: a reusable technique (secret detection and redaction in the editor/agent loop) I would integrate into a local tool use or code-generation workflow this week to prevent credential leakage into LLM calls.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<picture>\n  <source media=\"(prefers-color-scheme: dark)\" srcset=\"https://raw.githubusercontent.com/Sonofg0tham/Quell/main/assets/quell-logo-dark.png\">\n  <img src=\"https://raw.githubusercontent.com/Sonofg0tham/Quell/main/assets/quell-logo-light.png\" alt=\"Quell\" height=\"56\">\n</picture>\n\n[![CI](https://github.com/Sonofg0tham/Quell/actions/workflows/ci.yml/badge.svg)](https://github.com/Sonofg0tham/Quell/actions/workflows/ci.yml)\n[![VS Marketplace](https://img.shields.io/badge/VS%20Marketplace-Quell-23A7C7)](https://marketplace.visualstudio.com/items?itemName=Sonofg0tham.quell)\n[![Open VSX](https://img.shields.io/open-vsx/v/Sonofg0tham/quell?label=Open%20VSX)](https://open-vsx.org/extension/Sonofg0tham/quell)\n[![npm](https://img.shields.io/npm/v/%40sonofg0tham%2Fquell-scanner?label=quell-scanner)](https://www.npmjs.com/package/@sonofg0tham/quell-scanner)\n\n**Quell guards the line between you and your AI tools, in both directions.**\n\n**Outbound:** it scans your prompts for API keys, tokens, passwords and connection strings, and replaces them with secure placeholders before the AI ever sees them. Real values stay in your OS Keychain.\n\n**Inbound:** it finds instructions hidden in your files that are addressed to your AI assistant rather than to you — written in characters that render as nothing — decodes them so you can read them, and strips them in one click.\n\n> 100% offline. Zero network calls. Zero telemetry. Your secrets never leave your machine.\n\n**New here? Read [USAGE.md](https://github.com/Sonofg0tham/Quell/blob/main/USAGE.md).** It's a step-by-step setup guide plus a worked scenario for each of the three engines, written for people who want to know *when they'd actually hit this*, not just what the features are called.\n\n![Quell sidebar dashboard](assets/screenshot-sidebar.png)\n![Inline diagnostics and Quick Fix](assets/screenshot-diagnostics.png)\n![Before and after redaction](assets/screenshot-redaction.png)\n\n---\n\n## 🚨 The Problem\n\nEvery time you paste code into an AI chat (Copilot, Cursor, Windsurf, Antigravity), secrets get silently transmitted to cloud-hosted models:\n\n| What You Do | What Leaks |\n|---|---|\n| Paste `.env` asking \"why won't my DB connect?\" | D\n…[truncated]"
+    },
+    {
+      "source_id": "github:hoveychen/claw-fleet",
+      "title": "claw-fleet",
+      "url": "https://github.com/hoveychen/claw-fleet",
+      "github_url": "https://github.com/hoveychen/claw-fleet",
+      "bishop_ui": "http://localhost:8081/entries/github:hoveychen/claw-fleet",
+      "published_at": "2026-09-13T04:17:17+00:00",
+      "ingested_at": "2026-09-13T04:24:26.029878+00:00",
+      "relevance_score": 0.52,
+      "relevance_reason": "Touches the agentic-systems anchor (weight 1.0) through multi-agent monitoring and handoff chains, but the content is a tool/dashboard product rather than a transferable technique, pattern, or architectural insight—it monitors agent sessions without documenting the orchestration decisions that would be actionable.",
+      "value_rationale": "Documents a unified inbox pattern for routing agent questions and approvals across sessions, and demonstrates handoff chains for context-window relay, but provides no measured tradeoffs, failure modes, or implementation detail that would let the profile owner adapt the pattern to their own orchestration stack.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "observability",
+        "tool-use",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "agent monitoring and lifecycle management",
+        "decision routing (guard checks, permission prompts, plan approval)",
+        "multi-surface UI (desktop, web, mobile via relay)",
+        "session handoff and context-window relay",
+        "local file-watcher architecture (JSONL logs, FSEvents/inotify)",
+        "MCP tool integration",
+        "workspace and artifact archival"
+      ],
+      "challenge_hooks": [
+        "how to monitor and control multiple Claude Code agent sessions from a single unified dashboard",
+        "managing agent decision queues (guard checks, permissions, plan approvals) across desktop and mobile without context loss",
+        "keeping long-running agentic tasks alive across context-window boundaries via automatic handoff and relay",
+        "real-time cost tracking and runaway-loop detection for multi-agent workflows"
+      ],
+      "summary": "A mission-control dashboard for Claude Code, Codex, and DeepSeek agent sessions—monitors live status, real costs, and decision queues across desktop (macOS/Windows), web (Linux), and mobile; routes agent questions, guard checks, and plan approvals through a unified inbox; relays tasks across context windows via handoff chains.",
+      "pre_filter_rationale": "Applied dev-flow tool for agent orchestration and observability; a runnable artifact for multi-agent coordination that an engineer would integrate into a production agentic pipeline this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<img src=\"docs/hero.png\" width=\"640\" alt=\"Claw Fleet — Mission control for your Claude Code agents\" />\n\n# Claw Fleet\n\n**Your agents write the code. The task never dies on your watch.**\nOne dashboard for every **Claude Code**, **Codex** and **DeepSeek Harness** session you run — live status, real cost, and every question they need answered, in a single inbox you can reach from your phone.\n\n**[Explore the workspace](https://hoveychen.github.io/claw-fleet/)** · **[中文介绍](https://hoveychen.github.io/claw-fleet/zh/)**\n\n[![Release](https://img.shields.io/github/v/release/hoveychen/claw-fleet?style=flat-square&logo=github&color=d97757)](https://github.com/hoveychen/claw-fleet/releases/latest)\n[![License](https://img.shields.io/github/license/hoveychen/claw-fleet?style=flat-square&color=4a9eff)](LICENSE)\n[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux%20(web)%20%7C%20Mobile-lightgrey?style=flat-square)](https://github.com/hoveychen/claw-fleet/releases/latest)\n\n</div>\n\n---\n\n## 1. Install\n\n**Prerequisite:** [Claude Code](https://claude.com/claude-code) (`claude` CLI) installed, with at least one session already run — Claw Fleet reads the session files it writes. Codex is optional and can be enabled in Settings.\n\n### macOS / Windows — desktop app\n\n| | Platform | Download |\n|---|---|---|\n| <img src=\"docs/icon-apple.svg\" width=\"24\"> | macOS (Intel + Apple Silicon) | [claw-fleet-macos.pkg](https://github.com/hoveychen/claw-fleet/releases/latest/download/claw-fleet-macos.pkg) |\n| <img src=\"docs/icon-windows.svg\" width=\"24\"> | Windows x64 / ARM64 | [claw-fleet-windows-x64-setup.exe](https://github.com/hoveychen/claw-fleet/releases/latest/download/claw-fleet-windows-x64-setup.exe) |\n\nDownload, open, done. No server, no API key, no signup.\n\n### <img src=\"docs/icon-linux.svg\" width=\"20\"> Linux — web UI\n\nLinux runs the same UI in your browser instead of a native bundle. The UI is compiled into the Linux binary, so it's one download:\n\n```bash\ncurl -L -o fleet https://github.com/hoveychen/claw-fleet/releases/latest/download/fleet-linux-x64\nchmod +x fleet && sudo mv fleet /usr/local/bin/\n\nfleet webui\n```\n\nOpen **http://127.0.\n…[truncated]"
+    },
+    {
+      "source_id": "github:seaavey/SRouter",
+      "title": "SRouter",
+      "url": "https://github.com/seaavey/SRouter",
+      "github_url": "https://github.com/seaavey/SRouter",
+      "bishop_ui": "http://localhost:8081/entries/github:seaavey/SRouter",
+      "published_at": "2026-09-14T04:14:44+00:00",
+      "ingested_at": "2026-09-14T04:36:24.701096+00:00",
+      "relevance_score": 0.52,
+      "relevance_reason": "Touches the LLM inference and serving anchor (weight 0.8) through gateway routing and quota management, but lacks the specific production-scale tradeoff analysis or novel architectural pattern that would elevate it beyond a competent engineering tool.",
+      "value_rationale": "Provides a concrete local-first routing abstraction that consolidates provider selection and quota enforcement across multiple LLM endpoints, useful as a reference implementation for multi-model serving infrastructure; however, it does not articulate the latency/cost/reliability tradeoffs between routing strategies or document failure modes encountered in production deployments.",
+      "entry_type": "repo",
+      "tags": [
+        "serving",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "LLM routing",
+        "provider abstraction",
+        "OpenAI-compatible API",
+        "Anthropic-compatible API",
+        "virtual API keys",
+        "OAuth token refresh",
+        "quota management",
+        "request logging",
+        "Hono web framework"
+      ],
+      "challenge_hooks": [
+        "how to route inference requests across multiple LLM providers with a single client endpoint",
+        "managing authentication, quotas, and usage tracking for multiple external LLM APIs locally",
+        "abstracting provider protocol differences (OpenAI vs Anthropic) behind a unified gateway"
+      ],
+      "summary": "A local-first LLM gateway that routes requests across OpenAI, Anthropic, Google, and custom models via a single endpoint, handling provider authentication, virtual API key management, quota enforcement, and usage telemetry through a web dashboard.",
+      "pre_filter_rationale": "Applied systems: a shipped routing and gateway infrastructure for multi-model/multi-provider orchestration with production concerns (OAuth, failover, quota pooling) that an applied engineer would adapt or reference this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n# SRouter\n\n**A local-first AI gateway and LLM proxy for OpenAI, Anthropic, and custom models.**\n\nUse one local endpoint to route requests, manage provider authentication, enforce quotas, and inspect usage.\n\n<p>\n  <a href=\"https://github.com/seaavey/SRouter/releases\"><img src=\"https://img.shields.io/badge/version-v0.1.7-6366f1?style=flat-square\" alt=\"Version\"></a>\n  <a href=\"LICENSE\"><img src=\"https://img.shields.io/badge/license-MIT-22c55e?style=flat-square\" alt=\"MIT License\"></a>\n  <a href=\"https://nodejs.org/\"><img src=\"https://img.shields.io/badge/node-%3E%3D22-339933?style=flat-square&logo=node.js&logoColor=white\" alt=\"Node.js\"></a>\n  <a href=\"https://hono.dev/\"><img src=\"https://img.shields.io/badge/Hono-v4.13-e36002?style=flat-square\" alt=\"Hono\"></a>\n  <a href=\"https://react.dev/\"><img src=\"https://img.shields.io/badge/React-v19-61dafb?style=flat-square&logo=react&logoColor=black\" alt=\"React\"></a>\n</p>\n\n<p align=\"center\">\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"docs/assets/demo-dark.gif\">\n    <source media=\"(prefers-color-scheme: light)\" srcset=\"docs/assets/demo-light.gif\">\n    <img src=\"docs/assets/demo-dark.gif\" alt=\"SRouter dashboard walkthrough\" width=\"100%\">\n  </picture>\n</p>\n\n</div>\n\n## Dashboard showcase\n\nWatch the short walkthrough to see the dashboard, provider controls, routing surface, quotas, logs, and supporting features in context.\n\n## Contents\n\n- [Quick start](#quick-start)\n- [Connect coding tools](#connect-coding-tools)\n- [Configure a client](#configure-a-client)\n- [Supported providers](#supported-providers)\n- [API endpoints](#api-endpoints)\n- [Development](#development)\n- [Docker Compose](#docker-compose)\n\n## Quick Start\n\n### Docker\n\n```bash\ndocker run -d \\\n  --name srouter \\\n  --restart unless-stopped \\\n  -p 3000:3000 \\\n  -p 1455:1455 \\\n  -v \"$HOME/.srouter:/root/.srouter\" \\\n  ghcr.io/seaavey/srouter:latest\n```\n\nSRouter stores its SQLite database and provider credentials in `~/.srouter` on the host.\n\nOpen `http://localhost:3000` and configure a provider from the dashboard. Then create a virtual API key from **API Keys** and test a model from **Playground**.\n\n### Local Node.js\n\nRequirement\n…[truncated]"
+    }
+  ]
+}

@@ -1,0 +1,645 @@
+{
+  "batch": 2,
+  "items": [
+    {
+      "source_id": "github:MikkoParkkola/mcp-gateway",
+      "title": "mcp-gateway",
+      "url": "https://github.com/MikkoParkkola/mcp-gateway",
+      "github_url": "https://github.com/MikkoParkkola/mcp-gateway",
+      "bishop_ui": "http://localhost:8081/entries/github:MikkoParkkola/mcp-gateway",
+      "published_at": "2026-09-11T13:07:41+00:00",
+      "ingested_at": "2026-09-11T15:34:09.359416+00:00",
+      "relevance_score": 0.78,
+      "relevance_reason": "MCP Gateway directly addresses production security and orchestration concerns for agentic systems, with concrete patterns for tool validation and capability management that translate to reliable agent deployments.",
+      "value_rationale": "Provides battle-tested infrastructure patterns for securing tool-use in agents (tool-poisoning validation, capability pinning) and REST-based orchestration that reduce operational risk when building multi-agent systems. The hot-reload and compliance mapping are valuable for production observability and governance of agentic workflows.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "serving",
+        "safety",
+        "deployment",
+        "production",
+        "architecture"
+      ],
+      "concepts": [
+        "Model Context Protocol (MCP)",
+        "Tool-poisoning validation",
+        "SHA-256 capability hash-pinning",
+        "Hot-reload architecture",
+        "OpenAPI spec import",
+        "Multitenant identity routing",
+        "Circuit breakers and rate limiting",
+        "Gateway boundary compliance"
+      ],
+      "challenge_hooks": [
+        "How to safely expose 100+ backend tools to agents without tool-injection attacks or poisoned descriptions reaching the LLM context window?",
+        "How to verify backend capability integrity and detect rug-pulls when YAML files change after operator approval?",
+        "How to reload backend configurations and add new REST APIs in milliseconds without restarting the agent session or losing context?",
+        "How to route tool calls and agent messages through a single gateway while maintaining per-user identity to multitenant backends?"
+      ],
+      "summary": "MCP Gateway is a Rust-based Model Context Protocol gateway with 110+ REST capabilities, hot-reload architecture, tool-poisoning validation, SHA-256 capability pinning, and OWASP/MITRE compliance mapping for secure agentic AI deployments.",
+      "pre_filter_rationale": "Applied systems architecture for agentic tool orchestration; MCP-to-REST gateway pattern with concrete token-cost economics (89% savings on tool-list overhead) is a reusable deployment pattern I would implement for multi-agent systems.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# MCP Gateway\n\n[![CI](https://github.com/MikkoParkkola/mcp-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/MikkoParkkola/mcp-gateway/actions/workflows/ci.yml)\n[![Crates.io](https://img.shields.io/crates/v/mcp-gateway.svg)](https://crates.io/crates/mcp-gateway)\n[![Downloads](https://img.shields.io/crates/d/mcp-gateway.svg)](https://crates.io/crates/mcp-gateway)\n[![Rust](https://img.shields.io/badge/rust-1.95+-blue.svg)](https://www.rust-lang.org)\n[![License](https://img.shields.io/badge/license-PolyForm--NC-blue.svg)](https://github.com/MikkoParkkola/mcp-gateway/blob/main/LICENSES.md)\n[![unsafe denied](https://img.shields.io/badge/unsafe-denied-success.svg)](https://github.com/rust-secure-code/safety-dance/)\n[![dependency status](https://deps.rs/repo/github/MikkoParkkola/mcp-gateway/status.svg)](https://deps.rs/repo/github/MikkoParkkola/mcp-gateway)\n[![Capabilities](https://img.shields.io/badge/REST%20capabilities-110%2B-purple.svg)](https://github.com/MikkoParkkola/mcp-gateway/tree/main/capabilities)\n[![MCP Protocol](https://img.shields.io/badge/MCP-2025--11--25-green.svg)](https://modelcontextprotocol.io)\n[![OWASP Agentic AI](https://img.shields.io/badge/OWASP_Agentic_AI-10%2F10_self--assessed-blue.svg)](docs/OWASP_AGENTIC_AI_COMPLIANCE.md)\n[![MITRE F3](https://img.shields.io/badge/MITRE_F3-gateway_boundary_mapped-lightgrey.svg)](docs/compliance/MITRE-F3-MAPPING.md)\n[![Glama](https://glama.ai/mcp/servers/MikkoParkkola/mcp-gateway/badge)](https://glama.ai/mcp/servers/MikkoParkkola/mcp-gateway)\n[![Quality Score](https://glama.ai/mcp/servers/MikkoParkkola/mcp-gateway/badges/score.svg)](https://glama.ai/mcp/servers/MikkoParkkola/mcp-gateway)\n[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_MCP-0078d4?logo=visualstudiocode)](https://insiders.vscode.dev/redirect/mcp/install?name=mcp-gateway&config=%7B%22command%22%3A%22mcp-gateway%22%2C%22args%22%3A%5B%22serve%22%2C%22--stdio%22%5D%7D)\n[![Install in Cursor](https://img.shields.io/badge/Cursor-Install_MCP-black?logo=cursor)](cursor://anysphere.cursor-deeplink/mcp/install?name=mcp-gateway&config=%7B%22command%22%3A%22mcp-gateway%22%2C%22args%22%3A%5B%22serve%22%2C%22--stdio%22%5D%7D)\n…[truncated]"
+    },
+    {
+      "source_id": "github:Mnemosyne-OS/Mnemosyne-Neural-OS",
+      "title": "Mnemosyne-Neural-OS",
+      "url": "https://github.com/Mnemosyne-OS/Mnemosyne-Neural-OS",
+      "github_url": "https://github.com/Mnemosyne-OS/Mnemosyne-Neural-OS",
+      "bishop_ui": "http://localhost:8081/entries/github:Mnemosyne-OS/Mnemosyne-Neural-OS",
+      "published_at": "2026-09-12T05:52:23+00:00",
+      "ingested_at": "2026-09-12T06:10:47.282081+00:00",
+      "relevance_score": 0.78,
+      "relevance_reason": "Directly addresses RAG systems, agentic memory architectures, and production concerns like privacy and observability, though Electron/React stack is tangential to core ML concerns.",
+      "value_rationale": "Provides architectural reference for adaptive RAG and semantic memory consolidation patterns (Dream State) applicable to agent memory systems; privacy-first design and fine-grained access control patterns useful for production deployments; however, value is primarily in memory orchestration rather than novel retrieval or inference techniques.",
+      "entry_type": "repo",
+      "tags": [
+        "RAG",
+        "memory-architecture",
+        "orchestration",
+        "inference",
+        "embeddings",
+        "vector-stores",
+        "hybrid-retrieval",
+        "safety",
+        "production",
+        "architecture",
+        "tool-use"
+      ],
+      "concepts": [
+        "local-first memory architecture",
+        "adaptive RAG with semantic spine classification",
+        "two-speed memory consolidation (Dream State)",
+        "priority-ordered embedding engine chains",
+        "int8-quantized vector caching",
+        "fine-grained access control (FGAC)",
+        "visual memory embedding (SigLIP 2)",
+        "multi-resolution memory compression (Octave)"
+      ],
+      "challenge_hooks": [
+        "How to maintain persistent, cross-session AI memory on local hardware without cloud dependency or privacy compromise",
+        "Building adaptive retrieval systems that intelligently weight semantic vs. lexical signals and compress long-term memory for small context windows",
+        "Implementing fine-grained access control and P2P sync for sovereign multi-agent memory sharing without a central server",
+        "Designing memory consolidation engines that extract facts and link memories during idle time while staying strictly extractive and auditable"
+      ],
+      "summary": "Mnemosyne is a local-first, sovereign memory OS that acts as a relationship layer between users and AI systems. Built with Electron/React/TypeScript, it features adaptive RAG, semantic memory classification, two-speed consolidation (Dream State), vision engines, and privacy-first architecture with fine-grained access control and P2P sync capabilities.",
+      "pre_filter_rationale": "Applied systems artifact: a shipped memory infrastructure for agentic systems that I would evaluate for RAG/context-management pipelines and local-first orchestration patterns.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<img src=\"assets/banner-mnemosyne-os.png\" width=\"100%\" alt=\"Mnemosyne OS — Infinity Edition. Your memory. Your machine. Your rules. A sovereign, local-first memory OS — the relationship layer between you and every AI.\" />\n\n### The sovereign AI Operating System\n\n**Open to build on · Private at the core**\n\n<img src=\"assets/flags/en.svg\" height=\"14\" alt=\"English\" /> English&ensp;·&ensp;<img src=\"assets/flags/fr.svg\" height=\"14\" alt=\"Français\" /> Français&ensp;·&ensp;<img src=\"assets/flags/es.svg\" height=\"14\" alt=\"Español\" /> Español&ensp;·&ensp;<img src=\"assets/flags/de.svg\" height=\"14\" alt=\"Deutsch\" /> Deutsch&ensp;·&ensp;<img src=\"assets/flags/br.svg\" height=\"14\" alt=\"Português\" /> Português&ensp;·&ensp;<img src=\"assets/flags/ru.svg\" height=\"14\" alt=\"Русский\" /> Русский&ensp;·&ensp;<img src=\"assets/flags/zh.svg\" height=\"14\" alt=\"中文\" /> 中文\n\n<br/>\n\n*Everyone is building the intelligence. Mnemosyne builds the **relationship** — the memory that makes an AI truly know you, across sessions and across time. On your machine. Yours to see.*\n\n[**→ Why the relationship layer**](doc/WHY.md)\n\n<br/>\n\n[![CI](https://github.com/Mnemosyne-OS/Mnemosyne-Neural-OS/actions/workflows/ci.yml/badge.svg)](https://github.com/Mnemosyne-OS/Mnemosyne-Neural-OS/actions)\n![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript)\n![Electron](https://img.shields.io/badge/Electron-31.7.7-47848f?logo=electron)\n![React](https://img.shields.io/badge/React-18-61dafb?logo=react)\n![Tests](https://img.shields.io/badge/tests-passing-22c55e)\n[![Mnemosyne OS Benchmark](https://img.shields.io/badge/LongMemEval--M-77.1%25_strict_·_verifiable-33ffd6?style=flat-square)](https://mnemosyne-os.github.io/MnemosyneOS---benchmarks/verification-kit/)\n![License](https://img.shields.io/badge/license-open--core-8b5cf6)\n![Interface languages](https://img.shields.io/badge/interface-7_languages-a98bff)\n[![version](https://img.shields.io/github/v/release/Mnemosyne-OS/Mnemosyne-Neural-OS?include_prereleases&label=version&color=f59e0b)](https://github.com/Mnemosyne-OS/Mnemosyne-Neural-OS/releases)\n\n<br/><br/>\n\n<!-- Download + MnemoForge badges: auto-updated by `.github/workflows\n…[truncated]"
+    },
+    {
+      "source_id": "github:winfunc/appam",
+      "title": "appam",
+      "url": "https://github.com/winfunc/appam",
+      "github_url": "https://github.com/winfunc/appam",
+      "bishop_ui": "http://localhost:8081/entries/github:winfunc/appam",
+      "published_at": "2026-09-12T05:54:01+00:00",
+      "ingested_at": "2026-09-12T06:06:44.647224+00:00",
+      "relevance_score": 0.78,
+      "relevance_reason": "Directly applicable agent orchestration infrastructure with production-ready concerns (streaming, durability, observability), though language-specific to Rust rather than Python/ecosystem-agnostic.",
+      "value_rationale": "Provides reference architecture patterns for typed tool agents, session durability, and trace observability that transfer to multi-language implementations; useful for evaluating orchestration design decisions and tradeoff patterns regardless of language choice.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "serving",
+        "observability",
+        "memory-architecture",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "agent orchestration",
+        "typed tool system with macro generation",
+        "streaming event architecture",
+        "durable session persistence with SQLite",
+        "multi-provider LLM abstraction",
+        "JSONL trace logging",
+        "long-horizon context via auto-compaction",
+        "production operational controls"
+      ],
+      "challenge_hooks": [
+        "How to build production-ready multi-turn agents in Rust with typed tool integration and streaming output",
+        "Managing session persistence and conversation history across agent runs with SQLite durability",
+        "Providing unified orchestration layer across multiple LLM providers without rewriting agent logic",
+        "Making agent execution traceable and inspectable through structured event logging and session replay"
+      ],
+      "summary": "Rust agent orchestration library enabling typed tool-using agents with streaming, durable sessions, JSONL traces, and multi-provider LLM support (Anthropic, OpenAI, Vertex, Azure, Bedrock).",
+      "pre_filter_rationale": "Agentic Systems and Orchestration anchor: shipped Rust orchestration library for tool-use and tracing, a working reference for multi-agent patterns and state management I would evaluate for production deployment.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<img align=\"right\" src=\"assets/appam-logo.png\" alt=\"Appam logo\" width=\"180\" />\n\n<h1>Appam</h1>\n\n<p>\n  <strong>Rust agent orchestration library for tool-using, long-horizon, traceable AI systems.</strong>\n</p>\n<p>\n  Build agents directly in Rust with typed tools, streaming events, durable sessions, JSONL traces, and one runtime that can target multiple LLM providers.\n</p>\n<p>\n  <a href=\"https://crates.io/crates/appam\"><img src=\"https://img.shields.io/crates/v/appam?style=for-the-badge\" alt=\"Crates.io\"></a>\n  <a href=\"https://docs.rs/appam\"><img src=\"https://img.shields.io/docsrs/appam?style=for-the-badge\" alt=\"Docs.rs\"></a>\n  <a href=\"https://github.com/winfunc/appam/stargazers\"><img src=\"https://img.shields.io/github/stars/winfunc/appam?style=for-the-badge\" alt=\"GitHub stars\"></a>\n  <a href=\"LICENSE\"><img src=\"https://img.shields.io/badge/license-MIT-blue?style=for-the-badge\" alt=\"MIT License\"></a>\n</p>\n<p>\n  <a href=\"#why-appam\">Why Appam</a> •\n  <a href=\"#installation\">Installation</a> •\n  <a href=\"#quickstart\">Quickstart</a> •\n  <a href=\"#tool-using-agents\">Tools</a> •\n  <a href=\"#streaming-sessions-and-traces\">Streaming & Sessions</a> •\n  <a href=\"#providers\">Providers</a> •\n  <a href=\"#examples-and-docs\">Examples & Docs</a>\n</p>\n\n> [!TIP]\n> If Appam is useful, ⭐ Star the repo. It materially helps the project reach more systems thus better and reliable agents for all of us.\n\nAppam is for agent systems that need more than a toy chat loop. It is designed for workloads where the hard parts are operational: multi-turn tool use, session continuation, event streaming, traceability, provider switching, and reliability under repeated runs.\n\n> _The name `appam` is derived from the malayalam saying \"അപ്പം പോലെ ചുടാം\", which roughly means \"as easy as baking an appam.\"_\n\n## Why Appam\n\n- **Rust-first agent construction** with `Agent::quick(...)`, `Agent::new(...)`, and `AgentBuilder`\n- **Typed tool system** using the `#[tool]` macro, direct `Tool` implementations, or `ClosureTool`\n- **Streaming by default** through `StreamBuilder`, `StreamConsumer`, and built-in consumers\n- **Durable sessions** with SQLite-backed `SessionHistory` and `continue_session(...)`\n- **Long-hori\n…[truncated]"
+    },
+    {
+      "source_id": "github:BlocUnited-LLC/mozaiks",
+      "title": "mozaiks",
+      "url": "https://github.com/BlocUnited-LLC/mozaiks",
+      "github_url": "https://github.com/BlocUnited-LLC/mozaiks",
+      "bishop_ui": "http://localhost:8081/entries/github:BlocUnited-LLC/mozaiks",
+      "published_at": "2026-09-14T04:19:54+00:00",
+      "ingested_at": "2026-09-14T04:34:22.243985+00:00",
+      "relevance_score": 0.76,
+      "relevance_reason": "Directly addresses agentic-systems orchestration (weight 1.0) through AG2-powered multi-agent workflows and production-oriented app generation, but frames itself as a platform/framework rather than demonstrating specific agent patterns or failure modes from deployed systems.",
+      "value_rationale": "Provides a concrete reference implementation for agentic workflow orchestration with typed contracts and pluggable runtime extensibility; useful as a template for how to structure agent-driven iterative refinement pipelines, though the value is primarily architectural rather than a novel pattern or measured tradeoff insight.",
+      "entry_type": "repo",
+      "tags": [
+        "orchestration",
+        "agentic",
+        "production",
+        "deployment",
+        "architecture",
+        "tool-use"
+      ],
+      "concepts": [
+        "AG2 workflow orchestration",
+        "Genesis Builds and Refinement Runs",
+        "YAML contract validation",
+        "ports and adapters architecture",
+        "entitlement gating",
+        "artifact staging and promotion",
+        "leased workflow queues with fencing tokens"
+      ],
+      "challenge_hooks": [
+        "how to generate production-shaped AI app artifacts with validated contracts rather than throwaway demos",
+        "safely iterating on generated apps without discarding lineage or requiring full rebuilds",
+        "abstracting infrastructure concerns (entitlements, storage, sandboxes) behind pluggable ports in AI app runtimes"
+      ],
+      "summary": "An open-source AI app factory using AG2-powered workflow orchestration to generate, validate, and iteratively refine production-ready AI-native applications through Genesis Builds and Refinement Runs, with Studio management UI, typed YAML contracts, and pluggable runtime ports (entitlements, artifact stores, sandboxes).",
+      "pre_filter_rationale": "Applied systems: self-hostable runtime for deploying agentic workflows with documented architecture, auth, and billing integration — a working reference for multi-tenant agent orchestration and production deployment patterns I would open this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Mozaiks\n\n<div align=\"center\">\n\n<picture>\n  <source media=\"(prefers-color-scheme: dark)\" srcset=\"https://raw.githubusercontent.com/BlocUnited-LLC/mozaiks/main/docs/assets/logo-dark.png\">\n  <img src=\"https://raw.githubusercontent.com/BlocUnited-LLC/mozaiks/main/docs/assets/logo-light.png\" alt=\"Mozaiks\" width=\"260\"/>\n</picture>\n\n[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/BlocUnited-LLC/mozaiks/blob/main/LICENSE)\n[![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)](https://www.python.org/)\n[![AG2](https://img.shields.io/badge/AG2-1.0.2-green)](https://github.com/ag2ai/ag2)\n[![Discord](https://img.shields.io/badge/Discord-join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/Qnsywad9kp)\n\n[![Studio](https://img.shields.io/badge/Studio-management%20interface-7c3aed)](https://docs.mozaiks.ai/studio/)\n[![Runtime](https://img.shields.io/badge/Runtime-AI%20substrate-0f766e)](https://github.com/BlocUnited-LLC/mozaiks/blob/main/ARCHITECTURE.md)\n[![Workflows](https://img.shields.io/badge/Workflows-builder%20systems-2563eb)](https://github.com/BlocUnited-LLC/mozaiks/blob/main/docs/architecture/workflows/workflow-authoring-contracts.md)\n[![Community](https://img.shields.io/badge/Community-contributors%20welcome-f59e0b)](https://github.com/BlocUnited-LLC/mozaiks/graphs/contributors)\n\n</div>\n\n## What is Mozaiks?\n\nMozaiks is an open-source AI app factory for building, running, and iterating on\nAI-native software products.\n\nIt brings together three things that usually live in separate tools:\n\n- **Mozaiks Studio** for creating apps, continuing builds, and managing them.\n- **AI workflow orchestration powered by [AG2](https://github.com/ag2ai/ag2)** for planning, tool use, human\n  review, and generation.\n- **Generated app files** with modules, pages, workflows, config, and brand\n  assets that Mozaiks validates before making active.\n\nThe goal is not to generate a throwaway demo. Mozaiks stages production-shaped\nartifacts, validates them against strict contracts, and keeps runtime concerns\nseparate from builder workflows.\n\n## Genesis Builds and Refinement Runs\n\nEvery Mozaiks app begins with one **Genesis Bu\n…[truncated]"
+    },
+    {
+      "source_id": "github:FootprintAI/Containarium",
+      "title": "Containarium",
+      "url": "https://github.com/FootprintAI/Containarium",
+      "github_url": "https://github.com/FootprintAI/Containarium",
+      "bishop_ui": "http://localhost:8081/entries/github:FootprintAI/Containarium",
+      "published_at": "2026-09-14T04:11:05+00:00",
+      "ingested_at": "2026-09-14T04:42:27.547446+00:00",
+      "relevance_score": 0.76,
+      "relevance_reason": "Squarely on the agentic-systems anchor (weight 1.0) with a production-grade runtime architecture that includes isolation, resource control, and observability mechanisms — held in strong-secondary rather than core-exemplar because it is a specific tooling implementation rather than a documented pattern or architectural innovation.",
+      "value_rationale": "Provides a concrete runtime substrate for deploying multi-agent workloads with per-tenant egress control and GPU passthrough, giving the profile owner a reference architecture for agent isolation and a ready-made deployment target rather than requiring a custom containerization layer.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "serving",
+        "safety",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "agent sandboxing",
+        "SSH-native isolation",
+        "eBPF egress policy",
+        "LXC/Incus containers",
+        "MCP servers",
+        "persistent agent state",
+        "multi-tenant network isolation",
+        "GPU passthrough"
+      ],
+      "challenge_hooks": [
+        "how to isolate AI agents in persistent Linux environments with per-tenant network policies",
+        "enabling SSH-native agent access to sandboxed containers without exposing host credentials",
+        "running AI agents on Kubernetes or LXC with stateful, reachable compute primitives"
+      ],
+      "summary": "Open-source agent runtime providing persistent, isolated Linux containers for AI agents with SSH-native access, per-tenant eBPF egress policy, MCP-native CLI, Kubernetes/LXC backends, and GPU passthrough support.",
+      "pre_filter_rationale": "Applied systems: an open-source agent runtime with concrete isolation, networking, and orchestration primitives (eBPF policy, Kubernetes/LXC backends, GPU passthrough, MCP integration) is a working reference for building production agentic systems with resource control and observability — exactly the infrastructure pattern I would evaluate and potentially deploy this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Containarium — Agent Runtime\n\n> **Open-source agent runtime** · SSH-native isolation · eBPF egress policy · Kubernetes + LXC · MCP-native CLI · GPU passthrough\n\n**The open-source, self-hostable agent runtime for AI agents.**\nEach agent gets a persistent, SSH-reachable box with per-tenant network isolation — no kube-apiserver token, no host access, no cross-tenant leakage.\n\nBring your own agent — Cursor, Claude Code, OpenCode, your own MCP client.\nWe run the box.\n\n```\nagent: \"create me a sandbox called 'blog'\"           → containarium create\nagent: \"wire up SSH so I can reach it\"               → containarium ssh-config sync\nagent: \"install Caddy on :8080 inside the box\"       → shell_exec (via agent-box MCP)\nagent: \"expose that on blog.example.com\"             → containarium expose-port\n\ncurl https://blog.example.com → hello world\n```\n\n[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)\n[![Go](https://img.shields.io/badge/go-1.25-00ADD8.svg)](go.mod)\n[![Containarium MCP server](https://glama.ai/mcp/servers/FootprintAI/Containarium/badges/score.svg)](https://glama.ai/mcp/servers/FootprintAI/Containarium)\n\n[![Containarium MCP server](https://glama.ai/mcp/servers/FootprintAI/Containarium/badges/card.svg)](https://glama.ai/mcp/servers/FootprintAI/Containarium)\n\n[![Containarium quickstart: one command turns a fresh box into SSH + a wired agent + a live HTTPS app](docs/images/quickstart.gif)](https://youtu.be/IBDDD_tb8FY)\n\n🌐 **Project site:** [containarium.dev](https://containarium.dev) · 🎬 **55s demo:** [youtu.be/IBDDD_tb8FY](https://youtu.be/IBDDD_tb8FY) · 🚀 **Live app:** [helloworld.demo.containarium.dev](https://helloworld.demo.containarium.dev)\n\n---\n\n## Why an agent runtime?\n\nAI agents are increasingly the primary user of dev infrastructure. They\nwant to build, install, deploy, and verify — not on the human's laptop\n(too noisy, too risky, too local) but on a persistent, isolated runtime that's:\n\n- **Persistent**: state survives between agent runs.\n- **Isolated**: a misbehaving install doesn't touch your machine or your cluster.\n- **Real**: a full Linux environment with `systemd`, real networking,\n  and the ability to host things on\n…[truncated]"
+    },
+    {
+      "source_id": "github:GEMISIS/leviath",
+      "title": "leviath",
+      "url": "https://github.com/GEMISIS/leviath",
+      "github_url": "https://github.com/GEMISIS/leviath",
+      "bishop_ui": "http://localhost:8081/entries/github:GEMISIS/leviath",
+      "published_at": "2026-09-13T04:06:42+00:00",
+      "ingested_at": "2026-09-13T04:34:31.140568+00:00",
+      "relevance_score": 0.76,
+      "relevance_reason": "Squarely on the agentic-systems anchor (weight 1.0) with a production-focused runtime architecture that explicitly targets scaling and orchestration concerns the profile prioritizes.",
+      "value_rationale": "Provides a concrete architectural pattern for multi-agent state organization and task routing using phase-specific model/tool bindings, along with a measured scaling claim (thousands of agents per process), giving the profile owner a reference implementation pattern for agent orchestration without external coordination infrastructure.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "structured context regions",
+        "phase-specific task routing",
+        "agent state isolation",
+        "bevy_ecs process model",
+        "TOML agent blueprints",
+        "REST/WebSocket API",
+        "optional OS sandboxing"
+      ],
+      "challenge_hooks": [
+        "how to maintain coherent agent context across long tool-call sequences without context window overflow",
+        "running thousands of agents in a single process without scaling to multiple machines or containers",
+        "allocating appropriate models and tools per task phase instead of paying frontier model prices for simple operations"
+      ],
+      "summary": "Leviath is a structured Rust runtime for multi-agent AI systems that organizes agent context into coherent regions, routes tasks through phase-specific models and tool sets, and scales thousands of agents in a single bevy_ecs process without external dependencies.",
+      "pre_filter_rationale": "Applied systems and dev skills anchor: a shipped runtime for multi-stage agent workflows with structured context and orchestration patterns I would study and potentially integrate this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<img src=\"docs/assets/logo.png\" alt=\"Leviath\" width=\"440\">\n\n**A structured runtime for AI agents**\n\nGive a model one flat list of messages and a single big file read pushes your system prompt\nout of the window. Leviath gives it structure instead.\n\n**Coherent.** Structured context regions mean an agent still knows what it read 50 tool calls ago.<br>\n**Right-sized.** Each phase of a task gets its own model, tools, and context layout, so you aren't paying frontier prices for file reads.<br>\n**Light.** Thousands of agents in one [bevy_ecs](https://bevyengine.org/) process, from a single binary. No Node, Python, or Docker.\n\n[![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/GEMISIS/b35e030175e78fad8e3562e58be21c60/raw/leviath-test-all.json)](https://github.com/GEMISIS/leviath/actions/workflows/ci.yml)\n[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/GEMISIS/b35e030175e78fad8e3562e58be21c60/raw/leviath-coverage-lines.json)](https://github.com/GEMISIS/leviath/actions/workflows/ci.yml)\n[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/GEMISIS/leviath/blob/main/LICENSE)\n[![Docs](https://img.shields.io/badge/docs-leviath.dev-8b5cf6)](https://leviath.dev)\n[![stable](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/GEMISIS/b35e030175e78fad8e3562e58be21c60/raw/leviath-channel-stable.json)](https://github.com/GEMISIS/leviath/releases/latest)\n[![beta](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/GEMISIS/b35e030175e78fad8e3562e58be21c60/raw/leviath-channel-beta.json)](https://github.com/GEMISIS/leviath/releases/tag/beta)\n[![alpha](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/GEMISIS/b35e030175e78fad8e3562e58be21c60/raw/leviath-channel-alpha.json)](https://github.com/GEMISIS/leviath/releases/tag/alpha)\n\n**[Quick Start](#quick-start) · [Agents](#agents) · [Features](#features) · [Dashboard](#dashboard) · [API](#api-server) · [Comparison](#how-it-compares) · [Why not Leviath](#why-you-might-not-want-leviath) · [Contributing](#contributing)**\n\n</div>\n\n---\n\n<p align=\"center\">\n  <img src=\n…[truncated]"
+    },
+    {
+      "source_id": "github:UKGovernmentBEIS/inspect_ai",
+      "title": "inspect_ai",
+      "url": "https://github.com/UKGovernmentBEIS/inspect_ai",
+      "github_url": "https://github.com/UKGovernmentBEIS/inspect_ai",
+      "bishop_ui": "http://localhost:8081/entries/github:UKGovernmentBEIS/inspect_ai",
+      "published_at": "2026-09-15T02:05:36+00:00",
+      "ingested_at": "2026-09-15T02:23:35.662553+00:00",
+      "relevance_score": 0.76,
+      "relevance_reason": "Squarely serves the LLM evaluation and observability anchor (weight 0.7) with a concrete, production-grade framework providing built-in model-graded scoring and multi-turn evaluation capabilities directly applicable to agent and RAG system validation.",
+      "value_rationale": "Inspect gives the profile owner a ready-built evaluation framework with 200+ pre-built evaluations and extensible Python-based components for testing agentic systems (tool use, multi-turn dialog) and document/extraction pipelines without building evaluation infrastructure from scratch.",
+      "entry_type": "repo",
+      "tags": [
+        "evaluation",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "LLM evaluation framework",
+        "prompt engineering",
+        "tool usage",
+        "multi-turn dialog",
+        "model-graded evaluation",
+        "evaluation extensibility",
+        "Python framework"
+      ],
+      "challenge_hooks": [
+        "building reproducible evaluation suites for LLMs across multiple model families and behaviors",
+        "standardizing prompt engineering and model-graded scoring across safety and capability evaluations"
+      ],
+      "summary": "Inspect is a Python framework for LLM evaluation created by the UK AI Security Institute, providing built-in components for prompt engineering, tool usage, multi-turn dialog, and model-graded scoring, with over 200 pre-built evaluations and extensibility via Python packages.",
+      "pre_filter_rationale": "Applied systems: a shipped evaluation harness framework for building, running, and analyzing LLM evaluations. This is a working reference I would open this week to design eval workflows.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "[<img width=\"295\" src=\"https://inspect.aisi.org.uk/images/aisi-logo.svg\" />](https://aisi.gov.uk/)\n\nWelcome to Inspect, a framework for large language model evaluations created by the [UK AI Security Institute](https://aisi.gov.uk/).\n\nInspect provides many built-in components, including facilities for prompt engineering, tool usage, multi-turn dialog, and model graded evaluations. Extensions to Inspect (e.g. to support new elicitation and scoring techniques) can be provided by other Python packages.\n\nTo get started with Inspect, please see the documentation at <https://inspect.aisi.org.uk/>.\n\nInspect also includes a collection of over 200 pre-built evaluations ready to run on any model (learn more at <https://inspect.aisi.org.uk/evals/>).\n\n> Coding agents: a structured index of the docs is published at <https://inspect.aisi.org.uk/llms.txt>. The user guide is concatenated as Markdown at <https://inspect.aisi.org.uk/llms-guide.txt>, and <https://inspect.aisi.org.uk/llms-full.txt> additionally bundles the API and CLI reference. Individual pages are available as Markdown by appending `.md` to the `.html` path (e.g. `/extensions/index.html.md`).\n\n***\n\nTo work on development of Inspect, clone the repository and install with the `-e` flag and `[dev]` optional dependencies:\n\n```bash\ngit clone https://github.com/UKGovernmentBEIS/inspect_ai.git\ncd inspect_ai\npip install -e \".[dev]\"\n```\n\nAlternatively, if you use [uv](https://docs.astral.sh/uv/), sync the development environment from the checked-in lockfile:\n\n```bash\nuv sync --extra dev\n```\n\nThe uv workflow is supported but not required. The `uv.lock` file records a reproducible development resolution; project dependencies are still declared in `requirements*.txt` and exposed through `pyproject.toml`. When changing dependencies, update the appropriate requirements file and refresh the lockfile rather than relying on `uv add`.\n\nOptionally install pre-commit hooks via\n\n```bash\nmake hooks\n```\n\nRun linting, formatting, and tests via\n\n```bash\nmake check\nmake test\n```\n\nWhen working in a uv-managed environment, prefix those commands with `uv run` (for example, `uv run make check`).\n\nIf you use VS Code, you should be sure to have\n…[truncated]"
+    },
+    {
+      "source_id": "github:avirtual/clodex",
+      "title": "clodex",
+      "url": "https://github.com/avirtual/clodex",
+      "github_url": "https://github.com/avirtual/clodex",
+      "bishop_ui": "http://localhost:8081/entries/github:avirtual/clodex",
+      "published_at": "2026-09-13T04:13:17+00:00",
+      "ingested_at": "2026-09-13T04:28:28.147139+00:00",
+      "relevance_score": 0.76,
+      "relevance_reason": "Squarely on the agentic-systems anchor (weight 1.0) with concrete orchestration, state management, and multi-agent coordination patterns; held below core-exemplar because it is a specific tool implementation rather than a documented pattern or architecture that generalizes beyond the tool's own codebase.",
+      "value_rationale": "Demonstrates a production multi-agent orchestration architecture with SSH/SSM/kubectl backend flexibility, persistent memory, cost tracking, and prompt caching — concrete design choices a profile owner could adapt when building their own fleet-management layer rather than copy-paste-adopt the tool directly.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "multi-agent",
+        "orchestration",
+        "serving",
+        "observability",
+        "production",
+        "deployment",
+        "tool-use"
+      ],
+      "concepts": [
+        "agent orchestration",
+        "multi-machine fleet management",
+        "prompt caching and warmth tracking",
+        "context window management",
+        "inter-agent messaging and spawning",
+        "session persistence and resumption",
+        "cost-aware delivery",
+        "plugin architecture"
+      ],
+      "challenge_hooks": [
+        "how to monitor and control a fleet of distributed AI coding agents across multiple machines in real-time",
+        "managing prompt-cache warmth and context window lifecycle across long-running agent sessions to minimize cost",
+        "enabling safe inter-agent communication and spawning without manual session management or loss of visibility"
+      ],
+      "summary": "A visual desktop and CLI manager for distributed fleets of Claude/Codex coding agents, with real-time session monitoring, inter-agent messaging, multi-machine orchestration via SSH/SSM/kubectl, persistent memory, cost tracking, prompt caching, and plugin extensibility.",
+      "pre_filter_rationale": "Applied systems: a shipped fleet-management UI for multi-agent orchestration with observability (cost, context, messaging) — exactly the kind of agentic-systems infrastructure I would reference when building distributed agent workflows.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<img src=\"./build/icon-1024.png\" width=\"120\" alt=\"Clodex\">\n\n# Clodex\n\n**A visual manager for fleets of coding agents.**\n\n[![Release](https://img.shields.io/github/v/release/avirtual/clodex?color=6c5ce7)](https://github.com/avirtual/clodex/releases/latest)\n[![Downloads](https://img.shields.io/github/downloads/avirtual/clodex/total?color=00b894)](https://github.com/avirtual/clodex/releases)\n[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)\n[![Platform](https://img.shields.io/badge/platform-macOS%20arm64%20%C2%B7%20Linux%20headless-lightgrey)](#install)\n\n[Install](#install) · [Feature tour](#feature-tour) · [clodexctl](#clodexctl-the-fleet-from-a-terminal) · [Plugins](#plugins-install-one-or-write-your-own) · [How it works](#how-it-works)\n\n</div>\n\nRun **Cl**aude Code and C**odex** sessions on your Mac, on any Linux box you can ssh to, and on cloud instances you can't — and actually *see* their work: what each agent is doing right now, what it costs, what's in its context window, which files it's touching, and who spawned whom. Every session is a real terminal. Agents message each other, spawn each other (locally or across machines), and manage their own context; you watch and steer from one sidebar, a browser tab, or a terminal (`clodexctl`).\n\n<img src=\"./docs/screenshot-app.png\" width=\"100%\" alt=\"Clodex: sidebar of agent sessions grouped by project with live context and cache-warmth badges, a peered machine contributing remote sessions, a full-height terminal, and the IPC Traffic drawer showing agents messaging each other\">\n\n*One operator, several agents, nothing staged. Left: sessions grouped by project with live context percentages and cache warmth, a peered box (`TEST`) contributing its sessions inline, unread inbox. Centre: the session as a real terminal. Bottom: the IPC bus — this lead dispatching a code review to a reviewer it spawned, the verdict coming back, the seat retiring, a test run reporting green, and an agent on an unrelated project filing a morning digest. The bar under the terminal is wire telemetry: model, context, turn, spend, cache state.*\n\n## Why\n\nOne agent needs a terminal. Five need a contro\n…[truncated]"
+    },
+    {
+      "source_id": "github:luckyPipewrench/pipelock",
+      "title": "pipelock",
+      "url": "https://github.com/luckyPipewrench/pipelock",
+      "github_url": "https://github.com/luckyPipewrench/pipelock",
+      "bishop_ui": "http://localhost:8081/entries/github:luckyPipewrench/pipelock",
+      "published_at": "2026-09-13T04:16:35+00:00",
+      "ingested_at": "2026-09-13T04:30:29.348777+00:00",
+      "relevance_score": 0.76,
+      "relevance_reason": "Serves the agentic-systems anchor (weight 1.0) by addressing a concrete production concern — agent safety and tool-call policy enforcement — with specific architectural patterns (flight-recorder evidence, signed checkpoints, MCP policy layers) relevant to multi-agent orchestration.",
+      "value_rationale": "Provides a named, open-source pattern for egress control and tool-call verification in agentic systems, including verifiable audit trails via Ed25519 signatures and MCP-layer policy enforcement — directly applicable to teams building agent systems that require compliance or observability over untrusted tool invocations. The multi-agent federation angle adds breadth across orchestration patterns.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "safety",
+        "observability",
+        "tool-use",
+        "orchestration",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "verifiable egress control",
+        "data loss prevention (DLP)",
+        "SSRF and DNS rebinding protection",
+        "prompt-injection detection",
+        "MCP proxy wrapping",
+        "flight-recorder evidence",
+        "Ed25519-signed checkpoints",
+        "tool-call policy enforcement"
+      ],
+      "challenge_hooks": [
+        "how to prevent agents from exfiltrating secrets and credentials across network egress",
+        "detecting and blocking prompt-injection attacks and tool-poisoning before agent execution",
+        "auditing and verifying agent behavior with tamper-proof, signed evidence records",
+        "integrating egress scanning across multiple MCP clients and agent frameworks without code changes"
+      ],
+      "summary": "Open-source AI agent firewall implementing verifiable egress control with ordered URL scanning (DLP, SSRF, DNS rebinding), prompt-injection detection, MCP tool-call policy enforcement, flight-recorder evidence with Ed25519-signed checkpoints, and multi-agent federation via RFC 8941 mediation envelopes.",
+      "pre_filter_rationale": "Applied systems: production agent security pipeline (traffic mediation, exfiltration scanning, audit receipt generation) I would integrate into a deployed agentic system this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<h1 align=\"center\">\n  <img src=\"assets/pipelock-lockup.svg\" alt=\"Pipelock\" width=\"465\">\n</h1>\n\n<p align=\"center\">\n  <strong>Open-source AI agent firewall for <a href=\"https://pipelab.org/learn/verifiable-egress-control/\">Verifiable Egress Control</a>.</strong>\n</p>\n\n<p align=\"center\">\n  <a href=\"https://github.com/luckyPipewrench/pipelock/actions/workflows/ci.yaml\"><img alt=\"CI\" src=\"https://github.com/luckyPipewrench/pipelock/actions/workflows/ci.yaml/badge.svg\"></a>\n  <a href=\"https://github.com/luckyPipewrench/pipelock/actions/workflows/security.yaml\"><img alt=\"Security\" src=\"https://github.com/luckyPipewrench/pipelock/actions/workflows/security.yaml/badge.svg\"></a>\n  <a href=\"https://github.com/luckyPipewrench/pipelock/actions/workflows/continuous-gauntlet.yaml\"><img alt=\"Gauntlet exam\" src=\"https://github.com/luckyPipewrench/pipelock/actions/workflows/continuous-gauntlet.yaml/badge.svg\"></a>\n  <a href=\"go.mod\"><img alt=\"Go 1.25+\" src=\"https://img.shields.io/github/go-mod/go-version/luckyPipewrench/pipelock?logo=go&label=Go\"></a>\n  <a href=\"https://github.com/luckyPipewrench/pipelock/releases\"><img alt=\"Release\" src=\"https://img.shields.io/github/v/release/luckyPipewrench/pipelock\"></a>\n</p>\n\n<p align=\"center\">\n  <a href=\"https://scorecard.dev/viewer/?uri=github.com/luckyPipewrench/pipelock\"><img alt=\"OpenSSF Scorecard\" src=\"https://api.scorecard.dev/projects/github.com/luckyPipewrench/pipelock/badge\"></a>\n  <a href=\"https://www.bestpractices.dev/projects/11948\"><img alt=\"OpenSSF Best Practices\" src=\"https://www.bestpractices.dev/projects/11948/badge\"></a>\n  <a href=\"https://codecov.io/gh/luckyPipewrench/pipelock\"><img alt=\"codecov\" src=\"https://codecov.io/gh/luckyPipewrench/pipelock/graph/badge.svg\"></a>\n  <a href=\"https://github.com/luckyPipewrench/pipelock/blob/main/.github/workflows/ci.yaml#L21-L35\"><img alt=\"pipelock self-scanned\" src=\"https://img.shields.io/badge/pipelock-self--scanned-00FFC8?style=flat&labelColor=1A1A2E&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNCAxNCI+PHBhdGggZmlsbD0iIzAwRkZDOCIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03IDAuNWMtMS45MyAwLTMuNSAxLjY2LTMuNSAz\n…[truncated]"
+    },
+    {
+      "source_id": "github:nexus-substrate/nexus-agents",
+      "title": "nexus-agents",
+      "url": "https://github.com/nexus-substrate/nexus-agents",
+      "github_url": "https://github.com/nexus-substrate/nexus-agents",
+      "bishop_ui": "http://localhost:8081/entries/github:nexus-substrate/nexus-agents",
+      "published_at": "2026-09-14T04:20:10+00:00",
+      "ingested_at": "2026-09-14T04:36:23.828693+00:00",
+      "relevance_score": 0.76,
+      "relevance_reason": "Squarely within the agentic-systems anchor (weight 1.0) with a production-grade multi-agent orchestration pattern, but the core innovation sits in control-plane governance and routing rather than agent-task decomposition or planning architecture.",
+      "value_rationale": "Documents a concrete multi-role orchestration pattern (adversarial PR review, LinUCB routing, health-signal-driven demotion) with explicit failure-mode handling (tamper evidence, bounded auto-demotion) that a practitioner could adapt for managing heterogeneous coding-agent swarms; the 4-point gate and health-feedback loop are specific mechanisms worth stress-testing against production failure modes.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "safety",
+        "observability",
+        "production"
+      ],
+      "concepts": [
+        "autonomic computing (MAPE-K loop)",
+        "control plane vs data plane separation",
+        "adversarial code review (multi-voter consensus)",
+        "hash-chained audit trails",
+        "LinUCB routing with outcome feedback",
+        "circuit-breaker demotion with bounded authority",
+        "MCP (Model Context Protocol) tooling"
+      ],
+      "challenge_hooks": [
+        "how to apply adversarial code review and audit constraints across multiple autonomous coding agents without blocking productivity",
+        "closed-loop routing and demotion for agent fleets based on actual outcome telemetry rather than static configuration",
+        "tamper-evident audit compliance for autonomous system decisions with bounded self-tuning authority"
+      ],
+      "summary": "An autonomic control plane for AI coding agents that admits work through one entry point, conducts adversarial multi-role PR review (5 voters, 4-point gate), maintains tamper-evident hash-chained audit trails, and closes feedback loops via LinUCB routing with bounded auto-demotion on swarm-health signals.",
+      "pre_filter_rationale": "Applied systems: a shipped governance and observability substrate for agent deployment, addressing production concerns (drift detection, audit, telemetry) that I would implement from.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Nexus Agents\n\n[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12365/badge)](https://www.bestpractices.dev/projects/12365) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/nexus-substrate/nexus-agents/badge)](https://securityscorecards.dev/viewer/?uri=github.com/nexus-substrate/nexus-agents)\n\n> Autonomic control plane for AI coding agents — one entry point, adversarial review, tamper-evident hash-chained audit, human-gated closed-loop tuning (autonomous demotion, earned promotion)\n\n[![npm version](https://img.shields.io/npm/v/nexus-agents)](https://www.npmjs.com/package/nexus-agents)\n[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)\n[![Node.js Version](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen)](https://nodejs.org)\n[![Claims Registry Drift](https://img.shields.io/github/actions/workflow/status/nexus-substrate/nexus-agents/docs-check.yml?branch=main&label=claims%20registry)](https://github.com/nexus-substrate/nexus-agents/actions/workflows/docs-check.yml)\n\n---\n\n## Why Nexus Agents?\n\n**Nexus-agents is an autonomic control plane for your AI coding agents** — Claude Code, Codex, Gemini, and OpenCode. The agents are the _data plane_: they do the engineering. Nexus-agents is the _control plane_: it admits work through one entry point, reviews it adversarially before it ships, records every action in a tamper-evident event log, and closes the loop by tuning where the next task goes based on what actually worked.\n\nBorrowing the vocabulary of [autonomic computing](https://en.wikipedia.org/wiki/Autonomic_computing): the system runs a **MAPE-K** loop — Monitor, Analyze, Plan, Execute over a shared Knowledge base — so that operating your agent fleet is, as much as the evidence allows, self-managing rather than hand-driven.\n\n### The control-plane mapping\n\nEach classic control-plane role maps to a shipped nexus-agents component — the metaphor is load-bearing, not decoration:\n\n| Control-plane role | nexus-agents component                                    | What it does                                                              |\n| ------------------ | -\n…[truncated]"
+    },
+    {
+      "source_id": "github:scaleapi/vero",
+      "title": "vero",
+      "url": "https://github.com/scaleapi/vero",
+      "github_url": "https://github.com/scaleapi/vero",
+      "bishop_ui": "http://localhost:8081/entries/github:scaleapi/vero",
+      "published_at": "2026-09-13T04:15:41+00:00",
+      "ingested_at": "2026-09-13T04:36:31.813752+00:00",
+      "relevance_score": 0.76,
+      "relevance_reason": "Squarely addresses agent evaluation and orchestration (weight 1.0 anchor) with a concrete system for iterative agent optimization, combining agentic workflows with measurable evaluation, though the implementation is narrower than a full orchestration framework.",
+      "value_rationale": "Provides a Git-based harness pattern for evaluating coding agents with incremental candidate selection and isolated sandbox execution, giving the profile owner a concrete approach to iterating agent implementations and comparing outputs without manual intervention or cross-contamination.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "evaluation",
+        "production"
+      ],
+      "concepts": [
+        "version/evaluate/select loop",
+        "Git-based candidate management",
+        "sandboxed evaluation",
+        "coding agents",
+        "inference gating and budget metering",
+        "language-neutral command protocol",
+        "experiment tracking"
+      ],
+      "challenge_hooks": [
+        "how to systematically search over candidate programs or agent configurations with durable history and re-selection",
+        "isolating evaluation from production while keeping optimization state on the host",
+        "optimizing agent behavior, code, or prompts under a shared inference budget"
+      ],
+      "summary": "A version/evaluate/select harness for optimizing coding agents, programs, and text via iterative Git-based candidate generation, external evaluation, and history tracking. Targets are scored and re-selectable; state and experiment tracking remain on-host while builds and evaluation run in isolated sandboxes.",
+      "pre_filter_rationale": "Applied dev-skills and evaluation harness for agent optimization: VeRO is a working reference for agent-assisted engineering and eval-driven iteration I would implement this week, treating agent code as versioned artifacts and using git-native workflows for reproducible hill-climbing.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# VeRO: a harness for agents to optimize programs, text, and agents\n> **Looking for the code from the VeRO paper?** See\n> [Paper reproduction](#paper-reproduction) — reproduce from the `paper-v1`\n> tag, or read the same code in place under [`legacy/`](legacy/).\n\n[![Paper](https://img.shields.io/badge/arXiv-2602.22480-b31b1b.svg)](https://arxiv.org/abs/2602.22480)\n[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)\n[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)\n\nVeRO gives a coding agent something to edit, an evaluation boundary, and durable\nmemory of every candidate it tried. The target is anything you can put under Git\nand score — a **program** (a single function up to a whole codebase), **text**\n(a prompt, spec, or config), or an **agent** (its scaffold, tools, and prompts).\nVeRO was introduced to optimize agents, and the same version / evaluate / select\nloop applies to any of these.\n\n```\n  ┌─────────────────────────┐   submit candidate    ┌─────────────────────────┐\n  │  candidate production   ├──────────────────────►│  evaluation service     │\n  │                         │                       │                         │\n  │  coding agent, command, │◄──────────────────────┤  owns cases + scoring   │\n  │  or custom strategy;    │  score + diagnostics  │                         │\n  │  edits its own Git      │                       │  development: may ask   │\n  │  worktree per candidate │                       │  validation:  aggregate │\n  └───────────┬─────────────┘                       │  test:        withheld  │\n              │ commit                              └───────────┬─────────────┘\n              ▼                                                 │ report\n  ┌─────────────────────────┐    next round     ┌───────────────▼─────────────┐\n  │  candidate history:     │◄──────────────────┤  selection: keep the best   │\n  │  every version kept,    │                   │  feasible candidate         │\n  │  each one re-selectable │                   └─────────────────────────────┘\n  └─────────────────────────┘\n\n  Every model call on both sides goes through the inference gateway, which\n…[truncated]"
+    },
+    {
+      "source_id": "github:simonrowland/goal-flight",
+      "title": "goal-flight",
+      "url": "https://github.com/simonrowland/goal-flight",
+      "github_url": "https://github.com/simonrowland/goal-flight",
+      "bishop_ui": "http://localhost:8081/entries/github:simonrowland/goal-flight",
+      "published_at": "2026-09-13T04:16:27+00:00",
+      "ingested_at": "2026-09-13T04:26:26.644216+00:00",
+      "relevance_score": 0.76,
+      "relevance_reason": "Squarely addresses the agentic-systems anchor (weight 1.0) with a concrete multi-agent orchestration pattern including state management and handoff mechanics, though the focus on code-generation agents rather than information retrieval or document processing narrows its breadth.",
+      "value_rationale": "Documents a specific architectural pattern — durable state + review gates + escalation steering — for coordinating multiple coding agents without real-time supervision, which is directly transferable to multi-agent workflows beyond code generation, such as document-processing or information-gathering pipelines that also require async handoffs and human-in-the-loop checkpoints.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "multi-agent",
+        "orchestration",
+        "tool-use",
+        "production",
+        "architecture"
+      ],
+      "concepts": [
+        "agentic orchestration",
+        "multi-agent code generation",
+        "durable project state",
+        "adversarial code review",
+        "requirements gathering and architecture settlement",
+        "plan/act/test/review loops",
+        "RAG-based project corpus"
+      ],
+      "challenge_hooks": [
+        "how to coordinate multiple coding agents on a single long-horizon goal without context collapse or real-time supervision",
+        "maintaining project coherence across multi-hour unattended agent runs with durable checkpointing and resumability",
+        "integrating independent adversarial review into an agentic code-generation pipeline before commit",
+        "shifting developer role from execution supervision to design steering in multi-agent software projects"
+      ],
+      "summary": "A multi-agent orchestration framework that turns Claude Code or Grok Bot into a project coordinator, dispatching long-running software work to local or remote coding agents (Codex, Cursor, Claude CLI) with durable state management, independent review gates, and escalation-based steering rather than real-time supervision.",
+      "pre_filter_rationale": "Applied systems and dev-skills anchor: a shipped controller pattern for chunking and delegating work to CLI agents with embedded review loop and RAG integration—reusable orchestration technique I would implement.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# goal-flight\n\n[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)\n![Python](https://img.shields.io/badge/python-3.10%2B-blue)\n![Last commit](https://img.shields.io/github/last-commit/simonrowland/goal-flight)\n![Stars](https://img.shields.io/github/stars/simonrowland/goal-flight)\n\ngoal-flight turns a Claude Code session into the **orchestrator** of a long-running\nsoftware project. You bring a goal. The orchestrator collects the requirements worth your\nattention, settles the architecture with you before code is written, then dispatches the\nwork to a range of coding agents: codex, grok, cursor, claude, running locally or on\nremote nodes over SSH. Each worker iterates its own plan/act/test/review loop, and every\ncommit is gated behind independent review. The run's state lives in durable project files\n(plan, queue, worker status, review evidence, resume notes) that survive compaction,\nrestarts, and unattended overnight hours. A multi-hour run lands as reviewed,\none-commit-per-chunk work on your branch; nothing is pushed without your permission.\n\n**Hosts and workers.** [Claude Code](https://claude.ai/code) and Grok Bot are the\nfeatured orchestrators; Claude Code is the maintained path and Grok Bot ships a\nfirst-class controller wrapper with an exit-as-wake listen doorbell\n([docs/hosts/grok-bot.md](docs/hosts/grok-bot.md)).\n[Codex](https://github.com/openai/codex) is the standard worker; cursor, grok,\nclaude-cli, and other worker adapters also serve. Further orchestrator ports for\nCodex, Cursor, and OpenCode ship in-repo and are unsupported.\n\n**What the orchestrator session is for**: requirements gathering, architecture decisions,\nquestion escalation, and monitoring — not execution. The orchestrator holds enough context\nabout your project's goal, scenery (constraints, architecture, prior decisions, failure\nmodes), and intent to exercise discretion and recommend the next move — then dispatches\nthe work to workers running iterative code-review loops. Your task shifts from supervising\ncoding to steering design: you check in, ratify or redirect, and answer the questions the\nrun escalates.\n\n[Quickstart](#quickstart-fr\n…[truncated]"
+    },
+    {
+      "source_id": "github:Ar9av/agent-manual",
+      "title": "agent-manual",
+      "url": "https://github.com/Ar9av/agent-manual",
+      "github_url": "https://github.com/Ar9av/agent-manual",
+      "bishop_ui": "http://localhost:8081/entries/github:Ar9av/agent-manual",
+      "published_at": "2026-09-12T05:44:01+00:00",
+      "ingested_at": "2026-09-12T06:18:58.109392+00:00",
+      "relevance_score": 0.75,
+      "relevance_reason": "Directly relevant to agentic systems and orchestration with practical production patterns, though narrowed to coding agents which is a specialized subdomain.",
+      "value_rationale": "Provides actionable reference material on agent lifecycle, MCP integration, and tool composition patterns applicable to broader agentic architectures. The cross-tool comparison matrices offer decision support for agent stack selection, though value is somewhat limited by focus on coding-specific agents rather than general-purpose agentic workflows.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "architecture",
+        "production"
+      ],
+      "concepts": [
+        "lifecycle hooks",
+        "tool use interception",
+        "Model Context Protocol (MCP)",
+        "agent configuration",
+        "cross-tool comparison",
+        "custom instruction files",
+        "exit-code blocking rules",
+        "agent capabilities matrix"
+      ],
+      "challenge_hooks": [
+        "How do I standardize lifecycle hook implementations across different agentic frameworks?",
+        "Where can I find MCP server configuration paths and environment variable references for multiple agents?",
+        "How do I compare built-in capabilities and tool availability across 40+ different coding agents?",
+        "What are the conventions for writing custom instruction files and intercepting agent actions consistently?"
+      ],
+      "summary": "Community-driven reference manual for configuring and extending 40+ AI coding agents. Provides unified documentation of lifecycle hooks, MCP server integration, tool capabilities, system instructions, and cross-tool comparison matrices for agentic development.",
+      "pre_filter_rationale": "Working reference for dev-flow enhancement and agent-assisted engineering: practical patterns for hooking LLM agents into coding workflows, tool orchestration, and skill composition across multiple platforms — reusable technique I would implement this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <img src=\"https://img.shields.io/badge/Agentic%20Tools%20Almanac-%E2%9C%A7-blueviolet?style=for-the-badge\" alt=\"Agentic Tools Almanac\">\n  <a href=\"_shared/agent-tools-hooks-config.md\"><img src=\"https://img.shields.io/badge/Config%20Reference-Shared-FFD700?style=for-the-badge\" alt=\"Config Reference\"></a>\n  <a href=\"_shared/hook-event-comparison.md\"><img src=\"https://img.shields.io/badge/Hooks%20Matrix-Cross%20Tool-5865F2?style=for-the-badge\" alt=\"Hooks Matrix\"></a>\n  <a href=\"frameworks/README.md\"><img src=\"https://img.shields.io/badge/Frameworks%20%26%20SDKs-Sourced-2E8B57?style=for-the-badge\" alt=\"Frameworks and SDKs\"></a>\n  <a href=\"https://github.com/Ar9av/agent-manual\"><img src=\"https://img.shields.io/badge/Repo-GitHub-green?style=for-the-badge\" alt=\"GitHub Repo\"></a>\n</p>\n\n# Agentic Tools Almanac ☤\n\n**The ultimate developer's index for AI coding agents.** A community-driven reference for configuring, extending, and intercepting every major agentic development tool. Easily compare lifecycle hooks (e.g., `PreToolUse` and `PostToolUse`), built-in capabilities, Model Context Protocol (MCP) servers, system instruction file paths, and customized skills across 40+ different developer agents.\n\n<table>\n<tr><td><b>Universal Hooks Index</b></td><td>Standardized naming, exit-code blocking rules, and in-depth event execution behaviors for intercepting actions.</td></tr>\n<tr><td><b>Comprehensive Matrix</b></td><td>Side-by-side comparisons of file reads, shell commands, web searches, browser automation, and planning modes.</td></tr>\n<tr><td><b>MCP Config Reference</b></td><td>Direct paths, environment variables, local/remote stdio transports, and tool discovery rules.</td></tr>\n<tr><td><b>Conventions & Rules</b></td><td>Where to write custom instruction files (e.g., <code>CLAUDE.md</code>, <code>CONVENTIONS.md</code>, <code>.cursor/rules/</code>) to customize agent behaviors.</td></tr>\n</table>\n\n---\n\n## Tools Covered\n\n| Tool | Vendor | Config format | Hooks | MCP | Official docs |\n|------|--------|--------------|-------|-----|--------------|\n| [Claude Code](tools/claude-code/) | Anthropic | JSON | ✅ Full (31 events) | ✅ | [code.claude.com/docs/en/hook\n…[truncated]"
+    },
+    {
+      "source_id": "github:clayrune-io/clayrune",
+      "title": "clayrune",
+      "url": "https://github.com/clayrune-io/clayrune",
+      "github_url": "https://github.com/clayrune-io/clayrune",
+      "bishop_ui": "http://localhost:8081/entries/github:clayrune-io/clayrune",
+      "published_at": "2026-09-12T05:54:09+00:00",
+      "ingested_at": "2026-09-12T06:06:44.214869+00:00",
+      "relevance_score": 0.75,
+      "relevance_reason": "Directly addresses multi-agent orchestration and state management patterns, with practical production concerns like memory persistence and safety guardrails—core to agentic system architecture.",
+      "value_rationale": "Provides architectural reference for building mission-control dashboards that coordinate multiple autonomous agents with persistent state, scheduling, and observability—applicable to designing similar orchestration layers for document processing pipelines or multi-step workflows.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "multi-agent",
+        "orchestration",
+        "tool-use",
+        "memory-architecture",
+        "safety",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "multi-agent orchestration",
+        "agent scheduling and autonomy",
+        "long-term memory for agents",
+        "git worktree isolation",
+        "command safety guardrails",
+        "cross-session context persistence",
+        "streaming agent monitoring",
+        "multi-vendor LLM support"
+      ],
+      "challenge_hooks": [
+        "How do you run and manage multiple AI agents in parallel across different projects without constant human supervision?",
+        "How do you prevent autonomous agents from executing dangerous operations (git push, DROP TABLE, terraform destroy) while still enabling effective autonomy?",
+        "How do you maintain context and learn from agent execution across sessions to improve future performance?"
+      ],
+      "summary": "Clayrune is a mission-control dashboard for orchestrating multiple Claude Code agents across projects with autonomous execution, scheduling, memory persistence, and safety guardrails. Runs locally on your machine with optional remote access.",
+      "pre_filter_rationale": "Applied agentic orchestration system with multi-agent coordination, state persistence, and scheduling — a shipped pattern for agent management I would implement from or adapt.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Clayrune\n\n**Mission control for your [Claude Code](https://docs.anthropic.com/en/docs/claude-code) agents.**\nRun many agents, across every project, and keep working while they do.\n\n[![License: MIT](https://img.shields.io/badge/license-MIT-1f6feb?style=flat-square)](LICENSE)\n[![Last commit](https://img.shields.io/github/last-commit/clayrune-io/clayrune?style=flat-square&color=1f883d&label=last%20commit)](https://github.com/clayrune-io/clayrune/commits)\n[![Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-6e7781?style=flat-square)](https://clayrune.io/download.html)\n[![Live demo](https://img.shields.io/badge/live%20demo-clayrune.io-8250df?style=flat-square)](https://clayrune.io/demo)\n\nClayrune is a dashboard over the Claude Code sessions you already run. Every\nproject on one board, every agent named, and the ones waiting on you flagged.\nIt runs on your machine against your own Claude CLI.\n\n![Clayrune — the board, one project flagged as waiting on you, and thirty agent sessions running underneath](docs/assets/demo.gif)\n\n**[▶ Try the live demo — nothing to install](https://clayrune.io/demo)** &nbsp;·&nbsp; **[⬇ Download](https://clayrune.io/download.html)** — Windows, macOS, Linux\n\n---\n\n## What it does\n\n### 🎛️ Main features\n\n- 🔒 Runs on your machine against the Claude CLI you are already signed into. No account, no telemetry, MIT.\n- 📱 Connect from anywhere in the world using the dedicated mobile app, running over a secure tunnel.\n- One dashboard, as many projects as you want. Multi-agent conversations inside each project, with as many running in parallel as you need.\n- 🔔 Agents run autonomously until they absolutely **need you**, then clearly signal they are waiting for an answer.\n- Converse with individual agents, each with their own persona, voice and face.\n- Hire new agents as you need them through Floor management, where you see everything happening right now.\n- 🔀 Multi-vendor and multi-model at the same time: Claude Code first-class, plus Gemini, Codex, Aider, OpenCode and Goose.\n- Read output as it streams; interrupt mid-task without killing the session.\n- Agents working on the same project are protected by git worktree iso\n…[truncated]"
+    },
+    {
+      "source_id": "github:BerriAI/litellm",
+      "title": "litellm",
+      "url": "https://github.com/BerriAI/litellm",
+      "github_url": "https://github.com/BerriAI/litellm",
+      "bishop_ui": "http://localhost:8081/entries/github:BerriAI/litellm",
+      "published_at": "2026-09-13T04:16:14+00:00",
+      "ingested_at": "2026-09-13T04:30:28.896881+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Squarely on the LLM-inference anchor (weight 0.8) with measured production metrics (latency, throughput), but is a general-purpose gateway tool rather than a technique or pattern specific to the profile's core anchors (RAG, agentic systems, document intelligence).",
+      "value_rationale": "Provides a concrete serving framework with published latency and throughput numbers that could simplify multi-model routing in a production agentic system, though it does not address retrieval, orchestration, or evaluation patterns directly.",
+      "entry_type": "repo",
+      "tags": [
+        "serving",
+        "orchestration",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "OpenAI API compatibility",
+        "multi-provider LLM routing",
+        "virtual keys and spend tracking",
+        "load balancing",
+        "API gateway",
+        "Postgres/Redis backend",
+        "Helm deployment"
+      ],
+      "challenge_hooks": [
+        "how to abstract away provider-specific APIs and call 100+ LLMs through a single unified interface",
+        "deploying a production-grade LLM gateway with spend controls and load balancing without building from scratch",
+        "reducing operational overhead of managing virtual keys and request routing across multiple LLM providers"
+      ],
+      "summary": "An open-source AI gateway that provides a unified OpenAI-compatible API for 100+ LLMs with production-ready features including virtual keys, spend tracking, load balancing, and an admin dashboard. Achieves 8ms P95 latency at 1k RPS.",
+      "pre_filter_rationale": "Applied systems: a production LLM gateway with cost tracking, load balancing, and multi-model routing—a working reference for inference orchestration and API standardization I would integrate into a production RAG or agent pipeline this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<h1 align=\"center\">\n        🚅 LiteLLM\n    </h1>\n    <p align=\"center\">\n        <p align=\"center\">LiteLLM AI Gateway\n        </p>\n        <p align=\"center\">Open Source AI Gateway for 100+ LLMs. Self-hosted. Enterprise-ready. Call any LLM in OpenAI format.</p>\n        <p align=\"center\">\n        <a href=\"https://render.com/deploy?repo=https://github.com/BerriAI/litellm\" target=\"_blank\" rel=\"nofollow\"><img src=\"https://render.com/images/deploy-to-render-button.svg\" alt=\"Deploy to Render\" height=\"40\"></a>\n        <a href=\"https://railway.com/deploy/RhvhdC?referralCode=7mRv9K&utm_medium=integration&utm_source=template&utm_campaign=generic\"><img src=\"https://railway.com/button.svg\" alt=\"Deploy on Railway\" height=\"40\"></a>\n        <a href=\"https://console.aws.amazon.com/cloudshell/home\" target=\"_blank\" rel=\"nofollow\"><img src=\"./.github/deploy-on-aws.png\" alt=\"Deploy on AWS\" height=\"40\"></a>\n        <a href=\"https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FBerriAI%2Flitellm&cloudshell_workspace=terraform%2Flitellm%2Fgcp%2Fexamples%2Fdefault&cloudshell_tutorial=TUTORIAL.md&cloudshell_image=gcr.io/ds-artifacts-cloudshell/deploystack_custom_image&shellonly=true\" target=\"_blank\" rel=\"nofollow\"><img src=\"./.github/deploy-on-gcp.png\" alt=\"Deploy on GCP\" height=\"40\"></a>\n        </p>\n    </p>\n<h4 align=\"center\"><a href=\"https://docs.litellm.ai/docs/simple_proxy\" target=\"_blank\">LiteLLM Proxy Server (AI Gateway)</a> | <a href=\"https://docs.litellm.ai/docs/enterprise#hosted-litellm-proxy\" target=\"_blank\"> Hosted Proxy</a> | <a href=\"https://litellm.ai/enterprise\"target=\"_blank\">Enterprise Tier</a> | <a href=\"https://www.litellm.ai/ai-gateway\" target=\"_blank\">Website</a></h4>\n<h4 align=\"center\">\n    <a href=\"https://pypi.org/project/litellm/\" target=\"_blank\">\n        <img src=\"https://img.shields.io/pypi/v/litellm.svg\" alt=\"PyPI Version\">\n    </a>\n    <a href=\"https://github.com/BerriAI/litellm\" target=\"_blank\">\n        <img src=\"https://img.shields.io/github/stars/BerriAI/litellm.svg?style=social\" alt=\"GitHub Stars\">\n    </a>\n    <a href=\"https://www.ycombinator.com/companies/berriai\">\n        <img src=\"https://img.shields.io/badge/Y%\n…[truncated]"
+    },
+    {
+      "source_id": "github:CTRLRun/ctrlrun",
+      "title": "ctrlrun",
+      "url": "https://github.com/CTRLRun/ctrlrun",
+      "github_url": "https://github.com/CTRLRun/ctrlrun",
+      "bishop_ui": "http://localhost:8081/entries/github:CTRLRun/ctrlrun",
+      "published_at": "2026-09-12T05:51:30+00:00",
+      "ingested_at": "2026-09-12T06:10:49.413144+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly addresses production concerns for agentic systems (reliability, idempotency, audit trails) and provides architectural pattern for safe agent execution—core to shipping agents in regulated/high-stakes environments.",
+      "value_rationale": "Eliminates a critical gap in agentic workflows: preventing duplicate execution, audit compliance, and graceful failure handling. Particularly valuable for building production agents where action safety and observability are non-negotiable (finance, ops, healthcare contexts).",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "safety",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "execution safety",
+        "agent action authorization",
+        "idempotent execution",
+        "audit logging",
+        "approval workflows",
+        "distributed state management",
+        "outcome verification"
+      ],
+      "challenge_hooks": [
+        "How do you ensure AI agents execute actions safely in production without unintended side effects?",
+        "How do you prevent duplicate or unapproved consequential actions when agent decisions are uncertain?",
+        "How do you maintain audit trails and verify outcomes of agent-initiated actions across distributed systems?"
+      ],
+      "summary": "CTRLRun is a Python library providing execution safety for AI agents. It sits between decision-making and action execution, ensuring consequential actions happen exactly once as approved with audit trails, while gracefully handling uncertain outcomes rather than guessing.",
+      "pre_filter_rationale": "Applied systems and agentic orchestration: a shipped execution safety layer for tool-use and agent orchestration is a working reference for building reliable agent systems this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"https://raw.githubusercontent.com/CTRLRun/ctrlrun/main/docs/assets/wordmark-dark.svg\">\n    <img src=\"https://raw.githubusercontent.com/CTRLRun/ctrlrun/main/docs/assets/wordmark-light.svg\" alt=\"CTRLRun\" width=\"300\">\n  </picture>\n</p>\n\n<p align=\"center\">\n  <strong>Execution safety for AI agents.</strong><br>\n  The model guesses. CTRLRun does not.<br>\n  <br>\n  A Python library that sits between the decision to act and the call that acts.<br>\n  A consequential action happens at most once, exactly as approved, and leaves a receipt.<br>\n  When the outcome is unknown, CTRLRun says so instead of guessing.<br>\n  <br>\n  Runs in production on a single file, or on Postgres across hosts. Apache-2.0.\n</p>\n\n<!-- generated from tools/docs_audit/render_badges.py (readme) — edit the list, not this -->\n<p align=\"center\">\n  <a href=\"https://github.com/CTRLRun/ctrlrun/blob/badges/clones-history.json\"><img src=\"https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CTRLRun/ctrlrun/badges/clones-badge.json\" alt=\"Clones\"></a>\n  <a href=\"https://pypi.org/project/ctrlrun/\"><img src=\"https://img.shields.io/pypi/v/ctrlrun?color=B8730A&label=pypi\" alt=\"PyPI\"></a>\n  <a href=\"https://pypistats.org/packages/ctrlrun\"><img src=\"https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/CTRLRun/ctrlrun/badges/downloads-badge.json\" alt=\"Downloads\"></a>\n  <a href=\"https://ctrlrun.dev\"><img src=\"https://img.shields.io/badge/docs-ctrlrun.dev-B8730A\" alt=\"Docs\"></a>\n  <a href=\"https://github.com/CTRLRun/ctrlrun/actions/workflows/ci.yml\"><img src=\"https://github.com/CTRLRun/ctrlrun/actions/workflows/ci.yml/badge.svg?branch=main\" alt=\"CI\"></a>\n  <a href=\"https://github.com/CTRLRun/ctrlrun/actions/workflows/codeql.yml\"><img src=\"https://github.com/CTRLRun/ctrlrun/actions/workflows/codeql.yml/badge.svg?branch=main\" alt=\"CodeQL\"></a>\n  <a href=\"https://github.com/CTRLRun/ctrlrun/actions/workflows/fuzz.yml\"><img src=\"https://github.com/CTRLRun/ctrlrun/actions/workflows/fuzz.yml/badge.svg?branch=main\" alt=\"Fuzz\"></a>\n  <a href=\"https://ctrlrun.dev/docs/how-this-is-built\"><img src=\"https://img.shi\n…[truncated]"
+    }
+  ]
+}

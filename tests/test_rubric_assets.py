@@ -347,3 +347,33 @@ def test_prefilter_rubric_v1_names_only_m8_registered_adapters() -> None:
     assert named_sources, "no source names extracted from shape headers"
     unregistered = named_sources - _M8_ADAPTER_SOURCE_NAMES
     assert not unregistered, f"annex names sources outside the M8 adapter set: {unregistered}"
+
+
+def test_prefilter_rubric_v1_shape2_rejects_named_junk_classes() -> None:
+    """Option 1: Shape 2 names the stamped junk classes as reject, not park, and
+    still allows a named stealable artifact to be core (the four stamped keeps).
+    Hash/floor tests would stay green if this paragraph reverted to park-on-
+    ambiguous; this is the content falsifier for that revert."""
+    body = load_rubric(_PREFILTER_RUBRIC_PATH).body
+    match = re.search(
+        r"^## Shape 2 — repo \(github\)\n(?P<section>.*?)(?=^## Shape 3)",
+        body,
+        re.MULTILINE | re.DOTALL,
+    )
+    assert match, "Shape 2 section not found"
+    shape2 = match.group("section").lower()
+
+    for junk_class in (
+        "kitchen-sink wrapper",
+        "product landing",
+        "badge-wall",
+        "awesome-list",
+        "vendor sdk",
+        "clone of a cli",
+    ):
+        assert junk_class in shape2, f"Shape 2 does not name junk class {junk_class!r}"
+
+    assert "**reject**, not\npark" in shape2
+    assert "when a tagline is genuinely ambiguous about which side it falls on, park it" not in shape2
+    assert "stealable artifact" in shape2
+    assert "do not auto-reject" in shape2

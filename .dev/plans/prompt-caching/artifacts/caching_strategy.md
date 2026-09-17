@@ -284,7 +284,7 @@ Makes the 4,096-token cache floor tangible. Measured 2026-06-14 with `cl100k_bas
 | Call 1 system prompt (`build_call1_system_prompt()`) | 267 | 7% |
 | **Haiku 4.5 cache minimum** | **4,096** | 100% |
 | `auditor-review` `SKILL.md` (longest local skill) | 7,786 | 190% |
-| `.dev/caching_strategy.md` (this doc, v0.3) | ~6,900 | 168% |
+| `.dev/plans/prompt-caching/artifacts/caching_strategy.md` (this doc, v0.3) | ~6,900 | 168% |
 | Gap: profile → minimum | ~3,713 | need ~91% more content |
 
 **4,096 tokens ≈ first ~327 of 615 lines** of `auditor-review` (~53%) — from frontmatter through Phase 4 adversarial testing, before re-audit discipline and finding-classification tables.
@@ -527,7 +527,7 @@ Any rubric change must participate in the same hash-or-abort discipline as the p
 ### Scale / ops
 
 - [x] Persist cache usage aggregates in `batch-poller` logs (minimum); consider `BatchRecord` columns — logs only landed (no `BatchRecord` columns, per plan D8/non-goal)
-- [x] Document env overrides for backfill: larger `BISHOP_PREFILTER_BATCH_SIZE`, `BISHOP_ENRICHMENT_STAGE*_BATCH_SIZE` — see `.dev/llm-models-and-cache.md` batch-size/amortization table
+- [x] Document env overrides for backfill: larger `BISHOP_PREFILTER_BATCH_SIZE`, `BISHOP_ENRICHMENT_STAGE*_BATCH_SIZE` — see `.dev/plans/prompt-caching/artifacts/llm-models-and-cache.md` batch-size/amortization table
 - [ ] Profile freeze policy during G7 backfill tranches
 - [ ] Alert: consecutive batches with zero `cache_read_input_tokens` after enablement — landed a **per-batch** zero-read warning (`cache_read_zero`, T8), not a consecutive-batch tracker; leaving unchecked as the literal item is narrower than what shipped
 - [ ] Optional: pre-filter user-tail truncation for `title + abstract` (~500–1k tokens; §5f)

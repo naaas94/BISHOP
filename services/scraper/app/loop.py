@@ -18,7 +18,10 @@ from app.config import (
     BISHOP_BACKFILL_ENABLED,
     BISHOP_BACKFILL_INTER_CHUNK_DELAY_SEC,
     BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS,
+    BISHOP_HARVEST_ENABLED,
+    BISHOP_HARVEST_SLICE_BUDGET_SEC,
 )
+from app.harvest_github import harvest_github_slices
 from app.exceptions import EscalatableError, PermanentFailureError, RetryExhaustedError
 from app.failure_envelope import failure_envelope, log_permanent_failure
 from app.state_worker_client import StateWorkerClient
@@ -129,6 +132,21 @@ async def scrape_cycle(client: StateWorkerClient | None = None) -> None:
         logger.info("scrape cycle started", extra={"event": "scrape_cycle_start"})
         for AdapterClass in ADAPTER_REGISTRY:
             await _scrape_adapter(AdapterClass, client)
+        if BISHOP_HARVEST_ENABLED:
+            try:
+                deadline = datetime.now(UTC) + timedelta(
+                    seconds=BISHOP_HARVEST_SLICE_BUDGET_SEC
+                )
+                async with httpx.AsyncClient(timeout=httpx.Timeout(30.0)) as harvest_client:
+                    await harvest_github_slices(
+                        http_client=harvest_client,
+                        deadline=deadline,
+                    )
+            except Exception:
+                logger.exception(
+                    "github harvest failed",
+                    extra={"event": "harvest_slice_failed"},
+                )
         logger.info("scrape cycle complete", extra={"event": "scrape_cycle_complete"})
     finally:
         if owns_client:

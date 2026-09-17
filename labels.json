@@ -1,0 +1,215 @@
+{
+  "eval_id": "github_repo_gate_v0",
+  "labeler_default": "ale",
+  "updated_at": "2026-09-15T22:00:20.252Z",
+  "labeled_count": 23,
+  "labels": {
+    "github:antonyrag/ragleap-core": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "yes this is the type of junk we need to filter out ",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:38:33.126Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.82
+    },
+    "github:hanyeol/model-compose": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:39:07.935Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.82
+    },
+    "github:Apra-Labs/apra-fleet": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:39:25.704Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.78
+    },
+    "github:MikkoParkkola/mcp-gateway": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:39:42.361Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.78
+    },
+    "github:Mnemosyne-OS/Mnemosyne-Neural-OS": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:46:16.014Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.78
+    },
+    "github:BlocUnited-LLC/mozaiks": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:46:29.862Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.76
+    },
+    "github:Ar9av/agent-manual": {
+      "status": "labeled",
+      "kb_should": "unsure",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:46:40.471Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.75
+    },
+    "github:clayrune-io/clayrune": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:46:59.561Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.75
+    },
+    "github:HongyunQiu/QevosAgent": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:47:12.473Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.72
+    },
+    "github:caura-ai/caura-build-fleet": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:47:21.737Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.72
+    },
+    "github:magicyuan876/mineru-tianshu": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:47:38.202Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.72
+    },
+    "github:sarrazola/openlivery": {
+      "status": "labeled",
+      "kb_should": "unsure",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:48:45.094Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.72
+    },
+    "github:sseshachala/conductai": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:49:08.335Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.72
+    },
+    "github:elevenlabs/packages": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:49:44.609Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.65
+    },
+    "github:smithersai/smithers": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:49:56.954Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.62
+    },
+    "github:seaavey/SRouter": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:50:10.707Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.52
+    },
+    "github:snomiao/agent-yes": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:50:24.171Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.42
+    },
+    "github:sbluemin/fleet-harness": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:50:41.765Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.34
+    },
+    "github:gardnmi/boomux": {
+      "status": "labeled",
+      "kb_should": "junk",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:51:02.861Z",
+      "agent_verdict_at_stamp": "junk",
+      "relevance_score_at_stamp": 0.18
+    },
+    "github:Belkins/ai-dive-deep": {
+      "status": "labeled",
+      "kb_should": "keep",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:51:54.368Z",
+      "agent_verdict_at_stamp": "keep",
+      "relevance_score_at_stamp": 0.92
+    },
+    "github:abundantbeing/hermes-browser-extension": {
+      "status": "labeled",
+      "kb_should": "keep",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:58:23.157Z",
+      "agent_verdict_at_stamp": "keep",
+      "relevance_score_at_stamp": 0.92
+    },
+    "github:HKUDS/LightRAG": {
+      "status": "labeled",
+      "kb_should": "keep",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:58:40.934Z",
+      "agent_verdict_at_stamp": "keep",
+      "relevance_score_at_stamp": 0.91
+    },
+    "github:StructuPath/herdr-browser": {
+      "status": "labeled",
+      "kb_should": "keep",
+      "notes": "",
+      "labeler": "ale",
+      "labeled_at": "2026-09-15T21:59:05.632Z",
+      "agent_verdict_at_stamp": "keep",
+      "relevance_score_at_stamp": 0.89
+    }
+  }
+}

@@ -77,6 +77,6 @@ Optional: log chosen device at startup after model load for easier ops verificat
 
 | Doc | Relevance |
 |-----|-----------|
-| `.dev/llm-models-and-cache.md` | Embedding model and where it runs |
+| `.dev/plans/prompt-caching/artifacts/llm-models-and-cache.md` | Embedding model and where it runs |
 | `.dev/decision-logs/m6-indexing/T2-lancedb-encoder.md` | `EmbeddingEncoder` design (no device binding) |
 | `.dev/decision-logs/m7-read-path/T3-lancedb-duckdb-embedding.md` | Query-side encoder parity |

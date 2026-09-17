@@ -11,6 +11,7 @@ from app.models import AnthropicBatchSubmitResult, PreFilterBatchEntry
 from bishop_shared.anthropic_batch_errors import anthropic_batch_400_event
 from bishop_shared.anthropic_config import ANTHROPIC_MODEL_PREFILTER, get_anthropic_api_key
 from bishop_shared.batch_custom_id import source_id_to_batch_custom_id
+from bishop_shared.prompt_cache import send_cache_warmup_ping
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,21 @@ class AnthropicBatchClient:
                 }
             )
         return requests
+
+    def warm_cache(self, system_blocks: list[dict[str, object]]) -> bool:
+        """Best-effort cache-priming ping for cache key A (FU-CACHE-WARMUP-01).
+
+        Call right before ``submit_pre_filter_batch`` with the same
+        ``system_blocks`` the real batch will use, so the first request of
+        the cohort does not race Anthropic's concurrent batch scheduler for
+        the cache write. Never raises — see
+        ``bishop_shared.prompt_cache.send_cache_warmup_ping``.
+        """
+        return send_cache_warmup_ping(
+            self._client,
+            model=ANTHROPIC_MODEL_PREFILTER,
+            system_blocks=system_blocks,
+        )
 
     def submit_pre_filter_batch(
         self,

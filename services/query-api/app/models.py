@@ -107,3 +107,42 @@ class BatchDetailEnrichedResponse(BaseModel):
 class UpstreamErrorResponse(BaseModel):
     error: str = "upstream_error"
     status: int
+
+
+class StatBucket(BaseModel):
+    label: str
+    count: int
+
+
+class DailyCount(BaseModel):
+    date: str
+    count: int
+
+
+class StatsOverview(BaseModel):
+    generated_at: datetime
+    manifest_total: int
+    entries_total: int
+    indexed_total: int
+    pre_filter_decided: int
+    pre_filter_passed: int
+    funnel: list[StatBucket]
+    queue_depth: list[StatBucket]
+    relevance_histogram: list[StatBucket]
+    by_domain: list[StatBucket]
+    by_source: list[StatBucket]
+    by_entry_type: list[StatBucket]
+    top_tags: list[StatBucket]
+    reading_status: list[StatBucket]
+    ingest_by_day: list[DailyCount]
+    batches_total: int
+    batches_by_status: list[StatBucket]
+    batches_by_type: list[StatBucket]
+    recent_errors: list[StatBucket]
+    harvest_pool_size: int = 0
+    harvest_unreleased: int = 0
+    harvest_released_today: int = 0
+    harvest_n_cap: int = 0
+    harvest_budget_usd: float = 0.0
+    harvest_projected_usd_today: float = 0.0
+    harvest_sidecar_present: bool = False

@@ -1,0 +1,10 @@
+# Harvest release budget. Operator sets dollars. N_cap is derived.
+# Recalibrate unit costs by commit after a cache-hit batch — not at runtime.
+# Live Anthropic usage on batches is PB-002 (poller already parses; does not persist).
+
+daily_budget_usd: 2.00
+unit_gate1_usd: 0.0005
+unit_enrich_usd: 0.012
+github_paid_path_rate: 0.022
+paper_daily_g1_reserve: 400
+paper_paid_path_rate: 0.15

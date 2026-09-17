@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — BISHOP{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+{% include "partials/dashboard_stats.html" %}
+{% endblock %}

@@ -1,0 +1,290 @@
+{
+  "batch": 5,
+  "reviewer": "agent",
+  "items": [
+    {
+      "source_id": "github:vitali87/code-graph-rag",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Shipped code-intelligence system: Tree-sitter parse into a Memgraph knowledge graph plus AST-based query/edit, with PyPI and CI in the excerpt. Badge-heavy README, but the artifact and technique are specific enough to study.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "summary",
+          "quote": "parses multi-language codebases with Tree-sitter, builds a knowledge graph in Memgraph"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "https://pypi.org/project/code-graph-rag/"
+        }
+      ]
+    },
+    {
+      "source_id": "github:elevenlabs/packages",
+      "agent_verdict": "junk",
+      "confidence": "high",
+      "why": "Official vendor SDK landing: install a React hook, pass agentId, startSession. A practitioner would consume the package, not study the monorepo for a reusable technique.",
+      "signals": ["product_landing", "boilerplate", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Build multimodal agents with [ElevenAgents](https://elevenlabs.io/docs/eleven-agents/overview)."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "const conversation = useConversation({\n  agentId: \"your-agent-id\",\n});"
+        }
+      ]
+    },
+    {
+      "source_id": "github:AgamiAI/agami-core",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Concrete LLM-to-SQL governance: live-schema YAML model, FK-derived joins, signed metrics, and a pre-query audit receipt. Product tagline is loud, but the receipt-before-execution pattern is stealable.",
+      "signals": ["runnable_artifact", "real_technique", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "a governed, self-improving semantic model that enforces correct joins, signed-off metric definitions, and a full audit receipt on every answer"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "That last line returns a **governed answer with a receipt** (the exact SQL, the joins used, the model version)"
+        }
+      ]
+    },
+    {
+      "source_id": "github:kenryu42/cc-safety-net",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Pre-execution interceptor that semantically parses agent shell calls so flag-wrapping cannot hide rm/git-force/secret reads. Narrow, deployable safety technique worth copying.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "blocks destructive commands and access to secrets such as SSH keys and `.env` files before the tool call runs. It parses what the command does."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Wrapping the command or reordering flags does not hide it."
+        }
+      ]
+    },
+    {
+      "source_id": "github:Ephemeral-AI-Lab/layerfs",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "SQLite-backed CAS/CDC/COW filesystem that gives each tool call an ephemeral workspace and zero-copy branches instead of cloning environments. Real storage technique for parallel agent rollouts.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "LayerFS is a **SQLite-backed, content-addressed time machine for agent\nWorkspaces**."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "CAS, CDC, and COW store one shared base plus unique\ndeltas instead of cloning full environments."
+        }
+      ]
+    },
+    {
+      "source_id": "github:cortexkit/aft",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Published crate/npm toolkit for agent code perception and mutation (outline, callgraph, AST edit, PTY, undo), not just a prompt wrapper. Excerpt is banner-heavy so confidence stays medium.",
+      "signals": ["runnable_artifact", "real_technique", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Give your agent a proper IDE and OS."
+        },
+        {
+          "field": "summary",
+          "quote": "structured code perception (outline, zoom, search, callgraph), precise editing (edit, write, patch, import)"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "https://crates.io/crates/agent-file-tools"
+        }
+      ]
+    },
+    {
+      "source_id": "github:daidaiJ/websearch-mcpserver",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "MCP search servers are a crowded genre, but this excerpt specifies local multi-engine fusion (RRF/Boost/MMR), academic DOI dedup, SSRF-guarded fetch, and SQLite cache. Enough architecture to steal from.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "| **编排** | `factory` 按 mode 组装 · `hybrid` 并发去重合并 · RRF / Boost / MMR 评分 |"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "| **支撑** | SQLite 缓存、系统代理自动检测、webfetch（SSRF 防护）、MinerU、LLM 流式摘要 |"
+        }
+      ]
+    },
+    {
+      "source_id": "github:dlants/magenta.nvim",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Author-built Neovim agent with named mechanics (EDL edits, OS sandbox, Docker sub-agents, thread compaction) and an explicit comparison to CLI harnesses. A real editor-agent artifact to study.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "summary",
+          "quote": "Edit Description Language for efficient code edits, Docker sub-agents for parallel work, and thread-based conversation management with token-aware auto-compaction"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Why would I use this instead of claude code / another cli agent harness?"
+        }
+      ]
+    },
+    {
+      "source_id": "github:objectstack-ai/objectstack",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Framework pitch is commercial, but the stealable idea is explicit: a versioned Zod business ontology small enough for one context window, compiled into DB/API/UI/MCP with author-time validation. Not an empty landing.",
+      "signals": ["real_technique", "product_landing", "hype_tagline"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "into typed metadata that fits in a single context window. Agents read it\n> whole, reason it whole, refactor it whole."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "the runtime derives the database, REST API,\n> UI, and MCP server, and enforces permissions and audit on every call."
+        }
+      ]
+    },
+    {
+      "source_id": "github:redhat-et/ripwire",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "C++ static-analysis CLI that hands an agent a ranked deterministic call graph instead of whole-file greps, with CI/releases and a documented paper/tool lineage. Clear reusable context-compression technique.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "your agent gets a ranked, deterministic call graph — what to touch,\nwhat it breaks, which tests to run — instead of grepping around and reading whole files."
+        },
+        {
+          "field": "summary",
+          "quote": "reduces token consumption and improves context quality by providing symbol rankings, dependency maps, and risk annotations"
+        }
+      ]
+    },
+    {
+      "source_id": "github:siropkin/chrome-bridge",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "Tiny extension plus zero-dep Node CLI that drives the already-logged-in Chrome profile via a11y snapshots and element refs. Concrete, copyable agent-browser I/O, not a Playwright wrapper README.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "it drives the Chrome you're logged into — that's the only mode — with one small extension and one zero-dependency Node CLI."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "node cli.mjs snap localhost:8082         # compact a11y snapshot with element refs"
+        }
+      ]
+    },
+    {
+      "source_id": "github:smithersai/smithers",
+      "agent_verdict": "junk",
+      "confidence": "high",
+      "why": "Hosted 'codebase maintainer' product landing: generated README, private-alpha web app, CLI not on npm yet. No flow schema or execution-engine detail a practitioner could steal.",
+      "signals": ["product_landing", "hype_tagline", "thin_readme"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "The codebase maintainer agent"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "The hosted private alpha is free for selected public repositories."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "The 1.0 release candidate is not on npm yet."
+        }
+      ]
+    },
+    {
+      "source_id": "github:yinnho/aginxbrowser",
+      "agent_verdict": "unsure",
+      "confidence": "medium",
+      "why": "Claims a Chromium-free Rust engine with hard bench numbers and MCP/CDP APIs, but the excerpt is also a hosted-product comparison table. Cannot tell study-worthy engine from browser-agent marketing.",
+      "signals": ["hype_tagline", "product_landing"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "Humans have Chrome. Agents have AginxBrowser."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "one Rust binary with built-in V8, **no Chromium required**."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "**7.6× faster** to agent-usable text (p50 532 ms vs 4 053 ms)"
+        }
+      ]
+    },
+    {
+      "source_id": "github:Sonofg0tham/Quell",
+      "agent_verdict": "keep",
+      "confidence": "high",
+      "why": "VS Code/scanner that redacts outbound secrets into OS Keychain placeholders and decodes inbound hidden-text instructions. Bidirectional prompt-guard technique a practitioner would copy.",
+      "signals": ["runnable_artifact", "real_technique"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "scans your prompts for API keys, tokens, passwords and connection strings, and replaces them with secure placeholders before the AI ever sees them."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "finds instructions hidden in your files that are addressed to your AI assistant rather than to you — written in characters that render as nothing"
+        }
+      ]
+    },
+    {
+      "source_id": "github:hoveychen/claw-fleet",
+      "agent_verdict": "keep",
+      "confidence": "medium",
+      "why": "Shipped desktop/web dashboard that reads Claude Code/Codex session files and funnels approvals into one inbox. Ops artifact a multi-agent user would open; excerpt is install-heavy so not high confidence.",
+      "signals": ["runnable_artifact", "product_landing"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "One dashboard for every **Claude Code**, **Codex** and **DeepSeek Harness** session you run"
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Claw Fleet reads the session files it writes."
+        }
+      ]
+    },
+    {
+      "source_id": "github:seaavey/SRouter",
+      "agent_verdict": "junk",
+      "confidence": "high",
+      "why": "Local OpenAI/Anthropic gateway with virtual keys, quotas, and a dashboard — the standard LiteLLM/OpenRouter clone. On-topic serving boilerplate, not a technique to study.",
+      "signals": ["clone_wrapper", "boilerplate", "product_landing"],
+      "citations": [
+        {
+          "field": "content_excerpt",
+          "quote": "A local-first AI gateway and LLM proxy for OpenAI, Anthropic, and custom models."
+        },
+        {
+          "field": "content_excerpt",
+          "quote": "Use one local endpoint to route requests, manage provider authentication, enforce quotas, and inspect usage."
+        }
+      ]
+    }
+  ]
+}

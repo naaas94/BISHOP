@@ -1,0 +1,23 @@
+---
+description: Per-source taste, shape, and intel live in config/source-notes/ — read before changing fetch, gate, or windows
+alwaysApply: true
+---
+
+# Bishop source notes
+
+Authoritative per-source taste + intel: `config/source-notes/` (index in `README.md`).
+
+These files are **not** a second pre-filter pin and **not** per-source routing. Gate 1 stays one profile until an eval earns a split (`repo-gate-next.md` option 3 is not earned).
+
+## Before you change a source
+
+Read `config/source-notes/<source>.md` for that adapter (`arxiv`, `github`, `huggingface`, `lesswrong`, `openreview`, `paperswithcode`, `semantic_scholar`).
+
+Append dated intel. Do not silently rewrite history. Do not treat Call 2 `relevance_score` as gold.
+
+## Load-bearing facts (easy to get wrong)
+
+- GitHub bar is **steal from this codebase**, not topic match. Option 1 (stricter Shape 2, same pin) is live. Overlay lookback is **60 days**. Option 3 (GitHub-only profile) is not earned. Do **not** rewind Hugging Face.
+- Do **not** rewind Hugging Face. Papers with Code API is dead.
+- ArXiv category gate is `config/sources/arxiv.yaml` (primary category only). Source notes are a different file.
+- Frozen gold: `eval/prefilter_v0/`. GitHub spotcheck packet: `eval/github_repo_gate_v0/`.

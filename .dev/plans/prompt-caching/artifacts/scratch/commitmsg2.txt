@@ -1,0 +1,3 @@
+T4 (prompt-caching): author call2_rubric_v1.md (cache key C)
+
+Added config/prompts/call2_rubric_v1.md, a stamped rubric annex governing enrichment Call 2's relevance_score float scoring (score bands, anchor-weight guidance, 15 worked examples, value_rationale guidance, miscalibration traps) without reintroducing gate 1 binary decision contract. Measured against the include_output=False profile render (348 tokens) T7 will use for key C; total prefix 348+4379+82=4809 tokens clears the 4506-token floor by 303. Extended tests/test_rubric_assets.py with 4 tests against the real committed asset. See .dev/decision-logs/prompt-caching/T4-call2-rubric.md.

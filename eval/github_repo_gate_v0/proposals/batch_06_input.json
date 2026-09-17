@@ -1,0 +1,507 @@
+{
+  "batch": 6,
+  "items": [
+    {
+      "source_id": "github:gregbarbosa/fm-proxy",
+      "title": "fm-proxy",
+      "url": "https://github.com/gregbarbosa/fm-proxy",
+      "github_url": "https://github.com/gregbarbosa/fm-proxy",
+      "bishop_ui": "http://localhost:8081/entries/github:gregbarbosa/fm-proxy",
+      "published_at": "2026-09-11T13:07:59+00:00",
+      "ingested_at": "2026-09-11T15:34:07.786853+00:00",
+      "relevance_score": 0.45,
+      "relevance_reason": "Relevant for LLM inference serving patterns and on-device model deployment, but limited applicability since it's specific to Apple Foundation Models and doesn't address core RAG, agentic, or document intelligence workflows.",
+      "value_rationale": "Useful reference for understanding OpenAI API compatibility layers and protocol bridging, which could inform serving infrastructure decisions. However, on-device Apple models have narrow production adoption compared to cloud-hosted LLMs typically used in RAG and agentic systems.",
+      "entry_type": "repo",
+      "tags": [
+        "serving",
+        "tool-use",
+        "structured-output",
+        "inference",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "OpenAI API compatibility layer",
+        "Protocol normalization and correction",
+        "Schema resolution and validation",
+        "Tool/function calling with constrained decoding",
+        "Streaming chat completions",
+        "Error handling and retry logic",
+        "CORS and cross-origin request handling",
+        "Token counting fallback"
+      ],
+      "challenge_hooks": [
+        "How to use Apple Foundation Models with standard OpenAI client libraries without code changes",
+        "Fixing tool/function calling failures when auto tool choice returns no structured output",
+        "Resolving schema validation errors with $defs/$ref patterns in constrained decoding",
+        "Handling chat template marker leaks and protocol deviations in local model serving"
+      ],
+      "summary": "OpenAI-compatible proxy for Apple Foundation Models CLI on macOS 27, enabling standard OpenAI clients to access on-device models while correcting protocol deviations, schema issues, tool-calling bugs, and template marker leaks.",
+      "pre_filter_rationale": "Applied systems: a working reference for local model API integration and inference-economics routing (cost-free local inference vs. API calls); directly applicable to multi-model orchestration and dev workflows on macOS.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# fm-proxy\n\nAn OpenAI-compatible endpoint for Apple's Foundation Models CLI. Point any OpenAI\nclient at `http://127.0.0.1:1977/v1` and use Apple's on-device model without code\nchanges.\n\nmacOS 27 ships `fm serve`, which already speaks Chat Completions. It also departs from\nthe OpenAI specification in ways that break ordinary clients. `fm-proxy` sits in front\nof it and corrects those departures.\n\n> [!CAUTION]\n> **Read the licence before you use this.**\n>\n> macOS 27.0 Beta 5 added a legal notice. You must accept it before `fm` runs at all.\n> Run `sudo fm license` to read it and accept it. After that, `fm license --show`\n> prints the text again without prompting, and `fm license --status` reports the\n> version you agreed to. The 27.0 RC still carries the same text, recorded as\n> `FM1 version 1.0`. It says:\n>\n> > YOU ARE ALSO AGREEING TO NOT PROGRAMMATICALLY ACCESS OR USE APPLE MODELS THROUGH\n> > APPLE SOFTWARE OR SERVICES EXCEPT AS EXPRESSLY PERMITTED.\n>\n> `fm-proxy` accesses Apple models programmatically. That is its only function. Apple\n> does not publish the list of permitted uses, so I cannot show that this tool is\n> inside the exception. Read plainly, this tool conflicts with the terms that you\n> accept.\n>\n> Use `fm-proxy` at your own risk. Keep it on your own machine. Do not put it in a\n> product or a commercial deployment. For a supported path, use the\n> [Foundation Models framework][fmf] in a signed app.\n\n[fmf]: https://developer.apple.com/documentation/foundationmodels\n\n## State on the 27.0 RC\n\nTested on macOS 27.0 RC (`26A428`), which ships `fm` 2.0.68.1.402. Beta 7 and Beta 8\nship the same `fm` build and behave the same way, apart from the tool-call content\ndescribed below.\n\n> [!IMPORTANT]\n> **Beta 7 removed the `pcc` model, and the RC does not bring it back. Private Cloud\n> Compute is gone from `fm`.**\n>\n> `fm` accepts only `system` now. `fm respond -m pcc` answers `Please provide one of\n> 'system'`. The `fm quota-usage` subcommand is deleted. `fm serve` answers a request\n> for `pcc` with `400 Unknown model 'pcc'. Available models: system`.\n>\n> This is a change in the binary, not a licence or account state. Every PCC feature\n> that earlier notes describe\n…[truncated]"
+    },
+    {
+      "source_id": "github:snomiao/agent-yes",
+      "title": "agent-yes",
+      "url": "https://github.com/snomiao/agent-yes",
+      "github_url": "https://github.com/snomiao/agent-yes",
+      "bishop_ui": "http://localhost:8081/entries/github:snomiao/agent-yes",
+      "published_at": "2026-09-14T04:22:14+00:00",
+      "ingested_at": "2026-09-14T04:28:17.039250+00:00",
+      "relevance_score": 0.42,
+      "relevance_reason": "Touches the agentic-systems anchor (weight 1.0) through multi-agent coordination and process orchestration, but the system is a thin wrapper around existing CLI tools without a novel pattern, architectural decision, or production failure mode to extract.",
+      "value_rationale": "Demonstrates a file-based IPC coordination pattern for CLI agents with crash recovery, which could serve as a reference for orchestrating heterogeneous tool lifecycles, though the implementation is tool-specific and lacks measured tradeoffs or scaling boundaries.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "tool-use",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "CLI automation wrapper",
+        "multi-tool agent orchestration",
+        "auto-response pattern matching",
+        "process lifecycle management",
+        "file-based IPC (named pipes, FIFO)",
+        "crash recovery and restarts",
+        "idle detection",
+        "context injection via SKILL.md"
+      ],
+      "challenge_hooks": [
+        "automating repetitive yes/no prompts across multiple AI coding assistants without manual confirmation",
+        "coordinating independent AI agent processes without a central daemon while handling crashes and process isolation",
+        "reducing latency overhead of CLI-based AI tools in local development workflows"
+      ],
+      "summary": "A Rust-based wrapper automating interactions with multiple AI CLI tools (Claude, Codex, Copilot, Cursor, Qwen, Grok, Auggie) by auto-responding to common prompts, managing process lifecycle, and coordinating agents through file-based IPC with crash recovery and idle detection.",
+      "pre_filter_rationale": "Applied dev-skills anchor: a runnable harness for orchestrating LLM coding agents with local control, retries, and steering—exactly the agent-orchestration and dev-flow technique the profile targets for reuse this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Agent-Yes! for Claude/Codex/Cursor/Copilot/Qwen/Auggie\n\nA wrapper tool that automates interactions with various AI CLI tools by automatically handling common prompts and responses. Originally designed for Claude CLI, now supports multiple AI coding assistants. Rewritten in Rust for improved performance and reliability.\n\n⚠️ **Important Security Warning**: Only run this on trusted repositories. This tool automatically responds to prompts and can execute commands without user confirmation. Be aware of potential prompt injection attacks where malicious code or instructions could be embedded in files or user inputs to manipulate the automated responses.\n\n## Install\n\nOne-liner (installs Bun if needed, then the `ay` / `cy` / `claude-yes` … CLIs):\n\n```bash\n# macOS / Linux\ncurl -fsSL https://agent-yes.com/setup.sh | sh\n```\n\n```powershell\n# Windows (works in both PowerShell and cmd)\npowershell -c \"irm https://agent-yes.com/setup.ps1 | iex\"\n```\n\nOr with a package manager you already have:\n\n```bash\nbun add -g agent-yes      # or: npm install -g agent-yes\n```\n\nThen: `ay claude` (run an agent with auto-yes) · `ay serve --share` (web console + shareable link) · live console at https://agent-yes.com\n\n`ay` on its own prints the command list — `ay` **is** agent-yes, the fleet manager, so\nstarting an agent names a CLI (`ay claude`, `ay codex`, …). `cy` remains the one-word\nshortcut that launches claude with no arguments.\n\nFor the local web console, install [Portless](https://portless.sh/) once with `npm install -g portless`, then run `ay serve`. It assigns a free internal port and serves the console at `https://agent-yes.localhost/`. `ay serve --port N` remains available for a fixed-port API listener.\n\n## Features\n\n- **Multi-CLI Support**: Works with Claude, Codex, Copilot, and Cursor CLI tools\n- **Auto-Response**: Automatically responds to common prompts like \"Yes, proceed\" and \"Yes\"\n- **Continuous Operation**: Keeps the AI assistant running until your task is done, waiting for your next prompt\n- **Interactive Control**: You can still queue more prompts or cancel executing tasks with `ESC` or `Ctrl+C`\n- **Crash Recovery**: Automatically restarts crashed processes (where support\n…[truncated]"
+    },
+    {
+      "source_id": "github:vshulcz/deja-vu",
+      "title": "deja-vu",
+      "url": "https://github.com/vshulcz/deja-vu",
+      "github_url": "https://github.com/vshulcz/deja-vu",
+      "bishop_ui": "http://localhost:8081/entries/github:vshulcz/deja-vu",
+      "published_at": "2026-09-14T04:22:14+00:00",
+      "ingested_at": "2026-09-14T04:28:17.480983+00:00",
+      "relevance_score": 0.41,
+      "relevance_reason": "Touches the agentic-systems anchor (weight 1.0) through agent memory architecture, but the focus is narrowly on coding-agent session history rather than general agent orchestration or decision-making patterns, and the evaluation is proprietary-benchmark-focused rather than production-failure-mode or architectural-tradeoff analysis.",
+      "value_rationale": "Documents a cross-tool session-indexing pattern with specific latency targets and hit-rate numbers on defined benchmarks, useful as a reference if building coding-agent memory, but does not provide generalizable design patterns or failure-mode insights that transfer to non-coding-agent agentic systems.",
+      "entry_type": "repo",
+      "tags": [
+        "memory-architecture",
+        "agentic",
+        "tool-use",
+        "benchmark",
+        "production"
+      ],
+      "concepts": [
+        "cross-agent memory",
+        "session indexing",
+        "retrieval-augmented recall",
+        "coding-agent history",
+        "credential sanitization",
+        "LongMemEval-S",
+        "LoCoMo benchmark"
+      ],
+      "challenge_hooks": [
+        "how to give coding agents shared memory of past fixes without duplicating work across tools",
+        "retrieving relevant session history from gigabytes of agent transcripts at prompt time",
+        "preventing credential and token leakage when indexing agent session data for model access"
+      ],
+      "summary": "deja-vu indexes coding-agent session history across Claude Code, Codex, Cursor and other tools, providing millisecond-latency cross-agent memory retrieval with 85.3% hit@1 on LongMemEval-S and 69.7% on LoCoMo, stripping credentials before model exposure.",
+      "pre_filter_rationale": "Applied dev-skill: a reusable technique for cross-session fix propagation across coding agents using local indexing, directly implementable this week without LLM or embeddings overhead.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"assets/logo-dark.svg\">\n    <img src=\"assets/logo.svg\" width=\"330\" alt=\"deja-vu\">\n  </picture>\n</p>\n\n<p align=\"center\"><b>The one memory your coding agents share, built from the history already on your disk.</b></p>\n\n<p align=\"center\">Your agent is about to re-debug something you fixed in March — in a different agent.\ndeja indexes the sessions Claude Code, Codex, Cursor and every other agent on this machine\nalready wrote to disk, and hands the right one back in whichever agent asks.</p>\n\n<p align=\"center\"><img src=\"assets/demo.gif\" width=\"720\" alt=\"The same question put to the same agent twice: without memory it has no record of it, with deja it answers with the decision from eight months earlier\"></p>\n\n<p align=\"center\"><sub><em>Nobody searched anything — the agent called deja itself. Every line is quoted from two real sessions.</em></sub></p>\n\n<p align=\"center\"><b>Every memory tool starts empty and records forward. deja starts full.</b></p>\n\n<p align=\"center\">And nobody has to ask for it: recall arrives at session start, on every prompt,\nbefore a file is edited or a command runs, and after one fails. Keys and tokens are stripped as\nthe index is built, so what reaches the model is safe to send.</p>\n\n<p align=\"center\">\n<b>85.3% hit@1</b> on LongMemEval-S &middot; <b>69.7%</b> on LoCoMo &middot; <b>millisecond</b> lookups over gigabytes of history<br>\n<sub>Both harnesses ship in this repo and run on the public datasets in minutes &middot;\n<a href=\"https://vshulcz.github.io/deja-vu/guide/benchmarks.html\">check the numbers yourself</a></sub>\n</p>\n\n<p align=\"center\">\n  <a href=\"https://github.com/vshulcz/deja-vu/actions/workflows/ci.yml\"><img src=\"https://github.com/vshulcz/deja-vu/actions/workflows/ci.yml/badge.svg\" alt=\"CI\"></a>\n  <a href=\"https://github.com/vshulcz/deja-vu/releases\"><img src=\"https://img.shields.io/github/v/release/vshulcz/deja-vu\" alt=\"Release\"></a>\n  <a href=\"https://mcptoplist.com/server/io.github.vshulcz%2Fdeja-vu\"><img src=\"https://mcptoplist.com/badge/io.github.vshulcz%2Fdeja-vu.svg\" alt=\"MCP Toplist\"></a>\n  <a href=\"LICENSE\"><img src=\"https://img.shields\n…[truncated]"
+    },
+    {
+      "source_id": "github:DeusData/codebase-memory-mcp",
+      "title": "codebase-memory-mcp",
+      "url": "https://github.com/DeusData/codebase-memory-mcp",
+      "github_url": "https://github.com/DeusData/codebase-memory-mcp",
+      "bishop_ui": "http://localhost:8081/entries/github:DeusData/codebase-memory-mcp",
+      "published_at": "2026-09-14T04:11:04+00:00",
+      "ingested_at": "2026-09-14T04:42:28.015150+00:00",
+      "relevance_score": 0.38,
+      "relevance_reason": "Touches the agentic-systems anchor tangentially through MCP tool integration and touches document intelligence peripherally through semantic code search, but the core value (codebase indexing and analysis) sits outside all five anchors—it is a developer-productivity tool rather than an LLM retrieval, document extraction, inference, or observability system.",
+      "value_rationale": "Demonstrates a concrete MCP-server pattern for tool provisioning that an agent could call, and the 120x token-reduction insight is noteworthy for cost control in agent contexts; however, the item does not address how to integrate this into an agentic workflow, how to handle tool-call failures, or how to evaluate whether this pattern scales to multiple agents—it remains a single isolated tool rather than an architectural pattern the profile owner would apply to their own systems.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "memory-architecture",
+        "tool-use",
+        "optimization",
+        "production",
+        "architecture"
+      ],
+      "concepts": [
+        "MCP (Model Context Protocol) server",
+        "tree-sitter grammar indexing",
+        "in-memory SQLite with LZ4 compression",
+        "call-graph and data-flow analysis",
+        "semantic search with bundled Nomic embeddings",
+        "Cypher-like graph query language",
+        "hybrid LSP semantic type resolution",
+        "infrastructure-as-code indexing (Kubernetes/Docker/Kustomize)"
+      ],
+      "challenge_hooks": [
+        "how to give code-understanding agents a queryable codebase graph without API dependencies or recompilation",
+        "indexing large multi-language codebases fast enough for incremental agent workflows with minimal memory footprint",
+        "cross-repo architecture discovery and impact analysis in a single semantic graph query"
+      ],
+      "summary": "An MCP server that indexes entire codebases into an in-memory SQLite graph with 162 vendored tree-sitter languages, supporting semantic search, call-graph analysis, dead-code detection, and cross-repo architecture visualization via 15 MCP tools and a 3D UI, with extreme indexing speed (28M LOC in 3 minutes) and 120x token reduction vs file-by-file search.",
+      "pre_filter_rationale": "Applied dev-skills artifact: a reusable indexing and query tool for code intelligence that directly addresses token efficiency and latency in agentic code workflows—a working reference for agent-assisted engineering and codebase tooling I would integrate this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# codebase-memory-mcp\n\n[![GitHub Release](https://img.shields.io/github/v/release/DeusData/codebase-memory-mcp?style=flat&color=blue)](https://github.com/DeusData/codebase-memory-mcp/releases/latest)\n[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)\n[![CI](https://img.shields.io/github/actions/workflow/status/DeusData/codebase-memory-mcp/dry-run.yml?label=CI)](https://github.com/DeusData/codebase-memory-mcp/actions/workflows/dry-run.yml)\n[![Tests](https://img.shields.io/badge/tests-6768_passing-brightgreen)](https://github.com/DeusData/codebase-memory-mcp)\n[![Languages](https://img.shields.io/badge/languages-162-orange)](https://github.com/DeusData/codebase-memory-mcp)\n[![Hybrid LSP](https://img.shields.io/badge/Hybrid_LSP-10_languages-blue)](#hybrid-lsp)\n[![Agents](https://img.shields.io/badge/agent_surfaces-45-purple)](https://github.com/DeusData/codebase-memory-mcp)\n[![Pure C](https://img.shields.io/badge/pure_C-no_language_runtime-blue)](https://github.com/DeusData/codebase-memory-mcp)\n[![Platform](https://img.shields.io/badge/macOS_%7C_Linux_%7C_Windows-supported-lightgrey)](https://github.com/DeusData/codebase-memory-mcp/releases/latest)\n[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/DeusData/codebase-memory-mcp/badge)](https://scorecard.dev/viewer/?uri=github.com/DeusData/codebase-memory-mcp)\n[![SLSA 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)\n[![VirusTotal](https://img.shields.io/badge/VirusTotal-scanned_every_release-brightgreen?logo=virustotal)](https://github.com/DeusData/codebase-memory-mcp/releases/latest)\n[![arXiv](https://img.shields.io/badge/arXiv-2603.27277-b31b1b?logo=arxiv)](https://arxiv.org/abs/2603.27277)\n\n**The fastest and most efficient code intelligence engine for AI coding agents.** Full-indexes an average repository in milliseconds, the Linux kernel (28M LOC, 75K files) in 3 minutes. Answers structural queries in under 1ms. Ships as a native executable with a small verified runtime-asset set for macOS, Linux, and Windows — download, run `install`, done.\n\nHigh-quality parsing through [tree-sitter](https://tree-sitter.github.io/tree-sitter/) AST analysis across all 162 langu\n…[truncated]"
+    },
+    {
+      "source_id": "github:brekkylab/backlot",
+      "title": "backlot",
+      "url": "https://github.com/brekkylab/backlot",
+      "github_url": "https://github.com/brekkylab/backlot",
+      "bishop_ui": "http://localhost:8081/entries/github:brekkylab/backlot",
+      "published_at": "2026-09-15T02:10:22+00:00",
+      "ingested_at": "2026-09-15T02:23:33.152392+00:00",
+      "relevance_score": 0.38,
+      "relevance_reason": "Tangentially touches the agentic-systems anchor through tool-use testing infrastructure, but is fundamentally a test-infrastructure library with no retrieval, document intelligence, inference, or evaluation content specific to the profile's production concerns.",
+      "value_rationale": "Useful as a local mock-API layer for testing agents that call external SaaS tools, but the item itself is a testing harness—not an agentic architecture, failure-mode analysis, or orchestration pattern—and offers no techniques applicable to the profile owner's core work beyond 'mock the APIs you depend on.'",
+      "entry_type": "repo",
+      "tags": [
+        "production",
+        "orchestration",
+        "evaluation"
+      ],
+      "concepts": [
+        "API emulation",
+        "local development server",
+        "SQLite corpus",
+        "deterministic responses",
+        "authentication and ACLs",
+        "multi-service API gateway",
+        "official SDK compatibility"
+      ],
+      "challenge_hooks": [
+        "testing integrations against multiple enterprise APIs without vendor accounts or OAuth setup",
+        "reproducing and debugging API behavior against a controlled corpus in CI without network dependencies",
+        "evaluating RAG and agent systems with deterministic API responses across runs"
+      ],
+      "summary": "A local API emulator for Slack, Gmail, GitHub, Jira, Notion, S3 and other enterprise SaaS APIs, serving deterministic responses over HTTP with pagination, authentication, and per-document ACLs from a SQLite corpus—enabling integration testing without vendor accounts, OAuth, or secrets.",
+      "pre_filter_rationale": "Applied systems: a concrete, runnable artifact for local SaaS API emulation that solves a real production problem (testing and development against realistic enterprise API contracts without live calls). This is exactly the kind of reusable dev-skills and testing infrastructure an applied engineer building LLM systems (especially agentic and RAG pipelines that integrate with these services) would implement from or adapt this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Backlot\n\n[![python](https://img.shields.io/pypi/pyversions/backlot)](https://pypi.org/project/backlot/)\n[![PyPI](https://img.shields.io/pypi/v/backlot)](https://pypi.org/project/backlot/)\n[![tests](https://github.com/brekkylab/backlot/actions/workflows/ci.yml/badge.svg)](https://github.com/brekkylab/backlot/actions/workflows/ci.yml)\n[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)\n\n[![Discord](https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white)](https://discord.gg/XCSsxYH6R)\n[![X](https://img.shields.io/badge/Tweet-000000?logo=x&logoColor=white)](https://x.com/brekkylab)\n\n**Run enterprise SaaS APIs locally.**\n\nBacklot is a local emulator for Slack, Gmail, Google Drive, GitHub, Jira, Notion, S3 and other enterprise APIs. It reproduces the response shapes, pagination, authentication, errors and per-document access controls an integration has to handle, over a deterministic corpus you control — so you build and test against the official vendor SDKs with **no vendor account**, **no OAuth approval**, **no secrets in CI** and **no network**.\n\n![Connecting Slack to an app, two ways, side by side. On the left, the real Slack API: create a workspace, register an app, add a bot user, pick OAuth scopes, register a redirect URL, install to the workspace — then wait on an admin to approve it, with still zero API calls made. On the right, Backlot: pip install, backlot serve, and one changed base URL, after which a conversations.history response comes back with the same fields, pagination and per-document ACLs. A day gone, against seconds.](assets/demo.gif)\n\n## Try it in 60 seconds\n\n```bash\npip install backlot\nbacklot import --bundled   # a corpus ships with the package; nothing to fetch or write\nbacklot serve              # every supported API, at http://127.0.0.1:8000\n```\n\nPoint an official SDK at it by changing one base URL:\n\n```python\nfrom slack_sdk import WebClient  # pip install slack_sdk\n\nslack = WebClient(token=\"admin-service-token\", base_url=\"http://127.0.0.1:8000/slack/api/\")\nprint(slack.conversations_list()[\"channels\"])\n```\n\nThe same call targets Slack in production and Backlot in development. Backlot supplies the\n…[truncated]"
+    },
+    {
+      "source_id": "github:block/schemabot",
+      "title": "schemabot",
+      "url": "https://github.com/block/schemabot",
+      "github_url": "https://github.com/block/schemabot",
+      "bishop_ui": "http://localhost:8081/entries/github:block/schemabot",
+      "published_at": "2026-09-12T05:52:43+00:00",
+      "ingested_at": "2026-09-12T06:10:46.829079+00:00",
+      "relevance_score": 0.35,
+      "relevance_reason": "SchemaBot is a specialized database operations tool addressing schema migration safety, which is orthogonal to core NLP/RAG/agentic ML work unless the tool itself enables agent-driven database modifications.",
+      "value_rationale": "Marginally relevant only if evaluating agentic systems that need to modify backend schemas or if considering database-as-a-tool in multi-agent workflows; otherwise low priority compared to retrieval, inference, and orchestration concerns.",
+      "entry_type": "repo",
+      "tags": [
+        "deployment",
+        "production",
+        "safety",
+        "orchestration",
+        "agentic"
+      ],
+      "concepts": [
+        "declarative schema",
+        "DDL computation and linting",
+        "zero-downtime online migrations",
+        "schema diffing",
+        "merge-blocking checks",
+        "multi-environment promotion",
+        "agent-ready guardrails",
+        "PR-based workflow integration"
+      ],
+      "challenge_hooks": [
+        "How to safely execute schema changes across production databases without downtime or manual migration scripts",
+        "Enabling AI agents to evolve database schemas while maintaining safety guardrails and audit trails",
+        "Automating schema change workflows in CI/CD with version-controlled, linted DDL and environment promotion ordering",
+        "Providing real-time visibility and control (pause, resume, rollback) over long-running online schema migrations"
+      ],
+      "summary": "SchemaBot enables safe, fast database schema changes through declarative SQL files integrated with PR workflows. It computes DDL, enforces linting/safety gates, executes with zero-downtime online migrations, and provides agent-ready guardrails for MySQL, Vitess, and PostgreSQL.",
+      "pre_filter_rationale": "Applied systems write-up of schema evolution and breaking-change management in agentic tool-use workflows; directly actionable pattern for production multi-agent orchestration.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <img src=\"./assets/schemabot-avatar.svg\" alt=\"SchemaBot\" width=\"140\" />\n</p>\n\n<h1 align=\"center\">SchemaBot</h1>\n\n<p align=\"center\"><b>Ship schema changes as fast as your code, with the safety net your database deserves</b></p>\n\n<p align=\"center\">\n  <img alt=\"MySQL: GA\" src=\"https://img.shields.io/badge/MySQL-GA-brightgreen\" />\n  <img alt=\"Vitess: GA\" src=\"https://img.shields.io/badge/Vitess-GA-brightgreen\" />\n  <img alt=\"PostgreSQL: early alpha\" src=\"https://img.shields.io/badge/PostgreSQL-early_alpha-orange\" />\n</p>\n\n<p align=\"center\">\n  <a href=\"./docs/vision.md\">Vision</a> ·\n  <a href=\"#the-pr-workflow\">PR workflow</a> ·\n  <a href=\"#from-your-terminal\">CLI</a> ·\n  <a href=\"#quick-start\">Quick start</a> ·\n  <a href=\"#docs\">Docs</a>\n</p>\n\n---\n\nSchemaBot makes database schema changes safe and easy. Declare the schema you want in plain SQL files, then ship it through the PR workflow you already use or an interactive CLI. No migration scripts, no hand-written ALTER statements: SchemaBot computes the DDL, lints it, gates anything destructive behind explicit approval, and executes with smart defaults, instant DDL when safe and a zero-downtime online copy when not. Live progress and operator controls the whole way.\n\nSchemaBot is built for the agentic era. In a world where agents build product features from scratch, SchemaBot gives them the guardrails, context, and tooling to safely evolve your database schema. Declarative SQL files are a version-controlled source of truth an agent can read and reason about, and every change passes the same linting, safety gates, and merge-blocking checks, no matter who (or what) wrote it. Block runs SchemaBot today for the majority of its production schema changes, across a large fleet of MySQL and Vitess databases, with PostgreSQL in-flight.\n\n## The PR workflow\n\nOpen a PR with your schema changes, and SchemaBot plans, applies, and verifies them across environments, right from the PR timeline:\n\n[![SchemaBot PR workflow: plan, apply, progress, completion, checks, and merge](./assets/pr-workflow-demo.gif)](./docs/pre-merge-workflow.md)\n\n[Walk through the illustrated PR workflow](./docs/pre-merge-workflow.md#the-pr-\n…[truncated]"
+    },
+    {
+      "source_id": "github:lulu-loopp/folio-terminal",
+      "title": "folio-terminal",
+      "url": "https://github.com/lulu-loopp/folio-terminal",
+      "github_url": "https://github.com/lulu-loopp/folio-terminal",
+      "bishop_ui": "http://localhost:8081/entries/github:lulu-loopp/folio-terminal",
+      "published_at": "2026-09-12T05:46:25+00:00",
+      "ingested_at": "2026-09-12T06:16:54.178648+00:00",
+      "relevance_score": 0.35,
+      "relevance_reason": "While the AI agent profile feature and agent notification markers have marginal relevance to agentic systems, the core value proposition (terminal UX, LaTeX rendering, file preview) is primarily a developer tooling/UX product with limited applicability to RAG, document intelligence, or production ML system concerns.",
+      "value_rationale": "The agent notification/waiting indicator design could inform observability patterns in agentic workflows, but the terminal interface itself doesn't address core challenges in retrieval, inference serving, or structured extraction that drive production decision-making. Useful as developer experience tooling only if already integrated into a workflow.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "observability",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "Terminal emulation",
+        "LaTeX typesetting in output",
+        "Multi-pane workspace layouts",
+        "File preview and markdown rendering",
+        "Agent status indicators",
+        "Git panel integration",
+        "Quake-style terminal summoning",
+        "Command palette interface"
+      ],
+      "challenge_hooks": [
+        "How can a terminal UI surface waiting/blocking agent states to prevent user context loss?",
+        "Building multi-pane terminal layouts that intelligently display command outputs alongside file previews and rendered documentation",
+        "Integrating LaTeX rendering and rich document previewing directly into terminal workflows for technical users",
+        "Providing seamless agent integration (Claude Code, Copilot CLI) with visual notifications and control within a unified shell environment"
+      ],
+      "summary": "Folio is an open-source Windows terminal with LaTeX typesetting in command output, file preview panes, and agent notification markers. Supports multi-pane layouts, Git integration, Quake-mode summoning, and AI agent profiles (Claude Code, Copilot, etc.) with waiting indicators.",
+      "pre_filter_rationale": "Applied systems: a shipped terminal UI that integrates agentic workflows, file preview, and formula rendering—a reusable pattern for dev-flow enhancement and agent observability I would study for my own tooling.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<picture>\n  <source media=\"(prefers-color-scheme: dark)\"\n          srcset=\"assets/readme/hero-dark.svg\">\n  <img src=\"assets/readme/hero-light.svg\" width=\"100%\"\n       alt=\"Folio, a Windows terminal that typesets LaTeX and marks the tab of an\n       agent waiting for you. Beside the name, a terminal pane shows a display\n       formula typeset in a command's output, above the next prompt.\">\n</picture>\n\nFolio is an open-source Windows terminal. It typesets LaTeX where a command\nprints it, previews files beside the prompt, and marks the tab of an agent that\nis waiting for you.\n\n[中文说明](README.zh-CN.md) · [Shortcuts](docs/shortcuts.md) ·\n[Security](SECURITY.md) · [Changes](CHANGELOG.md)\n\n> **Preview.** 0.3.0 is a preview build, signed by Weiyi Shi — see\n> [Download](#download) below.\n\n---\n\n## Download\n\nTake [`folio-0.3.0-windows-x64.zip`](https://github.com/lulu-loopp/folio-terminal/releases/download/v0.3.0-preview/folio-0.3.0-windows-x64.zip)\nfrom the [releases page](https://github.com/lulu-loopp/folio-terminal/releases),\nunpack it wherever you keep programs, and run `folio.exe`. There is no\ninstaller; keep the extracted files together in one folder. `SHA256SUMS.txt` is\nthe hash of what you downloaded. Needs **Windows 10 1809 or newer, or Windows\n11, 64-bit**.\n\n`folio.exe` and `folio.msix` are signed by **Weiyi Shi**, with a certificate from\nMicrosoft's Artifact Signing service. On first run Windows may show\n**\"Windows protected your PC\"**.\n**\"More info\"** names the publisher: check that it reads **Weiyi Shi** before\nrunning it.\n\nThe archive holds nine files that belong together: `folio.exe`, the two console\nlibraries it needs to start a shell, `folio.msix` for the Explorer menu,\n`folio-here.cmd` for VS Code, and the licences and notices.\n\nThe web preview needs the **WebView2 Runtime**. Windows 11 has it; Windows 10\nusually does, and if it does not, the Evergreen Runtime is\n[here](https://developer.microsoft.com/microsoft-edge/webview2/). Without it\neverything except the web preview works, and the preview says what is missing.\n\n## First run\n\nA machine that has never run Folio gets one card, once. It says **Welcome to\nFolio** and asks whether to check for updates, add\n…[truncated]"
+    },
+    {
+      "source_id": "github:platformatic/pg-hooks",
+      "title": "pg-hooks",
+      "url": "https://github.com/platformatic/pg-hooks",
+      "github_url": "https://github.com/platformatic/pg-hooks",
+      "bishop_ui": "http://localhost:8081/entries/github:platformatic/pg-hooks",
+      "published_at": "2026-09-11T13:12:03+00:00",
+      "ingested_at": "2026-09-11T15:31:59.118443+00:00",
+      "relevance_score": 0.35,
+      "relevance_reason": "Infrastructure tooling for background job processing with no direct relevance to NLP, RAG, agentic systems, or LLM-based document intelligence.",
+      "value_rationale": "While production ML systems benefit from reliable job queues, this is generic backend infrastructure applicable to any production system; it offers no specific value for RAG, agent orchestration, or document processing pipelines that are core to the profile.",
+      "entry_type": "repo",
+      "tags": [
+        "orchestration",
+        "deployment",
+        "architecture",
+        "production"
+      ],
+      "concepts": [
+        "webhook delivery queue",
+        "leader election via PostgreSQL advisory locks",
+        "automatic retry mechanisms",
+        "dead letter queue pattern",
+        "cron scheduling",
+        "outbox pattern",
+        "distributed coordination"
+      ],
+      "challenge_hooks": [
+        "How to reliably deliver webhooks at scale with automatic retries and fault tolerance",
+        "Managing distributed task scheduling and leader election in multi-instance deployments",
+        "Building an outbox pattern for transactional message delivery in microservices"
+      ],
+      "summary": "PostgreSQL-backed webhook/queue system with delayed invocation, automatic retries, leader election, dead letter handling, and cron scheduling. Built on Platformatic DB with authorization support.",
+      "pre_filter_rationale": "Applied systems: a working reference for webhook delivery reliability patterns, retry mechanics, and persistence-backed queue design using PostgreSQL that I would implement or adapt for production agent/RAG pipelines.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# @platformatic/pg-hooks\n\nImplement web hooks inside your application easily.\nFeatures:\n\n1. delayed/scheduled invocation\n2. automatic retries\n3. leader/follower system (with election)\n4. dead letter queue\n5. cron\n\n`@platformatic/pg-hooks` is also useful to create an outbox.\n\n![Architecture](./architecture.png)\n\n## API Tutorial\n\nTo verify everything is working correctly, we will do a short tutorial\n\n### Create a target service\n\nCreate a new Platformatic application with the Kafka hooks package using [Wattpm](https://platformatic.io/docs/wattpm):\n\n```bash\nnpx wattpm@latest create\n```\n\nAnd select `@platformatic/service` from the list of available packages and name your application `target`.\n\n\nNow, create a `services/target/routes/hook.js` file with the following content:\n\n```js\nexport async function (fastify, opts) {\n  fastify.post('/receive-my-hook', async (request, reply) => {\n    request.log.info({ body: request.body }, 'Received hook')\n    return 'ok'\n  })\n}\n```\n\nThen, edit the `.env` file so that `PORT=3001`\n\nRun `wattpm start` to start your app. To verify that your applications is working as expected, in another shell run:\n\n```bash\ncurl -X POST -H 'Content-Type: application/json' -d '{ \"hello\": \"world\" }' http://127.0.0.1:3001/receive-my-hook\n```\n\nThis will print `ok` and log the received body in the console.\n\n### Create a Queue\n\nCreate a queue with\n\n```bash\ncurl --request POST \\\n  --url http://127.0.0.1:3042/queues/ \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n  \"name\": \"my test\",\n  \"callbackUrl\": \"http://127.0.0.1:3001/receive-my-hook\",\n  \"method\": \"POST\",\n  \"headers\": {\n    \"Content-Type\": \"application/json\"\n  },\n  \"maxRetries\": 1\n}'\n```\n\nor via OpenAPI or GraphQL web pages.\n\n### Create a Message\n\n```bash\ncurl --request POST \\\n  --url http://0.0.0.0:3042/messages/ \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n  \"queueId\": 1,\n  \"body\": \"{ \\\"hello\\\": \\\"world\\\" }\"\n}'\n```\n\nWatch the logs in both the service and the hooks app.\n\n### Create a Cron (optional)\n\nYou can set up a cron job with:\n\n```bash\ncurl --request POST \\\n  --url http://0.0.0.0:3042/cron/ \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n  \"queueId\": 2,\n  \"sc\n…[truncated]"
+    },
+    {
+      "source_id": "github:Dicklesworthstone/ntm",
+      "title": "ntm",
+      "url": "https://github.com/Dicklesworthstone/ntm",
+      "github_url": "https://github.com/Dicklesworthstone/ntm",
+      "bishop_ui": "http://localhost:8081/entries/github:Dicklesworthstone/ntm",
+      "published_at": "2026-09-13T04:18:29+00:00",
+      "ingested_at": "2026-09-13T04:38:32.567052+00:00",
+      "relevance_score": 0.34,
+      "relevance_reason": "NTM touches the agentic-systems anchor tangentially through 'multi-agent software development' framing, but the core substance is terminal-session orchestration and developer-UX tooling, not production agent orchestration, planning, or tool-use patterns.",
+      "value_rationale": "NTM documents a session-coordination pattern for human-agent workflows (triage, state capture, REST APIs), which is marginally relevant if the profile owner is building developer-facing agent tooling, but it offers no insight into agent reasoning, memory architectures, handoff patterns, or the production orchestration challenges (LangGraph-style state machines, failure handling) that define the agentic-systems anchor.",
+      "entry_type": "repo",
+      "tags": [
+        "orchestration",
+        "multi-agent",
+        "agentic",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "tmux orchestration",
+        "multi-agent coordination",
+        "session management",
+        "work triage",
+        "safety policy and approvals",
+        "Agent Mail",
+        "REST/WebSocket API",
+        "state checkpointing"
+      ],
+      "challenge_hooks": [
+        "how to coordinate multiple coding agents running in parallel without manual pane switching and state tracking",
+        "local control plane for multi-agent workflows with durable state, approvals, and safety guards",
+        "machine-readable robot surfaces and API access to tmux session orchestration"
+      ],
+      "summary": "NTM is a Go-based tmux orchestration system that turns a terminal multiplexer into a local control plane for multi-agent software development, combining session management, work triage, safety policy enforcement, Agent Mail coordination, durable state capture, and REST/WebSocket APIs.",
+      "pre_filter_rationale": "Applied dev-skills tool: a reusable orchestration harness for multi-agent coding workflows (agent coordination, TUI dispatch, pane management) that someone building agentic systems would adapt or learn from this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# NTM - Named Tmux Manager\n\n<div align=\"center\">\n  <img src=\"ntm_dashboard.webp\" alt=\"NTM dashboard\">\n</div>\n\n<div align=\"center\">\n\n![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS-blue.svg)\n![Go Version](https://img.shields.io/badge/go-1.26.8+-00ADD8.svg)\n![License](https://img.shields.io/badge/License-MIT%2BOpenAI%2FAnthropic%20Rider-blue.svg)\n![Release](https://img.shields.io/github/v/release/Dicklesworthstone/ntm?include_prereleases)\n\n</div>\n\nNTM turns `tmux` into a local control plane for multi-agent software development.\nIt combines session orchestration, graph-aware work triage, safety policy and approvals,\nAgent Mail coordination, durable state capture, machine-readable robot surfaces, and a\nlocal REST/WebSocket API in one Go binary.\n\n<div align=\"center\">\n\n```bash\ncurl -fsSL \"https://raw.githubusercontent.com/Dicklesworthstone/ntm/main/install.sh?$(date +%s)\" | bash -s -- --easy-mode\n```\n\n</div>\n\n## TL;DR\n\n### The Problem\n\nRunning several coding agents in parallel is easy to start and annoying to sustain.\nPlain `tmux` gives you panes, but it does not give you durable coordination, work\nselection, safety policy, approvals, history, replayable automation surfaces, or a\nshared control model that both humans and agents can use.\n\n### The Solution\n\nNTM gives you a single local system for:\n\n- spawning labeled multi-agent sessions in `tmux`\n- sending work, interrupts, and follow-ups across panes\n- triaging what to do next with `br` and `bv`\n- coordinating agents with Agent Mail, file reservations, and assignments\n- protecting dangerous operations with policy, approvals, and guards\n- exposing the whole system through `--robot-*`, REST, SSE, WebSocket, and OpenAPI\n- capturing state with checkpoints, timelines, audit trails, and pipeline state\n\n### Why NTM\n\n| Area | What NTM provides | Typical commands |\n| --- | --- | --- |\n| Session orchestration | Spawn, label, inspect, zoom, dashboard, palette | `ntm spawn`, `ntm dashboard`, `ntm palette` |\n| Work intelligence | Graph-aware triage, next-step selection, impact analysis, assignment | `ntm work triage`, `ntm work next`, `ntm assign` |\n| Coordination | Human overseer mail, inbox views, file rese\n…[truncated]"
+    },
+    {
+      "source_id": "github:sbluemin/fleet-harness",
+      "title": "fleet-harness",
+      "url": "https://github.com/sbluemin/fleet-harness",
+      "github_url": "https://github.com/sbluemin/fleet-harness",
+      "bishop_ui": "http://localhost:8081/entries/github:sbluemin/fleet-harness",
+      "published_at": "2026-09-15T02:09:47+00:00",
+      "ingested_at": "2026-09-15T02:23:33.536734+00:00",
+      "relevance_score": 0.34,
+      "relevance_reason": "Touches the agentic-systems anchor tangentially through its multi-agent orchestration framing, but the actual substance is a developer-tool UI layer for managing coding agents rather than addressing production orchestration, reliability, or observability concerns.",
+      "value_rationale": "Demonstrates a multi-agent session-management pattern (persistent PTY, cross-device control) that could inform local agent debugging workflows, but offers no insight into production agentic architecture, failure handling, or the kind of orchestration tradeoffs (state management, handoff patterns, tool use) the profile prioritizes for shipping systems.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "multi-agent",
+        "orchestration",
+        "tool-use",
+        "production"
+      ],
+      "concepts": [
+        "PTY session management",
+        "multi-agent orchestration",
+        "local server architecture",
+        "canvas-based UI",
+        "secure device pairing",
+        "Claude Code gateway",
+        "session persistence"
+      ],
+      "challenge_hooks": [
+        "managing multiple coding agent sessions without terminal tab clutter",
+        "controlling frontier AI agents from mobile or remote devices while keeping credentials local",
+        "preserving agent session state across browser tab closures and device reconnections"
+      ],
+      "summary": "A local server that runs multiple coding agents (Claude, Codex, Cursor, etc.) as persistent PTY sessions on a canvas, controllable from browser, desktop app, or paired mobile device via secure pairing.",
+      "pre_filter_rationale": "Applied systems: a shipped operational platform for persistent agentic workflows with Claude; directly relevant to agent orchestration, multi-machine deployment, and production supervision of long-running tool-use loops.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <img src=\".github/logo.png\" width=\"420\" alt=\"Fleet\" />\n</p>\n\n<h1 align=\"center\">Every frontier coding agent.<br/>One console. Any screen.</h1>\n\n<p align=\"center\">\n  <strong>Fleet runs your coding agents as live, server-owned sessions on your machine</strong> —<br/>\n  and lets you command them from a browser, a native desktop window, or the phone in your pocket.\n</p>\n\n<p align=\"center\">\n  <a href=\"https://www.npmjs.com/package/@dotobokuri/fleet-console\"><img src=\"https://img.shields.io/npm/v/@dotobokuri/fleet-console?color=c9a455\" alt=\"npm\"></a>\n  <a href=\"./LICENSE\"><img src=\"https://img.shields.io/badge/license-MIT-4aab8f\" alt=\"License\"></a>\n  <br/>\n  <a href=\"README.md\">English</a> · <a href=\"README.ko.md\">한국어</a>\n</p>\n\n<img src=\".github/console-canvas.png\" alt=\"Fleet Console running four operations side by side — Claude, Codex GPT-5.6, and Cursor Grok sessions with a live shell\" width=\"100%\" />\n\n<p align=\"center\"><sub>One Theater, four live Operations: Claude Fable 5, Codex GPT-5.6 Sol, and Cursor Grok 4.6 answering side by side, next to a plain shell. Every screenshot in this README is a real capture of Fleet running this repository.</sub></p>\n\nWorking with one AI coding agent is a workflow. Working with five is a mess of terminal tabs — until you give them a deck to land on. Fleet turns every agent session into an **Operation**: a real PTY owned by a local server, laid out on an infinite canvas, observable from any device you trust.\n\n## Start in one command\n\nRequires Node.js 20.19+ and at least one authenticated agent CLI on `PATH`.\n\n```bash\nnpm install -g @dotobokuri/fleet-console\n\nfleet console\n```\n\n<img src=\".github/cli-console.png\" alt=\"The fleet CLI: help banner and a real fleet console start, printing the local endpoint\" width=\"100%\" />\n\nEverything runs on your machine. The server binds to loopback by default, the browser never receives provider tokens, and remote access stays off until you deliberately turn it on.\n\n## Agents that outlive the tab\n\nAn Operation is owned by the local Fleet Console server, not by your browser. Close the tab and the PTY keeps running, its output keeps buffering; reopen the console and the session repl\n…[truncated]"
+    },
+    {
+      "source_id": "github:openclaw/Peekaboo",
+      "title": "Peekaboo",
+      "url": "https://github.com/openclaw/Peekaboo",
+      "github_url": "https://github.com/openclaw/Peekaboo",
+      "bishop_ui": "http://localhost:8081/entries/github:openclaw/Peekaboo",
+      "published_at": "2026-09-13T04:18:29+00:00",
+      "ingested_at": "2026-09-13T04:34:30.715253+00:00",
+      "relevance_score": 0.32,
+      "relevance_reason": "Touches agentic systems (weight 1.0) by enabling agent-driven UI automation, but the content is a tool announcement without technical depth on agent orchestration patterns, failure modes, or production deployment concerns.",
+      "value_rationale": "Provides a concrete MCP bridge for connecting agents to macOS UI actions, which could be useful for exploratory agent prototyping, but offers no architecture guidance, evaluation framework, or production reliability analysis that would apply to the profile owner's deployment decisions.",
+      "entry_type": "repo",
+      "tags": [
+        "tool-use",
+        "agentic",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "screen capture",
+        "accessibility inspection",
+        "UI automation",
+        "semantic element selection",
+        "MCP (Model Context Protocol)",
+        "agent-driven multi-step workflows",
+        "background delivery for UI actions",
+        "window-targeted automation"
+      ],
+      "challenge_hooks": [
+        "how to automate macOS UI interactions programmatically without requiring foreground focus",
+        "integrating screen vision and accessibility trees into an LLM agent for multi-step desktop workflows",
+        "exposing native UI automation capabilities to MCP clients like Claude Code and Cursor"
+      ],
+      "summary": "A macOS CLI and menu-bar app that captures screenshots, inspects accessibility trees, and automates native UI interactions through semantic commands or natural-language agent runs; exposes the same toolset via MCP for use in Claude Code, Cursor, and other clients.",
+      "pre_filter_rationale": "Applied dev-skills: a concrete, runnable tool for agent-assisted engineering workflows — screenshot capture and VQA integration for LLM agents — that I would evaluate and potentially integrate into agentic systems this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Peekaboo 🫣 — Mac automation that sees the screen and does the clicks.\n\n[![CI](https://img.shields.io/github/actions/workflow/status/openclaw/Peekaboo/macos-ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/openclaw/Peekaboo/actions/workflows/macos-ci.yml) [![npm](https://img.shields.io/npm/v/%40steipete%2Fpeekaboo?style=flat-square)](https://www.npmjs.com/package/@steipete/peekaboo) [![GitHub release](https://img.shields.io/github/v/release/openclaw/Peekaboo?style=flat-square)](https://github.com/openclaw/Peekaboo/releases/latest) [![macOS 15+](https://img.shields.io/badge/macOS-15%2B-0078d7?logo=apple&logoColor=white&style=flat-square)](docs/platform-support.md) [![Swift 6.2](https://img.shields.io/badge/Swift-6.2-F05138?logo=swift&logoColor=white&style=flat-square)](https://swift.org/) [![Node](https://img.shields.io/node/v/%40steipete%2Fpeekaboo?style=flat-square)](https://nodejs.org/) [![License](https://img.shields.io/github/license/openclaw/Peekaboo?style=flat-square)](LICENSE) [![Homebrew](https://img.shields.io/badge/Homebrew-openclaw%2Ftap-b28f62?logo=homebrew&logoColor=white&style=flat-square)](https://github.com/openclaw/homebrew-tap) [![Ask DeepWiki](https://img.shields.io/badge/Ask-DeepWiki-0088cc?style=flat-square)](https://deepwiki.com/openclaw/Peekaboo)\n\nPeekaboo is a macOS CLI and menu-bar app for screen capture, accessibility inspection, and native UI automation. Use it directly, let its agent plan multi-step work, or expose the same toolset to MCP clients.\n\n![Peekaboo banner](assets/peekaboo.png)\n\n## Install\n\nThe released CLI and app require macOS 15 or later.\n\n### CLI with Homebrew\n\n```sh\nbrew install openclaw/tap/peekaboo\n```\n\n### MCP package with npm\n\nThe npm package requires Node.js 22 or later and includes the CLI plus its MCP launcher.\n\n```sh\nnpx -y @steipete/peekaboo --version\n```\n\nSee [MCP setup](docs/MCP.md) to connect it to Codex, Claude Code, Cursor, or another MCP client.\n\n### Mac app\n\nDownload the signed DMG from the [latest GitHub release](https://github.com/openclaw/Peekaboo/releases/latest). The menu-bar app provides permission onboarding, visual feedback, and agent sessions; install the CLI separately when y\n…[truncated]"
+    },
+    {
+      "source_id": "github:etr/groundwork",
+      "title": "groundwork",
+      "url": "https://github.com/etr/groundwork",
+      "github_url": "https://github.com/etr/groundwork",
+      "bishop_ui": "http://localhost:8081/entries/github:etr/groundwork",
+      "published_at": "2026-09-12T05:46:20+00:00",
+      "ingested_at": "2026-09-12T06:16:55.624658+00:00",
+      "relevance_score": 0.2,
+      "relevance_reason": "This is a code generation and software development tool, not relevant to NLP, RAG, document intelligence, or agentic orchestration systems.",
+      "value_rationale": "While it mentions agents and workflows, the focus is on coding assistance and IDE integration rather than production ML systems, retrieval pipelines, or LLM-based document processing that would apply to your domain.",
+      "entry_type": "repo",
+      "tags": [
+        "tool-use",
+        "orchestration",
+        "prompt-engineering",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "plugin-architecture",
+        "cross-platform-transpilation",
+        "workflow-skills",
+        "verification-agents",
+        "monorepo-awareness",
+        "harness-agnostic-skill-export",
+        "agent-invocation-patterns",
+        "TDD-workflows"
+      ],
+      "challenge_hooks": [
+        "How to standardize AI-assisted development practices across multiple Claude harnesses and code model variants",
+        "Designing portable skill definitions and agent configurations that maintain fidelity across heterogeneous execution environments",
+        "Implementing project-aware workflow state persistence and invocation discovery in distributed harness ecosystems"
+      ],
+      "summary": "Groundwork is a comprehensive skills library for Claude Code, Codex, and ZCode providing structured workflows for planning, TDD, debugging, design, and collaboration. Multi-target installer transforms skills and agents across Claude Code, OpenCode, Kiro, Pi, and Codex with varying feature parity.",
+      "pre_filter_rationale": "Dev skills and reusable technique: a Claude Code plugin with structured workflow skills is directly actionable tooling I would integrate into my dev-flow this week for agent-assisted engineering.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Groundwork\n\nA comprehensive skills library for Claude Code and Codex, consolidating proven techniques for planning, design, TDD, debugging, collaboration, and problem-solving. ZCode is also supported (installer export and managed marketplace); experimental exports are available for OpenCode, Kiro, and Pi.\n\n## Installation\n\n### Via Marketplace\n\nFirst, add the Groundwork marketplace:\n\n```bash\nclaude plugin marketplace add https://github.com/etr/groundwork-marketplace\n```\n\nThen install the plugin:\n\n```bash\nclaude plugin install groundwork\n```\n\n#### Update via Marketplace\n\n```bash\nclaude plugin marketplace update groundwork-marketplace\n\nclaude plugin update groundwork\n```\n\n### Manual Installation\n\n```bash\ncd ~/.claude/plugins\ngit clone https://github.com/etr/groundwork.git\n```\n\nOr use the installer provided with the codebase.\n\n### Multi-target Installer\n\nGroundwork supports Claude Code, Codex, and ZCode (both the installer export and the managed marketplace). Exports for OpenCode, Kiro, and Pi are experimental: the installer transforms Claude Code-specific constructs for those harnesses, but hooks, invocation, and skill chaining may not behave identically.\n\nThe included installer adapts Groundwork skills and agents to each target's native format. Claude Code users should normally use the marketplace; Codex users should use the installer.\n\n#### Supported Targets\n\n| Target | Flag | Maturity | Description |\n|--------|------|----------|-------------|\n| Claude Code | `--claude-code` | Supported | Recommends the marketplace install; an explicit opt-in allows a full plugin copy with no transformation |\n| [Codex CLI](https://github.com/openai/codex) | `--codex` | Supported | Installs skills, native custom-agent TOML files with Codex model and reasoning settings, and the external task runner |\n| [OpenCode](https://github.com/opencode-ai/opencode) | `--opencode` | Experimental | Installs transformed skills and standalone agent files |\n| [Kiro](https://kiro.dev) | `--kiro` | Experimental | Installs transformed skills and JSON config + prompt file pairs for agents |\n| Pi | `--pi` | Experimental | Installs transformed skills, `review-`prefixed agent skills, and a pre-built Typ\n…[truncated]"
+    },
+    {
+      "source_id": "github:gardnmi/boomux",
+      "title": "boomux",
+      "url": "https://github.com/gardnmi/boomux",
+      "github_url": "https://github.com/gardnmi/boomux",
+      "bishop_ui": "http://localhost:8081/entries/github:gardnmi/boomux",
+      "published_at": "2026-09-14T04:18:25+00:00",
+      "ingested_at": "2026-09-14T04:32:19.688653+00:00",
+      "relevance_score": 0.18,
+      "relevance_reason": "A terminal multiplexer tool with bundled AI-agent integrations, but the core value proposition is the UI/UX frontend (drag-to-rearrange, keyboard layout mode), not the agent orchestration or AI-system architecture itself.",
+      "value_rationale": "While boomux mentions AI-agent bundling, it is a terminal application tool rather than a resource for building agentic systems, RAG pipelines, or production AI infrastructure; the AI components are pre-integrated third-party services, not architectural patterns or techniques the profile owner could apply to their own systems.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "tool-use",
+        "production"
+      ],
+      "concepts": [
+        "terminal multiplexing",
+        "pane management and layout modes",
+        "persistent shell sessions",
+        "SSH remote workspaces",
+        "AI-agent lifecycle integration",
+        "Ghostty terminal decoding",
+        "GPUI-CE native UI"
+      ],
+      "challenge_hooks": [
+        "how to build a modern terminal workspace with tiling panes and persistent shells without replacing the window manager",
+        "integrating AI coding agents (Claude, Codex, Kiro) with shell lifecycle management in a single terminal UI",
+        "managing remote terminal sessions over SSH with local pane arrangement and agent context"
+      ],
+      "summary": "A native Rust/GPUI terminal multiplexer inspired by Hyprland, supporting drag-to-rearrange panes, keyboard layout mode, persistent shells across closures, SSH remote workspaces, and bundled AI-agent integrations (Claude Code, Codex, Kiro CLI) on Linux and experimental macOS.",
+      "pre_filter_rationale": "Applied systems: a runnable dev-flow artifact for multi-agent orchestration and supervision that I would evaluate and potentially integrate into agentic workflows this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# Boomux\n\n**Hyprland-inspired control for your terminals.**\n\nDrag panes into place, resize your splits, and move around from the keyboard.\nBoomux brings your terminals, AI agents, and Git context into one native\nworkspace on Linux, with a largely untested macOS preview and persistent Shells\nbehind every view.\n\n[Website](https://gardnmi.github.io/boomux/) ·\n[Install Desktop](#install) ·\n[Desktop guide](desktop/README.md) ·\n[Development](DEVELOPMENT.md)\n\n![A real Boomux Desktop recording showing a terminal pane following the pointer and settling into a new layout](website/public/demos/move.gif)\n\n*Real Desktop recording in Tree layout, with fictional demo terminal content.\n[Watch the videos](https://gardnmi.github.io/boomux/#in-motion) for playback\ncontrols, or view the [recording notes](website/demos.md).*\n\n## Your Terminals. Your Rules.\n\n- **Move naturally.** Grab a pane by its heading. It follows your pointer, then\n  settles into the layout where you drop it.\n- **Make room.** Resize from pane edges, switch between tiled and floating panes,\n  or expand one pane without losing its place.\n- **Stay on the keyboard.** Tap Ctrl + Space to enter layout mode, or hold it for\n  a quick adjustment. Navigate, rearrange, and resize without reaching for the mouse.\n- **Keep your work running.** Minimize a pane or quit Desktop; its Shell keeps\n  running. Come back to the same process.\n- **See when you’re needed.** Follow supported coding-agent activity in the\n  Agents tab and check repositories, worktrees, and available PR status in Git.\n- **Bring remote work closer.** Connect over SSH and open a Remote Workspace.\n  Its Shells stay on that machine; manage connections and updates in Remotes.\n- **Feel at home.** A native Rust / GPUI-CE interface with Ghostty terminal\n  decoding, plus Omarchy theme integration.\n\nThe panes live inside Boomux’s own window. Hyprland inspires the interaction,\nbut is **not required**: Desktop runs on X11, Wayland, or macOS. It does not embed\narbitrary desktop applications or replace your window manager.\n\n## Install\n\n> [!WARNING]\n> **macOS is a largely untested experimental preview.** It has limited automated\n> CI and smoke-test coverage, with very litt\n…[truncated]"
+    }
+  ]
+}

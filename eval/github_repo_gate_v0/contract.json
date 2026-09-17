@@ -1,0 +1,35 @@
+{
+  "eval_id": "github_repo_gate_v0",
+  "version": "0.3.0",
+  "status": "option 1 live; overlay lookback 60 days",
+  "purpose": "Human gold for whether INDEXED GitHub repos deserve to stay in the KB as study-worthy artifacts, not merely on-topic. Agent proposals are a prior. Human stamps are attestation.",
+  "question": "Would I actually study or steal from this codebase?",
+  "values": ["keep", "junk", "unsure"],
+  "profile_under_test": "config/profiles/professional_v1.2.0_soft_launch.yaml",
+  "frozen_inputs": "eval/github_repo_gate_v0/corpus.json",
+  "agent_prior": "eval/github_repo_gate_v0/proposals.json",
+  "labels": "eval/github_repo_gate_v0/labels.json",
+  "intel_file": "eval/github_repo_gate_v0/intel.json",
+  "review_ui": "eval/github_repo_gate_v0/review.html",
+  "pickup": "repo-gate-next.md",
+  "do_not": [
+    "Do not treat Call 2 relevance_score as gold",
+    "Do not treat pre_filter_rationale as gold",
+    "Do not edit corpus.json after freeze — new snapshot is a new eval_id",
+    "Do not start a GitHub-only profile or second cache key unless the operator explicitly picks option 3",
+    "Do not rewind Hugging Face; overlay lookback is 60 days as of 2026-09-15"
+  ],
+  "disposition": {
+    "stamped": 23,
+    "remaining_agent_keep": "provisionally accepted; do not re-label the full 93",
+    "implemented": "option 1 — same gate, reject-heavier prefilter_rubric_v1.md shape 2 (live in pre-filter-worker)",
+    "optional": "option 2 — tighter GitHub fetch",
+    "not_earned": "option 3 — per-source profile / prefix",
+    "lookback": "60 days as of 2026-09-15; Hugging Face not rewound"
+  },
+  "intel": {
+    "agreement": "human stamp vs agent_verdict on stamped rows",
+    "high_score_junk": "human junk where relevance_score >= 0.7 — the failure mode for scaling GitHub lookback",
+    "agent_keep_human_junk": "over-proposal; do not train the next rubric on this without a human stamp"
+  }
+}

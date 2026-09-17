@@ -200,6 +200,57 @@ def test_stage1_cycle_happy_path_registers_enrichment_stage1_batch(
         assert req["params"]["model"] == "claude-haiku-4-5-20251001"
 
 
+def test_stage1_cycle_warms_cache_before_batch_submit(monkeypatch: pytest.MonkeyPatch) -> None:
+    """FU-CACHE-WARMUP-01: cache key B's warmup ping fires (messages.create)
+    before the real batch submit (messages.batches.create), using the same
+    system blocks build_call1_system_prompt() will assemble for the batch."""
+    anthropic_mod, loop_mod, models, client_mod = _load_enrichment_batcher_stack()
+    monkeypatch.setattr(loop_mod, "ENRICHMENT_STAGE1_MIN_BATCH_SIZE", 1)
+    entries = [_sample_poll_entry(models, "arxiv:2406.00001")]
+    state_client = _mock_state_client(client_mod, models, entries=entries)
+    anthropic_client = _mock_anthropic_client(anthropic_mod, models)
+    anthropic_client._client.messages.create.return_value = SimpleNamespace(usage=SimpleNamespace())
+
+    async def _run() -> None:
+        await loop_mod.stage1_cycle(
+            state_client,
+            anthropic_client,
+            profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
+        )
+
+    asyncio.run(_run())
+
+    anthropic_client._client.messages.create.assert_called_once()
+    create_kwargs = anthropic_client._client.messages.create.call_args.kwargs
+    batches_kwargs = anthropic_client._client.messages.batches.create.call_args.kwargs
+    assert create_kwargs["system"] == batches_kwargs["requests"][0]["params"]["system"]
+    assert create_kwargs["max_tokens"] == 1
+
+
+def test_stage1_cycle_held_below_minimum_does_not_warm_cache(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    anthropic_mod, loop_mod, models, client_mod = _load_enrichment_batcher_stack()
+    monkeypatch.setattr(loop_mod, "ENRICHMENT_STAGE1_MIN_BATCH_SIZE", 5)
+    entries = [_sample_poll_entry(models, "arxiv:2406.00001")]
+    state_client = _mock_state_client(client_mod, models, entries=entries)
+    anthropic_client = _mock_anthropic_client(anthropic_mod, models)
+
+    async def _run() -> None:
+        await loop_mod.stage1_cycle(
+            state_client,
+            anthropic_client,
+            profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
+        )
+
+    asyncio.run(_run())
+
+    anthropic_client._client.messages.create.assert_not_called()
+    anthropic_client._client.messages.batches.create.assert_not_called()
+
+
 def test_stage1_cycle_state_worker_register_error_after_anthropic_submit(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

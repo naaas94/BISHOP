@@ -4,7 +4,7 @@ domain: professional
 label: "AI/ML Engineering — Professional (soft launch)"
 
 # SHA-256 hash of the JSON-canonical profile dict per §11.3 (canonical_hash excluded from input).
-canonical_hash: "64ec84d7e8f41b0b6ea398ec9c9dd2007e1b149cd42c4e6ced2873d612150091"
+canonical_hash: "e5facb0f570b2ca5f3daca860cb6c54c637e4beb83dd2cb17f09166859abcd28"
 
 # Soft-launch overlay of v1.2.0. Peripheral items are parked, not enriched.
 # The renderer reads this field; do not delete it.
@@ -70,9 +70,11 @@ context: |
 
   This is a soft-launch gate. Enrichment costs money. Only mark core when you are sure
   the item is a working reference I would open this week — applied systems, reusable
-  dev-flow technique, or a pattern I would implement. On-topic is not enough. GitHub
-  repos, model cards, and paper dumps that are merely adjacent stay peripheral so a
-  human can skim the title and abstract later without paying for scrape or enrichment.
+  dev-flow technique, or a pattern I would implement. On-topic is not enough. For a
+  GitHub repo, core requires a stealable artifact — a named runnable thing you would
+  study or copy — not a topic match on agents or RAG. GitHub repos, model cards, and
+  paper dumps that are merely adjacent stay peripheral so a human can skim the title
+  and abstract later without paying for scrape or enrichment.
 
 principles:
   - "Prefer practical applicability over theoretical novelty"

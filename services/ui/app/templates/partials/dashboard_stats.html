@@ -1,0 +1,210 @@
+{% macro bar_row(label, count, max_count) %}
+<div class="bar-row">
+  <span class="bar-label">{{ label }}</span>
+  <div class="bar-track"><div class="bar-fill" style="width: {{ count | pct(max_count) }}%"></div></div>
+  <span class="bar-count">{{ count }}</span>
+</div>
+{% endmacro %}
+
+<div id="dashboard-stats" hx-get="/dashboard" hx-trigger="every 30s" hx-swap="outerHTML">
+{% if not stats and not error %}
+<p class="muted">No stats available.</p>
+{% endif %}
+{% if stats %}
+<section class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.indexed_total }}</div>
+    <div class="stat-label">Indexed entries</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.entries_total }}</div>
+    <div class="stat-label">Total entries</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.manifest_total }}</div>
+    <div class="stat-label">Manifest items</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.batches_total }}</div>
+    <div class="stat-label">Total batches</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ pass_rate }}</div>
+    <div class="stat-label">Pre-filter pass rate</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ in_flight }}</div>
+    <div class="stat-label">In flight</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ (stats.funnel | selectattr('label', 'equalto', 'Escalated') | map(attribute='count') | first) or 0 }}</div>
+    <div class="stat-label">Escalated</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ (stats.funnel | selectattr('label', 'equalto', 'Permanently failed') | map(attribute='count') | first) or 0 }}</div>
+    <div class="stat-label">Permanently failed</div>
+  </div>
+</section>
+
+<section class="harvest-stats">
+  <h2>Harvest</h2>
+  {% if not stats.harvest_sidecar_present %}
+  <p class="muted">Harvest sidecar not mounted.</p>
+  {% endif %}
+  <section class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.harvest_pool_size }}</div>
+      <div class="stat-label">Harvest pool</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.harvest_unreleased }}</div>
+      <div class="stat-label">Unreleased</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.harvest_released_today }}</div>
+      <div class="stat-label">Released today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.harvest_n_cap }}</div>
+      <div class="stat-label">N_cap</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${{ "%.2f"|format(stats.harvest_budget_usd) }}</div>
+      <div class="stat-label">Budget</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${{ "%.4f"|format(stats.harvest_projected_usd_today) }}</div>
+      <div class="stat-label">Projected $ today</div>
+    </div>
+  </section>
+</section>
+
+<h2>Pipeline funnel</h2>
+{% set funnel_ns = namespace(max=0) %}
+{% for bucket in stats.funnel %}
+{% if bucket.count > funnel_ns.max %}{% set funnel_ns.max = bucket.count %}{% endif %}
+{% endfor %}
+{% for bucket in stats.funnel %}
+{{ bar_row(bucket.label, bucket.count, funnel_ns.max) }}
+{% endfor %}
+
+<h2>Queue depth</h2>
+{% if stats.queue_depth %}
+{% set queue_ns = namespace(max=0) %}
+{% for bucket in stats.queue_depth %}
+{% if bucket.count > queue_ns.max %}{% set queue_ns.max = bucket.count %}{% endif %}
+{% endfor %}
+{% for bucket in stats.queue_depth %}
+{{ bar_row(bucket.label, bucket.count, queue_ns.max) }}
+{% endfor %}
+{% else %}
+<p class="muted">Nothing in flight.</p>
+{% endif %}
+
+<h2>Relevance score distribution</h2>
+{% set hist_ns = namespace(max=0) %}
+{% for bucket in stats.relevance_histogram %}
+{% if bucket.count > hist_ns.max %}{% set hist_ns.max = bucket.count %}{% endif %}
+{% endfor %}
+{% for bucket in stats.relevance_histogram %}
+{{ bar_row(bucket.label, bucket.count, hist_ns.max) }}
+{% endfor %}
+
+<div class="dash-grid">
+  <section class="dash-panel">
+    <h3>By domain</h3>
+    {% set dom_ns = namespace(max=0) %}
+    {% for bucket in stats.by_domain %}
+    {% if bucket.count > dom_ns.max %}{% set dom_ns.max = bucket.count %}{% endif %}
+    {% endfor %}
+    {% for bucket in stats.by_domain %}
+    {{ bar_row(bucket.label, bucket.count, dom_ns.max) }}
+    {% endfor %}
+  </section>
+  <section class="dash-panel">
+    <h3>By source</h3>
+    {% set src_ns = namespace(max=0) %}
+    {% for bucket in stats.by_source %}
+    {% if bucket.count > src_ns.max %}{% set src_ns.max = bucket.count %}{% endif %}
+    {% endfor %}
+    {% for bucket in stats.by_source %}
+    {{ bar_row(bucket.label, bucket.count, src_ns.max) }}
+    {% endfor %}
+  </section>
+  <section class="dash-panel">
+    <h3>By entry type</h3>
+    {% set type_ns = namespace(max=0) %}
+    {% for bucket in stats.by_entry_type %}
+    {% if bucket.count > type_ns.max %}{% set type_ns.max = bucket.count %}{% endif %}
+    {% endfor %}
+    {% for bucket in stats.by_entry_type %}
+    {{ bar_row(bucket.label, bucket.count, type_ns.max) }}
+    {% endfor %}
+  </section>
+  <section class="dash-panel">
+    <h3>Reading status</h3>
+    {% set read_ns = namespace(max=0) %}
+    {% for bucket in stats.reading_status %}
+    {% if bucket.count > read_ns.max %}{% set read_ns.max = bucket.count %}{% endif %}
+    {% endfor %}
+    {% for bucket in stats.reading_status %}
+    {{ bar_row(bucket.label, bucket.count, read_ns.max) }}
+    {% endfor %}
+  </section>
+</div>
+
+<h2>Top tags</h2>
+{% set tag_ns = namespace(max=0) %}
+{% for bucket in stats.top_tags[:15] %}
+{% if bucket.count > tag_ns.max %}{% set tag_ns.max = bucket.count %}{% endif %}
+{% endfor %}
+{% for bucket in stats.top_tags[:15] %}
+{{ bar_row(bucket.label, bucket.count, tag_ns.max) }}
+{% endfor %}
+
+<h2>Ingest per day (30d)</h2>
+{% set day_ns = namespace(max=0) %}
+{% for day in stats.ingest_by_day %}
+{% if day.count > day_ns.max %}{% set day_ns.max = day.count %}{% endif %}
+{% endfor %}
+{% for day in stats.ingest_by_day %}
+{{ bar_row(day.date[5:], day.count, day_ns.max) }}
+{% endfor %}
+
+<div class="dash-grid">
+  <section class="dash-panel">
+    <h3>Batches by status</h3>
+    {% set bstat_ns = namespace(max=0) %}
+    {% for bucket in stats.batches_by_status %}
+    {% if bucket.count > bstat_ns.max %}{% set bstat_ns.max = bucket.count %}{% endif %}
+    {% endfor %}
+    {% for bucket in stats.batches_by_status %}
+    {{ bar_row(bucket.label, bucket.count, bstat_ns.max) }}
+    {% endfor %}
+  </section>
+  <section class="dash-panel">
+    <h3>Batches by type</h3>
+    {% set btype_ns = namespace(max=0) %}
+    {% for bucket in stats.batches_by_type %}
+    {% if bucket.count > btype_ns.max %}{% set btype_ns.max = bucket.count %}{% endif %}
+    {% endfor %}
+    {% for bucket in stats.batches_by_type %}
+    {{ bar_row(bucket.label, bucket.count, btype_ns.max) }}
+    {% endfor %}
+  </section>
+</div>
+
+<h2>Errors (7d)</h2>
+{% if stats.recent_errors %}
+{% set err_ns = namespace(max=0) %}
+{% for bucket in stats.recent_errors %}
+{% if bucket.count > err_ns.max %}{% set err_ns.max = bucket.count %}{% endif %}
+{% endfor %}
+{% for bucket in stats.recent_errors %}
+{{ bar_row(bucket.label, bucket.count, err_ns.max) }}
+{% endfor %}
+{% else %}
+<p class="muted">No errors in the last 7 days.</p>
+{% endif %}
+{% endif %}
+</div>

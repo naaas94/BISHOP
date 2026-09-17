@@ -1,28 +1,30 @@
 Project:          bishop
-Purpose:          Local-first knowledge intelligence pipeline — M1-M8: SQLite state kernel, multi-source discovery scraper (7 sources), Anthropic pre-filter/enrichment batch pipeline, LanceDB/DuckDB/BM25 indexing, query API, UI.
+Purpose:          Local-first knowledge intelligence pipeline — SQLite state kernel, seven-source discovery and content scrape, Anthropic pre-filter/enrichment batches with cached system prefixes, LanceDB/DuckDB/BM25 indexing, query API, UI.
 Primary language: Python 3.12
-Key frameworks:   FastAPI, uvicorn, Pydantic, Alembic, aiosqlite, httpx, anthropic, PyYAML, Docker Compose, pytest
+Key frameworks:   FastAPI, uvicorn, Pydantic, Alembic, aiosqlite, httpx, anthropic, PyYAML, sentence-transformers, LanceDB, DuckDB, rank-bm25, Docker Compose, pytest
 Repository:       c:\Users\Ale\Documents\Repos\BISHOP
-Document version: 1.3.0
+Document version: 1.8.0
 Last constructed: 2026-06-10
-Last verified:    2026-09-10
-Stale after:      2026-10-10
+Last verified:    2026-09-16
+Stale after:      2026-10-16
 
 Files:
-  module-map.md                    1.3.0   2026-09-10
-  public-interface-inventory.md    1.2.0   2026-06-13   NOT re-audited for M4-M8 — see module-map.md "Deferred in this refresh"
-  data-contract-registry.md        1.2.0   2026-06-13   NOT re-audited for M4-M8 — see module-map.md "Deferred in this refresh"
-  dependency-graph.md              1.3.0   2026-09-10
-  integration-seams.md             1.2.0   2026-06-13   NOT re-audited for M4-M8 — see module-map.md "Deferred in this refresh"
-  external-input-sources.md        1.2.0   2026-06-13   NOT re-audited for M4-M8 — see module-map.md "Deferred in this refresh"
-  architectural-patterns.md        1.0.2   2026-06-13   NOT re-audited for M4-M8 — see module-map.md "Deferred in this refresh"
-  failure-taxonomy.md              1.0.0   2026-06-10
-  known-coupling-surfaces.md       1.3.0   2026-09-10
-  open-questions.md                1.2.0   2026-06-13   NOT re-audited for M4-M8 — see module-map.md "Deferred in this refresh"
+  module-map.md                    1.5.0   2026-09-13
+  public-interface-inventory.md    1.4.0   2026-09-13
+  data-contract-registry.md        1.3.0   2026-09-13
+  dependency-graph.md              1.5.0   2026-09-13
+  integration-seams.md             1.3.1   2026-09-16
+  external-input-sources.md        1.4.1   2026-09-16
+  architectural-patterns.md        1.0.3   2026-09-13   candidates only — pending user confirmation
+  failure-taxonomy.md              1.0.0   2026-06-10   verified no drift; cause classes still pending owner confirmation
+  known-coupling-surfaces.md       1.7.0   2026-09-16
+  open-questions.md                1.7.0   2026-09-16
   changelog.md                     —       (append-only; not versioned)
 
-M8 T8-bis partial refresh (2026-09-10): only module-map.md, known-coupling-surfaces.md,
-dependency-graph.md, and this file were re-verified against current code. The files
-flagged "NOT re-audited" above predate M4 (content-scraper, enrichment-batcher,
-vector-writer) and M7 (query-api, ui) landing and should not be trusted for those
-services' surfaces. Landing gate: next project-architecture skill pass or M9 kickoff.
+Sidecar (not in the project-architecture file schema): `architectural-decisions-divergence.md` — execution-time spec drift log; updated 2026-09-13.
+
+2026-09-16 MCP consumer/extraction split (PB-010): documented, no code. See `.dev/decision-logs/ops/mcp-consumer-extraction.md`. `open-questions.md` 1.7.0.
+
+2026-09-16 ingest-content-risk seed (OPEN-023): documented untrusted public text through LLM gates and UI; no code change. See `.dev/decision-logs/ops/ingest-content-risk-seed.md`. `failure-taxonomy.md` still has no cause classes (owner names not minted).
+
+2026-09-13 landing-gate refresh: completed the 2026-09-10 M8 T8-bis deferred re-audit of M4–M8 surfaces and folded prompt-caching (2026-09-12), the soft-launch precision overlay (2026-09-11), sqlite snapshot/integrity/named-volume ops, and the T12 scraper/ui m8 image-tag bump. `failure-taxonomy.md` was verified and left unchanged.

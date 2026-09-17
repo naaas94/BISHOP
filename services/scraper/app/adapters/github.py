@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 from datetime import UTC, datetime, timedelta
@@ -9,6 +10,7 @@ from datetime import UTC, datetime, timedelta
 import httpx
 
 from bishop_shared.enums import DomainEnum, SourceEnum
+from bishop_shared.harvest_ledger import HarvestCandidate, dumps_extras
 from bishop_shared.scraper_config import BACKFILL_CONFIG
 
 from app.adapters.base import SourceAdapter
@@ -52,6 +54,13 @@ def _format_github_date(dt: datetime) -> str:
 def build_search_query(since: datetime) -> str:
     """Build GitHub repository search query for repos updated since ``since``."""
     return f"pushed:>{_format_github_date(since)} stars:>10"
+
+
+def build_harvest_query(start: datetime, end: datetime) -> str:
+    """Closed-range harvest query. Incremental ``fetch_manifest`` stays ``pushed:>``."""
+    return (
+        f"pushed:{_format_github_date(start)}..{_format_github_date(end)} stars:>10"
+    )
 
 
 def _parse_github_datetime(value: str | None) -> datetime | None:
@@ -110,6 +119,133 @@ def parse_search_response(
         )
 
     return entries
+
+
+_HARVEST_TYPED_KEYS = frozenset(
+    {
+        "id",
+        "full_name",
+        "owner",
+        "created_at",
+        "updated_at",
+        "pushed_at",
+        "fork",
+        "archived",
+        "disabled",
+        "language",
+        "license",
+        "stargazers_count",
+        "forks_count",
+        "open_issues_count",
+        "size",
+        "topics",
+        "homepage",
+        "default_branch",
+        "visibility",
+        "score",
+        "name",
+        "description",
+        "html_url",
+    }
+)
+
+
+def _optional_str(value: object) -> str | None:
+    if isinstance(value, str) and value:
+        return value
+    return None
+
+
+def _optional_int(value: object) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    return value
+
+
+def _optional_float(value: object) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value)
+
+
+def _optional_bool(value: object) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    return None
+
+
+def parse_harvest_candidate(
+    item: dict[str, object],
+    *,
+    adapter: SourceAdapter,
+    harvest_query_id: str,
+) -> HarvestCandidate:
+    """Map a GitHub Search item onto the harvest sidecar row. Does not skip forks."""
+    full_name = item.get("full_name")
+    if not isinstance(full_name, str) or "/" not in full_name:
+        raise ValueError("harvest item missing full_name")
+
+    name = item.get("name")
+    description = item.get("description")
+    html_url = item.get("html_url")
+    title = name.strip() if isinstance(name, str) and name.strip() else full_name
+    abstract = (
+        description.strip()
+        if isinstance(description, str) and description.strip()
+        else None
+    )
+    url = html_url if isinstance(html_url, str) and html_url else f"https://github.com/{full_name}"
+
+    owner = item.get("owner")
+    owner_login = owner_type = None
+    owner_id = None
+    if isinstance(owner, dict):
+        owner_login = _optional_str(owner.get("login"))
+        owner_type = _optional_str(owner.get("type"))
+        owner_id = _optional_int(owner.get("id"))
+
+    license_obj = item.get("license")
+    license_spdx = None
+    if isinstance(license_obj, dict):
+        license_spdx = _optional_str(license_obj.get("spdx_id"))
+
+    topics = item.get("topics")
+    topics_json = json.dumps(topics) if isinstance(topics, list) else None
+
+    extras = {key: value for key, value in item.items() if key not in _HARVEST_TYPED_KEYS}
+    extras_json = dumps_extras(extras) if extras else None
+
+    return HarvestCandidate(
+        source_id=adapter.make_source_id(full_name),
+        source=adapter.source.value,
+        url=url,
+        title=title,
+        abstract=abstract,
+        github_id=_optional_int(item.get("id")),
+        full_name=full_name,
+        owner_login=owner_login,
+        owner_type=owner_type,
+        owner_id=owner_id,
+        created_at=_optional_str(item.get("created_at")),
+        updated_at=_optional_str(item.get("updated_at")),
+        pushed_at=_optional_str(item.get("pushed_at")),
+        is_fork=_optional_bool(item.get("fork")),
+        archived=_optional_bool(item.get("archived")),
+        disabled=_optional_bool(item.get("disabled")),
+        language=_optional_str(item.get("language")),
+        license_spdx=license_spdx,
+        stargazers_count=_optional_int(item.get("stargazers_count")),
+        forks_count=_optional_int(item.get("forks_count")),
+        open_issues_count=_optional_int(item.get("open_issues_count")),
+        size_kb=_optional_int(item.get("size")),
+        topics_json=topics_json,
+        homepage=_optional_str(item.get("homepage")),
+        default_branch=_optional_str(item.get("default_branch")),
+        visibility=_optional_str(item.get("visibility")),
+        search_score=_optional_float(item.get("score")),
+        harvest_query_id=harvest_query_id,
+        extras_json=extras_json,
+    )
 
 
 def parse_raw_id_from_source_id(source_id: str) -> str:

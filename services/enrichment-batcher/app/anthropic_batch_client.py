@@ -17,6 +17,7 @@ from bishop_shared.enrichment_prompts import (
     build_call2_system_prompt,
     build_call2_user_message,
 )
+from bishop_shared.prompt_cache import send_cache_warmup_ping
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,20 @@ class AnthropicBatchClient:
             )
         return requests
 
+    def warm_cache_stage1(self) -> bool:
+        """Best-effort cache-priming ping for cache key B (FU-CACHE-WARMUP-01).
+
+        Builds the same system blocks ``submit_stage1_batch`` will use
+        (``build_call1_system_prompt()``) and fires a throwaway sync call
+        right before the real submit. Never raises — see
+        ``bishop_shared.prompt_cache.send_cache_warmup_ping``.
+        """
+        return send_cache_warmup_ping(
+            self._client,
+            model=ANTHROPIC_MODEL_ENRICHMENT,
+            system_blocks=build_call1_system_prompt(),
+        )
+
     def submit_stage1_batch(
         self,
         *,
@@ -127,6 +142,20 @@ class AnthropicBatchClient:
                 }
             )
         return requests
+
+    def warm_cache_stage2(self, *, profile_prompt: str, rubric_body: str) -> bool:
+        """Best-effort cache-priming ping for cache key C (FU-CACHE-WARMUP-01).
+
+        Builds the same system blocks ``submit_stage2_batch`` will use
+        (``build_call2_system_prompt``) and fires a throwaway sync call
+        right before the real submit. Never raises — see
+        ``bishop_shared.prompt_cache.send_cache_warmup_ping``.
+        """
+        return send_cache_warmup_ping(
+            self._client,
+            model=ANTHROPIC_MODEL_ENRICHMENT,
+            system_blocks=build_call2_system_prompt(profile_prompt, rubric_body),
+        )
 
     def submit_stage2_batch(
         self,

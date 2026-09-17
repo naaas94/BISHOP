@@ -6,6 +6,7 @@ COPY services/query-api/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bishop_shared ./bishop_shared
+COPY config/harvest ./config/harvest
 COPY services/query-api/app ./app
 
 ENV PYTHONPATH=/app

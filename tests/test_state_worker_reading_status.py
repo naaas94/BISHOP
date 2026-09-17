@@ -117,6 +117,25 @@ def test_patch_reading_status_updates_entry(client: TestClient) -> None:
     assert tuple(asyncio.run(_read_status())) == (ReadingStatusEnum.READ.value,)
 
 
+def test_patch_reading_status_slash_source_id(client: TestClient) -> None:
+    github_id = "github:clavia-labs/tardigrade"
+
+    async def _seed() -> None:
+        async with get_db() as conn:
+            await _seed_entry(conn, github_id)
+
+    asyncio.run(_seed())
+    response = client.patch(
+        f"/entries/{github_id}/reading-status",
+        json={"reading_status": ReadingStatusEnum.READ.value},
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "source_id": github_id,
+        "reading_status": ReadingStatusEnum.READ.value,
+    }
+
+
 def test_patch_reading_status_does_not_touch_manifest_processing_state(
     client: TestClient,
 ) -> None:

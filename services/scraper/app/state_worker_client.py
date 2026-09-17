@@ -53,6 +53,14 @@ class StateWorkerClient:
         response.raise_for_status()
         return ManifestBatchResult.model_validate(response.json())
 
+    async def count_manifest(self, *, source: str, states: list[str]) -> int:
+        response = await self._client.get(
+            "/manifest/count",
+            params={"source": source, "state": states},
+        )
+        response.raise_for_status()
+        return int(response.json()["count"])
+
 
 def _iso_timestamp(value: datetime) -> str:
     text = value.isoformat()

@@ -1,14 +1,17 @@
-"""Unit tests for bishop_shared.prompt_cache (prompt-caching plan T1)."""
+"""Unit tests for bishop_shared.prompt_cache (prompt-caching plan T1, T12)."""
 
 from __future__ import annotations
 
+import logging
 import re
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 import yaml
 
-from bishop_shared.prompt_cache import CACHE_TTL, cached_system_blocks
+from bishop_shared.prompt_cache import CACHE_TTL, cached_system_blocks, send_cache_warmup_ping
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -78,6 +81,54 @@ def test_no_inline_cache_control_literals() -> None:
             if _CACHE_CONTROL_LITERAL.search(text):
                 offenders.append(str(path.relative_to(REPO_ROOT)))
     assert offenders == []
+
+
+def test_send_cache_warmup_ping_calls_messages_create_not_batches(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """FU-CACHE-WARMUP-01: warmup uses the synchronous Messages API, never
+    ``messages.batches.create`` — a batch-based warmup would either
+    double-submit a real manifest row or block on batch-turnaround with no
+    SLA (see docstring)."""
+    mock_sdk = MagicMock()
+    mock_sdk.messages.create.return_value = SimpleNamespace(
+        usage=SimpleNamespace(cache_creation_input_tokens=5523, cache_read_input_tokens=0)
+    )
+    blocks = cached_system_blocks("profile", "rubric")
+
+    with caplog.at_level(logging.INFO, logger="bishop_shared.prompt_cache"):
+        result = send_cache_warmup_ping(mock_sdk, model="claude-haiku-4-5-20251001", system_blocks=blocks)
+
+    assert result is True
+    mock_sdk.messages.batches.create.assert_not_called()
+    mock_sdk.messages.create.assert_called_once_with(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1,
+        system=blocks,
+        messages=[{"role": "user", "content": "."}],
+    )
+    sent_records = [r for r in caplog.records if r.event == "cache_warmup_sent"]  # type: ignore[attr-defined]
+    assert len(sent_records) == 1
+    assert sent_records[0].cache_creation_input_tokens == 5523  # type: ignore[attr-defined]
+
+
+def test_send_cache_warmup_ping_never_raises_on_failure(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Best-effort contract: any failure (network, auth, rate limit, model
+    rejection) is swallowed — a real batch submit must still be attempted
+    regardless of warmup outcome."""
+    mock_sdk = MagicMock()
+    mock_sdk.messages.create.side_effect = RuntimeError("connection reset")
+    blocks = cached_system_blocks("profile", "rubric")
+
+    with caplog.at_level(logging.WARNING, logger="bishop_shared.prompt_cache"):
+        result = send_cache_warmup_ping(mock_sdk, model="claude-haiku-4-5-20251001", system_blocks=blocks)
+
+    assert result is False
+    failed_records = [r for r in caplog.records if r.event == "cache_warmup_failed"]  # type: ignore[attr-defined]
+    assert len(failed_records) == 1
+    assert failed_records[0].detail == "connection reset"  # type: ignore[attr-defined]
 
 
 def test_no_prompts_bind_mount() -> None:

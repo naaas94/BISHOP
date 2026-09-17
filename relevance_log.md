@@ -1,3 +1,4 @@
+Per-source standing notes (taste + intel for future agents): `config/source-notes/`. Append there; keep this file as the raw diary.
 
 ### Not really relevant right now:
 

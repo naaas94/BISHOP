@@ -1,0 +1,47 @@
+{
+  "eval_id": "github_repo_gate_v0",
+  "exported_at": "2026-09-15T22:00:38.901Z",
+  "corpus": 93,
+  "stamped": 23,
+  "confusion_agent_to_human": {
+    "keep->keep": 4,
+    "junk->junk": 17,
+    "junk->unsure": 2
+  },
+  "human_by_call2_band": {
+    ">=0.7": {
+      "keep": 4,
+      "junk": 11,
+      "unsure": 2
+    },
+    "0.5-0.7": {
+      "keep": 0,
+      "junk": 3,
+      "unsure": 0
+    },
+    "0.3-0.5": {
+      "keep": 0,
+      "junk": 2,
+      "unsure": 0
+    },
+    "<0.3": {
+      "keep": 0,
+      "junk": 1,
+      "unsure": 0
+    }
+  },
+  "high_score_junk_ids": [
+    "github:antonyrag/ragleap-core",
+    "github:hanyeol/model-compose",
+    "github:Apra-Labs/apra-fleet",
+    "github:MikkoParkkola/mcp-gateway",
+    "github:Mnemosyne-OS/Mnemosyne-Neural-OS",
+    "github:BlocUnited-LLC/mozaiks",
+    "github:clayrune-io/clayrune",
+    "github:HongyunQiu/QevosAgent",
+    "github:caura-ai/caura-build-fleet",
+    "github:magicyuan876/mineru-tianshu",
+    "github:sseshachala/conductai"
+  ],
+  "agent_keep_human_junk_ids": []
+}

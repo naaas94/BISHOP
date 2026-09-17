@@ -60,3 +60,12 @@ SQLITE_SNAPSHOT_INTERVAL_MINUTES = 30
 # Busy timeout for every writer connection; a Windows bind mount blocks longer
 # than the SQLite default of 0ms, which surfaces as spurious "database is locked".
 SQLITE_BUSY_TIMEOUT_MS = 5000
+
+# Harvest pool sidecar — not one of the six spec §8.5 mounts. Compose adds
+# this volume on scraper (rw) and query-api (ro). Do not fold into
+# BISHOP_VOLUME_MOUNTS (tests pin that list at 6).
+HARVEST_DIRNAME = "harvest"
+HARVEST_DIR = "/app/data/harvest"
+HARVEST_DB_FILENAME = "ledger.sqlite"
+HARVEST_DB_PATH = f"{HARVEST_DIR}/{HARVEST_DB_FILENAME}"
+HARVEST_ECONOMICS_FILENAME = "economics.yaml"

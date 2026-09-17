@@ -30,6 +30,33 @@ templates = Jinja2Templates(directory=str(_APP_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 
+def _static_asset_version() -> str:
+    """Cache-busting token for /static assets (mtime of style.css).
+
+    Without this, browsers heuristically cache /static/style.css (no
+    Cache-Control header) and keep serving a stale copy across deploys
+    until a hard refresh. Appending ?v=<mtime> to the stylesheet link
+    changes the URL whenever the file changes, forcing a re-fetch.
+    """
+    css_path = _STATIC_DIR / "style.css"
+    try:
+        return str(int(css_path.stat().st_mtime))
+    except OSError:
+        return "0"
+
+
+templates.env.globals["static_version"] = _static_asset_version()
+
+
+def _pct(count: int | float, total: int | float) -> float:
+    if not total:
+        return 0
+    return count / total * 100
+
+
+templates.env.filters["pct"] = _pct
+
+
 def _query_api_request(
     method: str,
     path: str,
@@ -67,6 +94,10 @@ def _query_api_get(path: str, *, params: dict[str, str] | None = None) -> tuple[
     return _query_api_request("GET", path, params=params)
 
 
+def _quote_source_id(source_id: str) -> str:
+    return urllib.parse.quote(source_id, safe="")
+
+
 def _sort_batches_completed_desc(batches: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(
         batches,
@@ -82,7 +113,47 @@ def health() -> dict[str, str]:
 
 @app.get("/", include_in_schema=False)
 def root() -> RedirectResponse:
-    return RedirectResponse(url="/batches", status_code=302)
+    return RedirectResponse(url="/dashboard", status_code=302)
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard(request: Request) -> HTMLResponse:
+    code, payload = _query_api_get("/stats/overview")
+    stats: dict[str, Any] | None = None
+    error: str | None = None
+    if code == 200 and isinstance(payload, dict):
+        stats = payload
+    else:
+        error = f"query-api returned status {code}"
+        logger.warning(
+            "dashboard upstream failure",
+            extra={"event": "ui_dashboard_failed", "status": code},
+        )
+
+    pass_rate = "—"
+    in_flight = 0
+    if stats is not None:
+        decided = stats.get("pre_filter_decided", 0) or 0
+        passed = stats.get("pre_filter_passed", 0) or 0
+        if decided:
+            pass_rate = f"{round(passed / decided * 100)}%"
+        queue = stats.get("queue_depth", [])
+        if isinstance(queue, list):
+            in_flight = sum(
+                item.get("count", 0)
+                for item in queue
+                if isinstance(item, dict)
+            )
+
+    context = {
+        "stats": stats,
+        "error": error,
+        "pass_rate": pass_rate,
+        "in_flight": in_flight,
+    }
+    if request.headers.get("HX-Request"):
+        return templates.TemplateResponse(request, "partials/dashboard_stats.html", context)
+    return templates.TemplateResponse(request, "dashboard.html", context)
 
 
 @app.get("/batches", response_class=HTMLResponse)
@@ -216,7 +287,7 @@ def escalations_page(request: Request) -> HTMLResponse:
 
 @app.post("/escalations/{source_id:path}/retry", response_class=HTMLResponse)
 def escalations_retry(request: Request, source_id: str) -> HTMLResponse:
-    quoted = urllib.parse.quote(source_id, safe="")
+    quoted = _quote_source_id(source_id)
     code, _payload = _query_api_request("POST", f"/entries/{quoted}/retry")
     message: str | None = None
     error: str | None = None
@@ -245,7 +316,7 @@ def escalations_retry(request: Request, source_id: str) -> HTMLResponse:
 
 @app.post("/escalations/{source_id:path}/permanent-fail", response_class=HTMLResponse)
 def escalations_permanent_fail(request: Request, source_id: str) -> HTMLResponse:
-    quoted = urllib.parse.quote(source_id, safe="")
+    quoted = _quote_source_id(source_id)
     code, _payload = _query_api_request("POST", f"/entries/{quoted}/permanent-fail")
     message: str | None = None
     error: str | None = None
@@ -347,7 +418,7 @@ def entry_reading_status_update(
     source_id: str,
     reading_status: str = Form(...),
 ) -> HTMLResponse:
-    quoted = urllib.parse.quote(source_id, safe="")
+    quoted = _quote_source_id(source_id)
     code, _payload = _query_api_request(
         "PATCH",
         f"/entries/{quoted}/reading-status",
@@ -381,7 +452,8 @@ def entry_reading_status_update(
 
 @app.get("/entries/{source_id:path}", response_class=HTMLResponse)
 def entry_detail(request: Request, source_id: str) -> HTMLResponse:
-    code, payload = _query_api_get(f"/entries/{source_id}")
+    quoted = _quote_source_id(source_id)
+    code, payload = _query_api_get(f"/entries/{quoted}")
     entry: dict[str, Any] | None = None
     error: str | None = None
     if code == 200 and isinstance(payload, dict):

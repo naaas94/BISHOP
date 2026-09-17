@@ -14,7 +14,7 @@ This is an operator first-week overlay. It is not a milestone, not charter M9, a
 
 - Prefilter pin: `professional_v1.2.0_soft_launch.yaml` (precision-first; park peripherals).
 - `RELEVANCE_PARKED` + UI `/parked` promote (manifest-only; no scrape/enrich until promote).
-- `BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS=1` on compose (does not rewrite `BACKFILL_CONFIG`).
+- `BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS=60` on compose as of 2026-09-15 after option 1 (was `7`, originally `1`; does not rewrite `BACKFILL_CONFIG`).
 
 ## Intended (what to restore)
 

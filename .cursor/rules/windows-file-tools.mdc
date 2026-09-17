@@ -1,0 +1,28 @@
+---
+description: Windows Cursor Write/StrReplace traps — forward-slash paths, no backslash escapes, large files in sections
+alwaysApply: true
+---
+
+# Windows file-tool calls
+
+This host is Windows. Cursor `Write` / `StrReplace` / `Read` / `Delete` take a `path` parameter that **breaks on backslash-escaped strings**.
+
+## Paths
+
+Prefer workspace-relative paths. If you need absolute, use **forward slashes**.
+
+- Good: `.dev/plans/prompt-caching/plan.md`
+- Good: `C:/Users/Ale/Documents/Repos/BISHOP/.dev/plans/prompt-caching/plan.md`
+- Bad: `C:\\Users\\Ale\\Documents\\...` — `\U`, `\t`, `\n` and similar are parsed as escapes; the call truncates at `path` or hits a garbage path.
+
+If Write looks like it truncated at the path parameter, **do not retry the same escaped path**. Switch to forward slashes (or a shorter relative path) and retry with **minimal content** first.
+
+## Content length
+
+A large `contents` payload can also truncate the Write call (long `plan.md` drafts). Do not keep retrying the full blob.
+
+1. Write a short skeleton (title + headings).
+2. Fill with `StrReplace` (or several section Writes), not one giant Write.
+3. Confirm the file on disk with Read before treating the emit as done.
+
+Incident: 2026-09-12, `.dev/plans/prompt-caching/plan.md`.

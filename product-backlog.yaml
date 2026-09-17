@@ -1,0 +1,211 @@
+# Bishop product backlog — append newest first within each status group.
+# Operator-facing features and follow-ups. Sortable index, not a decision log.
+# Audit/test-hygiene prose stays in .dev/still_open.md and .dev/known-test-failures.md.
+# Write-ups stay in .dev/decision-logs/. Do not duplicate those files here.
+#
+# status: idea | next | in_progress | shipped | deferred | blocked | closed
+# kind:   feature | hygiene | ops | eval
+# priority: p0 | p1 | p2 | p3 | p4
+# ids: PB-NNN (product); OPEN-NNN / FU-NNN are foreign keys into still_open / incident-log.
+
+schema_version: 1
+updated: "2026-09-17"
+
+items:
+  - id: PB-011
+    status: next
+    kind: feature
+    priority: p1
+    opened: "2026-09-17"
+    updated: "2026-09-17"
+    title: Harvest mill loop (GitHub sidecar, not the 6h scrape tick)
+    summary: >
+      First landing hitchhiked GitHub harvest on scrape_cycle (90s leftover,
+      then BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC — live 21600). Release already
+      has a 60s loop. Philosophy is unbounded mill + $N tap. Same scraper
+      process, third asyncio loop, Search 30/min, same sidecar. Not a new
+      worker. Not paper exhaust. Not GitHub cutover.
+    see:
+      - harvest-pool-next.md
+      - .dev/decision-logs/ops/harvest-pool-first-landing.md
+      - services/scraper/app/harvest_github.py
+      - services/scraper/app/main.py
+
+  - id: PB-012
+    status: deferred
+    kind: feature
+    priority: p2
+    opened: "2026-09-17"
+    updated: "2026-09-17"
+    title: GitHub incremental cutover (ledger-only harvest)
+    summary: >
+      After PB-011 is filling. Stop POSTing GitHub fetch_manifest into
+      DISCOVERED; DISCOVERED is the $N tap only. Tap already inserts.
+      Do not dump the sidecar. Do not start paper exhaust here.
+    see:
+      - harvest-pool-next.md
+      - .dev/decision-logs/ops/harvest-pool-first-landing.md
+
+  - id: PB-010
+    status: idea
+    kind: feature
+    priority: p3
+    opened: "2026-09-16"
+    updated: "2026-09-16"
+    title: Bishop MCP — v1 read-only, later scout-artifact write-back
+    summary: >
+      Wrap query-api search/get_entry/recent as a read-only MCP (no
+      STATE_WORKER_URL). Consumers extract and apply; Bishop does not.
+      v2 may store a value-scout report.md against source_id in a sidecar
+      (visit vs scouted_empty vs scouted_kept). Do not re-embed, do not
+      patch Call 1/2, do not extend processing_state past INDEXED. Run a
+      few hand scouts before building v2.
+    see:
+      - mcp-agent-tool-notes.md
+      - .dev/decision-logs/ops/mcp-consumer-extraction.md
+
+  - id: PB-001
+    status: shipped
+    kind: feature
+    priority: p2
+    opened: "2026-09-14"
+    shipped: "2026-09-14"
+    title: UI dashboard with pipeline stats and CSS-bar breakdowns
+    summary: >
+      query-api GET /stats/overview (read-only SQLite aggregates) plus UI
+      /dashboard as the new landing page. Funnel, queue depth, relevance
+      histogram, domain/source/type/tags/reading-status, 30d ingest,
+      batches, 7d errors. htmx poll every 30s. No Chart.js.
+    see:
+      - services/query-api/app/stats_reader.py
+      - services/query-api/app/routers/stats.py
+      - services/ui/app/templates/dashboard.html
+      - tests/test_query_api_stats.py
+      - tests/test_ui_routes.py
+
+  - id: PB-002
+    status: idea
+    kind: feature
+    priority: p3
+    opened: "2026-09-14"
+    title: Token and cost stats on the dashboard
+    summary: >
+      batches has no usage columns today; batch-poller already parses
+      message.usage (input/output/cache tokens) and only logs it.
+      Persist those columns (Alembic + state-worker domain + poller write).
+      Do not invent token fields on the UI first. Harvest projected $ is
+      a different card (economics.yaml × released_today). See
+      .dev/persist-vendor-payloads.md.
+    blocked_on: schema change (Alembic + state-worker domain models)
+
+  - id: PB-003
+    status: next
+    kind: hygiene
+    priority: p0
+    opened: "2026-06-13"
+    updated: "2026-09-14"
+    title: Isolate the shared `app` package in monolithic pytest
+    summary: >
+      Nine services share top-level `app`. Leaky query-api entry/stats tests
+      leave query-api on sys.path; state-worker/vector-writer are namespace
+      packages (no __init__.py) and lose. ~98 full-suite fails/errors.
+    foreign_id: OPEN-002
+    see:
+      - .dev/still_open.md
+      - .dev/known-test-failures.md
+
+  - id: PB-004
+    status: next
+    kind: hygiene
+    priority: p1
+    opened: "2026-09-14"
+    title: Update M5 integration fixtures for T9-bis min-batch hold
+    summary: >
+      ENRICHMENT_STAGE1_MIN_BATCH_SIZE default is 10. M5 e2e still seeds 5
+      and 1 entries and never overrides the min. Two tests fail in isolation
+      at assert len(matches) == 1.
+    foreign_id: OPEN-021
+    see:
+      - .dev/still_open.md
+      - tests/test_m5_integration.py
+      - services/enrichment-batcher/app/config.py
+
+  - id: PB-005
+    status: next
+    kind: ops
+    priority: p2
+    opened: "2026-09-12"
+    updated: "2026-09-14"
+    title: Retire sqlite_live compose override (or narrow the discovery test)
+    summary: >
+      Tracked docker-compose.override.yml remounts sqlite_live after the
+      WAL-handle leak. Auto-load makes default `docker compose config` ≠
+      base file, so the named-volume discovery test fails in isolation.
+    foreign_id: OPEN-022
+    incident: 2026-09-12-state-worker-compose-up-exit-3
+    follow_up: FU-002
+    see:
+      - docker-compose.override.yml
+      - incident-log.yaml
+      - .dev/still_open.md
+
+  - id: PB-006
+    status: deferred
+    kind: ops
+    priority: p1
+    opened: "2026-06-13"
+    updated: "2026-09-11"
+    title: Cut sqlite over to a Docker named volume
+    summary: >
+      Tooling and opt-in overlay landed. Live bind mount is still in use.
+      Operator cutover, not a code invention.
+    foreign_id: OPEN-007
+    see:
+      - .dev/decision-logs/ops/sqlite-named-volume-migration.md
+      - docker-compose.override.named-volume.yml
+
+  - id: PB-007
+    status: idea
+    kind: feature
+    priority: p3
+    opened: "2026-09-14"
+    title: query-api entry reads via state-worker HTTP (drop direct sqlite)
+    summary: >
+      Larger M7 seam. Keeps the ro mount today. Listed under OPEN-007
+      remaining table as a medium operator decision.
+    foreign_id: OPEN-007
+    see:
+      - services/query-api/app/sqlite_reader.py
+
+  - id: PB-008
+    status: idea
+    kind: eval
+    priority: p3
+    opened: "2026-09-14"
+    title: Surface prefilter eval / calibration on the dashboard
+    summary: >
+      Gold set lives in eval/prefilter_v0 and eval/prefilter_v1. Dashboard
+      currently shows live corpus aggregates only. A later slice could
+      show last replay metrics vs the labeled slice without scraping a
+      new live batch. Do not bump the profile until replay metrics exist.
+    see:
+      - eval/prefilter_v1/
+      - AGENTS.md
+
+  - id: PB-009
+    status: deferred
+    kind: ops
+    priority: p3
+    opened: "2026-09-16"
+    title: Bound ingest content risk (prompt injection, href, body size)
+    summary: >
+      Seed map 2026-09-15. Untrusted public text reaches Claude as the user
+      turn and then the index. No RCE. First later probe is a frozen
+      adversarial eval through Gate 1 / Call 1 / Call 2; cheap independent
+      work is http(s) url allowlist and content_raw max_length. LAN auth
+      only if this host is not single-operator.
+    foreign_id: OPEN-023
+    see:
+      - .dev/decision-logs/ops/ingest-content-risk-seed.md
+      - .dev/still_open.md
+      - .dev/architecture/bishop/open-questions.md

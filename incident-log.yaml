@@ -93,6 +93,14 @@ incidents:
           seconds. Confirm BishopSqliteSnapshot does not block container
           integrity_check (mode=ro should be fine; SHM refresh may not be).
         status: open
+      - id: FU-004
+        item: >
+          Tracked docker-compose.override.yml makes
+          test_default_compose_discovery_ignores_named_volume_override fail
+          in isolation (default `docker compose config` ≠ base file). Logged
+          as OPEN-022. Retire the override with FU-002 or narrow the test.
+        status: open
+        see: .dev/still_open.md OPEN-022
     related:
       - 2026-09-11-bishop-db-salvage
       - 2026-06-13-bishop-db-overwrite

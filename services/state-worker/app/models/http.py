@@ -41,6 +41,10 @@ class ManifestBatchResponse(BaseModel):
     skipped: int
 
 
+class ManifestCountResponse(BaseModel):
+    count: int
+
+
 class ContentPostRequest(BaseModel):
     source_id: str
     content_raw: str

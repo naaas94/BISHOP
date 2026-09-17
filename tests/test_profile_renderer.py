@@ -162,9 +162,9 @@ def test_legacy_profiles_default_peripheral_disposition_pass() -> None:
 
 # prompt-caching plan T1 — §2 row 3: render_profile_prompt(profile, *, include_output=True).
 # Default True must be byte-for-byte identical to the pre-change render (pinned below).
-_SOFT_LAUNCH_DEFAULT_RENDER_LEN = 10799
+_SOFT_LAUNCH_DEFAULT_RENDER_LEN = 10940
 _SOFT_LAUNCH_DEFAULT_RENDER_SHA256 = (
-    "2518f24b3df2736b19d34c6129bdc35a37529ce116902331c371e1df84d630fd"
+    "fe4ec926b1ae0ea060ad1f4d4f80dd8968c4171e55fce63d4236eaabcb52fa0b"
 )
 
 

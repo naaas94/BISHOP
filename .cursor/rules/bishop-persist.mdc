@@ -1,0 +1,14 @@
+---
+description: Persist vendor-returned facts; do not log-and-drop usage or harvest fields
+alwaysApply: true
+---
+
+# Persist vendor payloads
+
+If GitHub, Anthropic, ArXiv, SS, HF, or LW already returned a fact in a payload we fetched, persist it (typed column or `extras_json`). Do not only log it.
+
+Harvest feature store is the sidecar under `${BISHOP_DATA_ROOT}/harvest/`, not `manifest`. Do not widen `ManifestIngestEntry` for GitHub stars/language/fork. Harvest mill is not the 6h scrape tick — see `harvest-pool-next.md`.
+
+Anthropic `message.usage` is already parsed in batch-poller and only logged. Persisting it is PB-002 (`batches` columns) — not a harvest blocker. Standing note: `.dev/persist-vendor-payloads.md`.
+
+Do not persist secrets or README/content on the harvest ledger.

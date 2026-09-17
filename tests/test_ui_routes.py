@@ -34,6 +34,63 @@ def _restore_app_modules(saved: dict[str, ModuleType], inserted_path: str | None
         sys.path.remove(inserted_path)
 
 
+def _fake_stats_overview_payload() -> dict:
+    en_dash = "\u2013"
+    funnel_labels = [
+        "Discovered",
+        "Relevance queued",
+        "Relevance passed",
+        "Relevance rejected",
+        "Relevance parked",
+        "Scrape",
+        "Enrichment stage 1",
+        "Enrichment stage 2",
+        "Vector write queued",
+        "Indexed",
+        "Failed",
+        "Escalated",
+        "Permanently failed",
+    ]
+    funnel = [{"label": label, "count": 0} for label in funnel_labels]
+    funnel[9] = {"label": "Indexed", "count": 12}
+    funnel[11] = {"label": "Escalated", "count": 2}
+    hist = [
+        {"label": f"{i / 10:.1f}{en_dash}{(i + 1) / 10:.1f}", "count": 0}
+        for i in range(10)
+    ]
+    return {
+        "generated_at": "2026-06-02T12:00:00Z",
+        "manifest_total": 100,
+        "entries_total": 50,
+        "indexed_total": 12,
+        "pre_filter_decided": 20,
+        "pre_filter_passed": 15,
+        "funnel": funnel,
+        "queue_depth": [{"label": "SCRAPE_QUEUED", "count": 3}],
+        "relevance_histogram": hist,
+        "by_domain": [{"label": "professional", "count": 12}],
+        "by_source": [{"label": "arxiv", "count": 8}],
+        "by_entry_type": [{"label": "paper", "count": 10}],
+        "top_tags": [{"label": "RAG", "count": 9}],
+        "reading_status": [{"label": "unread", "count": 7}],
+        "ingest_by_day": [
+            {"date": "2026-06-01", "count": 2},
+            {"date": "2026-06-02", "count": 5},
+        ],
+        "batches_total": 4,
+        "batches_by_status": [{"label": "complete", "count": 4}],
+        "batches_by_type": [{"label": "pre_filter", "count": 3}],
+        "recent_errors": [{"label": "http_error", "count": 1}],
+        "harvest_pool_size": 0,
+        "harvest_unreleased": 0,
+        "harvest_released_today": 0,
+        "harvest_n_cap": 0,
+        "harvest_budget_usd": 0.0,
+        "harvest_projected_usd_today": 0.0,
+        "harvest_sidecar_present": False,
+    }
+
+
 def _load_ui_app():
     saved = _clear_app_modules()
     path_str = str(_UI_ROOT)
@@ -109,7 +166,7 @@ def ui_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
                         }
                     ],
                 }
-            if path == "/entries/arxiv:2401.00001":
+            if path == "/entries/arxiv%3A2401.00001":
                 return 200, {
                     "source_id": "arxiv:2401.00001",
                     "title": "Hybrid Retrieval",
@@ -126,6 +183,25 @@ def ui_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
                     "flagged_for_review": False,
                     "id": "1",
                 }
+            if path == "/entries/github%3Aowner%2Frepo":
+                return 200, {
+                    "source_id": "github:owner/repo",
+                    "title": "owner/repo",
+                    "url": "https://github.com/owner/repo",
+                    "source": "github",
+                    "domain": "professional",
+                    "content_raw": "README body.",
+                    "ingested_at": "2026-06-02T11:00:00",
+                    "reading_status": "unread",
+                    "processing_state": "INDEXED",
+                    "profile_version": "1.0.0",
+                    "pre_filter_batch_id": "b-new",
+                    "pre_filter_rationale": "relevant",
+                    "flagged_for_review": False,
+                    "id": "2",
+                }
+            if path == "/stats/overview":
+                return 200, _fake_stats_overview_payload()
             if path == "/search":
                 assert params and params.get("q") == "hybrid retrieval"
                 return 200, {
@@ -153,10 +229,58 @@ def ui_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         _restore_app_modules(saved, inserted)
 
 
-def test_root_redirects_to_batches(ui_client: TestClient) -> None:
+def test_root_redirects_to_dashboard(ui_client: TestClient) -> None:
     response = ui_client.get("/", follow_redirects=False)
     assert response.status_code == 302
-    assert response.headers["location"] == "/batches"
+    assert response.headers["location"] == "/dashboard"
+
+
+def test_dashboard_renders_stats(ui_client: TestClient) -> None:
+    response = ui_client.get("/dashboard")
+    assert response.status_code == 200
+    body = response.text
+    assert "Dashboard" in body
+    assert "Pipeline funnel" in body
+    assert "Indexed" in body
+    assert "12" in body
+    assert "SCRAPE_QUEUED" in body
+    assert "75%" in body
+    assert "RAG" in body
+    assert "Total batches" in body
+    assert "Harvest pool" in body
+    assert "Harvest sidecar not mounted." in body
+    assert 'id="dashboard-stats"' in body
+
+
+def test_dashboard_htmx_returns_partial(ui_client: TestClient) -> None:
+    response = ui_client.get("/dashboard", headers={"HX-Request": "true"})
+    assert response.status_code == 200
+    body = response.text
+    assert 'id="dashboard-stats"' in body
+    assert "<html" not in body.lower()
+
+
+def test_dashboard_upstream_error_shows_message(monkeypatch: pytest.MonkeyPatch) -> None:
+    saved = _clear_app_modules()
+    path_str = str(_UI_ROOT)
+    inserted = None
+    if path_str not in sys.path:
+        sys.path.insert(0, path_str)
+        inserted = path_str
+    try:
+        import app.main as ui_main_live  # noqa: WPS433
+
+        monkeypatch.setattr(
+            ui_main_live,
+            "_query_api_get",
+            lambda path, *, params=None: (502, None),
+        )
+        client = TestClient(ui_main_live.app)
+        response = client.get("/dashboard")
+        assert response.status_code == 200
+        assert "query-api returned status 502" in response.text
+    finally:
+        _restore_app_modules(saved, inserted)
 
 
 def test_batch_list_filters_complete_and_sorts_desc(ui_client: TestClient) -> None:
@@ -179,6 +303,13 @@ def test_entry_detail_renders_content_raw(ui_client: TestClient) -> None:
     assert response.status_code == 200
     assert "Raw content" in response.text
     assert "Full paper text." in response.text
+
+
+def test_entry_detail_slash_source_id_renders(ui_client: TestClient) -> None:
+    response = ui_client.get("/entries/github:owner/repo")
+    assert response.status_code == 200
+    assert "README body." in response.text
+    assert "Entry not found" not in response.text
 
 
 def test_search_page_and_htmx_partial(ui_client: TestClient) -> None:
@@ -228,6 +359,7 @@ def test_ui_main_has_no_direct_store_imports() -> None:
         "rank_bm25",
         "aiosqlite",
         "sqlite3",
+        "harvest_ledger",
         "STATE_WORKER_URL",
         "state-worker",
     )

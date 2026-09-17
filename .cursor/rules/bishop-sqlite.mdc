@@ -12,6 +12,7 @@ Authoritative ops note: `.dev/sqlite.md`. Do not rediscover the DB from the READ
 - Filename: `bishop.db` (`bishop_shared/constants.py`)
 - Container: `/app/data/sqlite/bishop.db`
 - Host: `${BISHOP_DATA_ROOT}/sqlite/bishop.db` (this machine: `C:/Users/Ale/bishop_data/sqlite/bishop.db`)
+- Harvest sidecar (not `bishop.db`): `${BISHOP_DATA_ROOT}/harvest/ledger.sqlite` — scraper writes; query-api `mode=ro`. Pickup `harvest-pool-next.md`.
 - Migrations: repo-root `alembic/versions/` (not under `services/state-worker/`)
 - Runtime models: Pydantic in `services/state-worker/app/models/domain.py` — no SQLAlchemy ORM
 

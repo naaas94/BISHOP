@@ -1,7 +1,7 @@
 ---
 rubric_id: prefilter_rubric
 version: "1.0.0"
-canonical_hash: "821c1f8d94c9225c3e3d1ed79bd132cc34417a57dfa3bdf1dad7727dba1f39b9"
+canonical_hash: "976d9185b0bbef3eb994ed68913b9c1908dd4190d175148e5cec9190e14d4fb0"
 ---
 # Source-shape law for pre-filter
 
@@ -58,19 +58,35 @@ never going to contain it. Do not read the *presence* of exciting vocabulary in 
 taglines are marketing copy by construction and are the least reliable field in this entire
 pipeline for anchor matching.
 
-What the tagline is reliable for is the applied/dev-skills distinction the profile already
-draws. A tagline that names a concrete artifact you could run or adapt this week — a batching
-harness, an eval runner, a retrieval index builder, an agent framework with a described
-integration point — is real evidence for `applied_systems` or `dev_skills`, because a repo
-existing to do a specific runnable thing is itself the "working reference" the profile asks
-for; the code is the artifact. A tagline that only names a topic or lists capabilities without
-naming a runnable thing ("awesome list of X", "curated papers on Y", "collection of Z
-prompts") is the star-count-dump / curated-list exclusion already in the profile, and the
-absence of a described technique is exactly the signal that exclusion is watching for — treat
-a bare list as excluded on that basis rather than parking it as merely thin. Between those two
-readings, when a tagline is genuinely ambiguous about which side it falls on, park it
-peripheral rather than guessing core; a two-sentence tagline earning a core mark on inference
-alone spends real enrichment budget on a guess.
+The bar for a repo is whether you would study or steal from this codebase, not whether the
+tagline is about agents or RAG. A tagline that names a concrete stealable artifact — a
+retrieval index builder with a described retrieval mode, a browser extension that attaches to
+a real agent runtime, an observability pane with a named protocol, an operator playbook
+whose repo is the working artifact — is real evidence for `applied_systems` or `dev_skills`.
+The code is the working reference the profile asks for; that row may be core. Badges on a
+README that also names such an artifact do not by themselves make it junk.
+
+Treat the following as the profile's existing star-count-dump / no-reusable-technique
+exclusion and **reject** them (decision 0). Do not park them: park still spends gate-1 tokens
+and fills the inbox, and on-topic boilerplate must not spend scrape or enrich.
+
+- Kitchen-sink wrapper: capability laundry lists ("AI employees", RAG-in-a-box,
+  fleet-of-agents) that advertise every adjacent buzzword without a named stealable core.
+- Product landing: "deploy in minutes", YAML-as-product, hero copy with no application code
+  or technique to copy.
+- Badge-wall: stars, CI, shields, self-assessed compliance badges, and install buttons with
+  no named technique or artifact behind them.
+- Awesome-list / link dump / curated papers or prompts (already excluded).
+- Vendor SDK / thin client around someone else's API (install a hook, pass an agent id).
+- Clone of a CLI you already run: auto-yes wrappers, thin skins, rebrands of a tool already
+  on the machine.
+
+If the tagline is ambiguous about whether it is one of those junk classes, **reject**, not
+park. Uncertainty about kitchen-sink vs landing vs badge-wall is not genuine ambiguity about
+a working reference. Genuine remaining park cases are taglines that do name a stealable
+artifact but are too thin to tell whether you would open it this week — those stay peripheral,
+not core and not reject. Do not auto-reject a working-reference repo just because the tagline
+is short or the README also has badges.
 
 ## Shape 3 — model card (huggingface)
 

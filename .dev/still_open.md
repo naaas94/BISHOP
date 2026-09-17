@@ -2,11 +2,13 @@
 
 Consolidated open and half-open items from audits (M0–M7), milestone handoffs, decision logs, `CHANGELOG.MD`, ops notes, and live validation. Audit debt and ops follow-ups only — milestone feature work lives in milestone plans, not here.
 
-**Last verified:** 2026-06-13 · Python 3.14.2 · pytest 9.0.2 · win32 · HEAD
+**Machine-readable product index:** repo-root `product-backlog.yaml` (PB-* ids; OPEN-* / FU-* are foreign keys into this file and `incident-log.yaml`). Harvest mill (PB-011) is product, not this hygiene list — pickup `harvest-pool-next.md`.
+
+**Last verified:** 2026-09-14 · Python 3.14 · pytest 8.4.2 · win32 · HEAD
 
 **How gates work:** Milestone exit criteria are enforced by `scripts/verify-m<N>.sh` slices (often with subprocess isolation). Monolithic `pytest tests/` is **not** a binding gate but is the hygiene bar for “program green.”
 
-**Current monolithic suite (sanity check):** ~480 passed, 57 failed, 10 errors, 1 skipped — dominated by nine-service `app` package namespace collision plus OPEN-001.
+**Current monolithic suite (sanity check, 2026-09-14):** 811 passed, 87 failed, 14 errors, 4 skipped — still dominated by OPEN-002 (`app` namespace collision). Two isolated hold-gate lags (OPEN-021) and one compose-override discovery fail (OPEN-022) are **not** collision. OPEN-001 is closed (escalations test now expects the ALERT sibling).
 
 **M7 binding gate:** `scripts/verify-m7.sh` equivalent → **136 passed** (green).
 
@@ -16,7 +18,7 @@ Consolidated open and half-open items from audits (M0–M7), milestone handoffs,
 
 | ID | Priority | Status | One-liner |
 |----|----------|--------|-----------|
-| [OPEN-001](#open-001--escalations-test-stale-error_log-count) | P0 | Open | Stale test expects 1 `error_log` row; T8 dual-write produces 2 |
+| [OPEN-001](#open-001--escalations-test-stale-error_log-count) | P0 | **Closed 2026-09-13** | Escalations test now asserts `len(error_log) == 2` |
 | [OPEN-002](#open-002--monolithic-pytest-app-namespace-collision) | P0 | Open | Full `pytest tests/` breaks after multi-service `app` imports |
 | [OPEN-003](#open-003--m6-integration-sysmodules-leak) | P0 | Half-open | M6 harness teardown insufficient; poisons state-worker config test |
 | [OPEN-004](#open-004--charter-g4-full-e2e-arxiv--indexed) | P1 | Open | Manual charter exit gate; not automated |
@@ -34,6 +36,9 @@ Consolidated open and half-open items from audits (M0–M7), milestone handoffs,
 | [OPEN-018](#open-018--sqlite-wal-contention-test) | P3 | Mostly closed | Multi-process WAL harness landed; Windows bind-mount still untestable |
 | [OPEN-019](#open-019--misc-coverage--docs-gaps) | P4 | Mixed | Small tests/docs deferred across milestones |
 | [OPEN-020](#open-020--spec-normative-gaps) | P4 | Deferred | Spec §8.3 DuckDB prose; parent fsync; etc. |
+| [OPEN-021](#open-021--m5-integration-stale-vs-t9-bis-hold-gate) | P1 | Open | M5 e2e still seeds 5/1 entries; min batch size is now 10 |
+| [OPEN-022](#open-022--compose-override-yml-breaks-discovery-test) | P2 | Open | Tracked `docker-compose.override.yml` makes default `compose config` ≠ base |
+| [OPEN-023](#open-023--ingest-content-risk-prompt-injection--href--size) | P3 | Deferred | Seed map of untrusted ingest → LLM/index/UI; no RCE; tackle when convenient |
 
 ---
 
@@ -43,11 +48,11 @@ Consolidated open and half-open items from audits (M0–M7), milestone handoffs,
 
 | Field | Value |
 |-------|-------|
-| **Status** | Open |
-| **Also tracked** | `.dev/known-test-failures.md` OPEN-001 |
-| **Audit** | M1 re-audit F-013; inherited M2–M7 waivers |
+| **Status** | **Closed 2026-09-13** — test now asserts `len(error_log) == 2` with HTTPStatusError + ALERT sibling |
+| **Also tracked** | `.dev/known-test-failures.md` OPEN-001 (historical write-up; mark closed there) |
+| **Audit** | M1 re-audit F-013; inherited M2–M7 waivers; architecture `open-questions.md` 1.4.0 closed the matching question |
 
-**What:** `tests/test_state_worker_routers_escalations.py::test_escalations_returns_flagged_entry_with_error_log` asserts `len(error_log) == 1`. Implementation correctly returns **2** rows after M1 T8.
+**What (historical):** `tests/test_state_worker_routers_escalations.py::test_escalations_returns_flagged_entry_with_error_log` asserted `len(error_log) == 1`. Implementation correctly returned **2** rows after M1 T8. **Fix landed:** assertion is `== 2`.
 
 **Why it matters:** Wire shape is operational failure + `ALERT` sibling per T8 decision log. Stale test hides intended contract.
 
@@ -70,26 +75,38 @@ Consolidated open and half-open items from audits (M0–M7), milestone handoffs,
 
 | Field | Value |
 |-------|-------|
-| **Status** | Open (worsened post-M7) |
+| **Status** | Open (worsened post-M7; mechanism re-diagnosed 2026-09-14) |
+| **Also tracked** | `.dev/known-test-failures.md` OPEN-002; architecture `known-coupling-surfaces.md` (shared `app` package) |
 | **Audit** | M7 F-005; M7 handoff §8.1, §8.4 |
 
-**What:** Nine services each use a top-level `app` package. Monolithic `pytest tests/` loads multiple into `sys.modules['app']` → ImportError / wrong config (~57 failures + 10 errors at last run).
+**What:** Nine services each use a top-level `app` package. Monolithic `pytest tests/` loads multiple into `sys.modules['app']` → ImportError / wrong config.
 
-**Baseline:** Pre-M7 @ `e207960` had 2 failures (escalations + M6 leak). Post-M7: ~63+ failures/errors from collision alone.
+**2026-09-14 re-diagnosis (do not treat as 87 product regressions):**
+
+1. **Leaky poisoners.** `tests/test_query_api_routes_entry.py` and `tests/test_query_api_stats.py` wipe every `app.*` from `sys.modules`, import query-api’s `app`, then **never restore** modules and **never pop** `services/query-api` from `sys.path`. Search/UI tests use save-restore-and-pop and do **not** poison (entry+contract dies; search+contract and UI+contract stay green).
+2. **Namespace vs regular package.** `state-worker` and `vector-writer` have **no** `app/__init__.py` (PEP 420 namespace). query-api **does**. Once query-api is anywhere on `sys.path`, `import app` binds to query-api even if vector-writer is *earlier* on the path. Reproduced outside pytest; `importlib.invalidate_caches()` does not change it.
+3. **Victim pattern.** Later tests that re-resolve dotted names (`monkeypatch.setattr("app.db.SQLITE_DB_PATH", ...)`, `import app.index_entry`) fail. Collection-time bindings (`from app.main import app` → route-surface test) still pass.
+
+**2026-09-14 suite:** 811 passed / 87 failed / 14 errors / 4 skipped. Collision cluster ≈98 tests: `app.db` (30), `app.index_entry` (32), `app.transitions` (15), plus missing attrs on the wrong `app.config` / `app.models`. Dashboard stats/UI tests themselves pass; stats copied the leaky entry pattern so it is a **new poisoner of the same class**, not a new class.
+
+**Baseline:** Pre-M7 @ `e207960` had 2 failures (escalations + M6 leak). Post-M7: ~63+ failures/errors from collision alone. 2026-09-14 count is higher because more query-api/UI tests exist (including the leaky stats file).
 
 **Why it matters:** “Full suite green” is misleading; CI/policy needs a single authoritative command.
 
 **Anchors:**
 - Mitigation: `scripts/verify-m7.sh` (subprocess for `test_query_api_models.py`, `test_m7_integration.py`)
 - Handoff: `.dev/plans/m7-read-path/handoff.md` §8.1 monolithic note
+- Good pattern: `tests/test_query_api_routes_search.py` `_clear_app_modules` / `_restore_app_modules`
+- Leaky pattern: `tests/test_query_api_routes_entry.py`, `tests/test_query_api_stats.py`
 
 **Fix options:**
-1. **Policy:** Document that only `verify-m*.sh` slices are binding; monolithic is best-effort.
-2. **Harness:** Global `conftest.py` fixture that saves/restores `sys.modules` + `sys.path` per service test module.
-3. **Structural:** Rename packages (`state_worker_app`, etc.) — large diff; avoid unless necessary.
-4. **Subprocess isolation:** Extend verify-script pattern to additional collision-prone test modules (as M7 does for query-api models and M7 integration).
+1. **Harness (smallest):** Make entry/stats (and any other leaky file) use the search/UI save-restore-and-pop helper. Session `conftest.py` that asserts `app` is gone between files would lock it.
+2. **Equalize packages:** Add empty `app/__init__.py` to state-worker and vector-writer so they are regular packages and stop losing to query-api. Does **not** alone fix leftover-path order.
+3. **Policy:** Document that only `verify-m*.sh` slices are binding; monolithic is best-effort.
+4. **Structural:** Rename packages (`state_worker_app`, etc.) — large diff; avoid unless necessary.
+5. **Subprocess isolation:** Extend verify-script pattern to additional collision-prone test modules.
 
-**Validate:** `python -m pytest tests/ -q` vs `scripts/verify-m7.sh` (or manual slice commands in that script).
+**Validate:** `python -m pytest tests/test_query_api_routes_entry.py tests/test_state_worker_contract.py -q` must go green; then `python -m pytest tests/ -q`.
 
 ---
 
@@ -114,6 +131,33 @@ Consolidated open and half-open items from audits (M0–M7), milestone handoffs,
 python -m pytest tests/test_m6_integration.py tests/test_state_worker_config.py::test_config_env_round_trip -q
 ```
 Should pass in either order.
+
+---
+
+### OPEN-021 — M5 integration stale vs T9-bis hold gate
+
+| Field | Value |
+|-------|-------|
+| **Status** | Open |
+| **Also tracked** | `.dev/known-test-failures.md` OPEN-021 |
+| **Not** | OPEN-002 — these two fail **in isolation** |
+
+**What:** After prompt-caching T9-bis, `ENRICHMENT_STAGE1_MIN_BATCH_SIZE` defaults to **10** and `stage1_cycle` holds below that until `MAX_HOLD_MINUTES`. `tests/test_m5_integration.py` still seeds **5** entries (e2e) and **1** entry (startup scan), never overrides the min, and never advances the hold clock. One cycle → no Anthropic submit → no in-flight `enrichment_stage1` batch → `assert len(matches) == 1` with `matches == []`.
+
+**Why it matters:** Looks like a pipeline regression; product is doing what T9-bis specified. Unit tests in `test_enrichment_batcher_stage1_loop.py` already monkeypatch the min to 1; the M5 fixture was never updated.
+
+**Anchors:**
+- `services/enrichment-batcher/app/config.py` — `ENRICHMENT_STAGE1_MIN_BATCH_SIZE` default 10
+- `services/enrichment-batcher/app/stage1_loop.py` — hold-and-return when `held_count < MIN` and deadline not reached
+- `tests/test_m5_integration.py` — `_ENTRY_COUNT = 5`; startup scan uses `_source_ids(1)`
+- Decision: `.dev/decision-logs/prompt-caching/T9-bis-batch-amortization.md`
+
+**Recommended fix:** In `integration_client`, set stage-1/stage-2 min batch size to 1 (same as the unit tests), **or** raise `_ENTRY_COUNT` to 10 and give the startup-scan test a min override.
+
+**Validate:**
+```text
+python -m pytest tests/test_m5_integration.py::test_m5_e2e_five_entries_reach_vector_write_queued_with_enrichment_fields tests/test_m5_integration.py::test_m5_startup_scan_registers_enrichment_stage1_in_flight -q
+```
 
 ---
 
@@ -178,6 +222,29 @@ Should pass in either order.
 **Deferred (ops):** Automated backup; forensics on quarantined volume; integrity gate in verify scripts.
 
 **Validate:** After changes — compose up, corrupt-file injection test, concurrent read during write stress (Windows bind mount).
+
+---
+
+### OPEN-022 — `docker-compose.override.yml` breaks discovery test
+
+| Field | Value |
+|-------|-------|
+| **Status** | Open |
+| **Also tracked** | `.dev/known-test-failures.md` OPEN-022; `incident-log.yaml` 2026-09-12 FU-002 |
+| **Not** | OPEN-002 — fails **in isolation** |
+
+**What:** `tests/test_sqlite_named_volume.py::test_default_compose_discovery_ignores_named_volume_override` asserts `docker compose config` == `docker compose -f docker-compose.yml config`. Compose auto-loads a file literally named `docker-compose.override.yml`. This repo **tracks** a temporary override remounting `sqlite_live` after the Docker Desktop WAL-handle leak. Default render therefore differs from base; the named-volume overlay (`docker-compose.override.named-volume.yml`) is **not** the trigger.
+
+**Why it matters:** The test is correct about the named-volume filename. It is now also a tripwire that any committed `docker-compose.override.yml` fails CI/hygiene.
+
+**Anchors:**
+- `docker-compose.override.yml` — sqlite_live remount; comment says remove once handles are gone
+- `tests/test_sqlite_named_volume.py` L367–381
+- Incident FU-002: move live file back under `sqlite/` or cut over to named-volume runbook
+
+**Recommended fix:** gitignore / untrack the temporary override once sqlite_live is retired, **or** teach the test that a present `docker-compose.override.yml` is allowed and only forbid the named-volume filename being auto-loaded.
+
+**Validate:** `python -m pytest tests/test_sqlite_named_volume.py::test_default_compose_discovery_ignores_named_volume_override -q`
 
 ---
 
@@ -292,6 +359,33 @@ UI_HOST_PORT=8081
 ---
 
 ## P3 — Coverage gaps & waived deferrals
+
+### OPEN-023 — Ingest content risk (prompt injection, href, unbounded body)
+
+| Field | Value |
+|-------|-------|
+| **Status** | Deferred — documented 2026-09-16; not an incident; no code change |
+| **Also tracked** | `product-backlog.yaml` PB-009; architecture `open-questions.md` 1.6.0 |
+| **Write-up** | `.dev/decision-logs/ops/ingest-content-risk-seed.md` |
+
+**What:** Public titles, abstracts, READMEs, and LessWrong HTML are untrusted and reach Claude as the user turn (Gate 1, Call 1), then Call-1 summaries hop into Call 2 and into embeddings. No tool-use, no command exec, no generative RAG. Realistic impact is corpus integrity and batch spend, not a shell. Also: no `max_length` on `content_raw`; UI renders stored `url` as `href` without an http(s) allowlist; UI/query-api publish host ports with no auth.
+
+**Why it is P3:** Local-first single-operator box. Jinja autoescape, parameterized SQL, host-fixed content fetches, and trusted-only prompt-cache prefixes already close the RCE/SSRF/SQLi class.
+
+**Suggested later probes (do not start until a packet owns this):**
+1. Frozen adversarial eval through Gate 1 / Call 1 / Call 2 before changing prompts
+2. http(s) allowlist on stored URLs
+3. Wire / response size cap on `content_raw`
+4. LAN bind/auth only if this host is not single-operator
+
+**Anchors:**
+- Decision log: `.dev/decision-logs/ops/ingest-content-risk-seed.md`
+- Architecture: `open-questions.md` 1.6.0, `known-coupling-surfaces.md` 1.7.0, `external-input-sources.md` 1.4.1, `integration-seams.md` 1.3.1
+- Canvas: ingest-content-risk canvas beside chat (not in `.dev/architecture/`)
+
+**Do not:** invent `failure-taxonomy.md` cause-class IDs until the owner names them.
+
+---
 
 ### OPEN-013 — Live Docker compose smoke
 
@@ -443,21 +537,24 @@ UI_HOST_PORT=8081
 | M7 handoff not in HEAD (F-002) | Committed — `git show HEAD:.dev/plans/m7-read-path/handoff.md` works |
 | Plan artifact archaeology M2–M6 handoffs | Committed at HEAD |
 | Post-outage orphan-batch triage | Moot after DB clean reset (ops log) |
+| OPEN-001 escalations `error_log` count | Test now asserts 2 (HTTPStatusError + ALERT); architecture open-questions 1.4.0 |
 
 ---
 
 ## Suggested tackle order
 
-1. **OPEN-001** — ~5 min test fix; unblocks honest “1 failure” narrative
-2. **OPEN-003** — M6 fixture isolation
-3. **OPEN-002** — policy +/or subprocess isolation for collision-prone modules
-4. **OPEN-011** — `.env.example` two lines
-5. **OPEN-007** — batch-poller sqlite mount removal + integrity_check (high ops value)
-6. **OPEN-010** — one live G3 run when API key available
-7. **OPEN-004** — manual G4 pipeline run when docker stack is up
-8. **OPEN-008** — if live pipeline shows stuck `RELEVANCE_QUEUED` rows
-9. **OPEN-012** — architecture refresh when convenient
-10. **OPEN-019** — opportunistic small fixes
+1. **OPEN-021** — M5 fixture min-batch override (~5 min); two isolated fails
+2. **OPEN-002** — entry/stats save-restore-and-pop (same helper as search/UI); optionally add `app/__init__.py` on state-worker + vector-writer
+3. **OPEN-003** — M6 fixture isolation (same class as OPEN-002)
+4. **OPEN-022** — retire or gitignore `docker-compose.override.yml`, or narrow the discovery test
+5. **OPEN-011** — `.env.example` two lines
+6. **OPEN-007** — named-volume cutover still pending operator action
+7. **OPEN-010** — one live G3 run when API key available
+8. **OPEN-004** — manual G4 pipeline run when docker stack is up
+9. **OPEN-008** — if live pipeline shows stuck `RELEVANCE_QUEUED` rows
+10. **OPEN-012** — architecture refresh when convenient
+11. **OPEN-023** — ingest content risk when convenient (eval slice before prompt changes; cheap url/size caps independent)
+12. **OPEN-019** — opportunistic small fixes
 
 ---
 

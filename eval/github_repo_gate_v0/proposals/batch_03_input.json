@@ -1,0 +1,660 @@
+{
+  "batch": 3,
+  "items": [
+    {
+      "source_id": "github:CatCatUncle/openworkbuddy",
+      "title": "openworkbuddy",
+      "url": "https://github.com/CatCatUncle/openworkbuddy",
+      "github_url": "https://github.com/CatCatUncle/openworkbuddy",
+      "bishop_ui": "http://localhost:8081/entries/github:CatCatUncle/openworkbuddy",
+      "published_at": "2026-09-11T13:07:44+00:00",
+      "ingested_at": "2026-09-11T15:34:08.795353+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Direct match on agentic systems, multi-agent orchestration, and tool integration; production-grade agent design is core to your work, though the enterprise/SaaS positioning is less relevant than the underlying agent architecture and execution patterns.",
+      "value_rationale": "Valuable reference for multi-agent orchestration patterns, connector abstraction (39 integrations suggest a robust tool-use layer), and the architectural pattern of agents producing structured output (PPT, Word, Excel) rather than chat—directly applicable to building production agentic workflows that deliver executable artifacts.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "production",
+        "deployment",
+        "architecture",
+        "observability"
+      ],
+      "concepts": [
+        "agentic workflow automation",
+        "autonomous task planning and execution",
+        "multi-model integration (Claude, local LLMs)",
+        "file generation and format support",
+        "multi-tenant enterprise architecture",
+        "skill-based extensibility",
+        "streaming response optimization",
+        "IM platform connectors"
+      ],
+      "challenge_hooks": [
+        "How to build autonomous agents that produce actual files/deliverables instead of just chat responses",
+        "Deploying multi-tenant AI agents with enterprise security, audit trails, and role-based access control",
+        "Integrating multiple AI models and external APIs while optimizing performance for long-context streaming",
+        "Creating extensible agent systems where non-engineers can add new capabilities via simple skill definitions"
+      ],
+      "summary": "OpenWorkBuddy is a local-first AI office agent that autonomously plans and executes tasks, delivering actionable output files (PPT, Word, Excel, web) rather than chat logs. Features multi-agent orchestration, 39 connectors, enterprise multi-tenant management, and CLI integration.",
+      "pre_filter_rationale": "Applied systems write-up of a shipped agentic workflow with local-first architecture, LLM-agnostic tool integration, and skill-definition patterns—directly actionable for building multi-agent orchestration systems with interchangeable models.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <img src=\"build/icon.png\" width=\"120\" alt=\"OpenWorkBuddy\">\n</p>\n\n<h1 align=\"center\">OpenWorkBuddy</h1>\n\n<p align=\"center\">\n  <b>一个真吐文件的本机 AI 办公 agent。</b><br>\n  说一句人话，它自己规划、动手、验收——交给你的是能直接打开的 PPT / Word / Excel / 网页，<b>不是一段聊天记录</b>。\n</p>\n\n<p align=\"center\">\n  <sub>A local-first AI office agent that hands you files, not chat logs. → <a href=\"README.en.md\"><b>English README</b></a></sub>\n</p>\n\n<p align=\"center\">\n  <a href=\"#跑起来\"><b>⚡ 30 秒跑起来</b></a> ·\n  <a href=\"https://github.com/CatCatUncle/openworkbuddy/releases\">下载安装包</a> ·\n  <a href=\"#最新动态\">最新动态</a> ·\n  <a href=\"#交流群\">飞书交流群</a> ·\n  <a href=\"docs/功能清单.md\">功能清单</a>\n</p>\n\n<p align=\"center\">\n  <a href=\"https://github.com/CatCatUncle/openworkbuddy/stargazers\"><img src=\"https://img.shields.io/github/stars/CatCatUncle/openworkbuddy?style=flat-square&logo=github&label=Star&color=5b5ff7\" alt=\"Star\"></a>\n  <a href=\"https://github.com/CatCatUncle/openworkbuddy/forks\"><img src=\"https://img.shields.io/github/forks/CatCatUncle/openworkbuddy?style=flat-square&logo=github&color=5b5ff7\" alt=\"Fork\"></a>\n  <img src=\"https://img.shields.io/badge/Node-18%2B-5b5ff7?style=flat-square\" alt=\"Node 18+\">\n  <img src=\"https://img.shields.io/badge/macOS%20%7C%20Windows-desktop-5b5ff7?style=flat-square\" alt=\"macOS | Windows\">\n  <a href=\"LICENSE\"><img src=\"https://img.shields.io/badge/License-PolyForm%20NC-5b5ff7?style=flat-square\" alt=\"License\"></a>\n</p>\n\n<p align=\"center\">\n  <b>⭐ 觉得有用就点个 Star</b> —— 这个项目没有推广预算，能不能被搜到，基本取决于这个数字。<br>\n  <sub>个人、学习、非营利用途<b>免费</b>；公司里用需要授权，<a href=\"#协议\">一句话讲清 ↓</a></sub>\n</p>\n\n<p align=\"center\">\n  <img src=\"docs/images/demo.gif\" width=\"960\" alt=\"OpenWorkBuddy 演示：说一句话，助理自己干活，交付能打开的文件\">\n</p>\n\n---\n\n## 为什么是它\n\n**交付的是文件，不是聊天记录。** PPT / Word / Excel / 网页都是真生成的，成果面板里点开就能验收。声称写了文件却不在磁盘上，会被当场拦下重做。\n\n**不绑任何一家模型，东西都在你手里。** DeepSeek / 通义 / 智谱 / Kimi / OpenRouter / Ollama 本地模型界面点一下就切；本机装了 **Claude Code / Codex** 的，一键拿它当发动机，不再另买 token。自托管，会话、文件、Key 全在本机，默认只监听 `127.0.0.1`。\n\n**加一个能力 = 丢一个 Markdown 文件。** 放进 `skills/`，存盘后下一条任务就生效——不改代码、不重启、不打包。往外接 MCP 连接器和 [Agent Plugins](https://agent-plugins.org) 开放标准，别人的插件粘个 GitHub 地址就装。\n\n## 它替你做完的事\n\n| 你说一句 | 它交给你 |\n|---|---|\n| 帮我出一份 Q3 复盘 PPT，数据用这个 Excel | 读表 → 算 → 一个能直接放\n…[truncated]"
+    },
+    {
+      "source_id": "github:DavidCarliez/cover",
+      "title": "cover",
+      "url": "https://github.com/DavidCarliez/cover",
+      "github_url": "https://github.com/DavidCarliez/cover",
+      "bishop_ui": "http://localhost:8081/entries/github:DavidCarliez/cover",
+      "published_at": "2026-09-12T05:51:49+00:00",
+      "ingested_at": "2026-09-12T06:10:48.496750+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly relevant to production agentic systems and tool use, with practical applicability to agent safety and reliability, though focused on a specific (coding agent) use case rather than general agent orchestration.",
+      "value_rationale": "Provides actionable patterns for building observability and safety into multi-agent workflows where sensitive data flows through LLM calls—a critical production concern. The bidirectional proxy pattern and policy framework are architecturally transferable to RAG systems and document intelligence pipelines handling PII.",
+      "entry_type": "repo",
+      "tags": [
+        "safety",
+        "deployment",
+        "observability",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "privacy proxy",
+        "sensitive data redaction",
+        "reversible pseudonymization",
+        "deterministic replacement",
+        "bidirectional request-response translation",
+        "policy-based filtering",
+        "local data protection",
+        "AI coding agent security"
+      ],
+      "challenge_hooks": [
+        "How can developers use cloud-based AI coding agents without exposing private credentials, internal IPs, or infrastructure secrets?",
+        "How to maintain functional AI agent workflows while preventing sensitive data leakage to external LLM providers?",
+        "How to implement reversible data masking that preserves semantic context for model reasoning while protecting secrets in transit?"
+      ],
+      "summary": "Cover is a bidirectional privacy proxy for AI coding agents that replaces sensitive values with deterministic stand-ins before LLM requests and restores them in responses, supporting multiple policy types (pseudonymize, mask, redact, block, allow) across Codex, Claude, Cursor, and other clients.",
+      "pre_filter_rationale": "Applied systems write-up on production concerns (secrets isolation, infrastructure access control) for agent-assisted engineering workflows; directly reusable dev-flow pattern for securing AI-in-IDE tooling.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<h1 align=\"center\">Cover</h1>\n\n<p align=\"center\"><strong>Keep private data, internal infrastructure and secrets out of cloud coding agents without breaking your workflow.</strong></p>\n\n<p align=\"center\">\n  <a href=\"https://github.com/DavidCarliez/cover/actions/workflows/ci.yml\"><img alt=\"CI\" src=\"https://github.com/DavidCarliez/cover/actions/workflows/ci.yml/badge.svg\"></a>\n  <a href=\"go.mod\"><img alt=\"Go\" src=\"https://img.shields.io/badge/Go-see%20go.mod-00ADD8?logo=go&amp;logoColor=white\"></a>\n  <a href=\"LICENSE\"><img alt=\"License\" src=\"https://img.shields.io/badge/License-Apache%202.0-blue.svg\"></a>\n</p>\n\n<p align=\"center\">\n  <a href=\"#install\">Install</a> ·\n  <a href=\"#quick-start\">Quick start</a> ·\n  <a href=\"#privacy-policies\">Policies</a> ·\n  <a href=\"#inspect-diagnose-and-monitor\">Monitoring</a> ·\n  <a href=\"#pi-and-oh-my-pi\">Pi / OMP</a> ·\n  <a href=\"#security-boundary\">Security</a>\n</p>\n\nCover is a bidirectional privacy proxy for AI coding agents. It replaces\nmatched sensitive values locally with realistic, deterministic stand-ins\nbefore a request leaves your machine, then translates matching fakes in normal\nand streaming responses back to the originals. The model gets coherent\ncontext; your agent and tools keep working with the real environment.\n\n<p align=\"center\">\n  <img src=\"assets/cover-roundtrip.svg\" alt=\"Cover changes private values into protected replacements before an LLM request, then restores reversible values in the response. It also supports placeholder, mask, redact, block, and allow policies.\" width=\"100%\">\n</p>\n\nUse reversible `pseudonymize` or `placeholder` rules when the conversation must\nkeep working end to end. Use one-way `mask` or `redact` rules when restoration\nis unnecessary, `block` to stop a request locally, and `allow` for an explicit\nexception.\n\nSupported clients include **Codex**, **Claude Code**, **Cursor**, **Pi / Oh My\nPi**, and **OpenAI- or Anthropic-compatible SDKs and routers**.\n\n## Install\n\nThe installer downloads the release for your OS and CPU, verifies it against\nthe published SHA-256 checksums, installs it atomically to\n`~/.local/bin/cover`, configures selected clients, and starts the proxy.\n\n```sh\ncurl -fsSL http\n…[truncated]"
+    },
+    {
+      "source_id": "github:EthanChan050430/Saki-Panel",
+      "title": "Saki-Panel",
+      "url": "https://github.com/EthanChan050430/Saki-Panel",
+      "github_url": "https://github.com/EthanChan050430/Saki-Panel",
+      "bishop_ui": "http://localhost:8081/entries/github:EthanChan050430/Saki-Panel",
+      "published_at": "2026-09-12T05:51:59+00:00",
+      "ingested_at": "2026-09-12T06:10:48.085344+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly demonstrates agentic system patterns with tool use, state management, and production reliability concerns, though SRE-focused rather than core to NLP/RAG specialization.",
+      "value_rationale": "Provides architectural reference for autonomous agent orchestration in high-stakes production environments (crash handling, auto-remediation), with practical patterns applicable to multi-step LLM workflows and tool grounding. Local model support also relevant for deployment flexibility.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "observability",
+        "production",
+        "deployment",
+        "safety",
+        "orchestration"
+      ],
+      "concepts": [
+        "agentic task automation",
+        "autonomous incident response",
+        "error fingerprinting and crash detection",
+        "scoped tool execution with approvals",
+        "multi-provider LLM integration",
+        "real-time observability context",
+        "RBAC and audit logging",
+        "cloud-agnostic deployment"
+      ],
+      "challenge_hooks": [
+        "How can ops teams automate crash diagnosis and remediation without manual log inspection at 3 AM?",
+        "How do you safely delegate infrastructure changes to an autonomous agent while maintaining approval gates and rollback guarantees?",
+        "How can you run AI-driven server ops entirely offline using local models without external API dependencies?",
+        "How do you fingerprint recurring errors and prevent repeated failures with automated patch validation?"
+      ],
+      "summary": "Saki Panel is an AI-native server ops dashboard with an autonomous SRE agent that reads live logs/metrics, acts with scoped tools, and manages crash incidents via fingerprinting, patching, and auto-rollback. Supports local models (Ollama, LM Studio) and cloud providers.",
+      "pre_filter_rationale": "Shipped applied system combining agentic orchestration (SRE agent), observability (crash detection), and production reliability patterns (safe rollbacks, state machines); working reference for agent-based ops automation and failure-recovery pipelines.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<img src=\"apps/web/public/assets/saki-panel-icon.webp\" width=\"88\" height=\"88\" alt=\"Saki Panel\" />\n\n# Saki Panel\n\n**A server ops panel with an agent that can see, change, and run.**  \nHigh-risk work waits for your OK. Crashes get a fingerprint, a reviewed patch, and a rollback if it happens again.\n\n[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)\n[![check](https://github.com/EthanChan050430/Saki-Panel/actions/workflows/check.yml/badge.svg)](https://github.com/EthanChan050430/Saki-Panel/actions/workflows/check.yml)\n[![Release](https://img.shields.io/github/v/release/EthanChan050430/Saki-Panel)](https://github.com/EthanChan050430/Saki-Panel/releases/latest)\n[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6.svg)](https://www.typescriptlang.org/)\n[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)\n[![Fastify](https://img.shields.io/badge/Fastify-5-000000.svg)](https://fastify.dev/)\n[![Node](https://img.shields.io/badge/Node-%3E%3D22.13-339933.svg)](https://nodejs.org/)\n[![Plugins](https://img.shields.io/badge/plugins-saki--plugins-FF75AC.svg)](https://github.com/EthanChan050430/saki-plugins)\n\n<p>\n  <b>English</b> · <a href=\"README.zh-CN.md\">简体中文</a>\n</p>\n\n[Why Saki?](#why-saki) · [Saki](#saki) · [Watch](#saki-watch) · [Panel](#panel) · [Plugins](#plugins) · [Quick Start](#quick-start) · [Architecture](#architecture) · [Deploy](#deploy)\n\n</div>\n\n---\n\nSaki Panel is a web console for instances, nodes, files, terminals, and permissions. Saki is not a sidebar chatbot — it reads live status, logs, metrics, and the file tree, then acts inside the same workspace.\n\nYou can tell it:\n\n- *Restart the Node service on node-02 and tail the last 50 lines.*\n- *`/var` is filling up. Find what's using space and ask before deleting anything.*\n- *Update the Minecraft server. Back up the world first.*\n\nLocal models via [Ollama](https://ollama.com/) or [LM Studio](https://lmstudio.ai/) work with no API key. Cloud providers and GitHub Copilot are optional.\n\n## Why Saki Panel? (Comparison with Alternatives)\n\nExisting panels (MCSManager, 1Panel, Pterodactyl, aaPanel) are great at what they do —\n…[truncated]"
+    },
+    {
+      "source_id": "github:FailproofAI/failproofai",
+      "title": "failproofai",
+      "url": "https://github.com/FailproofAI/failproofai",
+      "github_url": "https://github.com/FailproofAI/failproofai",
+      "bishop_ui": "http://localhost:8081/entries/github:FailproofAI/failproofai",
+      "published_at": "2026-09-12T05:49:11+00:00",
+      "ingested_at": "2026-09-12T06:14:51.808099+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly addresses production observability and safety for agentic systems, core to shipping reliable agent workflows, though tooling focus is narrower than broader agentic architecture concerns.",
+      "value_rationale": "Provides concrete observability and enforcement patterns for multi-agent environments (12 harnesses) and policy-based safety, valuable for production deployment of agent systems. Specific value: pre-execution tool call filtering and audit trails reduce failure modes in production agents, though coverage is tool-specific rather than architectural.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "safety",
+        "observability",
+        "deployment",
+        "production"
+      ],
+      "concepts": [
+        "agent harness integration",
+        "policy-based enforcement",
+        "pre-tool-call interception",
+        "session tracing and observability",
+        "custom policy framework",
+        "local-first dashboard",
+        "tool-use gating",
+        "run audit and compliance"
+      ],
+      "challenge_hooks": [
+        "How do you prevent autonomous agents from executing dangerous operations like privilege escalation, recursive deletion, or production infrastructure changes?",
+        "How can teams monitor and audit agent behavior across multiple harnesses (Claude, Copilot, Cursor, etc.) in a centralized way without sending data to external servers?",
+        "How do you enforce organization-specific policies on tool calls and enforce them at runtime with zero latency impact?"
+      ],
+      "summary": "Failproof AI is a TypeScript observability and enforcement platform that hooks into 12 agent harnesses (Claude Code, Copilot, Cursor, etc.), enforcing 39 built-in policies to block dangerous tool calls before execution while providing local dashboard tracing and audit capabilities.",
+      "pre_filter_rationale": "Applied systems tooling for agent observability and reliability enforcement—a working reference for production agentic workflows and operational patterns I would implement this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<img src=\"https://d2wq11aau0arks.cloudfront.net/failproof/fa_updated_full.svg\" alt=\"failproof ai\" width=\"220\" />\n\n<a href=\"https://trendshift.io/repositories/69722?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-69722\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://trendshift.io/api/badge/trendshift/repositories/69722/daily?language=TypeScript\" alt=\"FailproofAI%2Ffailproofai | Trendshift\" width=\"250\" height=\"55\"/></a>\n\n[![npm](https://img.shields.io/npm/v/failproofai?style=flat-square&color=CB3837)](https://www.npmjs.com/package/failproofai)\n[![CI](https://img.shields.io/github/actions/workflow/status/failproofai/failproofai/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/failproofai/failproofai/actions)\n[![Supply Chain](https://img.shields.io/badge/supply%20chain-secure-brightgreen?style=flat-square)](https://github.com/failproofai/failproofai/actions/workflows/osv-scanner.yml)\n[![Discord](https://img.shields.io/badge/Discord-join%20us-5865F2?style=flat-square&logo=discord)](https://discord.befailproof.ai/)\n[![Reddit](https://img.shields.io/badge/Reddit-r%2Ffailproofai-FF4500?style=flat-square&logo=reddit)](https://www.reddit.com/r/failproofai/)\n[![Docs](https://img.shields.io/badge/docs-befailproof.ai-002CA7?style=flat-square)](https://docs.befailproof.ai/)\n[![License](https://img.shields.io/badge/license-MIT%20%2B%20Commons%20Clause-blue?style=flat-square)](./LICENSE)\n\n**Translations:** [简体中文](./docs/i18n/README.zh.md) · [日本語](./docs/i18n/README.ja.md) · [한국어](./docs/i18n/README.ko.md) · [Español](./docs/i18n/README.es.md) · [Português](./docs/i18n/README.pt-br.md) · [Deutsch](./docs/i18n/README.de.md) · [Français](./docs/i18n/README.fr.md) · [Русский](./docs/i18n/README.ru.md) · [हिन्दी](./docs/i18n/README.hi.md) · [Türkçe](./docs/i18n/README.tr.md) · [Tiếng Việt](./docs/i18n/README.vi.md) · [Italiano](./docs/i18n/README.it.md) · [العربية](./docs/i18n/README.ar.md) · [עברית](./docs/i18n/README.he.md)\n\n**Observability and enforcement for every harness your agents run in.**\nWherever your agents run, we see it — and we can say no. Failproof hooks 12 agent\nharnesses — coding\n…[truncated]"
+    },
+    {
+      "source_id": "github:HongyunQiu/QevosAgent",
+      "title": "QevosAgent",
+      "url": "https://github.com/HongyunQiu/QevosAgent",
+      "github_url": "https://github.com/HongyunQiu/QevosAgent",
+      "bishop_ui": "http://localhost:8081/entries/github:HongyunQiu/QevosAgent",
+      "published_at": "2026-09-12T05:44:37+00:00",
+      "ingested_at": "2026-09-12T06:18:57.682314+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly relevant as a production agentic system with observability and tool orchestration, though the focus on office/admin tasks and local deployment is a narrower use case than enterprise RAG-agentic systems.",
+      "value_rationale": "The tool self-repair mechanism and full execution observability are valuable patterns for agentic workflows; local-first architecture offers a useful deployment alternative for cost-sensitive or privacy-constrained scenarios. However, limited detail on retrieval integration, memory architecture specifics, and evaluation methodology reduces immediate applicability to document-heavy RAG systems.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "memory-architecture",
+        "observability",
+        "optimization",
+        "deployment",
+        "production"
+      ],
+      "concepts": [
+        "local-first AI agent",
+        "tool repair and self-evolution",
+        "persistent memory architecture",
+        "execution observability and history",
+        "open-source model integration",
+        "cross-platform deployment",
+        "multi-domain task automation"
+      ],
+      "challenge_hooks": [
+        "How to deploy a local AI agent without cloud dependencies while maintaining data privacy and zero API costs",
+        "Enabling agents to autonomously repair failed tools and create new tools dynamically without manual intervention",
+        "Tracking and auditing every agent action with persistent memory that survives task interruptions and long-running projects",
+        "Making AI agents accessible to non-technical users across Windows/macOS/Linux without requiring WSL or Docker setup"
+      ],
+      "summary": "QevosAgent is a local AI agent platform with native Windows/macOS/Linux installers, supporting open-source models like Qwen3 and Gemma4. Features include tool self-repair, persistent memory, full execution observability, and handles office tasks, daily operations, and system administration without API costs.",
+      "pre_filter_rationale": "Applied systems: a shipped agent runtime with persistent artifacts, recoverable memory, and observable execution—directly actionable patterns for agentic orchestration and state management I would reference when building tool-use loops.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <img src=\"./assets/QevosAgent.png\" alt=\"QevosAgent banner\" width=\"100%\" />\n</p>\n\n<h1 align=\"center\">QevosAgent</h1>\n\n[![Stars](https://img.shields.io/github/stars/HongyunQiu/QevosAgent?style=for-the-badge)](https://github.com/HongyunQiu/QevosAgent/stargazers)\n[![Last Commit](https://img.shields.io/github/last-commit/HongyunQiu/QevosAgent?style=for-the-badge)](https://github.com/HongyunQiu/QevosAgent/commits/main)\n[![License](https://img.shields.io/github/license/HongyunQiu/QevosAgent?style=for-the-badge)](https://github.com/HongyunQiu/QevosAgent/blob/main/LICENSE)\n[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=for-the-badge)](https://github.com/HongyunQiu/QevosAgent/releases/latest)\n[![OpenAI Compatible](https://img.shields.io/badge/OpenAI-Compatible-412991?style=for-the-badge)](https://github.com/HongyunQiu/QevosAgent)\n[![Anthropic](https://img.shields.io/badge/Anthropic-Supported-black?style=for-the-badge)](https://github.com/HongyunQiu/QevosAgent)\n[![Web Dashboard](https://img.shields.io/badge/Web-Dashboard-0A7CFF?style=for-the-badge)](https://github.com/HongyunQiu/QevosAgent)\n[![Tool Repair](https://img.shields.io/badge/Tool-Repair-orange?style=for-the-badge)](https://github.com/HongyunQiu/QevosAgent)\n\n\n🇺🇸 [**English** (EN)](#english) • 🇨🇳 [**中文** (ZH)](#中文)\n\n---\n\n## English\n\n**🦊 Your Local AI Agent, Ready Out of the Box**\n\nA local AI agent truly designed for everyone — native Windows/macOS/Linux installation, no WSL required, works out of the box.\n\nThe core design philosophy of QevosAgent is to keep the execution process as simple as possible, move complexity out of the runtime logic, and encapsulate capabilities into an extensible tool system.\n\nInstead of relying on complex and opaque internal workflows, QevosAgent defines capabilities as tools. These tools can continuously evolve and improve, which means the capability boundary of QevosAgent is not fixed. It can expand over time as the tool ecosystem grows, giving it a broad and open-ended potential.\n\nAt the same time, QevosAgent emphasizes observability and transparency. Through a visual dashboard, users can monitor the Agent’s execu\n…[truncated]"
+    },
+    {
+      "source_id": "github:LIUTod/scream-code",
+      "title": "scream-code",
+      "url": "https://github.com/LIUTod/scream-code",
+      "github_url": "https://github.com/LIUTod/scream-code",
+      "bishop_ui": "http://localhost:8081/entries/github:LIUTod/scream-code",
+      "published_at": "2026-09-12T05:51:09+00:00",
+      "ingested_at": "2026-09-12T06:16:56.015786+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Local agentic framework with multi-agent orchestration, persistent memory, and knowledge graphs directly aligns with agentic systems and RAG expertise, though lacks specifics on production reliability patterns and inference optimization.",
+      "value_rationale": "Provides architectural reference for decentralized agent coordination and self-evolving plugin systems relevant to building production agentic workflows; zero remote data behavior addresses privacy-critical deployment scenarios. Limited value without detailed failure mode analysis, latency characteristics, and orchestration tradeoffs.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "multi-agent",
+        "tool-use",
+        "orchestration",
+        "memory-architecture",
+        "structured-output",
+        "safety",
+        "production"
+      ],
+      "concepts": [
+        "goal loop with autonomous judge agent",
+        "wolfpack multi-agent collaboration",
+        "sub-agent ask-for-guidance pattern",
+        "bot mode with reversible/irreversible action classification",
+        "persistent structured memory with FTS5 + vector retrieval",
+        "self-evolving plugin system with circuit breakers",
+        "local knowledge graph for multi-hop reasoning"
+      ],
+      "challenge_hooks": [
+        "How do you orchestrate multiple specialist agents to collaborate autonomously while keeping the human in control of irreversible actions?",
+        "How can agents ask for guidance when blocked instead of hallucinating or retrying indefinitely?",
+        "How do you build self-improving agent systems that can discover, install, and manage their own plugins with rollback guarantees?",
+        "How do you maintain agent memory and reasoning context across sessions with efficient retrieval and vector search?"
+      ],
+      "summary": "Scream Code is a local agentic framework enabling autonomous goal-driven execution with a wolfpack of specialist sub-agents, persistent memory, knowledge graphs, and zero remote data behavior. Features goal loops, multi-agent collaboration, bot mode for unattended work, and self-evolving plugins.",
+      "pre_filter_rationale": "Shipped agentic system with multi-agent orchestration, persistent runtime state management, and tool-loop architecture—a working reference for agent delegation patterns and stateful execution I would study and adapt this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <a href=\"https://scream.chat\">\n    <img width=\"280\" alt=\"Scream Code\" src=\"assets/logo-v2.svg\" />\n  </a>\n</p>\n\n<p align=\"center\">A local agent with zero remote data behavior — write code, run tasks, research, code or work as you please.</p>\n\n<p align=\"center\">\n  <a href=\"https://www.npmjs.com/package/scream-code\"><img alt=\"npm\" src=\"https://img.shields.io/npm/v/scream-code?style=flat-square&logo=npm&logoColor=white\" /></a>\n  <a href=\"https://www.npmjs.com/package/scream-code\"><img alt=\"downloads\" src=\"https://img.shields.io/npm/dm/scream-code?style=flat-square\" /></a>\n  <a href=\"https://github.com/LIUTod/scream-code/stargazers\"><img alt=\"stars\" src=\"https://img.shields.io/github/stars/LIUTod/scream-code?style=flat-square&logo=github\" /></a>\n  <a href=\"https://github.com/LIUTod/scream-code/blob/main/LICENSE\"><img alt=\"license\" src=\"https://img.shields.io/github/license/LIUTod/scream-code?style=flat-square\" /></a>\n</p>\n\n<p align=\"center\">\n  <a href=\"README.md\">English</a> |\n  <a href=\"README.zh.md\">简体中文</a>\n</p>\n\n<p align=\"center\">\n  <img width=\"1007\" height=\"890\" alt=\"企业微信20260909-170226@2x\" src=\"https://github.com/user-attachments/assets/a8c1beda-3e73-41d1-855e-7dd80a3cc0e9\" />\n</p>\n\n---\n\n### Installation\n\n```bash\nnpm install -g scream-code\n```\n\n> [!NOTE]\n> Requires **Node.js >= 22**. Git recommended. Same command installs and updates.\n\n### Quick Start\n\n```bash\nscream            # terminal UI\nscream web        # browser UI (http://localhost:3210)\nscream --auto     # auto permission mode\nscream -y         # auto-approve mode\n```\n\nOn first launch Scream walks you through model setup (`/config`). 130+ providers built in — or point it at any OpenAI-compatible endpoint with `/config diy`. Switch models anytime with `/model`, no restart needed — or use `/model diy` to give each sub-agent its own model, letting every model do what it does best.\n\nWhen Scream wants to modify files or run commands, an approval panel pops up — pick a number, press Enter.\n\n### Features\n\n- **Goal Loop** — autonomous, goal-driven execution with an independent judge agent. Rejections must name concrete gaps; evidence gaps self-repair for up to 3 rounds, subjective calls pa\n…[truncated]"
+    },
+    {
+      "source_id": "github:LiWeny16/create-harness-vibe-coding",
+      "title": "create-harness-vibe-coding",
+      "url": "https://github.com/LiWeny16/create-harness-vibe-coding",
+      "github_url": "https://github.com/LiWeny16/create-harness-vibe-coding",
+      "bishop_ui": "http://localhost:8081/entries/github:LiWeny16/create-harness-vibe-coding",
+      "published_at": "2026-09-14T04:11:33+00:00",
+      "ingested_at": "2026-09-14T04:40:26.344742+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly addresses agentic-systems orchestration (weight 1.0) with a production-tested multi-stage workflow for long-running agents, plus measurable deployment metrics (prompt-cache efficiency), but focuses on a specific Node.js implementation rather than a generalizable pattern or architectural primitive.",
+      "value_rationale": "Documents a concrete multi-phase agent orchestration pipeline (research → PRD → architecture → task decomposition → implementation → testing → review) with measured prompt-cache efficiency (98.7%) and explicit safety constraints (15/15 safe writes), giving the profile owner a reference implementation for sequencing agentic substeps and a measured cost lever (caching) they can adapt to their own workflow.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "production",
+        "architecture"
+      ],
+      "concepts": [
+        "agentic workflows",
+        "task decomposition",
+        "durable memory architecture",
+        "safe file operations",
+        "prompt caching",
+        "Claude integration",
+        "long-context agent orchestration"
+      ],
+      "challenge_hooks": [
+        "how to give long-running AI agents a persistent operating model for multi-phase software projects without context drift",
+        "reliable file writes and memory recovery for Claude Code and compatible agents across iteration cycles",
+        "maximizing prompt-cache efficiency for repeated architectural context in agentic development workflows"
+      ],
+      "summary": "Node.js CLI scaffolding a repo-local operating system for AI-assisted software development, integrating research, PRD, architecture, task decomposition, implementation, testing, review, and memory management for long-running agentic workflows. Measured 15/15 safe file-write completions and 98.7% prompt-cache efficiency.",
+      "pre_filter_rationale": "Applied systems / dev-skills anchor: a reusable harness scaffold for AI-assisted engineering workflow (research through feedback) is a concrete artifact you would adapt and run this week to structure agentic product development.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <img src=\"https://img.shields.io/npm/v/create-harness-vibe-coding?color=blue\" alt=\"npm version\">\n  <img src=\"https://img.shields.io/badge/node-%3E%3D18-brightgreen\" alt=\"Node.js >= 18\">\n  <img src=\"https://img.shields.io/npm/l/create-harness-vibe-coding\" alt=\"MIT license\">\n  <img src=\"https://img.shields.io/github/stars/LiWeny16/create-harness-vibe-coding?style=social\" alt=\"GitHub stars\">\n</p>\n\n<p align=\"center\">\n  <img src=\"docs/images/harness-icon.png\" alt=\"Harness icon\" width=\"112\">\n</p>\n\n<h1 align=\"center\">create-harness-vibe-coding</h1>\n<p align=\"center\">\n  <b>An operating contract for reliable AI coding agents.</b><br>\n  <sub>Goals. Context. Loops. Evidence.</sub>\n</p>\n\n<p align=\"center\">\n  <a href=\"README-CN.md\">Chinese</a> |\n  <a href=\"https://github.com/LiWeny16/create-harness-vibe-coding\">GitHub</a> |\n  <a href=\"https://www.npmjs.com/package/create-harness-vibe-coding\">npm</a>\n</p>\n\n`create-harness-vibe-coding` is a Node.js CLI that scaffolds a repo-local harness for AI-assisted software development: research, PRD, architecture, task decomposition, implementation, testing, review, recovery, and durable memory.\n\nIt is not a prompt pack and it does not generate business code. It gives Claude Code, Codex, and compatible agents a shared operating system for long-running work.\n\n## The short version\n\nWithout a framework:\n\n```text\nIdea -> prompt -> patch -> demo -> rediscover context -> repair drift\n```\n\nWith Harness:\n\n```text\nIdea -> Research -> PRD -> Architecture -> Acceptance Criteria\n     -> Build -> Test -> Review -> Verify -> Learn -> Update\n```\n\n## Measured status in 0.8.16\n\nCurrent evidence in this repository:\n\n- HarnessBench v0.2 local lifecycle proof: 15 runs per mode. Direct file writes completed safely in 3/15 runs; the Harness safe path completed safely in 15/15 runs.\n- Protected overwrites in that proof: 21 for direct file writes, 0 for the Harness safe path.\n- Claude Code L2 prompt-cache sample: `harness-thin` reached `98.7%` warm median cache read (`+5.4` percentage points vs provider-control); `/wf` wf-light reached `99.1%` (`+5.8` percentage points).\n- Startup and update chain: thin startup remains the default, `Harness\n…[truncated]"
+    },
+    {
+      "source_id": "github:OpenHands/software-agent-sdk",
+      "title": "software-agent-sdk",
+      "url": "https://github.com/OpenHands/software-agent-sdk",
+      "github_url": "https://github.com/OpenHands/software-agent-sdk",
+      "bishop_ui": "http://localhost:8081/entries/github:OpenHands/software-agent-sdk",
+      "published_at": "2026-09-11T13:12:16+00:00",
+      "ingested_at": "2026-09-11T15:34:08.214538+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly applicable agentic framework with production-grade code execution capabilities, though primary focus on software engineering tasks rather than document intelligence or retrieval-augmented patterns.",
+      "value_rationale": "Provides practical orchestration patterns and workspace isolation strategies relevant to building multi-agent systems; useful reference for agent evaluation benchmarks (SWEBench) and execution backends, though less directly applicable than domain-specific RAG or document extraction tooling for current specialized focus areas.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "production",
+        "deployment",
+        "architecture"
+      ],
+      "concepts": [
+        "agentic software development",
+        "tool-use framework",
+        "workspace abstraction",
+        "LLM-driven code execution",
+        "conversation-based orchestration",
+        "ephemeral environment execution",
+        "multi-modal agent tools"
+      ],
+      "challenge_hooks": [
+        "Building autonomous software agents that can edit code, run terminals, and manage files in isolated environments",
+        "Orchestrating multi-agent workflows for complex development tasks like refactors and dependency updates",
+        "Executing agent workloads locally or in ephemeral containers without managing infrastructure",
+        "Integrating LLM-powered agents into CI/CD pipelines and developer tools"
+      ],
+      "summary": "OpenHands Software Agent SDK provides Python, TypeScript, and REST APIs for building autonomous agents that work with code. Enables local or ephemeral workspace execution for tasks from simple maintenance to complex multi-agent refactors, with 77.6% SWEBench performance.",
+      "pre_filter_rationale": "Agentic systems and orchestration: a shipped SDK for agent construction with modular patterns and tool integration I would reference when building multi-agent workflows.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<a name=\"readme-top\"></a>\n\n<div align=\"center\">\n  <img src=\"https://raw.githubusercontent.com/OpenHands/docs/main/openhands/static/img/logo.png\" alt=\"Logo\" width=\"200\">\n  <h1 align=\"center\">OpenHands Software Agent SDK </h1>\n</div>\n\n\n<div align=\"center\">\n  <a href=\"https://github.com/OpenHands/software-agent-sdk/blob/main/LICENSE\"><img src=\"https://img.shields.io/github/license/OpenHands/software-agent-sdk?style=for-the-badge&color=blue\" alt=\"MIT License\"></a>\n  <a href=\"https://openhands.dev/joinslack\"><img src=\"https://img.shields.io/badge/Slack-Join%20Us-red?logo=slack&logoColor=white&style=for-the-badge\" alt=\"Join our Slack community\"></a>\n  <br>\n  <a href=\"https://docs.openhands.dev/sdk\"><img src=\"https://img.shields.io/badge/Documentation-000?logo=googledocs&logoColor=FFE165&style=for-the-badge\" alt=\"Check out the documentation\"></a>\n  <a href=\"https://arxiv.org/abs/2511.03690\"><img src=\"https://img.shields.io/badge/Paper-000?logoColor=FFE165&logo=arxiv&style=for-the-badge\" alt=\"Tech Report\"></a>\n  <a href=\"https://docs.google.com/spreadsheets/d/1wOUdFCMyY6Nt0AIqF705KN4JKOWgeI4wUGUP60krXXs/edit?gid=811504672#gid=811504672\"><img src=\"https://img.shields.io/badge/SWEBench-77.6-000?logoColor=FFE165&style=for-the-badge\" alt=\"Benchmark Score\"></a>\n  <br>\n  <!-- Keep these links. Translations will automatically update with the README. -->\n  <a href=\"https://www.readme-i18n.com/OpenHands/software-agent-sdk?lang=de\">Deutsch</a> |\n  <a href=\"https://www.readme-i18n.com/OpenHands/software-agent-sdk?lang=es\">Español</a> |\n  <a href=\"https://www.readme-i18n.com/OpenHands/software-agent-sdk?lang=fr\">français</a> |\n  <a href=\"https://www.readme-i18n.com/OpenHands/software-agent-sdk?lang=ja\">日本語</a> |\n  <a href=\"https://www.readme-i18n.com/OpenHands/software-agent-sdk?lang=ko\">한국어</a> |\n  <a href=\"https://www.readme-i18n.com/OpenHands/software-agent-sdk?lang=pt\">Português</a> |\n  <a href=\"https://www.readme-i18n.com/OpenHands/software-agent-sdk?lang=ru\">Русский</a> |\n  <a href=\"https://www.readme-i18n.com/OpenHands/software-agent-sdk?lang=zh\">中文</a>\n\n  <hr>\n</div>\n\nThe OpenHands Software Agent SDK provides Python, TypeScript, and REST APIs for **building agents that work\n…[truncated]"
+    },
+    {
+      "source_id": "github:Vinix24/vnx-orchestration",
+      "title": "vnx-orchestration",
+      "url": "https://github.com/Vinix24/vnx-orchestration",
+      "github_url": "https://github.com/Vinix24/vnx-orchestration",
+      "bishop_ui": "http://localhost:8081/entries/github:Vinix24/vnx-orchestration",
+      "published_at": "2026-09-12T05:52:09+00:00",
+      "ingested_at": "2026-09-12T06:10:47.706225+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Production-grade agent orchestration with observability and governance patterns directly applicable to agentic workflows, though narrowly focused on coding agents rather than general agent systems.",
+      "value_rationale": "Provides architectural patterns for agent isolation, audit trails, and review gates that transfer to document intelligence and multi-agent systems; the emphasis on transparency and append-only logging addresses production observability concerns critical for shipping reliable agent systems.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "observability",
+        "safety",
+        "alignment",
+        "multi-agent",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "append-only NDJSON audit ledger",
+        "isolated git worktree workers",
+        "review gates and approval workflows",
+        "multi-model provider agnostic dispatch",
+        "governance scoring and autonomy contracts",
+        "glass-box observability",
+        "plan-first gate enforcement",
+        "dual-LLM adversarial review"
+      ],
+      "challenge_hooks": [
+        "How do you audit and govern AI agent actions with complete transparency without vendor lock-in?",
+        "How can you run multiple AI coding agents concurrently with safety gates and human approval workflows?",
+        "How do you maintain reproducible, compliance-ready logs of AI agent decisions and executions?",
+        "How can you switch between AI model providers without rewriting orchestration logic?"
+      ],
+      "summary": "VNX Orchestration is a governance-first runtime for AI coding agents with glass-box transparency, local NDJSON audit trails, and no vendor lock-in. It orchestrates ephemeral workers in isolated git worktrees with review gates and append-only receipt logging.",
+      "pre_filter_rationale": "Applied systems and dev-flow technique: a shipped orchestration pattern for multi-model code generation with quality gates, receipts, and observability — directly reusable for agentic code workflows and parallel-worker state management.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n# 🧾 VNX Orchestration\n\n### Governance-first runtime for AI coding agents\n\n**Glass-box governance · Local NDJSON receipts · No vendor SDK**\n\n[![PyPI version](https://img.shields.io/pypi/v/vnx-orchestration?color=1f6feb&label=pypi)](https://pypi.org/project/vnx-orchestration/)\n&nbsp;![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)\n&nbsp;[![License: MIT](https://img.shields.io/github/license/Vinix24/vnx-orchestration?color=2ea043)](LICENSE)\n&nbsp;[![CI](https://img.shields.io/github/actions/workflow/status/Vinix24/vnx-orchestration/public-ci.yml?branch=main&label=CI)](https://github.com/Vinix24/vnx-orchestration/actions)\n\n[![Stars](https://img.shields.io/github/stars/Vinix24/vnx-orchestration?logo=github)](https://github.com/Vinix24/vnx-orchestration/stargazers)\n&nbsp;![Forks](https://img.shields.io/github/forks/Vinix24/vnx-orchestration?logo=github)\n&nbsp;![Audit trail](https://img.shields.io/badge/audit%20trail-27k%2B%20receipts-2ea043)\n&nbsp;![Vendor SDK](https://img.shields.io/badge/vendor%20SDK-none-24292f)\n\n**[Docs](docs/) · [Architecture](docs/core/00_VNX_ARCHITECTURE.md) · [State Fabric](docs/core/STATE_FABRIC.md) · [ADRs](docs/governance/decisions/) · [Writing](https://vincentvandeth.nl) · [Changelog](CHANGELOG.md)**\n\n</div>\n\n---\n\nVNX runs AI coding CLI workers in tmux, isolated git worktrees, through review gates, with an append-only NDJSON receipt per dispatch.\n\nIt is a local control plane for the AI coding CLIs that already sit on your machine. One orchestrator dispatches work to ephemeral workers; each worker runs in its own git worktree; review gates decide what merges; every dispatch leaves a receipt. VNX drives `claude`, `codex`, `gemini`, `kimi`, and local `ollama` with no vendor SDK. It calls the CLIs as subprocesses and never imports a provider library.\n\nMost agent projects build SDK-native agents. I orchestrate the binaries instead. The difference shows up in the audit trail: I can reconstruct what was dispatched, what was reviewed, what merged, and what each gate cost.\n\nI built this for my own work, across 3,000+ hours of Claude Code and 18,816 test functions across 1,008 test files. It is\n…[truncated]"
+    },
+    {
+      "source_id": "github:andersonjoseph/jailed-agents",
+      "title": "jailed-agents",
+      "url": "https://github.com/andersonjoseph/jailed-agents",
+      "github_url": "https://github.com/andersonjoseph/jailed-agents",
+      "bishop_ui": "http://localhost:8081/entries/github:andersonjoseph/jailed-agents",
+      "published_at": "2026-09-11T13:08:58+00:00",
+      "ingested_at": "2026-09-11T15:34:05.748032+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly addresses production safety concerns for agentic systems executing code, a critical architectural pattern for tool-using agents in LLM workflows.",
+      "value_rationale": "Provides a practical sandboxing solution for securing agent execution environments—essential when shipping agents that generate and run code. Valuable for understanding isolation tradeoffs between security, resource access, and operational complexity in production agent deployments.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "safety",
+        "deployment",
+        "architecture",
+        "orchestration"
+      ],
+      "concepts": [
+        "zero-trust sandbox architecture",
+        "bubblewrap Linux namespaces isolation",
+        "Nix declarative configuration",
+        "composable jail builders",
+        "capability-based access control",
+        "read-write directory mounting",
+        "environment variable forwarding",
+        "git worktree integration"
+      ],
+      "challenge_hooks": [
+        "How to safely run untrusted LLM agents without granting full system access",
+        "Creating reproducible, declarative sandbox environments for AI coding tools across teams",
+        "Managing fine-grained access controls (read-only vs read-write) for agent filesystem and package dependencies",
+        "Integrating sandboxed agents seamlessly into existing Nix development workflows"
+      ],
+      "summary": "jailed-agents provides a zero-trust Linux sandbox for LLM coding agents using Nix and bubblewrap, enabling controlled access to filesystem, packages, and environment variables while isolating agents from sensitive host resources.",
+      "pre_filter_rationale": "Applied systems and reusable technique: a shipped sandbox pattern for constraining agent tool execution, directly relevant to agentic orchestration and production safety—I would reference this when designing tool-use isolation this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# jailed-agents\n\nSecure Nix sandbox for LLM agents. Run AI coding agents in isolated environments with controlled access.\n\n## What is it?\n\n`jailed-agents` provides a secure sandbox for running LLM coding agents using Nix and `jail.nix` (which is built on `bubblewrap`). It gives your AI agents the autonomy to be useful without giving them full access to your system.\n\n> **Linux only.** The sandbox is built on [`bubblewrap`](https://github.com/containers/bubblewrap), which depends on Linux namespaces (user, pid, net, …) and bind mounts. These have no equivalent on macOS/Darwin, so `jailed-agents` is **not compatible with Nix on macOS** and currently supports Linux only.\n\n## Features\n\n- **Zero-Trust Sandbox**: By default, agents have no access to your home directory, SSH keys, or other sensitive files.\n- **Sensible Defaults**: Comes with a curated set of 14 common packages and secure jail options enabled out-of-the-box.\n- **Composable**: Reuse common configurations to create custom, sandboxed environments for your agents.\n- **Pre-configured Agents**: Ready-to-use jails for popular agents like `crush`, `opencode`, and `pi`.\n- **Custom Agent Builder**: Easily create secure jails for any agent with the `makeJailedAgent` function.\n- **Declarative Tooling**: Explicitly define which commands, packages, and directories the agent can access.\n- **Seamless Nix Integration**: Works perfectly with your existing Nix Flakes setup.\n\n## Installation\n\nAdd `jailed-agents` as an input to your `flake.nix`:\n\n```nix\ninputs.jailed-agents.url = \"github:andersonjoseph/jailed-agents\";\n```\n\n## Quick Start\n\nYou can use `jailed-agents` in two ways:\n\n### Option 1: Run Pre-built Packages Directly\n\nBuild and run a pre-configured agent in one command:\n\n```bash\nnix run github:andersonjoseph/jailed-agents#jailed-opencode\n```\n\nOr add `jailed-agents` as an input and run:\n\n```bash\nnix run .#jailed-opencode\n```\n\n### Option 2: Customize with Lib Functions\n\nAdd a customized agent to your `devShell`:\n\n```nix\n{\n  inputs = {\n    nixpkgs.url = \"github:NixOS/nixpkgs/nixos-unstable\";\n    jailed-agents.url = \"github:andersonjoseph/jailed-agents\";\n  };\n\n  outputs = { nixpkgs, jailed-agents, ... }:\n    let\n      sy\n…[truncated]"
+    },
+    {
+      "source_id": "github:bobmatnyc/trusty-tools",
+      "title": "trusty-tools",
+      "url": "https://github.com/bobmatnyc/trusty-tools",
+      "github_url": "https://github.com/bobmatnyc/trusty-tools",
+      "bishop_ui": "http://localhost:8081/entries/github:bobmatnyc/trusty-tools",
+      "published_at": "2026-09-11T13:10:31+00:00",
+      "ingested_at": "2026-09-11T15:35:27.962879+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "A production-oriented Rust system combining hybrid retrieval (BM25+vector+KG), semantic memory, and multi-agent orchestration via MCP—directly applicable to RAG and agentic workflows, though language choice (Rust vs. Python ecosystem) and code-domain focus create partial alignment gaps.",
+      "value_rationale": "Offers practical architectural patterns for hybrid search, semantic memory engines, and agent orchestration that transfer to document intelligence systems; MCP-based agent design and multi-modal UI approach are actionable. However, Rust implementation and code-analysis focus limit direct reusability for LLM-centric NLP/document pipelines.",
+      "entry_type": "repo",
+      "tags": [
+        "RAG",
+        "agentic",
+        "multi-agent",
+        "inference",
+        "orchestration",
+        "observability",
+        "embeddings",
+        "vector-stores",
+        "graph-retrieval",
+        "hybrid-retrieval",
+        "tool-use",
+        "memory-architecture",
+        "architecture",
+        "production",
+        "deployment"
+      ],
+      "concepts": [
+        "Hybrid code search (BM25 + semantic + knowledge graph fusion)",
+        "Reciprocal Rank Fusion ranking",
+        "HNSW vector indexing with persistent storage",
+        "Memory palace semantic retrieval",
+        "Code complexity metrics (cyclomatic/cognitive)",
+        "MCP protocol server architecture",
+        "Knowledge triple facts store",
+        "Multi-agent orchestration platform"
+      ],
+      "challenge_hooks": [
+        "How to efficiently search large codebases with sub-10ms latency combining lexical, semantic, and structural intent?",
+        "How to maintain persistent development context and memories retrievable via natural language across long sessions?",
+        "How to identify code complexity hotspots and quality decay in real time with static analysis sidecar?",
+        "How to orchestrate multi-agent coding workflows with search, memory, analysis, and review in unified platform?"
+      ],
+      "summary": "Unified Rust workspace providing hybrid code search (BM25+vector+KG), semantic memory storage, static code analysis, and multi-agent orchestration via MCP servers. Includes trusty-search daemon, memory palace engine, analysis sidecar, review pipeline, and platform manager with desktop/web UIs.",
+      "pre_filter_rationale": "Shipped dev-skills tooling ecosystem: MCP servers, multi-agent platform (MPM), and developer-workflow CLIs (code search, PR review, memory systems) are directly reusable patterns for agentic systems and dev-flow enhancement.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# trusty-tools\n\n**Website: [trustytools.dev](https://trustytools.dev/)**\n\nUnified Rust workspace consolidating the entire trusty-* AI tooling ecosystem.\nIt combines code search, memory, analysis, orchestration, review, audit, and\noperator interfaces in one Cargo workspace. The live package inventory comes\nfrom `cargo metadata`; the human-readable map is\n[docs/reference/crate-map.md](docs/reference/crate-map.md).\n\n## Three Flagship MCP Servers\n\n### trusty-search — Hybrid Code Search\n\nMachine-wide code search daemon with hybrid BM25 + vector + knowledge-graph fusion, fused via Reciprocal Rank Fusion. One install per machine, unlimited named project indexes.\n\n**What you get:**\n- Sub-10ms p50 warm query latency on 100k-chunk indexes\n- Intelligent query routing (Definition / Usage / Conceptual / BugDebt intent detection)\n- Knowledge graph expansion with caller/callee chains\n- Branch-aware search (boost results from your current feature branch)\n- Auto-tuned memory tiers (5 tiers from 8 GB to 64+ GB RAM)\n- Embedded Svelte 5 admin UI\n- OpenRouter-backed chat with auto-injected search context\n\n**Quick start:**\n```bash\ncargo install trusty-search\ntrusty-search start\ntrusty-search index ~/Projects/myproj --name myproj\ntrusty-search query \"fn authenticate\" --index myproj\n```\n\n**MCP tools:** `search`, `search_lexical`, `search_semantic`, `search_kg`, `search_all`, `search_similar`, `grep`, `typeahead`, `get_call_chain`, `index_file`, `remove_file`, `list_indexes`, `create_index`, `delete_index`, `reindex`, `index_status`, `list_chunks`, `search_health`, `chat`, `upgrade`, `console_metrics`\n\nSee [crates/trusty-search/README.md](crates/trusty-search/README.md) for full documentation.\n\n---\n\n### trusty-memory — Memory Palace Storage Engine\n\nLong-term memory storage with semantic search, persistent embedding index, and embedded Svelte UI. Store development context, notes, snippets, and retrieve them via natural language.\n\n**What you get:**\n- Pure-Rust HNSW vector index (`hnsw_rs`) persisted in `redb` + fastembed embeddings\n- Semantic search over all stored memories\n- Collection organization (notes, snippets, code patterns, decisions)\n- Svelte UI for browsing and editing\n- MCP ser\n…[truncated]"
+    },
+    {
+      "source_id": "github:caura-ai/caura-build-fleet",
+      "title": "caura-build-fleet",
+      "url": "https://github.com/caura-ai/caura-build-fleet",
+      "github_url": "https://github.com/caura-ai/caura-build-fleet",
+      "bishop_ui": "http://localhost:8081/entries/github:caura-ai/caura-build-fleet",
+      "published_at": "2026-09-11T13:08:26+00:00",
+      "ingested_at": "2026-09-11T15:34:06.932105+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Multi-agent memory coordination and MCP-based tool integration are directly applicable to agentic systems, though the constraint propagation focus may be domain-specific rather than broadly practical for production RAG/agent systems.",
+      "value_rationale": "Provides architectural patterns for shared state management across agent fleets and MCP tooling patterns that are immediately useful for building observable, stateful multi-agent workflows. The recall-via-tools pattern offers a concrete approach to managing agent decision history without direct memory coupling.",
+      "entry_type": "repo",
+      "tags": [
+        "multi-agent",
+        "memory-architecture",
+        "tool-use",
+        "orchestration",
+        "agentic",
+        "production",
+        "architecture"
+      ],
+      "concepts": [
+        "multi-agent constraint propagation",
+        "shared fleet memory",
+        "Model Context Protocol (MCP) tools",
+        "hybrid recall (semantic + structured)",
+        "agent decision persistence",
+        "memory scoping and tenancy",
+        "governed memory layer",
+        "audit logging for multi-agent pipelines"
+      ],
+      "challenge_hooks": [
+        "How do I coordinate decisions across multiple agents in a pipeline without rebuilding context from scratch?",
+        "How can I ensure downstream agents are aware of constraints and decisions made by upstream agents?",
+        "How do I audit and replay multi-agent workflows with full memory traceability?",
+        "How do I build domain-agnostic multi-agent systems that share governance and memory boundaries?"
+      ],
+      "summary": "MemClaw Fleet is a multi-agent reference implementation demonstrating constraint propagation and shared memory coordination using MemClaw, a governed memory platform for AI agent fleets. Agents recall prior decisions via MCP-exposed tools before acting, enabling domain-agnostic pipeline composition.",
+      "pre_filter_rationale": "Applied systems: a shipped-pattern reference for multi-agent orchestration with shared memory and constraint propagation via MCP—directly actionable for agentic workflow design.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n\n<img src=\"docs/images/shared-fleet-memory-banner.png\" alt=\"shared fleet memory\" width=\"100%\" />\n\n# MemClaw Fleet: 5-Agent Pipeline with Shared Memory\n\n**A runnable reference implementation of multi-agent constraint propagation using [MemClaw](https://memclaw.net).**<br>\nEach agent recalls what the previous one decided before acting. Clone it, run it, adapt it to any domain.\n\n[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue?style=flat-square&logo=python)](https://python.org)\n[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)\n[![MemClaw](https://img.shields.io/badge/MemClaw-releases-orange?style=flat-square)](https://github.com/caura-ai/caura-memclaw/releases)\n[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/caura-ai/memclaw-build-fleet/pulls)\n\n[What is MemClaw?](#what-is-memclaw) · [Why Multi-Agent?](#why-multi-agent) · [Quickstart](#getting-started) · [New Fleet](#creating-a-new-fleet) · [Query Memories](#querying-fleet-memories) · [Add an Agent](#adding-a-new-agent)\n\n</div>\n\n---\n\n## What Is MemClaw?\n\n[MemClaw](https://memclaw.net) is a governed shared memory platform built for AI agent fleets. It's not a vector database bolted onto your pipeline; it's a memory layer designed from the ground up for multi-agent coordination.\n\n> **New to MCP?** MCP (Model Context Protocol) is an open standard that lets LLMs call external tools via a consistent interface. MemClaw exposes its memory operations as MCP tools, so any MCP-compatible agent or IDE (Claude Code, Cursor, OpenClaw) can read and write fleet memory without custom integration code. [Learn more →](https://modelcontextprotocol.io)\n\n### Core Features\n\n| Feature | What it means in practice |\n| :--- | :--- |\n| **Hybrid recall** | Vector similarity + keyword match + knowledge graph traversal in one call. Agents find relevant memories even when they paraphrase the original query. |\n| **Fleet namespacing** | Every memory is scoped to a `fleet_id`. Multiple fleets share one tenant without bleeding into each other. |\n| **Row-level security** | `scope_agent` flag makes a memory readable only by th\n…[truncated]"
+    },
+    {
+      "source_id": "github:costajohnt/oss-autopilot",
+      "title": "oss-autopilot",
+      "url": "https://github.com/costajohnt/oss-autopilot",
+      "github_url": "https://github.com/costajohnt/oss-autopilot",
+      "bishop_ui": "http://localhost:8081/entries/github:costajohnt/oss-autopilot",
+      "published_at": "2026-09-12T05:54:12+00:00",
+      "ingested_at": "2026-09-12T06:08:45.290248+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly relevant agentic system with practical production patterns (MCP server architecture, workflow orchestration, tool integration), though scoped to OSS contributions rather than core domain problems like RAG or document intelligence.",
+      "value_rationale": "Demonstrates multi-modal agent deployment patterns (Claude plugin + MCP + CLI), workflow state management, and tool composition that transfer to production agentic systems. MCP server implementation and PR/repo analysis pipelines offer architectural precedent for multi-tool coordination in structured domains.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "production",
+        "deployment",
+        "safety"
+      ],
+      "concepts": [
+        "Claude Code plugin architecture",
+        "Model Context Protocol (MCP) server",
+        "GitHub Search API integration",
+        "Repository scoring system (history + health metrics)",
+        "Anti-LLM policy detection",
+        "PR workflow automation",
+        "Contributor reputation tracking",
+        "Workflow orchestration for OSS contributions"
+      ],
+      "challenge_hooks": [
+        "How to systematically discover and filter open source projects that accept AI-assisted contributions?",
+        "How can individual contributors manage and automate PR workflows across hundreds of repositories?",
+        "How to detect and respect anti-AI policies in project governance documents at scale?",
+        "How to build reputation-aware contribution systems that learn from past PR outcomes?"
+      ],
+      "summary": "AI-powered workflow engine for automating open source contributions at scale. Built as Claude Code plugin, MCP server, and CLI. Manages PR tracking, repo scoring, policy detection, and contribution workflows for individual developers.",
+      "pre_filter_rationale": "Dev skills and reusable technique: agent-assisted engineering workflow for automating PR/issue triage and velocity management — a pattern I would adapt for my own agentic orchestration work.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<p align=\"center\">\n  <img src=\"assets/hero-light.svg\" alt=\"OSS Autopilot\" width=\"600\">\n</p>\n\n<p align=\"center\">\n  <em>An AI-powered workflow engine for managing open source contributions at scale — built as a Claude Code plugin, MCP server, and standalone CLI.</em>\n</p>\n\n<p align=\"center\">\n  <img src=\"https://github.com/costajohnt/oss-autopilot/actions/workflows/ci.yml/badge.svg\" alt=\"CI\">\n  <img src=\"https://img.shields.io/badge/license-MIT-green\" alt=\"License\">\n  <img src=\"https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript&logoColor=white\" alt=\"TypeScript\">\n  <img src=\"https://img.shields.io/node/v/@oss-autopilot/core\" alt=\"Node.js\">\n  <img src=\"https://img.shields.io/github/stars/costajohnt/oss-autopilot?style=flat\" alt=\"Stars\">\n  <img src=\"https://img.shields.io/github/last-commit/costajohnt/oss-autopilot\" alt=\"Last Commit\">\n</p>\n<p align=\"center\">\n  <a href=\"https://www.npmjs.com/package/@oss-autopilot/core\"><img src=\"https://img.shields.io/npm/v/@oss-autopilot/core\" alt=\"npm @oss-autopilot/core\"></a>\n  <a href=\"https://www.npmjs.com/package/@oss-autopilot/core\"><img src=\"https://img.shields.io/npm/dw/@oss-autopilot/core\" alt=\"npm downloads\"></a>\n  <a href=\"https://www.npmjs.com/package/@oss-autopilot/mcp\"><img src=\"https://img.shields.io/npm/v/@oss-autopilot/mcp\" alt=\"npm @oss-autopilot/mcp\"></a>\n</p>\n\n---\n\n**Built and used daily by [costajohnt](https://github.com/costajohnt)** — 3rd-largest contributor to [Ink](https://github.com/vadimdemedes/ink) by commits (the React CLI framework behind Claude Code, Gemini CLI, and Codex — 39k+ stars) and repeat contributor to [Homebrew](https://github.com/Homebrew/brew).\n\n<p align=\"center\">\n<a href=\"https://github.com/costajohnt/oss-autopilot\">\n<picture>\n  <source media=\"(prefers-color-scheme: dark)\" srcset=\"https://oss-widgets.vercel.app/api/card/costajohnt?theme=dark&minStars=50\" />\n  <source media=\"(prefers-color-scheme: light)\" srcset=\"https://oss-widgets.vercel.app/api/card/costajohnt?theme=light&minStars=50\" />\n  <img alt=\"OSS Stats\" src=\"https://oss-widgets.vercel.app/api/card/costajohnt?theme=dark&minStars=50\" width=\"495\" />\n</picture>\n</a>\n</p>\n\n<p align=\"center\">\n<a href=\"https://github.com/\n…[truncated]"
+    },
+    {
+      "source_id": "github:defilantech/LLMKube",
+      "title": "LLMKube",
+      "url": "https://github.com/defilantech/LLMKube",
+      "github_url": "https://github.com/defilantech/LLMKube",
+      "bishop_ui": "http://localhost:8081/entries/github:defilantech/LLMKube",
+      "published_at": "2026-09-14T04:18:07+00:00",
+      "ingested_at": "2026-09-14T04:34:20.949092+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Squarely addresses the LLM-inference anchor (weight 0.8) with a concrete production-deployment pattern for multi-backend orchestration, though the focus is infrastructure automation rather than inference optimization itself.",
+      "value_rationale": "Provides a specific architectural pattern (ModelRouter with fail-closed semantics for regulated data) that directly applies to the profile owner's concern with production reliability and cost tradeoffs across heterogeneous hardware; the policy-aware routing between local and cloud backends is actionable for a regulated-data RAG or agentic system.",
+      "entry_type": "repo",
+      "tags": [
+        "serving",
+        "orchestration",
+        "deployment",
+        "production"
+      ],
+      "concepts": [
+        "Kubernetes operators",
+        "ModelRouter CRD",
+        "heterogeneous GPU support (NVIDIA/Apple Metal/Intel)",
+        "policy-aware routing",
+        "fail-closed semantics",
+        "OpenAI-compatible API",
+        "llama.cpp/vLLM/TGI runtimes"
+      ],
+      "challenge_hooks": [
+        "running LLM inference across heterogeneous hardware (NVIDIA, Apple Silicon, AMD) from a single declarative spec",
+        "routing inference requests between on-prem and cloud backends while enforcing data residency rules and failing closed on regulated data"
+      ],
+      "summary": "A Kubernetes operator for self-hosted LLM inference across NVIDIA, Apple Silicon, and AMD, featuring ModelRouter for policy-aware hybrid routing between local and cloud backends with fail-closed semantics for regulated data.",
+      "pre_filter_rationale": "Applied systems: a shipped Kubernetes operator for heterogeneous LLM inference with concrete runtime support (vLLM, TGI, llama.cpp, mlx-server), multi-GPU orchestration, and model caching—this is a working reference for inference infrastructure I would deploy or adapt this week in production or on-prem settings.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<div align=\"center\">\n  <img src=\"docs/images/logo.png\" alt=\"LLMKube\" width=\"800\">\n\n  # LLMKube\n\n  ### The Kubernetes operator for self-hosted LLM inference\n\n  **Run models across NVIDIA, Apple Silicon, and AMD from one spec. Your models. Your hardware. Your rules.**\n\n  *Plus [Foreman](#foreman): an agentic harness that runs coding agents on your own fleet. It has shipped real fixes to this repo.*\n\n  <p>\n    <a href=\"https://github.com/defilantech/LLMKube/actions/workflows/test.yml\">\n      <img src=\"https://github.com/defilantech/LLMKube/actions/workflows/test.yml/badge.svg\" alt=\"Tests\">\n    </a>\n    <a href=\"https://github.com/defilantech/LLMKube/actions/workflows/helm-chart.yml\">\n      <img src=\"https://github.com/defilantech/LLMKube/actions/workflows/helm-chart.yml/badge.svg\" alt=\"Helm Chart CI\">\n    </a>\n    <a href=\"https://goreportcard.com/report/github.com/defilantech/llmkube\">\n      <img src=\"https://goreportcard.com/badge/github.com/defilantech/llmkube\" alt=\"Go Report Card\">\n    </a>\n    <a href=\"https://github.com/defilantech/LLMKube/releases\">\n      <img src=\"https://img.shields.io/github/v/release/defilantech/LLMKube?label=version\" alt=\"Version\">\n    </a>\n    <a href=\"https://github.com/defilantech/LLMKube/stargazers\">\n      <img src=\"https://img.shields.io/github/stars/defilantech/LLMKube?style=social\" alt=\"GitHub Stars\">\n    </a>\n    <a href=\"LICENSE\">\n      <img src=\"https://img.shields.io/badge/license-Apache%202.0-blue.svg\" alt=\"License\">\n    </a>\n    <img src=\"https://img.shields.io/github/go-mod/go-version/defilantech/LLMKube\" alt=\"Go Version\">\n    <a href=\"https://discord.gg/Ktz85RFHDv\">\n      <img src=\"https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white\" alt=\"Discord\">\n    </a>\n  </p>\n\n  <p>\n    <a href=\"#quick-start\">Quick Start</a> &bull;\n    <a href=\"#composition-modelrouter\">ModelRouter</a> &bull;\n    <a href=\"#foreman\">Foreman</a> &bull;\n    <a href=\"#the-metal-agent\">Metal Agent</a> &bull;\n    <a href=\"#how-is-this-different\">Why LLMKube?</a> &bull;\n    <a href=\"#performance\">Benchmarks</a> &bull;\n    <a href=\"ROADMAP.md\">Roadmap</a> &bull;\n    <a href=\"https://discord.gg/Ktz85RFHDv\">Discord</a>\n  </p>\n\n</\n…[truncated]"
+    },
+    {
+      "source_id": "github:felan-ai/felan",
+      "title": "felan",
+      "url": "https://github.com/felan-ai/felan",
+      "github_url": "https://github.com/felan-ai/felan",
+      "bishop_ui": "http://localhost:8081/entries/github:felan-ai/felan",
+      "published_at": "2026-09-14T04:18:07+00:00",
+      "ingested_at": "2026-09-14T04:34:20.480269+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Squarely inside the agentic-systems anchor (weight 1.0) with a production-oriented system that documents cost optimization techniques and state tracking — held at strong-secondary rather than core-exemplar because it is a complete system implementation rather than a novel pattern or technique that generalizes beyond the Node.js ecosystem.",
+      "value_rationale": "Demonstrates a specific architecture combining model routing, progressive context windowing, and compact tool output for cost control in agentic workflows, with measured API savings — gives the profile owner concrete cost-optimization levers to check against their own agent infrastructure.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "tool-use",
+        "orchestration",
+        "production"
+      ],
+      "concepts": [
+        "agentic coding",
+        "model routing",
+        "progressive context",
+        "compact tool output",
+        "task state tracking",
+        "cost optimization",
+        "verification"
+      ],
+      "challenge_hooks": [
+        "building coding agents that minimize API costs without sacrificing correctness",
+        "routing inference across multiple models while tracking task state and memory usage",
+        "verifying software work outputs before committing to expensive API calls"
+      ],
+      "summary": "Open-source Node.js coding agent optimized for cost-efficient, verifiable software work via model routing, progressive context windowing, compact tool output, and explicit task state tracking with estimated API-equivalent savings.",
+      "pre_filter_rationale": "Applied systems: a shipped coding agent with explicit architectural decisions (model routing, progressive context, tool output compaction, task state) that are reusable patterns for production agentic workflows and cost optimization at the API boundary.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "<h1 align=\"center\"><img src=\"docs/assets/felan-logo.svg\" alt=\"\" width=\"38\" height=\"39\" align=\"absbottom\"> Felan Code</h1>\n\n<p align=\"center\">\n  <strong>Get the job done. Waste less.</strong><br>\n  An open-source, model-portable coding agent built for cost-efficient,\n  verifiable software work.\n</p>\n\n<p align=\"center\">\n  <a href=\"https://www.npmjs.com/package/@felan-ai/felan\"><img src=\"https://img.shields.io/npm/v/@felan-ai/felan?style=flat&colorA=222222&colorB=CB3837\" alt=\"npm version\"></a>\n  <a href=\"https://github.com/felan-ai/felan/actions/workflows/ci.yml\"><img src=\"https://img.shields.io/github/actions/workflow/status/felan-ai/felan/ci.yml?branch=main&style=flat&label=CI&colorA=222222&colorB=3FB950\" alt=\"CI status\"></a>\n  <a href=\"LICENSE\"><img src=\"https://img.shields.io/github/license/felan-ai/felan?style=flat&colorA=222222&colorB=58A6FF\" alt=\"MIT license\"></a>\n  <a href=\"https://nodejs.org\"><img src=\"https://img.shields.io/badge/Node.js-%3E%3D22.19-5FA04E?style=flat&colorA=222222\" alt=\"Node.js 22.19 or newer\"></a>\n  <a href=\"https://discord.gg/skNd4GSzZ\"><img src=\"https://img.shields.io/badge/Discord-Join-5865F2?style=flat&logo=discord&logoColor=white&labelColor=222222\" alt=\"Join Felan on Discord\"></a>\n</p>\n\nFelan Code is built around one rule: an optimization only counts when the task still\nsucceeds. It combines model routing, progressive context, compact tool output,\nexplicit task state, and estimated API-equivalent savings for supported\noptimizations.\n\n**Correctness first. Efficiency by design.**\n\n> [!IMPORTANT]\n> The local agent runs with your user's filesystem and process permissions. It\n> is a host application, not a sandbox. Use an isolated host for untrusted\n> projects or commands.\n\n## 41.9% lower aggregate AI model cost in controlled benchmarks\n\nAcross seven controlled, extension-specific comparisons, candidate\nconfigurations used `$13.1193` versus `$22.5774` for their baselines when\nsumming median-reduced case costs—a **41.9% reduction**. Individual results\nranged from 14.5% to 66.0%. Each extension was measured separately against its\ndisabled baseline, not as one all-enabled configuration. Every candidate met\nits configured quality gate.\n\n| Ex\n…[truncated]"
+    },
+    {
+      "source_id": "github:gefsikatsinelou/MetaSearchMCP",
+      "title": "MetaSearchMCP",
+      "url": "https://github.com/gefsikatsinelou/MetaSearchMCP",
+      "github_url": "https://github.com/gefsikatsinelou/MetaSearchMCP",
+      "bishop_ui": "http://localhost:8081/entries/github:gefsikatsinelou/MetaSearchMCP",
+      "published_at": "2026-09-12T05:53:17+00:00",
+      "ingested_at": "2026-09-12T06:08:46.096234+00:00",
+      "relevance_score": 0.72,
+      "relevance_reason": "Directly applicable to agentic workflows and retrieval augmentation, but as a utility rather than a core architectural or methodological advance.",
+      "value_rationale": "Solves a practical production concern—reliable multi-source retrieval with fallback orchestration—useful for RAG systems requiring diverse knowledge sources. MCP server integration is relevant for agentic tool composition, though the value is primarily in engineering execution rather than novel patterns.",
+      "entry_type": "repo",
+      "tags": [
+        "agentic",
+        "orchestration",
+        "tool-use",
+        "inference",
+        "deployment",
+        "architecture",
+        "production"
+      ],
+      "concepts": [
+        "MCP server integration",
+        "multi-provider search aggregation",
+        "result normalization and deduplication",
+        "provider orchestration with fallback",
+        "structured JSON schema for agents",
+        "concurrent execution with timeout isolation",
+        "semantic provider tagging",
+        "partial-failure tolerance"
+      ],
+      "challenge_hooks": [
+        "How do you aggregate and normalize results from heterogeneous search providers for agent workflows without brittle parsing?",
+        "How do you handle partial failures and timeouts when orchestrating multiple concurrent search API calls in production?",
+        "How do you expose machine-consumable search APIs with stable contracts instead of HTML-first UX designed for browsers?",
+        "How do you integrate search tooling with MCP-compatible agent frameworks like Claude, Cline, and Continue?"
+      ],
+      "summary": "Open-source metasearch backend aggregating results from multiple search providers into normalized JSON, exposing HTTP API and MCP server for AI agents and LLM workflows with concurrent multi-provider orchestration, deduplication, and fallback handling.",
+      "pre_filter_rationale": "Applied systems write-up of a shipped search-aggregation backend for agentic workflows; directly reusable pattern for tool-use loops, multi-provider fallback, and structured output design I would implement this week.",
+      "pre_filter_tier": "core",
+      "content_excerpt": "# MetaSearchMCP\n\nOpen-source metasearch backend for MCP, AI agents, and LLM workflows.\n\nMetaSearchMCP aggregates results from multiple search providers, normalizes them into a stable JSON schema, and exposes both an HTTP API and an MCP server for agent tooling.\n\n## Positioning\n\n- MCP-first metasearch backend\n- Structured search API for AI pipelines\n- Multi-provider search orchestration with deduplication and fallback\n- Python FastAPI alternative to browser-first metasearch projects\n\n## Why It Exists\n\nMost search aggregators are designed around browser UX: HTML pages, pagination, and interactive result cards. Agents and LLM workflows need a different contract: predictable JSON, stable field names, partial-failure tolerance, and provider-level execution metadata.\n\nMetaSearchMCP is built for that machine-consumable workflow. The design is centered on search orchestration, normalized contracts, and MCP integration.\n\n## Core Features\n\n- Concurrent multi-provider aggregation\n- Unified result schema for web, academic, developer, and knowledge sources\n- Provider-level timeout isolation and partial-failure handling\n- Result deduplication across engines\n- Provider selection by explicit names or semantic tags such as `web`, `academic`, `code`, and `google`\n- Final result caps for agent-friendly payload sizing\n- HTTP API with OpenAPI docs\n- MCP server over stdio for Claude Desktop, Cline, Continue, and similar clients\n- Configurable provider allowlist via environment variables\n\n## Google Support\n\nGoogle support now includes a direct scraper provider implemented inside this project.\n\nThe direct Google implementation uses browser-like requests, consent cookie handling, locale-aware query parameters, and resilient HTML result parsing. It is implemented locally in this repository.\n\nCurrently supported Google providers:\n\n| Provider | Env var | Notes |\n|---|---|---|\n| Direct Google | `ALLOW_UNSTABLE_PROVIDERS=true` | Primary path; HTML scraping, best effort, may be blocked from datacenter IPs |\n| [serpbase.dev](https://serpbase.dev) | `SERPBASE_API_KEY` | Pay-per-use; typically cheaper for low-volume usage |\n| [serper.dev](https://serper.dev) | `SERPER_API_KEY` | Includes a free\n…[truncated]"
+    }
+  ]
+}

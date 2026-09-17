@@ -27,7 +27,7 @@
 - `services/pre-filter-worker/app/loop.py` / `services/enrichment-batcher/app/stage1_loop.py` / `stage2_loop.py` — hash-verify and render-before-submit.
 - `services/batch-poller/app/loop.py` / `clients/anthropic.py` / `models.py` — result parse has no usage fields.
 - `tests/test_enrichment_prompts.py` / prefilter + enrichment loop client tests — assert current `cache_control` shape.
-- `.dev/caching_strategy.md` / `.dev/decision-logs/m5-enrichment/` / `bishop_spec_0_6.md` §12.1/§12.3 — prior reasoning and spec drift.
+- `.dev/plans/prompt-caching/artifacts/caching_strategy.md` / `.dev/decision-logs/m5-enrichment/` / `bishop_spec_0_6.md` §12.1/§12.3 — prior reasoning and spec drift.
 
 **Explicit exclusions:**
 - `services/scraper/**`, `services/ui/**`, `services/query-api/**` — not on the Anthropic submit/complete path.
@@ -87,8 +87,8 @@
 | `config/profiles/professional_v1.2.0.yaml` | Intended prefilter pin (~1882 tok) | adjacent | Overlay log: revert target |
 | `config/profiles/professional_v1.2.0_soft_launch.yaml` | Live prefilter pin (~2280 tok) | adjacent | Ad hoc overlay; untracked |
 | `bishop_spec_0_6.md` | §12.1/§12.3 Phase 1.5 “no code change” | adjacent | Strategy §18 wants a spec fix; already dirty from overlay |
-| `.dev/caching_strategy.md` | Reference design v0.3.0 (2026-06-14) | adjacent | Not implemented beyond Call 2 wiring |
-| `.dev/llm-models-and-cache.md` | As-built model/cache table (2026-06-13) | adjacent | Stale on profile size |
+| `.dev/plans/prompt-caching/artifacts/caching_strategy.md` | Reference design v0.3.0 (2026-06-14) | adjacent | Not implemented beyond Call 2 wiring |
+| `.dev/plans/prompt-caching/artifacts/llm-models-and-cache.md` | As-built model/cache table (2026-06-13) | adjacent | Stale on profile size |
 
 **Skipped (over-cap / out of slice):** `config/profiles/professional_v1.1.0.yaml`, `v1.1.1.yaml` (historical); `bishop_shared/enrichment_parsers.py`; `scripts/replay_prefilter.py`; `alembic/versions/m1_001_initial_schema.py` / `m3_001_batch_source_ids.py` (batch table; only in scope if `BatchRecord` columns are chosen — see Flag 6); `services/state-worker/app/models/domain.py` `BatchRecord` / `http.py` `BatchPatchRequest` / `transitions.py` `patch_batch` (same); `alembic/versions/m8_001_pre_filter_tier.py` (does not touch `batches`); `tests/test_tag_taxonomy.py`; `tests/test_m3_integration.py`; `tests/test_m5_integration.py`.
 
@@ -214,7 +214,7 @@ Working copy vs HEAD: only `PreFilterResultsResponse.parked: int = 0` (overlay).
 | `services/pre-filter-worker/app/alerts.py` | `emit_profile_hash_mismatch_alert` | unknown | `tests/test_prefilter_loop.py` |
 | `services/batch-poller/app/clients/state_worker.py` | `get_in_flight_batches`, `post_*_results`, `patch_batch` | unknown | poller tests |
 
-`cache_creation_input_tokens` / `cache_read_input_tokens`: **zero Python hits**. Docs only (`.dev/caching_strategy.md`).
+`cache_creation_input_tokens` / `cache_read_input_tokens`: **zero Python hits**. Docs only (`.dev/plans/prompt-caching/artifacts/caching_strategy.md`).
 
 ---
 
@@ -228,7 +228,7 @@ Working copy vs HEAD: only `PreFilterResultsResponse.parked: int = 0` (overlay).
 | `.dev/decision-logs/ops/soft-launch-precision-overlay.md` | ops (not a milestone) | Temporary overlay. Prefilter pin → `professional_v1.2.0_soft_launch.yaml`. Intended pin remains `professional_v1.2.0.yaml`. Enrichment pin unchanged (`v1.0.0`). | Revert or promote after first-week spend/inbox. Live `RELEVANCE_PARKED` rows if revert. |
 | `.dev/plans/m5-enrichment/plan.md` T4 risk | M5 T4 packet | Profile below threshold — `cache_control` still emitted; may no-op (document in T4 log). | Absorbed by T4 log. |
 
-Reference (not decision logs): `.dev/caching_strategy.md` v0.3.0 (2026-06-14) — implementation checklist §18 still unchecked; `.dev/llm-models-and-cache.md` (2026-06-13); `thoughts.md` L6: “n.s.: prompt caching, reaching the min tokens required and making the most of it”.
+Reference (not decision logs): `.dev/plans/prompt-caching/artifacts/caching_strategy.md` v0.3.0 (2026-06-14) — implementation checklist §18 still unchecked; `.dev/plans/prompt-caching/artifacts/llm-models-and-cache.md` (2026-06-13); `thoughts.md` L6: “n.s.: prompt caching, reaching the min tokens required and making the most of it”.
 
 Strategy already **rejects** (do not re-open without supersession): Sonnet switch for 1,024 floor; `source` in the system prompt; per-source Anthropic batches; Phase 1.5 “no code change”; pad to 4k with noise. Strategy **recommends** unified multi-source rubric (option A) and dedicated `call1_rubric` (Call 1 cannot use the NL profile — spec §5.4). Those recommendations are not operator-locked in a decision log.
 

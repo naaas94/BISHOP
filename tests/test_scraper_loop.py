@@ -100,7 +100,10 @@ async def test_scrape_cycle_posts_batch_and_updates_state() -> None:
         skipped=0,
     )
 
-    with patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]):
+    with (
+        patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
+        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
+    ):
         await loop_mod.scrape_cycle(client)
 
     client.get_scraper_state.assert_awaited_once_with(SourceEnum.ARXIV)
@@ -128,7 +131,10 @@ async def test_scrape_cycle_skips_state_update_on_batch_failure() -> None:
         response=response,
     )
 
-    with patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]):
+    with (
+        patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
+        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
+    ):
         await loop_mod.scrape_cycle(client)
 
     client.post_scraper_state.assert_not_awaited()
@@ -152,7 +158,10 @@ async def test_scrape_cycle_rerun_reports_skipped_idempotent_rows() -> None:
     ]
     client.post_manifest_batch.side_effect = batch_results
 
-    with patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]):
+    with (
+        patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
+        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
+    ):
         await loop_mod.scrape_cycle(client)
         await loop_mod.scrape_cycle(client)
 
@@ -189,7 +198,10 @@ async def test_scrape_cycle_survives_429_via_failure_envelope() -> None:
         skipped=0,
     )
 
-    with patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]):
+    with (
+        patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
+        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
+    ):
         await loop_mod.scrape_cycle(client)
 
     assert attempts == 3
@@ -215,7 +227,10 @@ async def test_scrape_cycle_logs_permanent_failure_and_continues() -> None:
         updated_at=_UPDATED_AT,
     )
 
-    with patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]):
+    with (
+        patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
+        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
+    ):
         with patch.object(loop_mod, "log_permanent_failure") as log_failure:
             await loop_mod.scrape_cycle(client)
 
@@ -242,7 +257,10 @@ async def test_scrape_cycle_escalatable_failure_skips_batch() -> None:
         updated_at=_UPDATED_AT,
     )
 
-    with patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]):
+    with (
+        patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
+        patch.object(loop_mod, "BISHOP_HARVEST_ENABLED", False),
+    ):
         await loop_mod.scrape_cycle(client)
 
     client.post_manifest_batch.assert_not_awaited()
@@ -250,20 +268,30 @@ async def test_scrape_cycle_escalatable_failure_skips_batch() -> None:
 
 
 @pytest.mark.asyncio
-async def test_scheduler_invokes_cycle() -> None:
+async def test_scheduler_invokes_scrape_and_release() -> None:
     _, _, loop_mod, main_mod, _ = _load_scraper_loop_stack()
-    invoked = asyncio.Event()
+    scraped = asyncio.Event()
+    released = asyncio.Event()
 
     async def fake_cycle(client=None) -> None:
-        invoked.set()
-        raise asyncio.CancelledError
+        scraped.set()
+        await asyncio.Event().wait()
+
+    async def fake_release(client=None) -> None:
+        released.set()
+        await asyncio.Event().wait()
 
     with patch.object(main_mod, "StateWorkerClient", return_value=AsyncMock()):
         with patch.object(main_mod, "scrape_cycle", side_effect=fake_cycle):
-            with pytest.raises(asyncio.CancelledError):
-                await main_mod.run_scheduler()
-
-    assert invoked.is_set()
+            with patch.object(main_mod, "release_once", side_effect=fake_release):
+                task = asyncio.create_task(main_mod.run_scheduler())
+                await asyncio.wait_for(
+                    asyncio.gather(scraped.wait(), released.wait()),
+                    timeout=2,
+                )
+                task.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    await task
 
 
 def test_registry_lists_all_expected_sources() -> None:

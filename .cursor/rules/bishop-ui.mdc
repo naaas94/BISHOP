@@ -1,0 +1,27 @@
+---
+description: Operator UI talks only to query-api; live map is .dev/ui/ — read before adding pages, stats, or styles
+alwaysApply: true
+---
+
+# Bishop operator UI
+
+Authoritative folder: `.dev/ui/` (start at `README.md`; routes/dashboard recipe in `agent-reference.md`). Do not rediscover the UI from the README (M0 compose only) or from stale `.dev/architecture/bishop/` rows (`/` is `/dashboard`, not `/batches`). Do not recreate `.dev/ui.md` at the `.dev/` root.
+
+## Shape
+
+- FastAPI + Jinja + htmx in `services/ui/`. Host: `http://localhost:${UI_HOST_PORT}` (8081). Image `bishop/ui:m8` **bakes** templates and CSS — rebuild the `ui` service after those files change.
+- Data path is query-api only (`_query_api_get` / `_query_api_request`). Never sqlite / LanceDB / DuckDB / BM25 / state-worker from `main.py`. Compose may set `STATE_WORKER_URL`; ignore it.
+- `GET /` → 302 `/dashboard`. Dashboard JSON is `GET /stats/overview` (`stats_reader.py`), not UI-side counts.
+
+## Before you change the UI
+
+Read `.dev/ui/agent-reference.md` (routes table, dashboard recipe, CSS cache-bust). New corpus stats go on `StatsOverview` in query-api, then a card/bar in `partials/dashboard_stats.html`. New UI notes go in `.dev/ui/` and get a row in that folder's `README.md`.
+
+Keep `tests/test_ui_routes.py` kill tests: no store imports, Dockerfile `python -m app.main`, container port 80.
+
+## Load-bearing facts (easy to get wrong)
+
+- `{source_id:path}` — GitHub/HF ids contain `/`. Quote with `_quote_source_id` toward query-api.
+- Upstream errors still return HTML 200 with an `error` slot.
+- Stylesheet is `/static/style.css?v={{ static_version }}`. If the dashboard looks like an unstyled list after a rebuild, the image was not rebuilt or the HTML is stale — not “CSS grid is broken.”
+- `GET /recent` on query-api is unused by the UI. Search vs Explorer: `/search` is q-only; `/explorer` is filtered `/search`.

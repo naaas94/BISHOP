@@ -83,6 +83,31 @@ def entry_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
             "INDEXED",
         ),
     )
+    conn.execute(
+        """
+        INSERT INTO entries (
+            id, source_id, source, url, title, content_raw, ingested_at, domain,
+            profile_version, pre_filter_batch_id, pre_filter_rationale,
+            reading_status, flagged_for_review, processing_state
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            "entry-2",
+            "github:clavia-labs/tardigrade",
+            "github",
+            "https://github.com/clavia-labs/tardigrade",
+            "tardigrade",
+            "README body",
+            datetime(2026, 6, 13, tzinfo=UTC).isoformat(),
+            "professional",
+            "v1",
+            "batch-1",
+            "relevant",
+            "unread",
+            0,
+            "INDEXED",
+        ),
+    )
     conn.commit()
     conn.close()
 
@@ -112,6 +137,22 @@ def test_entry_not_found_returns_404(entry_client: TestClient) -> None:
     body = response.json()
     assert body["error"] == "not_found"
     assert body["source_id"] == "arxiv:missing"
+
+
+def test_entry_returns_slash_source_id(entry_client: TestClient) -> None:
+    """GitHub/HF ids are source:owner/name; {source_id} without :path 404s at routing."""
+    response = entry_client.get("/entries/github:clavia-labs/tardigrade")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["source_id"] == "github:clavia-labs/tardigrade"
+    assert body["title"] == "tardigrade"
+
+
+def test_entry_slash_source_id_with_encoded_colon(entry_client: TestClient) -> None:
+    """Browsers encode ':' and leave '/'; that must not become FastAPI's default 404."""
+    response = entry_client.get("/entries/github%3Aclavia-labs/tardigrade")
+    assert response.status_code == 200
+    assert response.json()["source_id"] == "github:clavia-labs/tardigrade"
 
 
 def test_read_entry_opens_sqlite_read_only(
