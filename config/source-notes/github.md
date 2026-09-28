@@ -80,7 +80,23 @@ Harvest sidecar (`${BISHOP_DATA_ROOT}/harvest/ledger.sqlite`) and the dollar tap
 
 ## Intel — 2026-09-17 tap live, mill hitchhiker
 
-Same-day live: `released_today` hit `N_cap` (1413). Pool 2000 after two incomplete Search windows (1000 each, cursor still 2024-09-21 of a 2y walk). `N_cap` stops the tap, not harvest. Harvest is 90s at the end of `scrape_cycle` then `BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC=21600` on this host. Next code is a harvest **loop** (PB-011), not GitHub cutover (PB-012) and not paper exhaust. Write-up: `.dev/decision-logs/ops/harvest-pool-first-landing.md`.
+Same-day live: `released_today` hit `N_cap` (1413). Pool 2000 after two incomplete Search windows (1000 each, cursor still 2024-09-21 of a 2y walk). `N_cap` stops the tap, not harvest. Harvest is 90s at the end of `scrape_cycle` then `BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC=21600` on this host. Next **code** is a harvest **loop** (PB-011), not this sitting. Operator later same day: a few months at ~100 G1 batches/day is fine; daily ingest stays; **~356k is 60d, not 2y**. Write-up: `.dev/decision-logs/ops/harvest-pool-first-landing.md`.
+
+## Intel — 2026-09-26 tap override
+
+Operator override, not a new yaml pin. `BISHOP_HARVEST_DAILY_BUDGET_USD=11.72` on this host (back from caba — server out for 4-ish days). Derived `N_cap=14136`. `config/harvest/economics.yaml` stays `$2` / `1413`. Write-up: `.dev/decision-logs/ops/2026-09-26-ncap-caba-override.md`.
+
+## Intel — 2026-09-27 faucet to a third
+
+Catch-up filled the 14,136 cap with **2024-10..2024-12** `pushed_at` rows (pool has not reached 2026). Gate-1 on that slice was ~0.7% pass. Credits died ~03:00 UTC; operator refilled ~09:00 UTC. Env now `4.52` → `N_cap=4712`. Same yaml pin. Full note: `catch_up_ad_hoc.md`.
+
+## Intel — 2026-09-27 operator pages
+
+Incremental GitHub still writes `DISCOVERED`. Mill + tap `$` is `/harvest` (`GET /stats/harvest`; headline unreleased × `$0.000764`). Incremental cursor lag is `/scrape` (`last_successful_run_at`). GitHub `discovered_today` on `/scrape` mixes incremental POSTs and tap releases — not mill walk. Dashboard keeps pipeline cards. Do not put harvest cards back on `/dashboard`. Write-up: `.dev/decision-logs/ops/2026-09-27-operator-ingest-pages.md`.
+
+## Intel — 2026-09-27 mill walks backward
+
+The 2024 pool was the forward walk (floor ended at `2024-12-15`). Mill now fills the gap from **now down to that floor**. First persisted slice after the flip: `pushed:2026-09-25..2026-09-27 stars:>10` (964 upserts, 10-page cap on `total_count` 68040). `walk_direction=backward`. Release order unchanged, so these rows outrank the unreleased 2024 pool. Write-up: `.dev/decision-logs/ops/2026-09-27-harvest-mill-backward.md`.
 
 ## Next (do not invent)
 

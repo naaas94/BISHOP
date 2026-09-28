@@ -157,6 +157,15 @@ async def prefilter_cycle(
                 extra={"http_status": exc.response.status_code, "event": "state_worker_error"},
             )
             return
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            # A read timeout used to kill the process. The 2211-row catch-up
+            # then sat in DISCOVERED with no Anthropic submit until someone
+            # noticed the container had exited.
+            logger.error(
+                "state-worker poll failed",
+                extra={"error": type(exc).__name__, "event": "state_worker_error"},
+            )
+            return
 
         global _hold_started_at
 
@@ -266,6 +275,17 @@ async def prefilter_cycle(
                 "state-worker batch registration failed",
                 extra={
                     "http_status": exc.response.status_code,
+                    "batch_id": batch_id,
+                    "external_batch_id": submit_result.external_batch_id,
+                    "event": "state_worker_error",
+                },
+            )
+            return
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            logger.error(
+                "state-worker batch registration failed",
+                extra={
+                    "error": type(exc).__name__,
                     "batch_id": batch_id,
                     "external_batch_id": submit_result.external_batch_id,
                     "event": "state_worker_error",

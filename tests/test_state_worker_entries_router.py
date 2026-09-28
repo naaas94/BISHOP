@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import sqlite3
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -358,6 +359,18 @@ def test_post_entries_indexed_returns_204(client: TestClient) -> None:
         json={"source_id": _SOURCE},
     )
     assert response.status_code == 204
+
+
+def test_post_entries_indexed_returns_503_when_database_is_locked(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    async def _locked(_conn: object, _source_id: str) -> None:
+        raise sqlite3.OperationalError("database is locked")
+
+    monkeypatch.setattr("app.routers.entries.mark_indexed", _locked)
+    response = client.post("/entries/indexed", json={"source_id": _SOURCE})
+    assert response.status_code == 503
+    assert response.json() == {"error": "database_locked", "source_id": _SOURCE}
 
 
 def test_post_entries_failed_returns_204(client: TestClient) -> None:

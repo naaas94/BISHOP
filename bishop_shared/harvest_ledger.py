@@ -72,7 +72,9 @@ CREATE TABLE IF NOT EXISTS harvest_cursor (
     source TEXT PRIMARY KEY,
     next_window_start TEXT,
     harvest_until TEXT,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    walk_direction TEXT,
+    high_water TEXT
 );
 
 CREATE INDEX IF NOT EXISTS ix_candidates_released_at ON candidates (released_at);
@@ -137,6 +139,16 @@ class HarvestPoolStats:
     released_today: int
 
 
+@dataclass(frozen=True)
+class HarvestCursor:
+    source: str
+    next_window_start: str | None
+    harvest_until: str | None
+    updated_at: str
+    walk_direction: str | None
+    high_water: str | None
+
+
 def harvest_db_path() -> Path:
     raw = os.environ.get("BISHOP_HARVEST_DB_PATH")
     if raw:
@@ -164,7 +176,17 @@ def connect_ro(path: Path | str | None = None) -> sqlite3.Connection:
 
 def init_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA_SQL)
+    _ensure_cursor_walk_columns(conn)
     conn.commit()
+
+
+def _ensure_cursor_walk_columns(conn: sqlite3.Connection) -> None:
+    """Idempotent ALTER — CREATE TABLE IF NOT EXISTS will not widen a live table."""
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(harvest_cursor)")}
+    if "walk_direction" not in columns:
+        conn.execute("ALTER TABLE harvest_cursor ADD COLUMN walk_direction TEXT")
+    if "high_water" not in columns:
+        conn.execute("ALTER TABLE harvest_cursor ADD COLUMN high_water TEXT")
 
 
 def _as_int_flag(value: bool | None) -> int | None:
@@ -308,6 +330,72 @@ def get_cursor(conn: sqlite3.Connection, source: str) -> sqlite3.Row | None:
     return cursor.fetchone()
 
 
+def _row_text(row: sqlite3.Row, key: str) -> str | None:
+    try:
+        value = row[key]
+    except (IndexError, KeyError):
+        return None
+    if value is None or value == "":
+        return None
+    return str(value)
+
+
+def read_cursor(conn: sqlite3.Connection, source: str) -> HarvestCursor | None:
+    row = get_cursor(conn, source)
+    if row is None:
+        return None
+    updated = _row_text(row, "updated_at")
+    if updated is None:
+        return None
+    return HarvestCursor(
+        source=str(row["source"]),
+        next_window_start=_row_text(row, "next_window_start"),
+        harvest_until=_row_text(row, "harvest_until"),
+        updated_at=updated,
+        walk_direction=_row_text(row, "walk_direction"),
+        high_water=_row_text(row, "high_water"),
+    )
+
+
+def list_harvest_runs(conn: sqlite3.Connection, source: str) -> list[HarvestRun]:
+    rows = conn.execute(
+        """
+        SELECT source, query, window_start, window_end, total_count,
+               incomplete_results, pages_fetched, items_upserted, http_status,
+               ratelimit_remaining, ratelimit_reset, started_at, finished_at
+        FROM harvest_runs
+        WHERE source = ?
+        ORDER BY started_at
+        """,
+        (source,),
+    )
+    runs: list[HarvestRun] = []
+    for row in rows:
+        total_raw = row["total_count"]
+        http_raw = row["http_status"]
+        remaining_raw = row["ratelimit_remaining"]
+        runs.append(
+            HarvestRun(
+                source=str(row["source"]),
+                query=str(row["query"]),
+                window_start=_row_text(row, "window_start"),
+                window_end=_row_text(row, "window_end"),
+                total_count=int(total_raw) if total_raw is not None else None,
+                incomplete_results=bool(row["incomplete_results"]),
+                pages_fetched=int(row["pages_fetched"] or 0),
+                items_upserted=int(row["items_upserted"] or 0),
+                http_status=int(http_raw) if http_raw is not None else None,
+                ratelimit_remaining=(
+                    int(remaining_raw) if remaining_raw is not None else None
+                ),
+                ratelimit_reset=_row_text(row, "ratelimit_reset"),
+                started_at=str(row["started_at"]),
+                finished_at=str(row["finished_at"]),
+            )
+        )
+    return runs
+
+
 def set_cursor(
     conn: sqlite3.Connection,
     source: str,
@@ -315,18 +403,32 @@ def set_cursor(
     next_window_start: str,
     harvest_until: str,
     now: datetime,
+    walk_direction: str | None = None,
+    high_water: str | None = None,
 ) -> None:
     stamp = _iso(now)
     conn.execute(
         """
-        INSERT INTO harvest_cursor (source, next_window_start, harvest_until, updated_at)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO harvest_cursor (
+            source, next_window_start, harvest_until, updated_at,
+            walk_direction, high_water
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
         ON CONFLICT(source) DO UPDATE SET
             next_window_start=excluded.next_window_start,
             harvest_until=excluded.harvest_until,
-            updated_at=excluded.updated_at
+            updated_at=excluded.updated_at,
+            walk_direction=excluded.walk_direction,
+            high_water=excluded.high_water
         """,
-        (source, next_window_start, harvest_until, stamp),
+        (
+            source,
+            next_window_start,
+            harvest_until,
+            stamp,
+            walk_direction,
+            high_water,
+        ),
     )
     conn.commit()
 

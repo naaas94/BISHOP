@@ -9,9 +9,27 @@
 # ids: PB-NNN (product); OPEN-NNN / FU-NNN are foreign keys into still_open / incident-log.
 
 schema_version: 1
-updated: "2026-09-17"
+updated: "2026-09-27"
 
 items:
+  - id: PB-016
+    status: closed
+    kind: ops
+    priority: p4
+    opened: "2026-09-27"
+    updated: "2026-09-27"
+    title: Name the entity in search; do not cite the hit card
+    summary: >
+      Standing rule, no build. On 2026-09-27 a query that named Jev
+      returned the three indexed papers at the top. The same idea as a
+      method name, a monitor, or a keep-or-drop gate did not. summary
+      compressed a GPT-6 cascade into "99% of GPT-4". relevance_score
+      ranked a GUI paper at 0.76 and the useful audit at 0.38.
+    see:
+      - .dev/decision-logs/ops/2026-09-27-search-prompt-shape.md
+      - mcp-agent-tool-notes.md
+      - AGENTS.md
+
   - id: PB-011
     status: shipped
     kind: feature
@@ -24,7 +42,9 @@ items:
       then BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC — live 21600). Release already
       has a 60s loop. Philosophy is unbounded mill + $N tap. Same scraper
       process, third asyncio loop, Search 30/min, same sidecar. Not a new
-      worker. Not paper exhaust. Not GitHub cutover.
+      worker. Not paper exhaust. Not GitHub cutover. Operator 2026-09-17:
+      a few months at ~100 G1 batches/day is fine; daily ingest stays;
+      do not implement this sitting. ~356k is 60d, not the 2y mill.
     see:
       - harvest-pool-next.md
       - .dev/decision-logs/ops/harvest-pool-first-landing.md
@@ -36,22 +56,52 @@ items:
     kind: feature
     priority: p2
     opened: "2026-09-17"
-    updated: "2026-09-17"
+    updated: "2026-09-27"
     title: GitHub incremental cutover (ledger-only harvest)
     summary: >
       After PB-011 is filling. Stop POSTing GitHub fetch_manifest into
       DISCOVERED; DISCOVERED is the $N tap only. Tap already inserts.
       Do not dump the sidecar. Do not start paper exhaust here.
+      Gated on tap yield (F-001, 2026-09-27 r001): tap days 2026-09-17,
+      09-18, and 09-26 reached INDEXED on 2/4,976 rows (0.04%) versus
+      incremental GitHub 14/1,909 (0.73%). Leaving deferred waits on
+      Q-001: 5+ settled, uptime-clean tap days under N_cap 4712.
+      Investigate harvest stars:>10 pushed-window versus incremental
+      fetch_manifest. Same pin.
     see:
       - harvest-pool-next.md
       - .dev/decision-logs/ops/harvest-pool-first-landing.md
+      - .dev/insights-manager/runs/2026-09-27-r001.md
+
+  - id: PB-013
+    status: idea
+    kind: feature
+    priority: p3
+    opened: "2026-09-17"
+    updated: "2026-09-17"
+    title: Attention pass / digest consumer (not ingest stage 3)
+    summary: >
+      Parked. Ad hoc (later job) pass over INDEXED in a date range that
+      flags must-looks or writes a short digest; persist so reruns are a
+      no-op; later a reading home feed. Parked overlay rows are a
+      separate cheap promote-vs-leave pass, not the same mill. Open fork:
+      Bishop-owned sidecar vs a separate consumer of query-api / stores.
+      Do not fold into Call 1/2 or the VDB. Do not extend processing_state
+      past INDEXED. Do not restyle /dashboard. Do not treat this as M9
+      news adapters. Hand range before any mill. Sibling of PB-010, not
+      a collapse. Spec §23 daily digest is the named deferred surface.
+    see:
+      - .dev/decision-logs/ops/attention-pass-consumer.md
+      - .dev/direction/2026-09-17-attention-pass/plan.md
+      - mcp-agent-tool-notes.md
+      - bishop_spec_0_6.md
 
   - id: PB-010
     status: idea
     kind: feature
     priority: p3
     opened: "2026-09-16"
-    updated: "2026-09-16"
+    updated: "2026-09-17"
     title: Bishop MCP — v1 read-only, later scout-artifact write-back
     summary: >
       Wrap query-api search/get_entry/recent as a read-only MCP (no
@@ -59,10 +109,51 @@ items:
       v2 may store a value-scout report.md against source_id in a sidecar
       (visit vs scouted_empty vs scouted_kept). Do not re-embed, do not
       patch Call 1/2, do not extend processing_state past INDEXED. Run a
-      few hand scouts before building v2.
+      few hand scouts before building v2. Sibling idea PB-013 is the
+      operator attention/digest/feed pass — do not collapse the two.
     see:
       - mcp-agent-tool-notes.md
       - .dev/decision-logs/ops/mcp-consumer-extraction.md
+      - .dev/decision-logs/ops/attention-pass-consumer.md
+
+  - id: PB-015
+    status: shipped
+    kind: feature
+    priority: p2
+    opened: "2026-09-27"
+    shipped: "2026-09-27"
+    title: Scrape cycle page
+    summary: >
+      /scrape is incremental ingest: worst live-source lag from
+      scraper_state.last_successful_run_at, overlay window, today’s
+      DISCOVERED inserts. Papers with Code is dead and does not set the
+      headline. Dashboard keeps pipeline cards plus a scrape one-liner.
+      GET /stats/scrape. Query-api gets the same overlay/interval env as
+      the scraper and must be recreated after those keys are added.
+    see:
+      - .dev/ui/scrape.md
+      - .dev/decision-logs/ops/2026-09-27-operator-ingest-pages.md
+      - services/query-api/app/stats_reader.py
+      - services/ui/app/templates/scrape.html
+
+  - id: PB-014
+    status: shipped
+    kind: feature
+    priority: p2
+    opened: "2026-09-27"
+    shipped: "2026-09-27"
+    title: Harvest economics page
+    summary: >
+      /harvest is mill + tap: unreleased × blended GitHub unit, censored
+      walk-forecast band, remaining_slots faucet including overshoot.
+      Dashboard keeps a one-liner, not the old harvest card grid. GET
+      /stats/harvest. Figures are the pinned blend, not Anthropic
+      (PB-002).
+    see:
+      - .dev/ui/harvest-dashboard.md
+      - .dev/decision-logs/ops/2026-09-27-operator-ingest-pages.md
+      - services/query-api/app/stats_reader.py
+      - services/ui/app/templates/harvest.html
 
   - id: PB-001
     status: shipped
@@ -75,26 +166,35 @@ items:
       query-api GET /stats/overview (read-only SQLite aggregates) plus UI
       /dashboard as the new landing page. Funnel, queue depth, relevance
       histogram, domain/source/type/tags/reading-status, 30d ingest,
-      batches, 7d errors. htmx poll every 30s. No Chart.js.
+      batches, 7d errors. htmx poll every 30s. No Chart.js. Harvest and
+      scrape analytics later moved to /harvest and /scrape (PB-014,
+      PB-015); dashboard keeps one-liners.
     see:
       - services/query-api/app/stats_reader.py
       - services/query-api/app/routers/stats.py
       - services/ui/app/templates/dashboard.html
       - tests/test_query_api_stats.py
       - tests/test_ui_routes.py
+      - .dev/decision-logs/ops/2026-09-27-operator-ingest-pages.md
 
   - id: PB-002
     status: idea
     kind: feature
     priority: p3
     opened: "2026-09-14"
+    updated: "2026-09-27"
     title: Token and cost stats on the dashboard
     summary: >
       batches has no usage columns today; batch-poller already parses
       message.usage (input/output/cache tokens) and only logs it.
-      Persist those columns (Alembic + state-worker domain + poller write).
-      Do not invent token fields on the UI first. Harvest projected $ is
-      a different card (economics.yaml × released_today). See
+      When this lands, persist usage per result (source_id / custom_id):
+      Alembic + state-worker domain + poller write. batches.source_ids
+      mixes sources inside one pre-filter batch, so a batch-level total
+      cannot be split by source without an allocation rule (F-007,
+      2026-09-27). Shape stays with this item.
+      Do not invent token fields on the UI first. Harvest modeled $ lives
+      on /harvest (unreleased × economics.yaml blend), not live Anthropic
+      and not a dashboard card of released_today. See
       .dev/persist-vendor-payloads.md.
     blocked_on: schema change (Alembic + state-worker domain models)
 

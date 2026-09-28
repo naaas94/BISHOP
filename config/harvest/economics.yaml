@@ -1,6 +1,10 @@
 # Harvest release budget. Operator sets dollars. N_cap is derived.
 # Recalibrate unit costs by commit after a cache-hit batch — not at runtime.
-# Live Anthropic usage on batches is PB-002 (poller already parses; does not persist).
+# Operator 2026-09-17: ~100 G1 batches/day (~$3 cached) is the intended later
+# faucet; this file stays $2 until that bump. Live Anthropic usage is PB-002.
+# Operator override 2026-09-26 (env, not this pin): 11.72 -> N_cap 14136. Catch-up. Spent.
+# Operator override 2026-09-27 (env): 4.52 -> N_cap 4712, about a third of 14136.
+# Yaml pin stays $2. Env wins. Report: catch_up_ad_hoc.md.
 
 daily_budget_usd: 2.00
 unit_gate1_usd: 0.0005

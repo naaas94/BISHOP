@@ -159,12 +159,21 @@ def test_query_api_harvest_budget_env_passthrough(compose_text: str) -> None:
         "BISHOP_HARVEST_DAILY_BUDGET_USD: ${BISHOP_HARVEST_DAILY_BUDGET_USD:-2}"
         in block
     )
+    assert (
+        "BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC: ${BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC:-21600}"
+        in block
+    )
+    assert (
+        "BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS: ${BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS:-60}"
+        in block
+    )
 
 
 def test_vector_writer_stop_grace_period(compose_text: str) -> None:
     """Falsifier: spec §6.2 G1 requires stop_grace_period on vector-writer."""
     block = _service_block(compose_text, "vector-writer")
     assert "stop_grace_period: 30s" in block
+    assert "restart: unless-stopped" in block
 
 
 def test_batch_poller_has_no_sqlite_mount(compose_text: str) -> None:

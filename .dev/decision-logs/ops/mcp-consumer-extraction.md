@@ -45,6 +45,7 @@ Append-only, keyed by `source_id`. Two events only: optional visit; completed sc
 
 ## Related
 
-- `mcp-agent-tool-notes.md` (§7 sidecar, §8 consumers)
+- `mcp-agent-tool-notes.md` (§7 sidecar, §8 consumers; §9 sibling PB-013)
 - `product-backlog.yaml` PB-010
 - value-scout skill (report-only; not a Bishop writer)
+- Parked sibling (do not collapse): PB-013 attention/digest/feed — `.dev/decision-logs/ops/attention-pass-consumer.md`

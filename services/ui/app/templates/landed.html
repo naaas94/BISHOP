@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Landed — BISHOP{% endblock %}
+{% block content %}
+<h1>Landed</h1>
+<p class="muted">Indexed entries from GET /recent. No score. No persist.</p>
+<form class="explorer-form" method="get" action="/landed">
+  <label for="landed-days">Days</label>
+  <input id="landed-days" name="days" type="text" value="{{ days }}" placeholder="7">
+
+  <label for="landed-source">Source</label>
+  <input id="landed-source" name="source" type="text" value="{{ source }}" placeholder="arxiv">
+
+  <button type="submit">Show</button>
+</form>
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+{% if entries %}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Ingested</th>
+      <th>Source</th>
+      <th>Title</th>
+      <th>Relevance</th>
+      <th>Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for hit in entries %}
+    <tr>
+      <td>{{ hit.ingested_at }}</td>
+      <td>{{ hit.source }}</td>
+      <td><a href="/entries/{{ hit.source_id }}">{{ hit.title }}</a></td>
+      <td>{% if hit.relevance_score is not none %}{{ "%.2f"|format(hit.relevance_score) }}{% else %}—{% endif %}</td>
+      <td>{{ hit.entry_type or "—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% elif not error %}
+<p class="muted">No indexed entries in this window.</p>
+{% endif %}
+{% endblock %}

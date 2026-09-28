@@ -331,6 +331,32 @@ def test_prefilter_cycle_state_worker_register_error_skips_after_anthropic(
     state_client.register_batch.assert_called_once()
 
 
+def test_prefilter_cycle_register_timeout_keeps_the_process(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    anthropic_mod, loop_mod, models, client_mod = _load_prefilter_loop_stack()
+    monkeypatch.setattr(loop_mod, "PREFILTER_MIN_BATCH_SIZE", 1)
+    entries = [_sample_poll_entry(models, "arxiv:2406.00001")]
+    state_client = _mock_state_client(client_mod, models, entries=entries)
+    request = httpx.Request("POST", "http://state-worker:8000/batches")
+    state_client.register_batch = AsyncMock(
+        side_effect=httpx.ReadTimeout("timed out", request=request)
+    )
+    anthropic_client = _mock_anthropic_client(anthropic_mod, models)
+
+    async def _run() -> None:
+        await loop_mod.prefilter_cycle(
+            state_client,
+            anthropic_client,
+            profile_path=_PROFILE_PATH,
+            rubric_path=_RUBRIC_PATH,
+        )
+
+    asyncio.run(_run())
+    anthropic_client._client.messages.batches.create.assert_called_once()
+    state_client.register_batch.assert_called_once()
+
+
 def test_prefilter_cycle_anthropic_400_skips_batch_registration(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

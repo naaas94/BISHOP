@@ -145,9 +145,48 @@ def test_index_cycle_empty_poll_skips_index_entry() -> None:
         index_mod.index_entry = original_index_entry  # type: ignore[method-assign]
 
 
+def test_state_worker_client_defaults_to_60s_timeout() -> None:
+    _, _, client_mod, _ = _load_loop_stack()
+    client = client_mod.StateWorkerClient(base_url="http://state-worker:8000")
+
+    async def _run() -> None:
+        try:
+            timeout = client._client.timeout
+            assert timeout.connect == 60.0
+            assert timeout.read == 60.0
+            assert timeout.write == 60.0
+            assert timeout.pool == 60.0
+        finally:
+            await client.aclose()
+
+    asyncio.run(_run())
+
+
 def test_index_cycle_poll_error_skips_index_entry() -> None:
     loop_mod, models, client_mod, index_mod = _load_loop_stack()
     state_client = _mock_state_client(client_mod, models, poll_error=True)
+    stores = MagicMock(spec=index_mod.IndexStores)
+    index_entry_mock = AsyncMock()
+    original_index_entry = index_mod.index_entry
+    index_mod.index_entry = index_entry_mock  # type: ignore[method-assign]
+
+    try:
+        async def _run() -> None:
+            await loop_mod.index_cycle(state_client=state_client, stores=stores)
+
+        asyncio.run(_run())
+        index_entry_mock.assert_not_awaited()
+    finally:
+        index_mod.index_entry = original_index_entry  # type: ignore[method-assign]
+
+
+def test_index_cycle_poll_timeout_skips_index_entry() -> None:
+    loop_mod, models, client_mod, index_mod = _load_loop_stack()
+    state_client = _mock_state_client(client_mod, models, entries=[_sample_poll_entry(models)])
+    request = httpx.Request("GET", "http://test/entries/poll")
+    state_client.poll_vector_write_queued = AsyncMock(
+        side_effect=httpx.ReadTimeout("timed out", request=request),
+    )
     stores = MagicMock(spec=index_mod.IndexStores)
     index_entry_mock = AsyncMock()
     original_index_entry = index_mod.index_entry

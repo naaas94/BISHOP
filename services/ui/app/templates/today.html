@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Today — BISHOP{% endblock %}
+{% block content %}
+<h1>Today</h1>
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+{% include "partials/today_stats.html" %}
+{% endblock %}

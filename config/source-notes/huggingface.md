@@ -20,6 +20,10 @@ No HF keep-list stamped yet. Default posture: **flood, almost all reject**.
 - Soft-launch: HF is the volume problem next to GitHub. GitHub is the one we want *if* the quality bar holds. HF is not the faucet to open.
 - 7-day rewind still added ~286 incremental HF rows. That is not a success metric.
 
+## Intel — 2026-09-27 cohort
+
+Discovered 2026-09-11..09-21 UTC (discovery clock, settled window; host down 09-22..25): 13,200 of 30,052 discoveries (44%) and 7 of 189 INDEXED (3.7%). Volume without yield. Rewind stays closed. No HF-only profile (option 3 is not earned). Run: `.dev/insights-manager/runs/2026-09-27-r001.md` (F-005).
+
 ## Do not
 
 - Extend HF lookback to “fill the corpus.”

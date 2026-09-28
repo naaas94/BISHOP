@@ -61,7 +61,7 @@ JSON-text list columns: `concepts`, `tags`, `challenge_hooks`, `references`, `ci
 - `batches` — Anthropic batch lifecycle; `source_ids` JSON added in `m3_001`.
 - `error_log` — failures + ALERT siblings.
 - `oov_tags_log` — tags stripped from Call 1.
-- `scraper_state` — per-source `last_successful_run_at`.
+- `scraper_state` — per-source `last_successful_run_at` (incremental `since`). Operator page `/scrape` (`GET /stats/scrape`). Harvest mill cursor is the sidecar, not this table.
 
 ## `processing_state` (not “processed”)
 
@@ -138,6 +138,23 @@ JOIN manifest m ON m.source_id = e.source_id
 WHERE e.processing_state = 'INDEXED';
 ```
 
+Operator ingest stats (prefer HTTP; hits whatever sqlite compose actually mounted, including this host’s `sqlite_live`):
+
+```powershell
+curl.exe -s http://localhost:8080/stats/scrape    # incremental lag / discovered today
+curl.exe -s http://localhost:8080/stats/harvest   # sidecar pool / walk / N_cap
+curl.exe -s http://localhost:8080/stats/today     # UTC-day glance (discovered / scrape / faucet)
+curl.exe -s http://localhost:8080/stats/overview  # pipeline glance
+```
+
+Incremental cursor SQL if you must (host path may be `sqlite_live`, not `sqlite/`):
+
+```sql
+SELECT source, last_successful_run_at, updated_at
+FROM scraper_state
+ORDER BY source;
+```
+
 ## Frozen vs live
 
 | Artifact | What it is |
@@ -199,6 +216,8 @@ Check the first bytes are `SQLite format 3`. HTML at byte 0 means the file was o
 `entries.content_raw` holding scraped HTML on overflow pages, and it is not evidence of
 overwrite. Quarantine; do not run `init_pool` against a second writer while state-worker
 is up.
+
+**2026-09-27 claim-poll lock — fixed.** `claim_manifest_poll` and `claim_entries_poll` take `BEGIN IMMEDIATE` and then filter on `processing_state`. Migration `m8_002_claim_poll_indexes` adds `ix_manifest_state_discovered (processing_state, discovered_at)` and `ix_entries_state_ingested (processing_state, ingested_at)`. Before that, an empty scan inside the container held the writer for 5.4s (`manifest`) and 8.9s (`entries`), past the 5s busy timeout. After the index those scans were 0.001s and 0.046s. Write-up: `.dev/decision-logs/ops/2026-09-27-sqlite-claim-lock.md`. Incident: `2026-09-27-sqlite-claim-lock` (resolved).
 
 **2026-09-11 torn-page corruption — salvaged, root-caused, hardened.** Read
 `.dev/decision-logs/ops/sqlite-snapshot-and-integrity-gate.md` before ever considering

@@ -49,9 +49,22 @@ Daily ingest must stay live (standing rule). First landing stuffed harvest into 
 
 Paper exhaust into `DISCOVERED`. Dump the sidecar. Widen `ManifestIngestEntry`. Rewind HF. Treat PwC as live. Mechanical drops before the pool mix is visible. UI token fields before PB-002. GitHub-only profile / option 3. Rewrite `BACKFILL_CONFIG`.
 
+## Operator 2026-09-17 (spend / calendar)
+
+A few months to finish the GitHub window is fine. Daily incremental (papers + GitHub today/yesterday) stays up — that is already true and must stay true.
+
+~**100 G1 batches/day** (~$3, ~25M tokens, batched, ~99% cache) is the intended faucet **after** PB-011, not a yaml bump this sitting. Current pin stays `$2` / `N_cap=1413`. Recalibrate `unit_gate1_usd` off a cache-true batch (yaml already says that). All-in at current units for 5000 G1 is closer to ~$4.70 with the paper reserve.
+
+**~356k is 60d `stars:>10`, not 2y.** 2y is the mill (`WINDOW_DAYS=730`), Search-capped per slice. Do not quote 71 days as “2y done.” Order-of-magnitude at 5k/day is a few months.
+
+Other sources: keep live incremental + paper reserve. Sidecar exhaust for papers/LW/OR/SS stays after GitHub mill + cutover. HF no rewind. PwC dead.
+
+Do not implement PB-011 / PB-012 / budget bump in the sitting that logged this. Goal remains: mill loop, then the rest of the deferred list.
+
 ## Next sequence
 
-1. **PB-011** — harvest mill loop (GitHub sidecar fill independent of the 6h scrape clock).
-2. **PB-012** — GitHub incremental cutover (ledger-only harvest; `DISCOVERED` is the tap). Tap is already visibly inserting; mill is the remaining gate so cutover is not starved of pool.
-3. Paper/LW/OR/SS exhaust into the sidecar — after GitHub cutover, not before.
-4. Mechanical drops / extra rank — after the mix is visible.
+1. **PB-011** — harvest mill loop (GitHub sidecar fill independent of the 6h scrape clock). **Not this sitting.**
+2. Optional: raise toward ~100 G1 batches/day (`daily_budget_usd` / env) after a cache-true batch — not before the mill exists.
+3. **PB-012** — GitHub incremental cutover (ledger-only harvest; `DISCOVERED` is the tap). Tap already inserts; mill is the remaining gate.
+4. Paper/LW/OR/SS exhaust into the sidecar — after GitHub cutover, not before.
+5. Mechanical drops / extra rank — after the mix is visible.

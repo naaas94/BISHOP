@@ -11,6 +11,7 @@ import httpx
 from bishop_shared.enums import SourceEnum
 from bishop_shared.scraper_config import BACKFILL_CONFIG
 
+from app.adapters.arxiv import ARXIV_INTER_PAGE_DELAY_SEC
 from app.adapters.base import SourceAdapter
 from app.adapters.registry import ADAPTER_REGISTRY
 from app.config import (
@@ -21,9 +22,15 @@ from app.config import (
 )
 from app.exceptions import EscalatableError, PermanentFailureError, RetryExhaustedError
 from app.failure_envelope import failure_envelope, log_permanent_failure
+from app.models import ManifestBatchResult, ManifestIngestEntry
 from app.state_worker_client import StateWorkerClient
 
 logger = logging.getLogger(__name__)
+
+# One page of the arXiv export cap. A caught-up window can be thousands of
+# rows; one POST of all of them is a large body. Chunks are idempotent, so a
+# failed later chunk retries as skips and still does not stamp the cursor.
+MANIFEST_POST_CHUNK = 100
 
 
 def resolve_backfill_window_days(source: str) -> int:
@@ -64,6 +71,121 @@ def compute_backfill_chunk_starts(
     return starts
 
 
+def _utc_day_start(value: datetime) -> datetime:
+    utc = value.astimezone(UTC)
+    return utc.replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def _utc_day_end(day_start: datetime) -> datetime:
+    return day_start.replace(hour=23, minute=59, second=59, microsecond=0)
+
+
+def arxiv_days_to_scrape(
+    last_run: datetime | None,
+    now: datetime,
+    *,
+    window_days: int,
+) -> list[datetime]:
+    """UTC midnights still to fetch, oldest first, through today.
+
+    The cursor counts only when it sits at 23:59:59 of a day. Anything earlier
+    is a jump (the old stamp-now path). A jump restarts at the overlay floor
+    so days that only received a partial page are fetched in full.
+    """
+    today = _utc_day_start(now)
+    floor = today - timedelta(days=window_days)
+    if last_run is None:
+        start = floor
+    else:
+        last = last_run.astimezone(UTC)
+        day_start = _utc_day_start(last)
+        if last >= _utc_day_end(day_start):
+            start = day_start + timedelta(days=1)
+        else:
+            start = floor
+    if start < floor:
+        start = floor
+    days: list[datetime] = []
+    cursor = start
+    while cursor <= today:
+        days.append(cursor)
+        cursor += timedelta(days=1)
+    return days
+
+
+async def _scrape_arxiv_days(
+    adapter: SourceAdapter,
+    client: StateWorkerClient,
+    last_run: datetime | None,
+    now: datetime,
+) -> None:
+    """Fetch one calendar day, post it, stamp the end of that day, repeat.
+
+    A failed day raises before its stamp. Days already stamped stay put.
+    The cursor is never moved to ``now``.
+    """
+    days = arxiv_days_to_scrape(
+        last_run,
+        now,
+        window_days=resolve_backfill_window_days(adapter.source.value),
+    )
+    if not days:
+        logger.info(
+            "arxiv day walk caught up",
+            extra={"event": "arxiv_day_walk_caught_up", "source": adapter.source.value},
+        )
+        return
+    for index, day_start in enumerate(days):
+        if index > 0 and ARXIV_INTER_PAGE_DELAY_SEC > 0:
+            await asyncio.sleep(ARXIV_INTER_PAGE_DELAY_SEC)
+        day_end = _utc_day_end(day_start)
+        entries = await failure_envelope(
+            adapter.fetch_manifest,
+            since=day_start,
+            until=day_end,
+            source=adapter.source,
+        )
+        if not entries:
+            logger.info(
+                "arxiv day empty",
+                extra={
+                    "event": "arxiv_day_empty",
+                    "source": adapter.source.value,
+                    "day": day_start.date().isoformat(),
+                },
+            )
+        result = await _post_manifest_chunks(client, entries)
+        await client.post_scraper_state(adapter.source, timestamp=day_end)
+        logger.info(
+            "arxiv day complete",
+            extra={
+                "event": "arxiv_day_complete",
+                "source": adapter.source.value,
+                "day": day_start.date().isoformat(),
+                "inserted": result.inserted,
+                "skipped": result.skipped,
+            },
+        )
+
+
+async def _post_manifest_chunks(
+    client: StateWorkerClient,
+    entries: list[ManifestIngestEntry],
+) -> ManifestBatchResult:
+    """POST manifest rows in bounded chunks. Empty input still posts once."""
+    if len(entries) <= MANIFEST_POST_CHUNK:
+        return await client.post_manifest_batch(entries)
+    inserted = 0
+    skipped = 0
+    for offset in range(0, len(entries), MANIFEST_POST_CHUNK):
+        result = await client.post_manifest_batch(
+            entries[offset : offset + MANIFEST_POST_CHUNK],
+        )
+        inserted += result.inserted
+        skipped += result.skipped
+    return ManifestBatchResult(inserted=inserted, skipped=skipped)
+
+
 async def _run_backfill_chunks(
     adapter: SourceAdapter,
     *,
@@ -85,7 +207,7 @@ async def _run_backfill_chunks(
     for index, chunk_start in enumerate(chunk_starts):
         entries = await failure_envelope(adapter.fetch_manifest, since=chunk_start, source=source)
         if entries:
-            result = await client.post_manifest_batch(entries)
+            result = await _post_manifest_chunks(client, entries)
             total_inserted += result.inserted
             logger.info(
                 "backfill chunk complete",
@@ -151,6 +273,9 @@ async def _scrape_adapter(
                 extra={"event": "backfill_cycle_start", "source": source.value},
             )
             await _run_backfill_chunks(adapter, client=client, source=source, now=now)
+        elif getattr(adapter, "walks_calendar_days", False):
+            await _scrape_arxiv_days(adapter, client, last_run, now)
+            return
         else:
             since = last_run
             if last_run is None and BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS is not None:
@@ -162,7 +287,7 @@ async def _scrape_adapter(
             )
             if not entries:
                 logger.warning("empty manifest fetch", extra={"source": source.value})
-            result = await client.post_manifest_batch(entries)
+            result = await _post_manifest_chunks(client, entries)
             logger.info(
                 "manifest batch posted",
                 extra={
@@ -199,5 +324,14 @@ async def _scrape_adapter(
             extra={
                 "source": source.value,
                 "http_status": exc.response.status_code,
+            },
+        )
+    except (httpx.TimeoutException, httpx.TransportError) as exc:
+        logger.error(
+            "state-worker request timed out",
+            extra={
+                "source": source.value,
+                "error": type(exc).__name__,
+                "event": "state_worker_error",
             },
         )

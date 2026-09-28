@@ -51,10 +51,30 @@ templates.env.globals["static_version"] = _static_asset_version()
 def _pct(count: int | float, total: int | float) -> float:
     if not total:
         return 0
-    return count / total * 100
+    return min(100.0, count / total * 100)
 
 
 templates.env.filters["pct"] = _pct
+
+
+def _funnel_count(stats: dict[str, Any] | None, label: str) -> int:
+    if not stats:
+        return 0
+    for item in stats.get("funnel") or []:
+        if isinstance(item, dict) and item.get("label") == label:
+            try:
+                return int(item.get("count") or 0)
+            except (TypeError, ValueError):
+                return 0
+    return 0
+
+
+def _parked_by_source(entries: list[dict[str, Any]]) -> list[tuple[str, int]]:
+    counts: dict[str, int] = {}
+    for row in entries:
+        source = str(row.get("source") or "(unset)")
+        counts[source] = counts.get(source, 0) + 1
+    return sorted(counts.items(), key=lambda item: (-item[1], item[0]))
 
 
 def _query_api_request(
@@ -72,7 +92,10 @@ def _query_api_request(
     headers = {"Content-Type": "application/json"} if data is not None else {}
     request = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        # Overview full-scans manifest through the Docker mount. While the
+        # pipeline is writing, that runs past 30s. A shorter wait becomes a
+        # raw 500 because TimeoutError is not a URLError.
+        with urllib.request.urlopen(request, timeout=90) as response:
             raw = response.read()
             status = response.status
     except urllib.error.HTTPError as exc:
@@ -82,6 +105,8 @@ def _query_api_request(
         except json.JSONDecodeError:
             payload = None
         return exc.code, payload
+    except TimeoutError:
+        return 504, None
     except urllib.error.URLError:
         return 502, None
 
@@ -132,6 +157,7 @@ def dashboard(request: Request) -> HTMLResponse:
 
     pass_rate = "—"
     in_flight = 0
+    in_queue = 0
     if stats is not None:
         decided = stats.get("pre_filter_decided", 0) or 0
         passed = stats.get("pre_filter_passed", 0) or 0
@@ -144,16 +170,120 @@ def dashboard(request: Request) -> HTMLResponse:
                 for item in queue
                 if isinstance(item, dict)
             )
+        in_queue = _funnel_count(stats, "Discovered") + _funnel_count(
+            stats, "Relevance queued"
+        )
 
     context = {
         "stats": stats,
         "error": error,
         "pass_rate": pass_rate,
         "in_flight": in_flight,
+        "in_queue": in_queue,
     }
     if request.headers.get("HX-Request"):
         return templates.TemplateResponse(request, "partials/dashboard_stats.html", context)
     return templates.TemplateResponse(request, "dashboard.html", context)
+
+
+@app.get("/harvest", response_class=HTMLResponse)
+def harvest_page(request: Request) -> HTMLResponse:
+    code, payload = _query_api_get("/stats/harvest")
+    stats: dict[str, Any] | None = None
+    error: str | None = None
+    if code == 200 and isinstance(payload, dict):
+        stats = payload
+    else:
+        error = f"query-api returned status {code}"
+        logger.warning(
+            "harvest upstream failure",
+            extra={"event": "ui_harvest_failed", "status": code},
+        )
+
+    context = {"stats": stats, "error": error}
+    if request.headers.get("HX-Request"):
+        return templates.TemplateResponse(request, "partials/harvest_stats.html", context)
+    return templates.TemplateResponse(request, "harvest.html", context)
+
+
+@app.get("/scrape", response_class=HTMLResponse)
+def scrape_page(request: Request) -> HTMLResponse:
+    code, payload = _query_api_get("/stats/scrape")
+    stats: dict[str, Any] | None = None
+    error: str | None = None
+    if code == 200 and isinstance(payload, dict):
+        stats = payload
+    else:
+        error = f"query-api returned status {code}"
+        logger.warning(
+            "scrape upstream failure",
+            extra={"event": "ui_scrape_failed", "status": code},
+        )
+
+    context = {"stats": stats, "error": error}
+    if request.headers.get("HX-Request"):
+        return templates.TemplateResponse(request, "partials/scrape_stats.html", context)
+    return templates.TemplateResponse(request, "scrape.html", context)
+
+
+@app.get("/today", response_class=HTMLResponse)
+def today_page(request: Request) -> HTMLResponse:
+    code, payload = _query_api_get("/stats/today")
+    stats: dict[str, Any] | None = None
+    error: str | None = None
+    if code == 200 and isinstance(payload, dict):
+        stats = payload
+    else:
+        error = f"query-api returned status {code}"
+        logger.warning(
+            "today upstream failure",
+            extra={"event": "ui_today_failed", "status": code},
+        )
+
+    context = {"stats": stats, "error": error}
+    if request.headers.get("HX-Request"):
+        return templates.TemplateResponse(request, "partials/today_stats.html", context)
+    return templates.TemplateResponse(request, "today.html", context)
+
+
+@app.get("/landed", response_class=HTMLResponse)
+def landed_page(
+    request: Request,
+    days: str = Query(default="7"),
+    source: str = Query(default=""),
+) -> HTMLResponse:
+    try:
+        days_n = max(1, int(days))
+    except ValueError:
+        days_n = 7
+    params: dict[str, str] = {"days": str(days_n)}
+    source_clean = source.strip()
+    if source_clean:
+        params["source"] = source_clean
+    code, payload = _query_api_get("/recent", params=params)
+    entries: list[dict[str, Any]] = []
+    error: str | None = None
+    if code == 200 and isinstance(payload, dict):
+        raw = payload.get("entries", [])
+        if isinstance(raw, list):
+            entries = raw
+    else:
+        error = f"query-api returned status {code}"
+        logger.warning(
+            "landed upstream failure",
+            extra={"event": "ui_landed_failed", "status": code},
+        )
+
+    return templates.TemplateResponse(
+        request,
+        "landed.html",
+        {
+            "entries": entries,
+            "error": error,
+            "days": str(days_n),
+            "source": source_clean,
+        },
+    )
 
 
 @app.get("/batches", response_class=HTMLResponse)
@@ -226,7 +356,12 @@ def parked_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request,
         "parked.html",
-        {"entries": entries, "error": error, "message": None},
+        {
+            "entries": entries,
+            "error": error,
+            "message": None,
+            "parked_by_source": _parked_by_source(entries),
+        },
     )
 
 
@@ -258,7 +393,12 @@ def parked_promote(request: Request, source_id: str) -> HTMLResponse:
     return templates.TemplateResponse(
         request,
         "parked.html",
-        {"entries": entries, "error": error, "message": message},
+        {
+            "entries": entries,
+            "error": error,
+            "message": message,
+            "parked_by_source": _parked_by_source(entries),
+        },
     )
 
 

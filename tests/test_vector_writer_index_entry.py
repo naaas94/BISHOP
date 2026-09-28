@@ -185,6 +185,25 @@ def test_index_entry_returns_false_when_indexed_signal_fails_after_stores() -> N
     state_client.post_failed.assert_not_awaited()
 
 
+def test_index_entry_returns_false_when_indexed_signal_times_out() -> None:
+    """A read timeout after the stores are written must not kill the caller."""
+    index_mod, models, client_mod = _load_index_entry_stack()
+    entry = _sample_entry(models)
+    stores = _mock_stores(index_mod)
+    state_client = MagicMock(spec=client_mod.StateWorkerClient)
+    request = httpx.Request("POST", "http://test/entries/indexed")
+    state_client.post_indexed = AsyncMock(
+        side_effect=httpx.ReadTimeout("timed out", request=request),
+    )
+    state_client.post_failed = AsyncMock()
+
+    async def _run() -> bool:
+        return await index_mod.index_entry(entry, stores, state_client)
+
+    assert asyncio.run(_run()) is False
+    state_client.post_failed.assert_not_awaited()
+
+
 @pytest.fixture
 def bm25_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     root = tmp_path / "bm25"

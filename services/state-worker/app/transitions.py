@@ -846,7 +846,20 @@ async def _apply_pre_filter_results_inner(
                 },
             )
             continue
-        _guard_terminal(manifest.processing_state, item.source_id)
+        if manifest.processing_state in TERMINAL_STATES:
+            # A row already rejected, indexed, or permanently failed must not
+            # 409 the whole POST. The poller retries any non-2xx forever, and
+            # one terminal id was keeping finished batches in that loop.
+            logger.info(
+                "pre-filter result skipped; row already terminal",
+                extra={
+                    "source_id": item.source_id,
+                    "batch_id": batch_id,
+                    "processing_state": manifest.processing_state.value,
+                    "event": "pre_filter_result_terminal",
+                },
+            )
+            continue
 
         if manifest.processing_state == ProcessingState.RELEVANCE_QUEUED:
             target = _pre_filter_target(item)
@@ -1320,24 +1333,36 @@ async def _record_enrichment_failure(
 
 
 async def mark_indexed(conn: aiosqlite.Connection, source_id: str) -> None:
+    """Move VECTOR_WRITE_QUEUED to INDEXED.
+
+    BEGIN IMMEDIATE takes the WAL write lock before the first UPDATE. A deferred
+    transaction upgrades on that UPDATE and SQLite returns SQLITE_BUSY without
+    honouring busy_timeout.
+    """
     _prepare_conn(conn)
-    entry = await _fetch_entry(conn, source_id)
-    if entry is None:
-        raise NotFoundError(source_id)
-    if entry.processing_state == ProcessingState.INDEXED:
-        logger.warning(
-            "mark_indexed idempotent no-op",
-            extra={"source_id": source_id},
-        )
-        return
-    if entry.processing_state != ProcessingState.VECTOR_WRITE_QUEUED:
-        raise InvalidTransitionError(
-            source_id,
-            entry.processing_state.value,
-            ProcessingState.INDEXED.value,
-        )
-    await _sync_pipeline_state(conn, source_id, ProcessingState.INDEXED)
-    await conn.commit()
+    await conn.execute("BEGIN IMMEDIATE")
+    try:
+        entry = await _fetch_entry(conn, source_id)
+        if entry is None:
+            raise NotFoundError(source_id)
+        if entry.processing_state == ProcessingState.INDEXED:
+            logger.warning(
+                "mark_indexed idempotent no-op",
+                extra={"source_id": source_id},
+            )
+            await conn.rollback()
+            return
+        if entry.processing_state != ProcessingState.VECTOR_WRITE_QUEUED:
+            raise InvalidTransitionError(
+                source_id,
+                entry.processing_state.value,
+                ProcessingState.INDEXED.value,
+            )
+        await _sync_pipeline_state(conn, source_id, ProcessingState.INDEXED)
+        await conn.commit()
+    except Exception:
+        await conn.rollback()
+        raise
 
 
 async def record_failure(

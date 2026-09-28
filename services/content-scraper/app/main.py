@@ -17,7 +17,13 @@ async def run_scheduler() -> None:
     client = StateWorkerClient()
     try:
         while True:
-            await content_scrape_cycle(state_client=client)
+            try:
+                await content_scrape_cycle(state_client=client)
+            except Exception:
+                logger.exception(
+                    "content scrape cycle failed",
+                    extra={"event": "content_scrape_cycle_failed"},
+                )
             await asyncio.sleep(CONTENT_SCRAPE_POLL_INTERVAL_SEC)
     finally:
         await client.aclose()

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import re
+import ssl
 from datetime import UTC, datetime, timedelta
 from html.parser import HTMLParser
 from xml.etree import ElementTree as ET
@@ -16,6 +18,7 @@ from bishop_shared.source_config import SourceCategoryConfig, load_source_config
 
 from app.adapters.base import SourceAdapter
 from app.config import ARXIV_BACKFILL_WINDOW_DAYS, ARXIV_CATEGORIES
+from app.exceptions import PermanentFailureError
 from app.models import ManifestIngestEntry
 from app.rate_limit import SOURCE_RATE_LIMITS, TokenBucketRateLimiter
 
@@ -31,6 +34,19 @@ ARXIV_SCHEMA_NS = "http://arxiv.org/schemas/atom"
 _ARXIV = f"{{{ARXIV_SCHEMA_NS}}}"
 
 CATEGORY_GATE_EVENT = "arxiv_category_gate"
+
+# export.arxiv.org sits behind Fastly. OpenSSL 3.5's default handshake (the
+# scraper image) is answered with an empty 406 and never reaches arXiv.
+# Capping this client at TLS 1.2 is what Fastly forwards. Other adapters stay
+# on the default handshake.
+ARXIV_INTER_PAGE_DELAY_SEC = 3.0
+# export API will not return past this many hits for one query. A window that
+# is still full here must not look finished — the scrape loop would stamp the
+# cursor to now and drop the tail.
+ARXIV_EXPORT_RESULT_CAP = 30_000
+
+OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/"
+_OPENSEARCH = f"{{{OPENSEARCH_NS}}}"
 
 _ARXIV_ID_VERSION_RE = re.compile(r"^(.+?)v\d+$")
 
@@ -173,6 +189,27 @@ def parse_atom_feed(xml: bytes | str, *, adapter: SourceAdapter) -> list[Manifes
     return [entry for entry, _category in parse_atom_feed_with_categories(xml, adapter=adapter)]
 
 
+def export_feed_bounds(xml: bytes | str) -> tuple[int, int | None]:
+    """Raw Atom entry count and ``opensearch:totalResults``, if the feed has it.
+
+    Pagination stops on the raw entry count. The category gate runs later, so a
+    page that the gate would shrink must not look like the last page.
+    """
+    root = ET.fromstring(xml)
+    entry_count = len(root.findall(f"{_ATOM}entry"))
+    total_el = root.find(f"{_OPENSEARCH}totalResults")
+    if total_el is None or not total_el.text or not total_el.text.strip().isdigit():
+        return entry_count, None
+    return entry_count, int(total_el.text.strip())
+
+
+def arxiv_export_ssl_context() -> ssl.SSLContext:
+    """SSL context Fastly will forward to the export API."""
+    ctx = httpx.create_ssl_context()
+    ctx.maximum_version = ssl.TLSVersion.TLSv1_2
+    return ctx
+
+
 def apply_category_gate(
     pairs: list[tuple[ManifestIngestEntry, str | None]],
     config: SourceCategoryConfig | None,
@@ -264,6 +301,10 @@ class ArxivAdapter(SourceAdapter):
     source = SourceEnum.ARXIV
     domain = DomainEnum.PROFESSIONAL
     rate_limit = SOURCE_RATE_LIMITS[SourceEnum.ARXIV.value]
+    # Scrape loop walks one UTC calendar day at a time and stamps the end of
+    # that day. A single fetch through "now" would skip every day it did not
+    # finish and leave the cursor on today.
+    walks_calendar_days = True
 
     def __init__(self, http_client: httpx.AsyncClient | None = None) -> None:
         self._http_client = http_client
@@ -273,25 +314,83 @@ class ArxivAdapter(SourceAdapter):
     async def fetch_manifest(
         self,
         since: datetime | None = None,
+        *,
+        until: datetime | None = None,
     ) -> list[ManifestIngestEntry]:
         now = datetime.now(UTC)
         effective_since = resolve_effective_since(since, now=now)
-        search_query = build_search_query(ARXIV_CATEGORIES, effective_since, now)
-        params = {
-            "search_query": search_query,
-            "max_results": _max_results_from_env(),
-        }
+        effective_until = until if until is not None else now
+        search_query = build_search_query(
+            ARXIV_CATEGORIES,
+            effective_since,
+            effective_until,
+        )
+        page_size = _max_results_from_env()
 
-        client = self._http_client or httpx.AsyncClient()
+        client = self._http_client or httpx.AsyncClient(
+            verify=arxiv_export_ssl_context(),
+            timeout=httpx.Timeout(60.0),
+        )
         try:
-            await self._rate_limiter.acquire()
-            response = await client.get(ARXIV_EXPORT_API_URL, params=params)
-            response.raise_for_status()
-            pairs = parse_atom_feed_with_categories(response.content, adapter=self)
+            pairs = await self._page_export(client, search_query, page_size)
             return self._gate_by_category(pairs)
         finally:
             if self._owns_client:
                 await client.aclose()
+
+    async def _page_export(
+        self,
+        client: httpx.AsyncClient,
+        search_query: str,
+        page_size: int,
+    ) -> list[tuple[ManifestIngestEntry, str | None]]:
+        """Read every page of one submittedDate window before returning.
+
+        A later-page failure raises, so the scrape loop does not stamp
+        ``last_successful_run_at``. Pages are submittedDate-ascending so the
+        offset does not shuffle. arXiv asks for about 3s between export calls.
+        """
+        start = 0
+        seen: set[str] = set()
+        collected: list[tuple[ManifestIngestEntry, str | None]] = []
+        while True:
+            if start > 0 and ARXIV_INTER_PAGE_DELAY_SEC > 0:
+                await asyncio.sleep(ARXIV_INTER_PAGE_DELAY_SEC)
+            await self._rate_limiter.acquire()
+            response = await client.get(
+                ARXIV_EXPORT_API_URL,
+                params={
+                    "search_query": search_query,
+                    "start": start,
+                    "max_results": page_size,
+                    "sortBy": "submittedDate",
+                    "sortOrder": "ascending",
+                },
+            )
+            response.raise_for_status()
+            entry_count, total = export_feed_bounds(response.content)
+            for pair in parse_atom_feed_with_categories(response.content, adapter=self):
+                source_id = pair[0].source_id
+                if source_id in seen:
+                    continue
+                seen.add(source_id)
+                collected.append(pair)
+            next_start = start + page_size
+            if entry_count < page_size:
+                return collected
+            if total is not None and next_start >= total:
+                return collected
+            if next_start >= ARXIV_EXPORT_RESULT_CAP:
+                raise PermanentFailureError(
+                    self.source,
+                    None,
+                    RuntimeError(
+                        "arxiv export window exceeds "
+                        f"{ARXIV_EXPORT_RESULT_CAP} results "
+                        f"(fetched through start={start}, total={total})"
+                    ),
+                )
+            start = next_start
 
     def _gate_by_category(
         self,

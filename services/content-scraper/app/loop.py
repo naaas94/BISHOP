@@ -47,6 +47,12 @@ async def content_scrape_cycle(state_client: StateWorkerClient | None = None) ->
                 },
             )
             return
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            logger.error(
+                "state-worker poll failed",
+                extra={"error": type(exc).__name__, "event": "state_worker_error"},
+            )
+            return
 
         if not poll.entries:
             logger.info(
@@ -91,6 +97,17 @@ async def _process_entry(entry: ManifestPollEntry, state_client: StateWorkerClie
                 },
             )
             return
+        except (httpx.TimeoutException, httpx.TransportError) as post_exc:
+            logger.error(
+                "state-worker failed POST error",
+                extra={
+                    "source_id": entry.source_id,
+                    "source": entry.source.value,
+                    "error": type(post_exc).__name__,
+                    "event": "state_worker_error",
+                },
+            )
+            return
         logger.error(
             "content scrape failed",
             extra={
@@ -122,6 +139,17 @@ async def _process_entry(entry: ManifestPollEntry, state_client: StateWorkerClie
                 "source_id": entry.source_id,
                 "source": entry.source.value,
                 "http_status": exc.response.status_code,
+                "event": "state_worker_error",
+            },
+        )
+        return
+    except (httpx.TimeoutException, httpx.TransportError) as exc:
+        logger.error(
+            "state-worker content POST error",
+            extra={
+                "source_id": entry.source_id,
+                "source": entry.source.value,
+                "error": type(exc).__name__,
                 "event": "state_worker_error",
             },
         )

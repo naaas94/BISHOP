@@ -59,6 +59,25 @@ def remaining_slots(*, n_cap: int, released_today: int, github_in_queue: int) ->
     return max(0, min(from_budget, from_queue))
 
 
+def modeled_usd(*, count: int, blended: float) -> float:
+    """Pinned blend times a row count. Never negative."""
+    if count <= 0 or blended <= 0:
+        return 0.0
+    return count * blended
+
+
+def days_to_drain(*, unreleased: int, n_cap: int) -> int | None:
+    """Calendar days to empty the current unreleased set if the mill adds nothing.
+
+    ``None`` when the tap is killed (``n_cap == 0``).
+    """
+    if n_cap <= 0:
+        return None
+    if unreleased <= 0:
+        return 0
+    return math.ceil(unreleased / n_cap)
+
+
 def economics_yaml_path() -> Path:
     raw = os.environ.get("BISHOP_HARVEST_ECONOMICS_PATH")
     if raw:

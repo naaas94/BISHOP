@@ -5,6 +5,298 @@
 schema_version: 1
 
 incidents:
+  - id: 2026-09-27-sqlite-claim-lock
+    status: resolved
+    severity: sev2
+    started_at: "2026-09-27T18:15:40-03:00"
+    detected_at: "2026-09-27T21:29:00-03:00"
+    resolved_at: "2026-09-27T21:48:00-03:00"
+    title: Claim polls hold the SQLite write lock; scraper and pre-filter exited
+    summary: >
+      Scraper and pre-filter are exited. Both died on httpx.ReadTimeout
+      against state-worker. Claim polls take the WAL write lock and then
+      full-scan manifest or entries. Inside the container those scans take
+      5.4–8.9s even when they match nothing. The busy timeout is 5s, so
+      every overlapping writer gets "database is locked", and the 5s client
+      timeout kills any worker that does not catch it. The GitHub mill
+      stopped with the scraper. Three older pre-filter batches are still
+      409-retrying because their rows are already rejected.
+    what_we_were_doing:
+      - Operator said an incident looked active and asked for docker logs, a root cause, registry notes, and a remediation plan for approval.
+      - Read compose status, the two exit tracebacks, state-worker logs for the last 8h, and the live sqlite file read-only.
+    what_happened:
+      exits:
+        - scraper exited 1 at 2026-09-27T21:15:40Z. Traceback is httpx.ReadTimeout in post_scraper_state, during the 6h tick, after POST /manifest/batch 200 for github. _scrape_loop does not catch it. The mill and release loops do.
+        - pre-filter exited 1 at 2026-09-27T23:22:30Z. Poll timeouts were caught and logged. register_batch is only wrapped for HTTPStatusError. The timeout hit after Anthropic POST /v1/messages/batches 200.
+      lock:
+        - 307 "database is locked" lines in 8h, still about 1–2 per minute after both exits. No sqlite_pool_rollback log. quick_check ok. /health/db 200.
+        - Waiters: claim_entries_poll 169, apply_pre_filter_results 72, claim_manifest_poll 24, register_batch 11.
+        - HTTP in that window: 550x 409 and 58x 500 on /manifest/pre-filter-results, 140x 500 on /entries/poll, 49x 503 on /entries/indexed, 9x 500 on /batches.
+      scans:
+        - No index on processing_state. EXPLAIN is SCAN plus a temp B-tree.
+        - Host, manifest DISCOVERED, 0.08s. Container, same query, 6.06s. Container RELEVANCE_PASSED (0 rows) 5.45s. Container entries SCRAPED (0 rows) 8.91s.
+        - SQLITE_BUSY_TIMEOUT_MS is 5000. Scraper and pre-filter httpx clients use the default 5s timeout. Content, enrichment, and vector-writer were already raised to 60s and stayed up.
+      stuck_batches:
+        - 0de20a4f-1872-4a8e-aa15-d8c02b3c280d processing since 2026-09-26T23:45:58Z
+        - b182fa76-177a-4e76-aba7-6881c283a7d5 submitted since 2026-09-27T02:23:30Z
+        - fcdebb59-bded-4913-ad05-77582ebb3fe3 processing since 2026-09-27T02:54:02Z
+        - 150/150 source ids are RELEVANCE_REJECTED under a different pre_filter_batch_id. _guard_terminal returns 409 terminal_state. The poller only settles invalid_transition. 689 "results post failed" in 8h, still going at 00:33Z. Interval 120s.
+    impact:
+      - Incremental scrape and the GitHub mill stopped at 21:15Z. Harvest cursor updated_at 2026-09-27T21:15:18Z, walk_direction forward.
+      - github, huggingface, lesswrong, openreview, paperswithcode cursors remain 2026-09-27T15:15Z. The died tick had posted the github page and not stamped.
+      - Arxiv cursor is 2026-09-27T23:59:59Z from the day walk. Semantic Scholar remains 2026-09-20 (FU-005).
+      - Gate 1 stopped at 23:22Z. 5696 rows in DISCOVERED. RELEVANCE_QUEUED is 0. RELEVANCE_PASSED is 0. One entry in VECTOR_WRITE_QUEUED.
+      - One Anthropic pre-filter batch was accepted and never registered. External id was not logged. Newest registered pre-filter complete is 2026-09-27T23:20:14Z.
+      - Enrichment still completed batches through 23:33Z.
+    root_cause:
+      class: code
+      confidence: high
+      statement: >
+        Claim polls hold the single WAL writer across a full-table scan that
+        takes longer than the 5s busy timeout on the Docker bind mount, so
+        overlapping writers fail with database is locked. The scraper and
+        pre-filter clients time out at that same 5s and do not catch
+        ReadTimeout, so those processes exit and the mill exits with the
+        scraper. Separately, pre-filter results for an already-rejected row
+        409 as terminal_state, and the poller retries that forever.
+      ruled_out:
+        - integrity failure (quick_check ok)
+        - the 2026-09-11 pool leak (no rollback-on-release log, health stayed 200)
+        - an empty queue being the reason the lock is held (0-row scans were 5.4s and 8.9s)
+    how_it_was_fixed:
+      indexes:
+        - Alembic m8_002_claim_poll_indexes. manifest(processing_state, discovered_at) and entries(processing_state, ingested_at).
+        - Recreated bishop/state-worker:m1. alembic_version is m8_002_claim_poll_indexes.
+        - Same three queries inside the container, after the index: DISCOVERED 0.009s (was 6.06s), RELEVANCE_PASSED 0.001s (was 5.45s), entries SCRAPED 0.046s (was 8.91s). EXPLAIN is SEARCH USING INDEX. Zero "database is locked" in the first two minutes after the workers came back.
+      workers:
+        - Scrape loop and each adapter catch TimeoutException and TransportError. Pre-filter register_batch does too, and logs the external batch id.
+        - Scraper and pre-filter state-worker clients wait 60s.
+        - Rebuilt bishop/scraper:m8, bishop/pre-filter-worker:m3, bishop/batch-poller:m5 and started them with --no-deps.
+        - Scraper stamped arXiv 2026-09-28 (empty day, POST scraper-state 204) and moved on to GitHub. Pre-filter registered a batch 201. Harvest release tick ran. All three stayed up.
+      stuck_batches:
+        - Stopped batch-poller, then PATCH /batches/{id} status=failed on the three ids. patch_batch does not move manifest. Sample row github:rafaelgreca/e2e-mlops-project stayed RELEVANCE_REJECTED under batch 4f0ce857, decision 0.
+        - Poller treats 409 terminal_state like invalid_transition and marks the batch failed. apply_pre_filter_results skips a terminal row and still returns 200 for the rest of the batch.
+        - After restart the poller startup scan did not reload the three failed batches. Status still failed.
+    resolution:
+      - claim polls use the new indexes; in-container scans are under 0.05s
+      - scraper and pre-filter survive a state-worker read timeout and use a 60s client
+      - terminal pre-filter rows no longer fail the whole results POST; the poller stops on terminal_state
+      - the three stuck batches are failed; their manifest rows were already rejected by other batches
+      - scraper, pre-filter, and batch-poller are up
+    follow_ups:
+      - id: FU-008
+        item: >
+          Index manifest(processing_state, discovered_at) and
+          entries(processing_state, ingested_at). Re-time the claim queries
+          inside the container. Target well under 1s.
+        status: done
+      - id: FU-009
+        item: >
+          Catch TimeoutException and TransportError on scrape_cycle and
+          register_batch. Raise those two state-worker clients to 60s.
+          Then start scraper and pre-filter.
+        status: done
+      - id: FU-010
+        item: >
+          Skip already-terminal pre-filter rows instead of 409ing the whole
+          batch, and stop the poller on terminal_state. The three open batch
+          ids were patched to failed. patch_batch does not move manifest.
+        status: done
+    related:
+      - .dev/decision-logs/ops/2026-09-27-sqlite-claim-lock.md
+      - .dev/sqlite.md
+      - services/state-worker/app/transitions.py
+      - services/state-worker/app/db.py
+      - services/scraper/app/main.py
+      - services/pre-filter-worker/app/loop.py
+      - services/batch-poller/app/loop.py
+      - bishop_shared/constants.py
+
+  - id: 2026-09-27-arxiv-stuck-and-workers-down
+    status: resolved
+    severity: sev2
+    started_at: "2026-09-17T11:20:27-03:00"
+    detected_at: "2026-09-27T09:05:00-03:00"
+    resolved_at: "2026-09-27T12:34:00-03:00"
+    title: arXiv cursor frozen, then jumped; pre-filter, content scraper, and enrichment exited
+    summary: >
+      Operator asked why /scrape showed arXiv 237.7h behind and whether the
+      missing days had simply not been started. The cursor was frozen because
+      Fastly refused the scraper image's default TLS handshake. The first fix
+      paged that window and stamped now, which skipped every earlier overlay
+      day that only had a 100-paper page. Pre-filter, content scraper, and
+      enrichment had all exited on an uncaught state-worker read timeout, so
+      nothing judged or scraped the new rows. The walk was changed to one
+      finished UTC day at a time. The three workers were brought back and a
+      poll or post timeout no longer kills the process.
+    what_we_were_doing:
+      - Operator looked at /scrape. Headline was 237.7h behind (arxiv). today 0, queue 0. Last success 2026-09-17T14:20:27Z. GitHub, Hugging Face, LessWrong, and OpenReview were about 2h behind. Semantic Scholar was 159h. Papers with Code is dead and does not set the headline.
+      - Asked whether something was wrong with arXiv and whether the missing or pending days had not been started. Read only.
+      - Then asked for a clearer cause and a fix, then to implement it and document it.
+      - After the first rebuild, said no calls had been made and the point was to scrape every day, not skip a day or jump the cursor ahead.
+      - Then said content scraper and enrichment were still down.
+    what_happened:
+      arxiv_cursor:
+        - last_successful_run_at stayed 2026-09-17T14:20:27Z. updated_at matched it. The row was not being touched.
+        - Newest arXiv paper in sqlite_live was published 2026-09-15T17:55:28Z and discovered 2026-09-16. Nothing was in DISCOVERED or RELEVANCE_QUEUED for arxiv. The gap was undiscovered, not queued.
+        - There is no arXiv backlog job. Backfill runs only when the cursor is empty. With a cursor, each tick asks submittedDate from that stamp through end of today.
+        - The 10:07 UTC scrape tick did call export.arxiv.org. Fastly answered 406 with an empty body. via was varnish only, no Google hop. 406 is not retried (not in 429/500/502/503/504) and is not escalated, so failure_envelope raised PermanentFailureError and the loop did not POST scraper state.
+        - Same public IP and same Fastly address from the Windows host (OpenSSL 3.0) returned 200 and totalResults 2211 for 17-27 Sep. Inside bishop-scraper-1 (python:3.12-slim, OpenSSL 3.5, httpx default SSL context) a fresh date window 406'd. The same context capped at TLS 1.2 was a cache miss that reached arXiv and returned 200. A custom User-Agent did not clear the 406. A Fastly cache hit also returned 200, which is a false healthy.
+        - Before that fix, fetch_manifest sent one request, max_results 100, no start offset. On success the loop stamped now. A green tick would have saved one page and dropped the other ~2100.
+      first_fix_was_a_jump:
+        - TLS 1.2 client, paging start=0,100,... until a short page or totalResults, 3s between pages, manifest POSTs in chunks of 100, then stamp now.
+        - Rebuild of bishop/scraper:m8 at about 09:21 ART also recreated state-worker (compose dependency). Startup cycle paged start=0 through start=2200, all 200.
+        - Inserted 2211 DISCOVERED rows. published_at ran 17 Sep through 24 Sep and summed to 2211. 25-27 Sep are totalResults 0 on the API.
+        - Cursor became 2026-09-27T12:21:08Z. That is midday, so the next tick would only look at today and would never go back.
+        - Earlier overlay days were still samples from the old 100 cap. Checked against the API: 2026-07-29 was 2 stored of 343, 2026-09-09 was 104 of 307, 2026-09-15 was 100 of 332, 2026-09-16 was 0 of 338.
+      no_calls:
+        - bishop-pre-filter-worker-1 had exited (1) about 4h earlier on httpx.ReadTimeout in poll_discovered_manifest. The scheduler does not catch that, so the process ended. The 2211 rows sat in DISCOVERED. No Anthropic batch was submitted after the catch-up.
+        - bishop-content-scraper-1 had exited (1) about 9h earlier, same ReadTimeout, on poll_relevance_passed.
+        - bishop-enrichment-batcher-1 had exited (1) about 10h earlier, same ReadTimeout, on poll_stage2_queued_entries. Stage 1 and stage 2 run in one gather, so one uncaught timeout takes both calls down.
+      content_scraper_died_again:
+        - After the poll timeout was caught and the image rebuilt, the first start still exited (1). Poll had succeeded. post_content to state-worker then ReadTimeout'd (default httpx timeout is 5s) while state-worker was busy with the day walk. That exception was only caught for HTTPStatusError, so the process ended again.
+        - Enrichment's poll catch held. It logged state-worker poll failed for stage 1 and stayed up. Stage 2 got an empty 200.
+    how_it_was_fixed:
+      tls_and_paging:
+        - arxiv_export_ssl_context caps the export client at TLS 1.2. Other adapters stay on the default handshake.
+        - _page_export sends start, max_results, sortBy=submittedDate, sortOrder=ascending. Stop uses the raw Atom entry count, then the category gate runs once. 3s between pages. A window still full at 30000 results raises and does not stamp.
+        - Manifest posts over 100 rows are chunked so one body does not die on the 5s state-worker client.
+      day_walk:
+        - ArxivAdapter.walks_calendar_days. The scrape loop no longer fetches from the cursor through now and stamps now.
+        - A cursor at 23:59:59 means that UTC day is finished. The next day is the one after.
+        - Any earlier timestamp is a jump. The walk restarts at the overlay floor (BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS, live 60, so 2026-07-29 on this date).
+        - Each day is paged, posted, then stamped 23:59:59 of that day. A failed day does not stamp. An empty API day still stamps, so 25-27 Sep do not stall the walk.
+        - Live check after the walk: cursor is 2026-09-27T23:59:59Z. 2026-07-29 in the DB is 343, matching the API total for that day.
+      workers:
+        - Pre-filter, content scraper, and both enrichment polls catch httpx.TimeoutException and TransportError, log state_worker_error, and return. The scheduler loop continues.
+        - Content scraper also catches that pair on post_content and post_failed, per entry, so one slow post does not drop the rest of the batch or exit.
+        - Content scraper and enrichment state-worker clients use a 60s timeout instead of httpx's 5s default.
+        - Content scraper and enrichment schedulers catch an unexpected cycle exception, log it, and sleep into the next tick.
+        - Rebuilt and started with docker compose up -d --build --no-deps so state-worker was not recreated again under the day walk.
+        - Confirmed content scraper posting /entries/content 200 and completing cycles. Enrichment stage 1 polled SCRAPED, posted a messages batch 200, and registered the batch 201. Stage 2 poll was empty, which is the queue being empty, not the process being down.
+    impact:
+      - arXiv incremental discover stopped 2026-09-17. Papers submitted after 2026-09-15 were absent until the 12:21 UTC page.
+      - Overlay days from 2026-07-29 through 2026-09-16 stayed partial (about 100 or fewer stored against ~300 on the API) until the day walk.
+      - First fix inserted 2211 DISCOVERED rows and then no Gate 1 calls ran, because pre-filter was already dead.
+      - Content scrape and Call 1 / Call 2 were down from the read-timeout exits (~10h and ~9h before the 12:28 ART report) until the restarts.
+      - Category gate is still enforce false, so the full export pages were posted and are what Gate 1 judges. Rough cost of the overlay fill is several dollars of Haiku at the ~$0.00046/row observed on 2026-09-27, outside N_cap.
+      - Semantic Scholar was not this incident. Cursor still 2026-09-20T20:45:29Z. The 10:07 UTC and later ticks got 429.
+    timeline:
+      - at: "2026-09-17T11:20:27-03:00"
+        event: last successful arXiv scrape. Cursor frozen after that.
+      - at: "2026-09-22T00:00:00-03:00"
+        event: machine off through 25 Sep. Cursor was already frozen before this.
+      - at: "2026-09-27T07:07:56-03:00"
+        event: scrape tick. export.arxiv.org 406 empty. Permanent adapter failure. Other live sources stamped. Semantic Scholar 429.
+      - at: "2026-09-27T09:05:00-03:00"
+        event: operator asked if arXiv was wrong and if the backlog had not been started. Read-only diagnosis.
+      - at: "2026-09-27T09:21:00-03:00"
+        event: first scraper rebuild. Paged 17-27 Sep, inserted 2211, stamped cursor 2026-09-27T12:21:08Z. State-worker recreated as a compose dependency and came back healthy.
+      - at: "2026-09-27T11:56:00-03:00"
+        event: operator said no calls since the change, and not to skip a day or jump ahead.
+      - at: "2026-09-27T12:02:00-03:00"
+        event: day walk started at 2026-07-29. Pre-filter rebuilt and a batch registered 2026-09-27T15:02:13Z. 29 Jul stored count became 343.
+      - at: "2026-09-27T12:28:00-03:00"
+        event: content scraper and enrichment still Exited (1), both last traceback httpx.ReadTimeout on poll.
+      - at: "2026-09-27T12:31:00-03:00"
+        event: content scraper restarted and exited again. This time post_content ReadTimeout. Enrichment stayed up and logged the stage1 poll failure.
+      - at: "2026-09-27T12:33:00-03:00"
+        event: both restarted with 60s client timeout and cycle-level catch. Content posts 200. Enrichment Call 1 batch 200 and register 201.
+      - at: "2026-09-27T12:34:00-03:00"
+        event: arXiv cursor read back as 2026-09-27T23:59:59Z. Day walk has finished today. All four workers Up.
+      - at: "2026-09-27T12:40:00-03:00"
+        event: >
+          /dashboard showed Internal Server Error. /stats/overview was taking
+          ~34-40s (manifest scans through the Docker mount while the pipeline
+          writes). The UI client gave up at 30s. TimeoutError is not a
+          URLError, so it escaped and FastAPI rendered a raw 500. UI wait
+          raised to 90s and that timeout now returns an error slot instead
+          of a 500. A reload then returned 200 in 40s with the dashboard body.
+    evidence:
+      live_db: C:/Users/Ale/bishop_data/sqlite_live/bishop.db
+      stale_db_do_not_use: C:/Users/Ale/bishop_data/sqlite/bishop.db
+      scrape_page: "237.7h Behind (arxiv); today 0; queue 0; pin 60d; tick 21600s"
+      failing_request: "GET https://export.arxiv.org/api/query search_query=(cat:cs.AI OR cat:cs.CL OR cat:cs.LG) AND submittedDate:[20260917000000 TO 20260927235959]&max_results=100 -> 406 empty, via varnish only"
+      tls_proof: "container httpx.create_ssl_context() fresh window 406; same context maximum_version TLS 1.2 fresh window 200 x-cache MISS via google"
+      api_vs_db_before_day_walk:
+        "2026-07-29": "api 343, db 2"
+        "2026-09-09": "api 307, db 104"
+        "2026-09-15": "api 332, db 100"
+        "2026-09-16": "api 338, db 0"
+        "2026-09-25..27": "api 0"
+      after_day_walk:
+        cursor: "2026-09-27T23:59:59Z"
+        "2026-07-29_db": 343
+      worker_exits:
+        pre-filter: "Exited (1) ReadTimeout poll_discovered_manifest"
+        content-scraper: "Exited (1) ReadTimeout poll_relevance_passed, then again on post_content"
+        enrichment-batcher: "Exited (1) ReadTimeout poll_stage2_queued_entries"
+      images:
+        scraper: bishop/scraper:m8
+        pre-filter: bishop/pre-filter-worker:m3
+        content-scraper: bishop/content-scraper:m4
+        enrichment: bishop/enrichment-batcher:m5
+      non_incidents:
+        - Papers with Code stays dead and does not set the scrape headline
+        - Semantic Scholar 429, cursor still 2026-09-20. Not changed here
+        - OpenReview retry-exhausted on the 12:21 UTC startup cycle and stayed on 10:07 UTC, still inside one 6h tick
+        - 25-27 Sep arXiv totalResults 0. Empty days, not a skipped page
+    root_cause:
+      class: code-and-edge
+      confidence: high
+      statement: >
+        Two separate faults. Fastly in front of export.arxiv.org rejects the
+        OpenSSL 3.5 default handshake from python:3.12-slim with an empty 406
+        and never forwards the request. The scraper treated 406 as permanent
+        and only stamps the cursor after a successful fetch, so arXiv sat on
+        17 Sep while the other adapters kept moving. The fetch itself was one
+        page of 100 and then a stamp of now, so even a success skipped the
+        rest of the window; the first patched success did that with a full
+        page of 17-24 Sep and left the partial overlay days behind the cursor.
+        Independently, pre-filter, content scraper, and enrichment let
+        httpx.ReadTimeout escape the scheduler, so a slow state-worker poll
+        or content post exited the container and no further calls ran.
+      not:
+        - an empty queue of papers waiting to be scraped
+        - the GitHub mill walking backward (different cursor, different database)
+        - a dead arXiv API (host and TLS 1.2 both got 200)
+        - a missing User-Agent (custom UA still 406 on a cache miss)
+    resolution:
+      - export client pinned to TLS 1.2; full-window paging kept for each calendar day
+      - day walk from the 60-day floor when the cursor is not 23:59:59; stamp the end of each finished day only
+      - pre-filter, content scraper, and enrichment catch poll timeouts; content scraper also catches post timeouts; both content and enrichment clients wait 60s; their schedulers survive an unexpected cycle error
+      - workers restarted without recreating state-worker
+      - cursor verified at end of 2026-09-27; 29 Jul count matches the API; content posts and a Call 1 batch observed
+    follow_ups:
+      - id: FU-005
+        item: >
+          Semantic Scholar cursor is still 2026-09-20. Ticks get 429 and the
+          scrape headline will stay on that source. Same one-shot limit=100
+          shape as the old arXiv fetch. Not fixed in this incident.
+        status: open
+      - id: FU-006
+        item: >
+          Days older than the live 60-day overlay (before 2026-07-29) are
+          still the old partial samples. The day walk does not go back past
+          the overlay floor.
+        status: open
+      - id: FU-007
+        item: >
+          config/sources/arxiv.yaml enforce is still false. The day walk
+          posts every export hit, including primaries the exclude list would
+          drop. Gate 1 pays for those rows.
+        status: open
+    related:
+      - .dev/decision-logs/ops/2026-09-27-arxiv-export-stuck.md
+      - config/source-notes/arxiv.md
+      - .dev/ui/scrape.md
+      - services/scraper/app/adapters/arxiv.py
+      - services/scraper/app/loop.py
+      - services/pre-filter-worker/app/loop.py
+      - services/content-scraper/app/loop.py
+      - services/enrichment-batcher/app/stage1_loop.py
+      - services/enrichment-batcher/app/stage2_loop.py
+
   - id: 2026-09-12-state-worker-compose-up-exit-3
     status: resolved
     severity: sev2

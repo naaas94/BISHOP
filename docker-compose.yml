@@ -116,6 +116,7 @@ services:
       context: .
       dockerfile: services/vector-writer/Dockerfile
     image: bishop/vector-writer:m6
+    restart: unless-stopped
     stop_grace_period: 30s
     networks:
       - bishop-internal
@@ -147,6 +148,9 @@ services:
     environment:
       STATE_WORKER_URL: http://state-worker:8000
       BISHOP_HARVEST_DAILY_BUDGET_USD: ${BISHOP_HARVEST_DAILY_BUDGET_USD:-2}
+      BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC: ${BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC:-21600}
+      BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS: ${BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS:-60}
+      BISHOP_BACKFILL_ENABLED: ${BISHOP_BACKFILL_ENABLED:-0}
     ports:
       - "${QUERY_API_HOST_PORT}:8000"
     depends_on:

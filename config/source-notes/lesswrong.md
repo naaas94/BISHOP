@@ -20,6 +20,10 @@ No LW stamp set yet. Park more readily than you would a paper: the title cannot 
 
 - Thin live sample. Do not tune the shared rubric from two LW titles.
 
+## Intel — 2026-09-27 cohort
+
+Discovered 2026-09-11..09-21 UTC (discovery clock, settled window; host down 09-22..25): 73 passes, 73 parked, 0 INDEXED. Parking is the exit on this window. Reporting only — same pin, no per-source threshold. Run: `.dev/insights-manager/runs/2026-09-27-r001.md` (F-005).
+
 ## Do not
 
 - Treat LW like ArXiv (there is no abstract).

@@ -11,12 +11,16 @@
   <header class="site-header">
     <a href="/" class="brand">BISHOP</a>
     <nav>
-      <a href="/dashboard">Dashboard</a>
-      <a href="/batches">Batches</a>
-      <a href="/search">Search</a>
-      <a href="/explorer">Explorer</a>
-      <a href="/parked">Parked</a>
-      <a href="/escalations">Escalations</a>
+      <a href="/dashboard"{% if request.url.path == "/dashboard" %} aria-current="page"{% endif %}>Dashboard</a>
+      <a href="/today"{% if request.url.path == "/today" %} aria-current="page"{% endif %}>Today</a>
+      <a href="/scrape"{% if request.url.path == "/scrape" %} aria-current="page"{% endif %}>Scrape</a>
+      <a href="/harvest"{% if request.url.path == "/harvest" %} aria-current="page"{% endif %}>Harvest</a>
+      <a href="/batches"{% if request.url.path.startswith("/batches") %} aria-current="page"{% endif %}>Batches</a>
+      <a href="/search"{% if request.url.path == "/search" %} aria-current="page"{% endif %}>Search</a>
+      <a href="/explorer"{% if request.url.path == "/explorer" %} aria-current="page"{% endif %}>Explorer</a>
+      <a href="/landed"{% if request.url.path == "/landed" %} aria-current="page"{% endif %}>Landed</a>
+      <a href="/parked"{% if request.url.path == "/parked" %} aria-current="page"{% endif %}>Parked</a>
+      <a href="/escalations"{% if request.url.path == "/escalations" %} aria-current="page"{% endif %}>Escalations</a>
     </nav>
   </header>
   <main class="content">

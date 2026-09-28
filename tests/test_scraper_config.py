@@ -71,6 +71,27 @@ def test_schedule_interval_env_override(monkeypatch: pytest.MonkeyPatch) -> None
     assert config.SCRAPER_SCHEDULE_INTERVAL_SEC == 3600
 
 
+def test_shared_scrape_env_helpers(monkeypatch: pytest.MonkeyPatch) -> None:
+    from bishop_shared.scraper_config import (
+        backfill_enabled,
+        overlay_window_days,
+        schedule_interval_sec,
+    )
+
+    monkeypatch.delenv("BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC", raising=False)
+    monkeypatch.delenv("BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS", raising=False)
+    monkeypatch.delenv("BISHOP_BACKFILL_ENABLED", raising=False)
+    assert schedule_interval_sec() == 21600
+    assert overlay_window_days() is None
+    assert backfill_enabled() is False
+    monkeypatch.setenv("BISHOP_SCRAPER_SCHEDULE_INTERVAL_SEC", "2700")
+    monkeypatch.setenv("BISHOP_BACKFILL_WINDOW_OVERRIDE_DAYS", "60")
+    monkeypatch.setenv("BISHOP_BACKFILL_ENABLED", "1")
+    assert schedule_interval_sec() == 2700
+    assert overlay_window_days() == 60
+    assert backfill_enabled() is True
+
+
 def _gate(**overrides: object) -> SourceCategoryConfig:
     payload: dict[str, object] = {"version": "test"}
     payload.update(overrides)

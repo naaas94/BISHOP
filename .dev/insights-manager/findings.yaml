@@ -1,0 +1,213 @@
+# Insights Manager findings registry.
+# One row per routed finding. A finding names a population, a rate, an owner
+# doc, and an ask. This registry never decides for the owner; it tracks pickup.
+#
+# status:
+#   routed  - owner doc named, ask written, owner has not acted
+#   acted   - owner doc changed or decided (cite where in status_note)
+#   stale   - stale_when fired; numbers no longer describe the pipe. Re-run, don't edit
+#   dropped - owner considered and declined (cite where)
+# Numbers are frozen at the run's read time. Do not edit them; a new read is a new run.
+# Update status only from evidence in the owner doc, with a dated status_note.
+
+findings:
+  - id: F-001
+    date: "2026-09-27"
+    run: runs/2026-09-27-r001.md
+    experiment: E2
+    claim: >
+      GitHub tap yields ~18x fewer INDEXED per row than incremental GitHub.
+      Population: GitHub rows discovered on tap days 2026-09-17, 09-18, 09-26
+      (UTC, discovery clock). Tap 4,976 rows: pass 13 (0.26%), INDEXED 2
+      (0.04%). Incremental 1,909 rows: pass 35 (1.83%), INDEXED 14 (0.73%).
+    query: queries/e2_github_tap_split.py
+    routed_to: [harvest-pool-next.md, "product-backlog.yaml#PB-012"]
+    ask: >
+      Gate the cutover on a tap-yield check. PB-012 makes the tap the only
+      GitHub path, which would replace the higher-yield path with the lower one.
+      Investigate the selection-population difference (harvest stars:>10
+      pushed-window vs incremental query). Not a gate or pin change.
+    stale_when: tap selection (stars/pushed window/ranking) changes, or PB-012 ships
+    status: routed
+    status_note: "2026-09-27: gate text is in harvest-pool-next.md Deferred and PB-012 summary (updated 2026-09-27). PB-012 still deferred. Selection investigation and Q-001 have not run."
+
+  - id: F-002
+    date: "2026-09-27"
+    run: runs/2026-09-27-r001.md
+    experiment: E2
+    claim: >
+      economics.yaml github_paid_path_rate is 0.022. Observed tap proceeded rate
+      on the same tap days is 2/4,976 = 0.04%, about 50x lower. The modeled unit
+      overstates tap cost. This compares a parameter with an observed rate, not
+      modeled dollars with billed ones.
+    query: queries/e2_github_tap_split.py
+    routed_to: [config/harvest/economics.yaml]
+    ask: >
+      Recalibrate by commit (the file's own rule), or split the paid-path rate by
+      path (tap vs incremental). Not at runtime. This function does not edit it.
+    stale_when: github_paid_path_rate changes, or tap selection changes
+    status: routed
+    status_note: "2026-09-27: value still 0.022."
+
+  - id: F-003
+    date: "2026-09-27"
+    run: runs/2026-09-27-r001.md
+    experiment: E5
+    claim: >
+      Harvest unreleased pool grew on every observed UTC day (09-17..09-21, 09-26,
+      09-27 partial). Mill adds exceeded releases every day. /harvest days-to-drain
+      = ceil(unreleased / N_cap), which assumes zero further adds (65 days at
+      305,983 / 4,712). 677 of 677 harvest_runs windows on 09-27 were
+      incomplete_results, so the walk forecast is censored on every window.
+    query: queries/e5_pool_trajectory.py
+    routed_to: [.dev/ui/harvest-dashboard.md, harvest-pool-next.md]
+    ask: >
+      Label days-to-drain as "if the mill stopped now". Note that the walk
+      forecast will stay "waiting" at the current Search-window granularity.
+    stale_when: mill stops adding, window granularity changes, or the label changes
+    status: acted
+    status_note: "2026-09-27: page already said 'if the mill adds nothing' (harvest_stats.html). harvest-dashboard.md now matches that sentence and notes the forecast stays waiting while Search windows are incomplete. harvest-pool-next.md Operator pages names days-to-drain as the stopped-mill figure."
+
+  - id: F-004
+    date: "2026-09-27"
+    run: runs/2026-09-27-r001.md
+    experiment: E3
+    claim: >
+      Parked is 75% of passes (601 of 799, discovered 2026-09-11..09-21, tier-based).
+      Lifetime promoted is 0 of 968 peripheral rows. /parked is a write-only bin.
+    query: queries/e3_parked_promote.py
+    routed_to: ["product-backlog.yaml#PB-013", .dev/decision-logs/ops/soft-launch-precision-overlay.md]
+    ask: >
+      Size PB-013's parked promote-vs-leave pass at ~968 rows (growing). The
+      overlay decision log should know that parking is the dominant exit after
+      rejection and that nothing leaves it.
+    stale_when: any promote happens, or overlay tiering changes
+    status: routed
+    status_note: "2026-09-27: neither doc cites it."
+
+  - id: F-005
+    date: "2026-09-27"
+    run: runs/2026-09-27-r001.md
+    experiment: E1
+    claim: >
+      Discovered 2026-09-11..09-21: LessWrong 73 passes, 73 parked, 0 INDEXED.
+      Hugging Face 44% of discoveries (13,200 of 30,052) and 3.7% of INDEXED
+      (7 of 189).
+    query: queries/e1_cohort_partition.py
+    routed_to: [config/source-notes/lesswrong.md, config/source-notes/huggingface.md]
+    ask: >
+      Append dated intel. No pin change and no per-source threshold (option 3 is
+      not earned). Do not rewind Hugging Face.
+    stale_when: overlay tiering or LW/HF fetch changes
+    status: acted
+    status_note: "2026-09-27: dated intel appended to config/source-notes/lesswrong.md and huggingface.md. No pin change."
+
+  - id: F-006
+    date: "2026-09-27"
+    run: runs/2026-09-27-r001.md
+    experiment: E2
+    claim: >
+      The tap releases of 2026-09-17/18 (2,826 rows, 4 passes, 0 proceeded) are
+      the most anomalous live slice this week.
+    query: queries/e2_github_tap_split.py
+    routed_to: ["product-backlog.yaml#PB-008", eval/github_repo_gate_v0/]
+    ask: >
+      Candidate slice for eval to freeze and label: are the 99.7% rejects
+      correct? Eval computes precision; this function does not.
+    stale_when: eval freezes a different GitHub slice for the same question
+    status: routed
+    status_note: "2026-09-27: nomination only."
+
+  - id: F-007
+    date: "2026-09-27"
+    run: runs/2026-09-27-r001.md
+    experiment: E6
+    claim: >
+      Per-source billed cost needs usage per result (source_id/custom_id).
+      batches.source_ids mixes sources inside one pre-filter batch, so
+      batch-level usage columns would force an allocation rule. That rule would
+      be a fiction.
+    query: null
+    routed_to: ["product-backlog.yaml#PB-002", .dev/persist-vendor-payloads.md]
+    ask: >
+      When PB-002 lands, persist usage per result, not only as batches
+      aggregates. Owner decides the shape.
+    stale_when: PB-002 lands in either shape
+    status: routed
+    status_note: "2026-09-27: per-result constraint is in PB-002 summary and .dev/persist-vendor-payloads.md. PB-002 still idea; columns are not built."
+
+  - id: F-008
+    date: "2026-09-27"
+    run: runs/2026-09-27-r001.md
+    experiment: null
+    claim: >
+      REPORTING.md carries three false lines (R9, R10, R11), an escape hatch (R6),
+      a non-partition (R12), and a state-based parked/proceeded definition (R3).
+    query: null
+    routed_to: [REPORTING.md, .dev/insights-manager/corrections.md]
+    ask: Record the corrections where an agent reading the brief will find them.
+    stale_when: never
+    status: acted
+    status_note: "2026-09-27: corrections.md written. REPORTING.md got a pointer banner; its content was left unedited on purpose."
+
+# Next runs. Named, not scheduled. At most one run per week (README rule 3).
+queued:
+  - id: Q-001
+    what: Tap-yield recheck before PB-012 moves
+    why: F-001 is the only evidence on the cutover and covers 3 tap days under the N_cap 1413/2150 regime
+    population: GitHub tap vs incremental, discovery clock
+    window: first 5+ settled, uptime-clean tap days after 2026-09-27 (N_cap 4712 regime)
+    query: queries/e2_github_tap_split.py
+    trigger: before PB-012 leaves deferred
+    blocked_on: null
+
+  - id: Q-002
+    what: Next weekly cohort, with the publication clock for arXiv
+    why: the 09-11..09-21 window undercounts arXiv (stuck export). First clean week after the catch-up
+    population: all sources, exclusive partition
+    window: first uptime-clean settled UTC week after 2026-09-27. arXiv also on published_at
+    query: queries/e1_cohort_partition.py
+    trigger: operator asks, or at most weekly
+    blocked_on: an uptime-clean week existing
+
+  - id: Q-003
+    what: Pool trajectory under N_cap 4712
+    why: F-003 was observed at N_cap 1413/2150 plus a 296k burst day. Does steady state still grow?
+    population: harvest ledger candidates
+    window: 7 UTC days after 2026-09-28
+    query: queries/e5_pool_trajectory.py
+    trigger: after 7 days at the new cap
+    blocked_on: null
+
+  - id: Q-004
+    what: E6 cost shadow — billed $ per proceeded and per INDEXED, by source and path
+    why: the only test of whether the tap's ~$1.90 modeled per INDEXED is real. Two columns forever (modeled, billed)
+    population: pre-filter + enrichment batches joined to cohort rows
+    window: first settled week after PB-002 lands
+    query: null
+    trigger: PB-002 lands
+    blocked_on: "product-backlog.yaml#PB-002 (per-result usage, F-007)"
+
+  - id: Q-005
+    what: Estimated true-relevant INDEXED per $ by source (live yield x gold precision)
+    why: the evidence REPORTING.md:189 says a pin bump needs. Only possible where volume and truth multiply
+    population: a labeled live slice
+    window: whatever slice eval freezes
+    query: null
+    trigger: PB-008 freezes a slice (F-006) and PB-002 lands
+    blocked_on: "PB-008, PB-002"
+
+# Operator questions that survived the brainstorm-gate cut. Not gates; runs feed them.
+open_questions:
+  - id: OQ-1
+    question: Source strategy — spend harvest $ on the GitHub mill or let arXiv fill DISCOVERED?
+    fed_by: [F-001, F-005, Q-001, Q-002]
+    decided_in: harvest-pool-next.md / PB-012 (not here)
+  - id: OQ-2
+    question: Parked as a product — waste, a second look, or a taste buffer?
+    fed_by: [F-004]
+    decided_in: PB-013 (not here)
+  - id: OQ-3
+    question: What is a good week? Needed only before a page headline, never before a run.
+    fed_by: []
+    decided_in: operator, if and when a page is earned (README rule 8)

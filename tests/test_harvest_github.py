@@ -22,6 +22,9 @@ _SCRAPER_ROOT = _REPO_ROOT / "services" / "scraper"
 _START = datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC)
 _SEVEN = _START + timedelta(days=7)
 _ONE = _START + timedelta(days=1)
+_FLOOR = datetime(2024, 12, 15, 20, 18, 40, tzinfo=UTC)
+_FROZEN_CEILING = datetime(2026, 9, 17, 14, 18, 40, tzinfo=UTC)
+_NOW = datetime(2026, 9, 27, 12, 0, 0, tzinfo=UTC)
 
 
 def _iso(value: datetime) -> str:
@@ -144,6 +147,50 @@ async def _instant_acquire(self: object) -> None:
     return None
 
 
+def _seed_cursor(
+    db: Path,
+    *,
+    next_window_start: datetime,
+    harvest_until: datetime,
+    now: datetime,
+    walk_direction: str | None = None,
+    high_water: datetime | None = None,
+) -> None:
+    conn = connect_rw(db)
+    try:
+        set_cursor(
+            conn,
+            "github",
+            next_window_start=_iso(next_window_start),
+            harvest_until=_iso(harvest_until),
+            now=now,
+            walk_direction=walk_direction,
+            high_water=_iso(high_water) if high_water is not None else None,
+        )
+    finally:
+        conn.close()
+
+
+def _stop_after_first_slice(harvest: ModuleType, monkeypatch: pytest.MonkeyPatch, now: datetime) -> datetime:
+    """Freeze harvest clock at ``now`` until the first slice is recorded, then expire the deadline."""
+    state = {"after_slice": False}
+    real_record = harvest.record_run
+
+    def _record(*args: object, **kwargs: object) -> None:
+        real_record(*args, **kwargs)
+        state["after_slice"] = True
+
+    monkeypatch.setattr(harvest, "record_run", _record)
+
+    def _frozen() -> datetime:
+        if state["after_slice"]:
+            return now + timedelta(hours=2)
+        return now
+
+    monkeypatch.setattr(harvest, "_utc_now", _frozen)
+    return now + timedelta(hours=1)
+
+
 def test_build_harvest_query_closed_range_not_open_ended() -> None:
     github, _ = _load_harvest_stack()
     query = github.build_harvest_query(_START, _SEVEN)
@@ -208,23 +255,21 @@ async def test_harvest_recursive_split_emits_distinct_closed_ranges(
         )
 
     db = tmp_path / "ledger.sqlite"
-    conn = connect_rw(db)
-    try:
-        set_cursor(
-            conn,
-            "github",
-            next_window_start=_iso(_START),
-            harvest_until=_iso(_SEVEN),
-            now=_START,
-        )
-    finally:
-        conn.close()
+    _seed_cursor(
+        db,
+        next_window_start=_START,
+        harvest_until=_SEVEN,
+        now=_START,
+        walk_direction="backward",
+        high_water=_SEVEN,
+    )
+    deadline = _stop_after_first_slice(harvest, monkeypatch, _SEVEN)
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
         await harvest.harvest_github_slices(
             http_client=client,
-            deadline=datetime.now(UTC) + timedelta(hours=1),
+            deadline=deadline,
             db_path=db,
         )
 
@@ -235,10 +280,15 @@ async def test_harvest_recursive_split_emits_distinct_closed_ranges(
         assert ".." in query
         assert "pushed:>" not in query
         assert "stars:>10" in query
+    full = "pushed:2026-01-01..2026-01-08 stars:>10"
+    newer = "pushed:2026-01-04..2026-01-08 stars:>10"
+    assert distinct[0] == full
+    after_full = [query for query in distinct if query != full]
+    assert after_full[0] == newer
 
 
 @pytest.mark.asyncio
-async def test_harvest_one_day_overflow_caps_pages_and_advances_cursor(
+async def test_harvest_one_day_overflow_caps_pages_and_retreats_cursor(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -266,23 +316,21 @@ async def test_harvest_one_day_overflow_caps_pages_and_advances_cursor(
         )
 
     db = tmp_path / "ledger.sqlite"
-    conn = connect_rw(db)
-    try:
-        set_cursor(
-            conn,
-            "github",
-            next_window_start=_iso(_START),
-            harvest_until=_iso(_ONE),
-            now=_START,
-        )
-    finally:
-        conn.close()
+    _seed_cursor(
+        db,
+        next_window_start=_START,
+        harvest_until=_ONE,
+        now=_START,
+        walk_direction="backward",
+        high_water=_NOW,
+    )
+    deadline = _stop_after_first_slice(harvest, monkeypatch, _ONE)
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
         await harvest.harvest_github_slices(
             http_client=client,
-            deadline=datetime.now(UTC) + timedelta(hours=1),
+            deadline=deadline,
             db_path=db,
         )
 
@@ -290,21 +338,25 @@ async def test_harvest_one_day_overflow_caps_pages_and_advances_cursor(
     conn = connect_rw(db)
     try:
         run = conn.execute(
-            "SELECT incomplete_results, pages_fetched FROM harvest_runs"
+            "SELECT incomplete_results, pages_fetched, window_start, window_end "
+            "FROM harvest_runs"
         ).fetchone()
         assert run["incomplete_results"] == 1
         assert run["pages_fetched"] == 10
         cursor = get_cursor(conn, "github")
         assert cursor is not None
-        advanced = datetime.fromisoformat(
-            cursor["next_window_start"].replace("Z", "+00:00")
-        )
-        assert advanced == _ONE
+        # 1-day remaining gap retreats then meets the floor → done writes high_water.
+        assert cursor["walk_direction"] == "forward"
+        assert cursor["next_window_start"] == _iso(_NOW)
+        assert cursor["harvest_until"] == _iso(_NOW)
+        assert cursor["next_window_start"] != _iso(_ONE) or cursor["walk_direction"] == "forward"
         fork_row = conn.execute(
             "SELECT is_fork FROM candidates WHERE source_id = ?",
             ("github:acme/day-1-0",),
         ).fetchone()
         assert fork_row["is_fork"] == 1
+        leftover = conn.execute("SELECT COUNT(*) FROM candidates").fetchone()[0]
+        assert leftover > 0
     finally:
         conn.close()
 
@@ -331,17 +383,14 @@ async def test_harvest_does_not_call_post_manifest_batch(
         )
 
     db = tmp_path / "ledger.sqlite"
-    conn = connect_rw(db)
-    try:
-        set_cursor(
-            conn,
-            "github",
-            next_window_start=_iso(_START),
-            harvest_until=_iso(_ONE),
-            now=_START,
-        )
-    finally:
-        conn.close()
+    _seed_cursor(
+        db,
+        next_window_start=_START,
+        harvest_until=_ONE,
+        now=_START,
+        walk_direction="backward",
+        high_water=_NOW,
+    )
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
@@ -395,17 +444,14 @@ async def test_harvest_uses_search_rate_limit_not_rest_budget(
         )
 
     db = tmp_path / "ledger.sqlite"
-    conn = connect_rw(db)
-    try:
-        set_cursor(
-            conn,
-            "github",
-            next_window_start=_iso(_START),
-            harvest_until=_iso(_ONE),
-            now=_START,
-        )
-    finally:
-        conn.close()
+    _seed_cursor(
+        db,
+        next_window_start=_START,
+        harvest_until=_ONE,
+        now=_START,
+        walk_direction="backward",
+        high_water=_NOW,
+    )
 
     transport = httpx.MockTransport(handler)
     async with httpx.AsyncClient(transport=transport) as client:
@@ -430,3 +476,237 @@ def test_harvest_http_client_uses_30s_timeout() -> None:
     )
     assert "httpx.Timeout(30.0)" in source
     assert "async with httpx.AsyncClient()" not in source
+
+
+def _ok_item_handler(full_name: str = "acme/now"):
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "total_count": 1,
+                "incomplete_results": False,
+                "items": [_repo_item(full_name)],
+            },
+        )
+
+    return handler
+
+
+@pytest.mark.asyncio
+async def test_legacy_forward_cursor_first_tick_ends_at_now_without_raising_floor(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, harvest = _load_harvest_stack()
+    monkeypatch.setattr(harvest, "BISHOP_HARVEST_ENABLED", True)
+    monkeypatch.setattr(harvest.TokenBucketRateLimiter, "acquire", _instant_acquire)
+    queries: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        queries.append(_search_q(request))
+        return _ok_item_handler()(request)
+
+    db = tmp_path / "ledger.sqlite"
+    _seed_cursor(
+        db,
+        next_window_start=_FLOOR,
+        harvest_until=_FROZEN_CEILING,
+        now=_FLOOR,
+    )
+    deadline = _stop_after_first_slice(harvest, monkeypatch, _NOW)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        await harvest.harvest_github_slices(
+            http_client=client,
+            deadline=deadline,
+            db_path=db,
+        )
+
+    expected = "pushed:2026-09-20..2026-09-27 stars:>10"
+    assert expected in queries
+    conn = connect_rw(db)
+    try:
+        cursor = get_cursor(conn, "github")
+        assert cursor is not None
+        assert cursor["next_window_start"] == _iso(_FLOOR)
+        retreated = datetime.fromisoformat(
+            cursor["harvest_until"].replace("Z", "+00:00")
+        )
+        assert retreated == _NOW - timedelta(days=7)
+        assert cursor["walk_direction"] == "backward"
+        assert cursor["high_water"] == _iso(_NOW)
+    finally:
+        conn.close()
+
+
+@pytest.mark.asyncio
+async def test_second_tick_is_next_older_window(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, harvest = _load_harvest_stack()
+    monkeypatch.setattr(harvest, "BISHOP_HARVEST_ENABLED", True)
+    monkeypatch.setattr(harvest.TokenBucketRateLimiter, "acquire", _instant_acquire)
+    db = tmp_path / "ledger.sqlite"
+    _seed_cursor(
+        db,
+        next_window_start=_FLOOR,
+        harvest_until=_FROZEN_CEILING,
+        now=_FLOOR,
+    )
+
+    first_deadline = _stop_after_first_slice(harvest, monkeypatch, _NOW)
+    transport = httpx.MockTransport(_ok_item_handler("acme/first"))
+    async with httpx.AsyncClient(transport=transport) as client:
+        await harvest.harvest_github_slices(
+            http_client=client,
+            deadline=first_deadline,
+            db_path=db,
+        )
+
+    queries: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        queries.append(_search_q(request))
+        return _ok_item_handler("acme/second")(request)
+
+    second_deadline = _stop_after_first_slice(harvest, monkeypatch, _NOW)
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        await harvest.harvest_github_slices(
+            http_client=client,
+            deadline=second_deadline,
+            db_path=db,
+        )
+
+    assert "pushed:2026-09-13..2026-09-20 stars:>10" in queries
+    conn = connect_rw(db)
+    try:
+        cursor = get_cursor(conn, "github")
+        assert cursor is not None
+        assert cursor["next_window_start"] == _iso(_FLOOR)
+        retreated = datetime.fromisoformat(
+            cursor["harvest_until"].replace("Z", "+00:00")
+        )
+        assert retreated == _NOW - timedelta(days=14)
+    finally:
+        conn.close()
+
+
+@pytest.mark.asyncio
+async def test_restart_does_not_jump_high_edge_back_to_now(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, harvest = _load_harvest_stack()
+    monkeypatch.setattr(harvest, "BISHOP_HARVEST_ENABLED", True)
+    monkeypatch.setattr(harvest.TokenBucketRateLimiter, "acquire", _instant_acquire)
+    retreated_until = _NOW - timedelta(days=7)
+    later_now = _NOW + timedelta(days=3)
+    queries: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        queries.append(_search_q(request))
+        return _ok_item_handler("acme/restart")(request)
+
+    db = tmp_path / "ledger.sqlite"
+    _seed_cursor(
+        db,
+        next_window_start=_FLOOR,
+        harvest_until=retreated_until,
+        now=retreated_until,
+        walk_direction="backward",
+        high_water=_NOW,
+    )
+    deadline = _stop_after_first_slice(harvest, monkeypatch, later_now)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        await harvest.harvest_github_slices(
+            http_client=client,
+            deadline=deadline,
+            db_path=db,
+        )
+
+    assert "pushed:2026-09-23..2026-09-30 stars:>10" not in queries
+    assert "pushed:2026-09-13..2026-09-20 stars:>10" in queries
+    conn = connect_rw(db)
+    try:
+        cursor = get_cursor(conn, "github")
+        assert cursor is not None
+        assert cursor["next_window_start"] == _iso(_FLOOR)
+        assert cursor["walk_direction"] == "backward"
+        high = datetime.fromisoformat(cursor["harvest_until"].replace("Z", "+00:00"))
+        assert high == retreated_until - timedelta(days=7)
+        assert high < later_now
+    finally:
+        conn.close()
+
+
+@pytest.mark.asyncio
+async def test_overflow_split_fetches_newer_half_first(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, harvest = _load_harvest_stack()
+    monkeypatch.setattr(harvest, "BISHOP_HARVEST_ENABLED", True)
+    monkeypatch.setattr(harvest.TokenBucketRateLimiter, "acquire", _instant_acquire)
+    queries: list[str] = []
+    full = "pushed:2026-01-01..2026-01-08 stars:>10"
+    newer = "pushed:2026-01-04..2026-01-08 stars:>10"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        query = _search_q(request)
+        queries.append(query)
+        params = _params(request)
+        per_page = int(params.get("per_page", ["100"])[0])
+        if query == full and per_page == 1:
+            return httpx.Response(
+                200,
+                json={"total_count": 2500, "incomplete_results": False, "items": []},
+            )
+        return httpx.Response(
+            200,
+            json={
+                "total_count": 10,
+                "incomplete_results": False,
+                "items": [_repo_item("acme/newer-half")],
+            },
+        )
+
+    db = tmp_path / "ledger.sqlite"
+    _seed_cursor(
+        db,
+        next_window_start=_START,
+        harvest_until=_SEVEN,
+        now=_START,
+        walk_direction="backward",
+        high_water=_SEVEN,
+    )
+    deadline = _stop_after_first_slice(harvest, monkeypatch, _SEVEN)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        await harvest.harvest_github_slices(
+            http_client=client,
+            deadline=deadline,
+            db_path=db,
+        )
+
+    assert queries[0] == full
+    after_full = [query for query in queries if query != full]
+    assert after_full[0] == newer
+    conn = connect_rw(db)
+    try:
+        cursor = get_cursor(conn, "github")
+        assert cursor is not None
+        assert cursor["next_window_start"] == _iso(_START)
+        retreated = datetime.fromisoformat(
+            cursor["harvest_until"].replace("Z", "+00:00")
+        )
+        assert retreated == datetime(2026, 1, 4, 12, 0, 0, tzinfo=UTC)
+        run = conn.execute("SELECT query FROM harvest_runs").fetchone()
+        assert run["query"] == newer
+    finally:
+        conn.close()

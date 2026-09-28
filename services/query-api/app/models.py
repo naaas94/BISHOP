@@ -117,6 +117,15 @@ class StatBucket(BaseModel):
 class DailyCount(BaseModel):
     date: str
     count: int
+    by_source: list[StatBucket] = []
+
+
+class ScrapeExceptionRow(BaseModel):
+    source: str
+    lag_hours: float | None = None
+    discovered_today: int = 0
+    in_queue: int = 0
+    stale: bool = False
 
 
 class StatsOverview(BaseModel):
@@ -126,6 +135,8 @@ class StatsOverview(BaseModel):
     indexed_total: int
     pre_filter_decided: int
     pre_filter_passed: int
+    pre_filter_parked: int = 0
+    pre_filter_proceeded: int = 0
     funnel: list[StatBucket]
     queue_depth: list[StatBucket]
     relevance_histogram: list[StatBucket]
@@ -146,3 +157,115 @@ class StatsOverview(BaseModel):
     harvest_budget_usd: float = 0.0
     harvest_projected_usd_today: float = 0.0
     harvest_sidecar_present: bool = False
+    harvest_unreleased_liability_usd: float = 0.0
+    harvest_tap_open: bool = False
+    scrape_max_lag_hours: float = 0.0
+    scrape_lag_source: str | None = None
+    scrape_caught_up: bool = False
+    scrape_exceptions: list[ScrapeExceptionRow] = []
+    today_discovered: int = 0
+
+
+class HarvestStats(BaseModel):
+    """GitHub harvest liability, mill walk, and daily faucet. Modeled, not billed."""
+
+    generated_at: datetime
+    sidecar_present: bool = False
+    pool_size: int = 0
+    unreleased: int = 0
+    unreleased_liability_usd: float = 0.0
+    pool_modeled_usd: float = 0.0
+    blended_github_usd: float = 0.0
+    days_to_drain: int | None = None
+    n_cap: int = 0
+    budget_usd: float = 0.0
+    paper_reserve_usd: float = 0.0
+    github_budget_usd: float = 0.0
+    released_today: int = 0
+    github_in_queue: int = 0
+    slots_remaining: int = 0
+    tap_open: bool = False
+    tap_killed: bool = False
+    released_overshoot: bool = False
+    released_fill_pct: float = 0.0
+    modeled_usd_today: float = 0.0
+    walk_direction: str | None = None
+    floor_at: str | None = None
+    harvest_until: str | None = None
+    high_water: str | None = None
+    cursor_updated_at: str | None = None
+    unwalked_days: float = 0.0
+    walked_recent_days: float = 0.0
+    window_span_days: float = 0.0
+    walked_pct: float = 0.0
+    forecast_ready: bool = False
+    forecast_complete_windows: int = 0
+    forecast_incomplete_windows: int = 0
+    forecast_median_rate: float = 0.0
+    forecast_upper_rate: float = 0.0
+    forecast_median_usd: float = 0.0
+    forecast_upper_usd: float = 0.0
+
+
+class ScrapeSourceRow(BaseModel):
+    source: str
+    last_successful_run_at: str | None = None
+    updated_at: str | None = None
+    lag_hours: float | None = None
+    lag_fill_pct: float = 0.0
+    pin_window_days: int = 0
+    discovered_today: int = 0
+    in_queue: int = 0
+    dead: bool = False
+    stale: bool = False
+    note: str | None = None
+
+
+class ScrapeStats(BaseModel):
+    """Incremental scrape cursors, overlay window, and today's inserts."""
+
+    generated_at: datetime
+    schedule_interval_sec: int = 21600
+    overlay_window_days: int | None = None
+    backfill_enabled: bool = False
+    max_lag_hours: float = 0.0
+    lag_source: str | None = None
+    caught_up: bool = False
+    discovered_today: int = 0
+    in_queue: int = 0
+    github_released_today: int | None = None
+    sources: list[ScrapeSourceRow] = []
+
+
+class TodayStats(BaseModel):
+    """UTC-day rollup. Cohort is discovered_at >= UTC midnight. No indexed_at."""
+
+    generated_at: datetime
+    utc_day: str = ""
+    utc_midnight: str = ""
+    discovered_today: int = 0
+    discovered_by_source: list[StatBucket] = []
+    in_queue_today: int = 0
+    indexed_cohort_today: int = 0
+    entries_ingested_today: int = 0
+    batches_completed_today: int = 0
+    batches_by_status: list[StatBucket] = []
+    batches_by_type: list[StatBucket] = []
+    errors_today: list[StatBucket] = []
+    funnel: list[StatBucket] = []
+    queue_depth: list[StatBucket] = []
+    harvest_sidecar_present: bool = False
+    harvest_released_today: int = 0
+    harvest_modeled_usd_today: float = 0.0
+    harvest_n_cap: int = 0
+    harvest_tap_open: bool = False
+    harvest_tap_killed: bool = False
+    harvest_released_overshoot: bool = False
+    harvest_released_fill_pct: float = 0.0
+    scrape_caught_up: bool = False
+    scrape_max_lag_hours: float = 0.0
+    scrape_lag_source: str | None = None
+    scrape_in_queue: int = 0
+    scrape_exceptions: list[ScrapeExceptionRow] = []
+    overlay_window_days: int | None = None
+    schedule_interval_sec: int = 21600

@@ -18,10 +18,16 @@ async def run_scheduler() -> None:
     client = StateWorkerClient()
     try:
         while True:
-            await asyncio.gather(
-                stage1_cycle(state_client=client),
-                stage2_cycle(state_client=client),
-            )
+            try:
+                await asyncio.gather(
+                    stage1_cycle(state_client=client),
+                    stage2_cycle(state_client=client),
+                )
+            except Exception:
+                logger.exception(
+                    "enrichment cycle failed",
+                    extra={"event": "enrichment_cycle_failed"},
+                )
             await asyncio.sleep(ENRICHMENT_POLL_INTERVAL_SEC)
     finally:
         await client.aclose()

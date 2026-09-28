@@ -63,6 +63,16 @@ async def _post_index_failed(
                 "event": "state_worker_error",
             },
         )
+    except httpx.RequestError as exc:
+        logger.error(
+            "state-worker failed POST error",
+            extra={
+                "source_id": entry.source_id,
+                "domain": entry.domain.value,
+                "error_class": type(exc).__name__,
+                "event": "state_worker_error",
+            },
+        )
 
 
 def _mirror_row_from_entry(entry: EntryPollRow) -> EntryMirrorRow:
@@ -214,6 +224,17 @@ async def index_entry(
                 "source_id": entry.source_id,
                 "domain": domain,
                 "http_status": exc.response.status_code,
+                "event": "indexed_signal_failed",
+            },
+        )
+        return False
+    except httpx.RequestError as exc:
+        logger.critical(
+            "indexed signal failed after stores written",
+            extra={
+                "source_id": entry.source_id,
+                "domain": domain,
+                "error_class": type(exc).__name__,
                 "event": "indexed_signal_failed",
             },
         )

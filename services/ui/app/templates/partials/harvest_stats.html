@@ -1,0 +1,111 @@
+<div id="harvest-stats" hx-get="/harvest" hx-trigger="every 30s" hx-sync="this:drop" hx-swap="outerHTML">
+{% if not stats and not error %}
+<p class="muted">No harvest stats available.</p>
+{% endif %}
+{% if stats %}
+<section class="harvest-hero">
+  <div class="stat-value harvest-hero-value">${{ "%.0f"|format(stats.unreleased_liability_usd) }}</div>
+  <div class="stat-label">Unreleased modeled liability</div>
+  {% if not stats.sidecar_present %}
+  <p class="muted">Harvest sidecar not mounted.</p>
+  {% else %}
+  <p class="muted">
+    {{ stats.unreleased }} unreleased × ${{ "%.6f"|format(stats.blended_github_usd) }} blended GitHub unit.
+    Whole ledger ${{ "%.2f"|format(stats.pool_modeled_usd) }} (released portion is sunk).
+  </p>
+  {% if stats.tap_killed %}
+  <p>Tap is killed (N_cap 0).</p>
+  {% elif stats.days_to_drain is not none %}
+  <p>{{ stats.days_to_drain }} days to drain {{ stats.unreleased }} unreleased at N_cap {{ stats.n_cap }} if the mill adds nothing. Does not price {{ "%.1f"|format(stats.unwalked_days) }} unwalked days.</p>
+  {% endif %}
+  {% endif %}
+</section>
+
+<section class="harvest-walk">
+  <h2>Walk</h2>
+  {% if not stats.sidecar_present %}
+  <p class="muted">No mill cursor until the sidecar is mounted.</p>
+  {% elif not stats.walk_direction %}
+  <p class="muted">No mill cursor yet.</p>
+  {% else %}
+  <p class="muted">
+    Direction {{ stats.walk_direction }}.
+    Floor {{ stats.floor_at or "—" }} → until {{ stats.harvest_until or "—" }} → high water {{ stats.high_water or "—" }}.
+  </p>
+  <div class="walk-track" title="Walked {{ "%.0f"|format(stats.walked_pct) }}% of floor to high water">
+    <div class="walk-unwalked" style="width: {{ (100 - stats.walked_pct) | round(1) }}%"></div>
+    <div class="walk-walked" style="left: {{ (100 - stats.walked_pct) | round(1) }}%; width: {{ stats.walked_pct | round(1) }}%"></div>
+  </div>
+  <p class="muted">
+    Unwalked {{ "%.1f"|format(stats.unwalked_days) }} days · walked recent {{ "%.1f"|format(stats.walked_recent_days) }} days.
+    Cursor {{ stats.cursor_updated_at or "—" }}.
+  </p>
+  {% if stats.walk_direction == "forward" %}
+  <p>Gap closed. Walk forecast is $0.00.</p>
+  {% elif not stats.forecast_ready %}
+  <p class="muted">
+    Forecast waiting — need 3 complete Search windows in the walked span
+    ({{ stats.forecast_complete_windows }} so far).
+    {% if stats.forecast_incomplete_windows %}
+    {{ stats.forecast_incomplete_windows }} capped windows ignored.
+    {% endif %}
+  </p>
+  {% else %}
+  <p>
+    Unwalked window ${{ "%.2f"|format(stats.forecast_median_usd) }}–${{ "%.2f"|format(stats.forecast_upper_usd) }} modeled
+    ({{ "%.0f"|format(stats.forecast_median_rate) }}–{{ "%.0f"|format(stats.forecast_upper_rate) }} repos/day).
+  </p>
+  {% if stats.forecast_incomplete_windows %}
+  <p class="muted">{{ stats.forecast_incomplete_windows }} capped windows (Search 1000) ignored in the rate.</p>
+  {% endif %}
+  {% endif %}
+  {% endif %}
+</section>
+
+<section class="harvest-faucet">
+  <h2>Faucet</h2>
+  <section class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-value">${{ "%.2f"|format(stats.budget_usd) }}</div>
+      <div class="stat-label">Budget</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${{ "%.2f"|format(stats.paper_reserve_usd) }}</div>
+      <div class="stat-label">Paper reserve</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${{ "%.2f"|format(stats.github_budget_usd) }}</div>
+      <div class="stat-label">GitHub allowance</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.n_cap }}</div>
+      <div class="stat-label">N_cap</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.released_today }}</div>
+      <div class="stat-label">Released today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${{ "%.2f"|format(stats.modeled_usd_today) }}</div>
+      <div class="stat-label">Modeled cost of today's releases</div>
+    </div>
+  </section>
+  {% if stats.tap_killed %}
+  <p>Tap killed. N_cap is 0.</p>
+  {% elif stats.tap_open %}
+  <p class="is-ok">Tap open. {{ stats.slots_remaining }} slots remaining (queue {{ stats.github_in_queue }}).</p>
+  {% elif stats.released_overshoot %}
+  <p>Tap closed until UTC midnight. Released today {{ stats.released_today }} is already above N_cap {{ stats.n_cap }}.</p>
+  {% else %}
+  <p>Tap closed. {{ stats.slots_remaining }} slots remaining (queue {{ stats.github_in_queue }}).</p>
+  {% endif %}
+  <div class="bar-row{% if stats.released_overshoot %} is-bad{% endif %}">
+    <span class="bar-label">Released today</span>
+    <div class="bar-track"><div class="bar-fill" style="width: {{ stats.released_fill_pct }}%"></div></div>
+    <span class="bar-count">{{ stats.released_today }} / {{ stats.n_cap }}</span>
+  </div>
+  <p class="muted">Figures are the harvest formula, not the Anthropic console. Live billed usage is PB-002.</p>
+</section>
+<p class="muted">{{ stats.generated_at }}</p>
+{% endif %}
+</div>

@@ -6,7 +6,7 @@
 </div>
 {% endmacro %}
 
-<div id="dashboard-stats" hx-get="/dashboard" hx-trigger="every 30s" hx-swap="outerHTML">
+<div id="dashboard-stats" hx-get="/dashboard" hx-trigger="every 30s" hx-sync="this:drop" hx-swap="outerHTML">
 {% if not stats and not error %}
 <p class="muted">No stats available.</p>
 {% endif %}
@@ -31,6 +31,11 @@
   <div class="stat-card">
     <div class="stat-value">{{ pass_rate }}</div>
     <div class="stat-label">Pre-filter pass rate</div>
+    <p class="muted">{{ stats.pre_filter_parked }} parked · {{ stats.pre_filter_proceeded }} proceeded</p>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ in_queue }}</div>
+    <div class="stat-label">In queue</div>
   </div>
   <div class="stat-card">
     <div class="stat-value">{{ in_flight }}</div>
@@ -46,46 +51,23 @@
   </div>
 </section>
 
-<section class="harvest-stats">
-  <h2>Harvest</h2>
-  {% if not stats.harvest_sidecar_present %}
-  <p class="muted">Harvest sidecar not mounted.</p>
-  {% endif %}
-  <section class="stat-cards">
-    <div class="stat-card">
-      <div class="stat-value">{{ stats.harvest_pool_size }}</div>
-      <div class="stat-label">Harvest pool</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ stats.harvest_unreleased }}</div>
-      <div class="stat-label">Unreleased</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ stats.harvest_released_today }}</div>
-      <div class="stat-label">Released today</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ stats.harvest_n_cap }}</div>
-      <div class="stat-label">N_cap</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${{ "%.2f"|format(stats.harvest_budget_usd) }}</div>
-      <div class="stat-label">Budget</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${{ "%.4f"|format(stats.harvest_projected_usd_today) }}</div>
-      <div class="stat-label">Projected $ today</div>
-    </div>
-  </section>
-</section>
-
 <h2>Pipeline funnel</h2>
 {% set funnel_ns = namespace(max=0) %}
 {% for bucket in stats.funnel %}
-{% if bucket.count > funnel_ns.max %}{% set funnel_ns.max = bucket.count %}{% endif %}
+{% if bucket.label != "Relevance rejected" and bucket.count > funnel_ns.max %}
+{% set funnel_ns.max = bucket.count %}
+{% endif %}
 {% endfor %}
 {% for bucket in stats.funnel %}
+{% if bucket.label == "Relevance rejected" %}
+<div class="bar-row">
+  <span class="bar-label">{{ bucket.label }}</span>
+  <div class="bar-track"></div>
+  <span class="bar-count">{{ bucket.count }}</span>
+</div>
+{% else %}
 {{ bar_row(bucket.label, bucket.count, funnel_ns.max) }}
+{% endif %}
 {% endfor %}
 
 <h2>Queue depth</h2>
@@ -163,12 +145,31 @@
 {% endfor %}
 
 <h2>Ingest per day (30d)</h2>
+{% set legend_ns = namespace(names=[]) %}
 {% set day_ns = namespace(max=0) %}
 {% for day in stats.ingest_by_day %}
 {% if day.count > day_ns.max %}{% set day_ns.max = day.count %}{% endif %}
+{% for bucket in day.by_source %}
+{% if bucket.label not in legend_ns.names %}
+{% set legend_ns.names = legend_ns.names + [bucket.label] %}
+{% endif %}
 {% endfor %}
+{% endfor %}
+{% if legend_ns.names %}
+<p class="ingest-legend muted">{{ legend_ns.names | join(" · ") }}</p>
+{% endif %}
 {% for day in stats.ingest_by_day %}
-{{ bar_row(day.date[5:], day.count, day_ns.max) }}
+<div class="bar-row">
+  <span class="bar-label">{{ day.date[5:] }}</span>
+  <div class="ingest-track">
+    <div class="ingest-fill" style="width: {{ day.count | pct(day_ns.max) }}%">
+      {% for bucket in day.by_source %}
+      <div class="ingest-seg" style="width: {{ bucket.count | pct(day.count) }}%"></div>
+      {% endfor %}
+    </div>
+  </div>
+  <span class="bar-count">{{ day.count }}</span>
+</div>
 {% endfor %}
 
 <div class="dash-grid">
@@ -206,5 +207,6 @@
 {% else %}
 <p class="muted">No errors in the last 7 days.</p>
 {% endif %}
+<p class="muted">{{ stats.generated_at }}</p>
 {% endif %}
 </div>

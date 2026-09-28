@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Scrape — BISHOP{% endblock %}
+{% block content %}
+<h1>Scrape</h1>
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+{% include "partials/scrape_stats.html" %}
+{% endblock %}

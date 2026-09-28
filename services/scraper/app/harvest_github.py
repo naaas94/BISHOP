@@ -66,6 +66,16 @@ def _iso(value: datetime) -> str:
     return _as_utc(value).isoformat().replace("+00:00", "Z")
 
 
+def _cursor_text(row, key: str) -> str | None:
+    try:
+        value = row[key]
+    except (IndexError, KeyError):
+        return None
+    if value is None or value == "":
+        return None
+    return str(value)
+
+
 def _split_mid(start: datetime, end: datetime) -> datetime:
     mid = start + (end - start) / 2
     if mid <= start:
@@ -124,6 +134,26 @@ async def harvest_github_slices(
         conn.close()
 
 
+def _persist_cursor(
+    conn,
+    *,
+    next_window_start: datetime,
+    harvest_until: datetime,
+    walk_direction: str | None,
+    high_water: datetime | None,
+    now: datetime,
+) -> None:
+    set_cursor(
+        conn,
+        _SEARCH_SOURCE,
+        next_window_start=_iso(next_window_start),
+        harvest_until=_iso(harvest_until),
+        now=now,
+        walk_direction=walk_direction,
+        high_water=_iso(high_water) if high_water is not None else None,
+    )
+
+
 async def _harvest_into(
     conn,
     *,
@@ -134,41 +164,80 @@ async def _harvest_into(
     limiter = TokenBucketRateLimiter(_SEARCH_RATE_LIMIT)
     clock = _utc_now()
     row = get_cursor(conn, _SEARCH_SOURCE)
+    walk_direction: str | None = None
+    high_water: datetime | None = None
     if row is None or not row["next_window_start"] or not row["harvest_until"]:
         next_window_start = clock - timedelta(days=BISHOP_HARVEST_WINDOW_DAYS)
         harvest_until = clock
-        set_cursor(
+        walk_direction = "backward"
+        high_water = clock
+        _persist_cursor(
             conn,
-            _SEARCH_SOURCE,
-            next_window_start=_iso(next_window_start),
-            harvest_until=_iso(harvest_until),
+            next_window_start=next_window_start,
+            harvest_until=harvest_until,
+            walk_direction=walk_direction,
+            high_water=high_water,
             now=clock,
         )
     else:
         next_window_start = _as_utc(_parse_iso(row["next_window_start"]))
         harvest_until = _as_utc(_parse_iso(row["harvest_until"]))
+        walk_direction = _cursor_text(row, "walk_direction")
+        high_water_raw = _cursor_text(row, "high_water")
+        high_water = (
+            _as_utc(_parse_iso(high_water_raw)) if high_water_raw is not None else None
+        )
 
-    if next_window_start >= harvest_until:
+    if walk_direction not in ("backward", "forward"):
+        if next_window_start >= harvest_until:
+            bumped = _utc_now()
+            if bumped > harvest_until:
+                harvest_until = bumped
+        if next_window_start < harvest_until:
+            flipped = _utc_now()
+            harvest_until = flipped
+            high_water = flipped
+            walk_direction = "backward"
+            _persist_cursor(
+                conn,
+                next_window_start=next_window_start,
+                harvest_until=harvest_until,
+                walk_direction=walk_direction,
+                high_water=high_water,
+                now=flipped,
+            )
+    elif walk_direction == "forward" and next_window_start >= harvest_until:
         bumped = _utc_now()
         if bumped > harvest_until:
             harvest_until = bumped
-            set_cursor(
+            _persist_cursor(
                 conn,
-                _SEARCH_SOURCE,
-                next_window_start=_iso(next_window_start),
-                harvest_until=_iso(harvest_until),
+                next_window_start=next_window_start,
+                harvest_until=harvest_until,
+                walk_direction=walk_direction,
+                high_water=high_water,
                 now=bumped,
             )
 
-    pending_end: datetime | None = None
+    pending_bound: datetime | None = None
     while _utc_now() < deadline and next_window_start < harvest_until:
-        start = next_window_start
-        end = (
-            pending_end
-            if pending_end is not None
-            else min(start + timedelta(days=_SLICE_DAYS), harvest_until)
-        )
-        pending_end = None
+        if walk_direction == "backward":
+            end = harvest_until
+            start = (
+                pending_bound
+                if pending_bound is not None
+                else max(
+                    next_window_start, end - timedelta(days=_SLICE_DAYS)
+                )
+            )
+        else:
+            start = next_window_start
+            end = (
+                pending_bound
+                if pending_bound is not None
+                else min(start + timedelta(days=_SLICE_DAYS), harvest_until)
+            )
+        pending_bound = None
         if end <= start:
             break
 
@@ -189,10 +258,11 @@ async def _harvest_into(
         total_count = int(total_count_raw) if isinstance(total_count_raw, int) else 0
         width_days = (end - start).days
         if total_count > _OVERFLOW_TOTAL_COUNT and width_days > 1:
-            pending_end = _split_mid(start, end)
-            if pending_end <= start or pending_end >= end:
-                pending_end = None
+            mid = _split_mid(start, end)
+            if mid <= start or mid >= end:
+                pending_bound = None
             else:
+                pending_bound = mid
                 continue
 
         incomplete = bool(payload.get("incomplete_results")) or (
@@ -276,24 +346,42 @@ async def _harvest_into(
                 "upserted": items_upserted,
             },
         )
-        next_window_start = end
-        set_cursor(
+        if walk_direction == "backward":
+            harvest_until = start
+        else:
+            next_window_start = end
+        _persist_cursor(
             conn,
-            _SEARCH_SOURCE,
-            next_window_start=_iso(next_window_start),
-            harvest_until=_iso(harvest_until),
+            next_window_start=next_window_start,
+            harvest_until=harvest_until,
+            walk_direction=walk_direction,
+            high_water=high_water,
             now=finished,
         )
 
-    if next_window_start >= harvest_until:
+    if walk_direction == "backward" and next_window_start >= harvest_until:
+        restore = high_water if high_water is not None else _utc_now()
+        next_window_start = restore
+        harvest_until = restore
+        walk_direction = "forward"
+        _persist_cursor(
+            conn,
+            next_window_start=next_window_start,
+            harvest_until=harvest_until,
+            walk_direction=walk_direction,
+            high_water=high_water,
+            now=_utc_now(),
+        )
+    elif walk_direction == "forward" and next_window_start >= harvest_until:
         bumped = _utc_now()
         if bumped > harvest_until:
             harvest_until = bumped
-            set_cursor(
+            _persist_cursor(
                 conn,
-                _SEARCH_SOURCE,
-                next_window_start=_iso(next_window_start),
-                harvest_until=_iso(harvest_until),
+                next_window_start=next_window_start,
+                harvest_until=harvest_until,
+                walk_direction=walk_direction,
+                high_water=high_water,
                 now=bumped,
             )
 

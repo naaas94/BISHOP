@@ -56,6 +56,18 @@ def test_migrations_create_six_tables(temp_db: Path) -> None:
     finally:
         conn.close()
     assert EXPECTED_TABLES.issubset(tables)
+    conn = sqlite3.connect(temp_db)
+    try:
+        indexes = {
+            row[0]
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='index'"
+            ).fetchall()
+        }
+    finally:
+        conn.close()
+    assert "ix_manifest_state_discovered" in indexes
+    assert "ix_entries_state_ingested" in indexes
 
 
 def test_wal_mode_enabled(temp_db: Path) -> None:

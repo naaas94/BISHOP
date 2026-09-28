@@ -1,11 +1,75 @@
 # Changelog
 
+## ops — claim polls stop holding the write lock — 2026-09-27
+
+- `manifest` and `entries` claim polls were full scans under `BEGIN IMMEDIATE`. On the Docker bind mount an empty scan took 5–9s, past the 5s busy timeout, so other writers got `database is locked`. Scraper and pre-filter exited on the matching httpx timeout, and the GitHub mill stopped with the scraper. Indexes `ix_manifest_state_discovered` and `ix_entries_state_ingested` (`m8_002_claim_poll_indexes`) bring those scans under 0.05s. Scraper and pre-filter now survive a state-worker timeout and wait 60s. A pre-filter result for an already-terminal row no longer 409s the whole batch, and the poller stops on `terminal_state`. The three stuck batches were marked `failed`; their rows were already rejected. Rebuild `state-worker`, `scraper`, `pre-filter-worker`, and `batch-poller`. Write-up: `.dev/decision-logs/ops/2026-09-27-sqlite-claim-lock.md`.
+
+## ops — today glance — 2026-09-27
+
+- `/today` is the UTC-day glance: scrape health (lag or caught up, overlay, tick, queue pile, exceptions) plus discovered-by-source, a harvest faucet one-liner, and the discovery cohort. Lag bars stay on `/scrape`; mill, pool, and faucet cards stay on `/harvest`. Scrape’s Today card grid is now `N discovered · queue Q · Today`. Rebuild `query-api` and `ui`. Note: `.dev/ui/today.md`.
+
+## ops — reporting glance — 2026-09-27
+
+- Dashboard names the live exception: in-queue vs in-flight, parked vs proceeded, ingest stacked by source (volume vs 30d peak). `/landed` lists `GET /recent`. GitHub scrape row prints tap released today. Harvest drain sentence is current unreleased only. Parked header counts by source. Funnel rejected is count-only so it cannot overflow the live-stage scale. Rebuild `query-api` and `ui`.
+
+## ops — today page — 2026-09-27
+
+- `/today` is the UTC-day rollup: discovered since midnight, harvest faucet, funnel of that discovery cohort, entries created, batches completed, errors. Mill walk stays `/harvest`; scrape lag stays `/scrape`. No `indexed_at` — INDEXED count is today's discoveries already through. `GET /stats/today`. Note: `.dev/ui/today.md`.
+
+## ops — content scraper and enrichment stay up on poll timeout — 2026-09-27
+
+- Both had exited on `httpx.ReadTimeout` while polling state-worker, the same uncaught timeout that had killed pre-filter. A poll timeout now logs and the loop continues. Rebuild `content-scraper` and `enrichment-batcher`.
+
+## ops — arXiv walks one day at a time — 2026-09-27
+
+- Stamping the cursor to now after the 17–27 Sep page skipped every earlier overlay day that only had the old 100-result page (9 Sep is 104 stored of 307 on the API; 16 Sep is 0 of 338). A midday cursor is now treated as a jump and the walk restarts at the 60-day overlay floor. Each finished UTC day is stamped at 23:59:59; a failed day does not move the cursor. Pre-filter had exited on a poll read-timeout, so the 2,211 `DISCOVERED` rows had no Anthropic submit; that timeout now keeps the process up. Rebuild `scraper` and `pre-filter-worker`. Write-up: `.dev/decision-logs/ops/2026-09-27-arxiv-export-stuck.md`.
+
+## ops — arXiv export unstuck — 2026-09-27
+
+- The scrape cursor had been frozen at 2026-09-17 because Fastly answered the scraper image’s default TLS handshake with an empty 406, and a 406 does not retry or stamp `last_successful_run_at`. The export client now uses TLS 1.2. One tick pages the whole `submittedDate` window (100 per page, 3s apart, submittedDate ascending) and only then stamps the cursor. Manifest posts are chunks of 100 so a ~2,200-row catch-up does not die on the state-worker client timeout. Rebuilt `bishop/scraper:m8`: 23 pages all 200, cursor **2026-09-27T12:21:08Z**, **2,211** `DISCOVERED` rows. Write-up: `.dev/decision-logs/ops/2026-09-27-arxiv-export-stuck.md`.
+
+## ops — FRS console restyle — 2026-09-27
+
+- Operator UI uses the FRS console sheet: near-black, square surfaces, gold for focus, `is-ok` / `is-warn` / `is-bad` / `is-dead` for health. Stale scrape lag is no longer the same red as harvest overshoot. Operator same day: not loved; iterate — as-built, not locked. Rebuild `ui`. Note: `.dev/ui/design.md`.
+
+## ops — operator ingest pages logged — 2026-09-27
+
+- Dashboard stays pipeline glance. `/scrape` is incremental cursors; `/harvest` is mill + tap `$`. Glance fields on `StatsOverview`; full payload on `GET /stats/scrape` and `GET /stats/harvest`. Query-api must get overlay/interval/budget env and be recreated, not rebuild-only. Write-up: `.dev/decision-logs/ops/2026-09-27-operator-ingest-pages.md`. Notes: `.dev/ui/`.
+
+## ops — scrape page — 2026-09-27
+
+- `/scrape` is the incremental ingest surface: worst live-source lag from `scraper_state.last_successful_run_at`, overlay window, today’s `DISCOVERED` inserts, per-source queue. Papers with Code is dead and does not set the headline. GitHub mill stays `/harvest`. `GET /stats/scrape`. Query-api gets the same scrape overlay/interval env as the scraper. Note: `.dev/ui/scrape.md`.
+
+## ops — harvest economics page — 2026-09-27
+
+- `/harvest` is the harvest surface: unreleased pool as modeled dollar liability, mill walk with a censored Search-window forecast band, and a faucet that uses the same `remaining_slots` rule as the scraper (including released-today overshoot). Dashboard keeps a one-line summary and a link. `GET /stats/harvest` on query-api. Figures are the pinned blend, not the Anthropic console (PB-002). Rebuild `query-api` and `ui`. Note: `.dev/ui/harvest-dashboard.md`.
+
+## ops — harvest mill walks backward — 2026-09-27
+
+- GitHub harvest mill now walks newest-unwalked first: a legacy forward cursor flips once (`walk_direction=backward`, `high_water=now`, `harvest_until=now`) and then retreats the high edge toward the existing floor. Restarts do not jump `harvest_until` back to now. Overflow fetches the newer half first; one-day overflow still caps at 10 pages and still retreats. When the gap is done, both edges restore to `high_water` and `walk_direction=forward` so bump-until covers new days. Release, economics, N_cap, and incremental DISCOVERED are unchanged. Write-up: `.dev/decision-logs/ops/2026-09-27-harvest-mill-backward.md`.
+
+## ops — harvest faucet to a third — 2026-09-27
+
+- Catch-up at `N_cap=14136` filled and the Anthropic credit balance stopped the batch path around 03:00 UTC. Host env `BISHOP_HARVEST_DAILY_BUDGET_USD` `11.72` → `4.52`, derived `N_cap` `14136` → `4712`. Yaml pin stays `$2`. Report: `catch_up_ad_hoc.md`.
+
+## ops — harvest N_cap override — 2026-09-26
+
+- Operator override, not a pin change. Host `BISHOP_HARVEST_DAILY_BUDGET_USD=11.72` so derived `N_cap=14136` (~10× the `$2` pin of 1413). `config/harvest/economics.yaml` stays `$2`; env wins. Reason: back from caba — server out for 4-ish days. Recreate `scraper` and `query-api` (no image rebuild). Write-up: `.dev/decision-logs/ops/2026-09-26-ncap-caba-override.md`.
+
 ## harvest-mill-loop — 2026-09-17
 
 - T1 (harvest mill interval config): Added env-backed `BISHOP_HARVEST_MILL_INTERVAL_SEC` (default 5) to scraper config. This is the mill loop's sleep between ticks, distinct from the 90s slice budget; not pinned in compose or `.env.example`, matching WINDOW_DAYS / SLICE_BUDGET / QUERY_ID.
 - T2 (remove harvest mill hitchhike from scrape_cycle): `scrape_cycle` no longer calls `harvest_github_slices` after the adapter loop, so the mill is no longer starved to a 90s slice on the 6h scrape tick. The mill's own asyncio loop lands in a later subtask. Deferred: the source-grep falsifier does not execute `scrape_cycle`; T3's mill-loop wiring test (harvest patched on `main.py`) is the execution-path proof.
 - T3 (harvest mill own asyncio loop): Added `_mill_loop` as a third `asyncio.gather` sibling in the scraper process so GitHub Search harvest walks on its own 5s cadence with a 90s slice budget, instead of waiting on the 6h scrape tick. Single call site, dedicated rest interval, per-tick 30s httpx client; `harvest_github_slices` still no-ops when the harvest flag is off. See `.dev/decision-logs/ops/harvest-mill-loop.md`.
 - T4 (harvest mill loop closeout): Harvest GitHub mill now runs as its own asyncio loop (`_mill_loop`, `BISHOP_HARVEST_MILL_INTERVAL_SEC` default 5s) instead of hitchhiking `scrape_cycle`'s 90s/6h tick; `scrape_cycle` no longer calls `harvest_github_slices`. See `.dev/decision-logs/ops/harvest-mill-loop.md`. + added `tests/test_product_backlog.py`. Deferred: `AGENTS.md` still says PB-011 is next code (not in this subtask's files-to-touch; landing gate = auditor-review — observable: that harvest-pool pickup line names the mill as landed).
+
+## ops — attention pass / digest consumer parked (PB-013) — 2026-09-17
+
+- Documented, parked. No mill, no schema, no UI. Consumption layer over INDEXED (must-look / digest, idempotent persist); parked overlay is a separate cheap pass; home feed later; news/signals are M9 not this. Open fork: Bishop sidecar vs separate consumer of query-api / stores. Do not fold into Call 1/2 or `processing_state`. Write-up: `.dev/decision-logs/ops/attention-pass-consumer.md`. Pickup: `.dev/direction/2026-09-17-attention-pass/plan.md`. Tracked as PB-013. Sibling of PB-010.
+
+## ops — Sept 15 spend snapshot — 2026-09-17
+
+- Documented, not a schema change. UTC 2026-09-15 reconstructed from `sqlite_live` plus the operator Anthropic console (~25M tokens / ~$3, mostly cache hits). 4,114 pre-filter rows, 93 complete batches, 52 INDEXED. Rewind day (lookback 1 → 7 → 60), not steady state. Write-up: `.dev/decision-logs/ops/2026-09-15-day-performance.md`. Does not close overlay revert-or-promote. Does not land PB-002.
 
 ## harvest-pool — 2026-09-17
 

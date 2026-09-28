@@ -1,0 +1,160 @@
+<div id="today-stats" hx-get="/today" hx-trigger="every 30s" hx-swap="outerHTML">
+{% if not stats and not error %}
+<p class="muted">No today stats available.</p>
+{% endif %}
+{% if stats %}
+<section class="harvest-hero">
+  <div class="stat-value harvest-hero-value">{{ stats.discovered_today }}</div>
+  <div class="stat-label">Discovered (UTC {{ stats.utc_day }})</div>
+  <p class="muted">
+    Since {{ stats.utc_midnight }}.
+    {{ stats.harvest_released_today }} harvest released ·
+    {{ stats.entries_ingested_today }} entries created ·
+    {{ stats.indexed_cohort_today }} of today's discoveries already INDEXED
+    (no indexed_at stamp).
+  </p>
+</section>
+
+<p class="harvest-summary{% if not stats.scrape_caught_up and stats.scrape_lag_source %} is-warn{% endif %}">
+  {% if stats.scrape_caught_up %}
+  Scrape caught up
+  {% elif stats.scrape_lag_source %}
+  Scrape {{ "%.1f"|format(stats.scrape_max_lag_hours) }}h behind ({{ stats.scrape_lag_source }})
+  {% else %}
+  No scrape cursor yet
+  {% endif %}
+  · overlay {% if stats.overlay_window_days is not none %}{{ stats.overlay_window_days }}d{% else %}pin{% endif %}
+  · tick {{ stats.schedule_interval_sec }}s
+  · queue {{ stats.scrape_in_queue }}
+  · <a href="/scrape">Scrape</a>
+</p>
+{% for row in stats.scrape_exceptions %}
+<p class="harvest-summary{% if row.stale %} is-warn{% endif %}">
+  {{ row.source }}{% if row.stale %} stale{% endif %}
+  · today {{ row.discovered_today }}
+  · queue {{ row.in_queue }}
+  {% if row.lag_hours is not none %} · {{ "%.1f"|format(row.lag_hours) }}h{% endif %}
+</p>
+{% endfor %}
+
+<section class="harvest-walk">
+  <h2>Discovered by source</h2>
+  {% if stats.discovered_by_source %}
+  {% set src_ns = namespace(max=0) %}
+  {% for bucket in stats.discovered_by_source %}
+  {% if bucket.count > src_ns.max %}{% set src_ns.max = bucket.count %}{% endif %}
+  {% endfor %}
+  {% for bucket in stats.discovered_by_source %}
+  <div class="bar-row">
+    <span class="bar-label">{{ bucket.label }}</span>
+    <div class="bar-track"><div class="bar-fill" style="width: {{ bucket.count | pct(src_ns.max) }}%"></div></div>
+    <span class="bar-count">{{ bucket.count }}</span>
+  </div>
+  {% endfor %}
+  {% else %}
+  <p class="muted">Nothing discovered since UTC midnight.</p>
+  {% endif %}
+</section>
+
+<p class="harvest-summary{% if stats.harvest_released_overshoot %} is-bad{% endif %}">
+  {{ stats.harvest_released_today }} / {{ stats.harvest_n_cap }} released
+  · ${{ "%.2f"|format(stats.harvest_modeled_usd_today) }}
+  · tap
+  {% if stats.harvest_tap_killed %}
+  killed
+  {% elif stats.harvest_tap_open %}
+  open
+  {% else %}
+  closed
+  {% endif %}
+  · <a href="/harvest">Harvest</a>
+</p>
+
+<section class="harvest-walk">
+  <h2>Today's discoveries</h2>
+  <p class="muted">
+    Funnel of rows with discovered_at since UTC midnight.
+    {{ stats.in_queue_today }} still in queue states.
+  </p>
+  {% set funnel_ns = namespace(max=0) %}
+  {% for bucket in stats.funnel %}
+  {% if bucket.count > funnel_ns.max %}{% set funnel_ns.max = bucket.count %}{% endif %}
+  {% endfor %}
+  {% for bucket in stats.funnel %}
+  {% if bucket.count %}
+  <div class="bar-row">
+    <span class="bar-label">{{ bucket.label }}</span>
+    <div class="bar-track"><div class="bar-fill" style="width: {{ bucket.count | pct(funnel_ns.max) }}%"></div></div>
+    <span class="bar-count">{{ bucket.count }}</span>
+  </div>
+  {% endif %}
+  {% endfor %}
+</section>
+
+<section class="harvest-faucet">
+  <h2>Pipeline today</h2>
+  <section class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.entries_ingested_today }}</div>
+      <div class="stat-label">Entries created</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.indexed_cohort_today }}</div>
+      <div class="stat-label">Today's discoveries INDEXED</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.batches_completed_today }}</div>
+      <div class="stat-label">Batches completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.in_queue_today }}</div>
+      <div class="stat-label">Still in queue</div>
+    </div>
+  </section>
+  {% if stats.queue_depth %}
+  <h3>Queue (today's cohort)</h3>
+  {% set queue_ns = namespace(max=0) %}
+  {% for bucket in stats.queue_depth %}
+  {% if bucket.count > queue_ns.max %}{% set queue_ns.max = bucket.count %}{% endif %}
+  {% endfor %}
+  {% for bucket in stats.queue_depth %}
+  <div class="bar-row">
+    <span class="bar-label">{{ bucket.label }}</span>
+    <div class="bar-track"><div class="bar-fill" style="width: {{ bucket.count | pct(queue_ns.max) }}%"></div></div>
+    <span class="bar-count">{{ bucket.count }}</span>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% if stats.batches_by_type %}
+  <h3>Batches by type</h3>
+  {% set bt_ns = namespace(max=0) %}
+  {% for bucket in stats.batches_by_type %}
+  {% if bucket.count > bt_ns.max %}{% set bt_ns.max = bucket.count %}{% endif %}
+  {% endfor %}
+  {% for bucket in stats.batches_by_type %}
+  <div class="bar-row">
+    <span class="bar-label">{{ bucket.label }}</span>
+    <div class="bar-track"><div class="bar-fill" style="width: {{ bucket.count | pct(bt_ns.max) }}%"></div></div>
+    <span class="bar-count">{{ bucket.count }}</span>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% if stats.errors_today %}
+  <h3>Errors</h3>
+  {% set err_ns = namespace(max=0) %}
+  {% for bucket in stats.errors_today %}
+  {% if bucket.count > err_ns.max %}{% set err_ns.max = bucket.count %}{% endif %}
+  {% endfor %}
+  {% for bucket in stats.errors_today %}
+  <div class="bar-row">
+    <span class="bar-label">{{ bucket.label }}</span>
+    <div class="bar-track"><div class="bar-fill" style="width: {{ bucket.count | pct(err_ns.max) }}%"></div></div>
+    <span class="bar-count">{{ bucket.count }}</span>
+  </div>
+  {% endfor %}
+  {% else %}
+  <p class="muted">No errors since UTC midnight.</p>
+  {% endif %}
+</section>
+{% endif %}
+</div>

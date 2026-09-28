@@ -18,7 +18,8 @@ This host is Windows. Rule: `.cursor/rules/windows-file-tools.mdc`. Use **forwar
 - Rule: `.cursor/rules/bishop-ui.mdc`
 - Folder: `.dev/ui/` (index `README.md`, live map `agent-reference.md`)
 - Host: `http://localhost:8081`. Query-api only; templates/CSS are baked into `bishop/ui:m8` (rebuild after edits).
-- Landing page is `/dashboard` (`GET /stats/overview`). Architecture folder still says `/batches` — trust `.dev/ui/`.
+- Landing page is `/dashboard` (`GET /stats/overview`). Incremental cursors: `/scrape`. GitHub mill + tap `$`: `/harvest`. UTC-day glance: `/today`. Architecture folder still says `/batches` — trust `.dev/ui/`.
+- Reporting (cohorts, conversion, cost) is the Insights Manager: `.dev/insights-manager/README.md` (registry `findings.yaml`, errata `corrections.md`). It names and routes findings to owner docs; it never edits them, authors pages, or touches `services/ui`. `REPORTING.md` is the superseded founding brief.
 
 ## Source notes (taste + intel)
 
@@ -26,13 +27,20 @@ This host is Windows. Rule: `.cursor/rules/windows-file-tools.mdc`. Use **forwar
 - Rule: `.cursor/rules/bishop-source-notes.mdc`
 - These notes are **not** a second profile pin and **not** per-source routing. One gate-1 pin until an eval earns a split.
 - GitHub pickup: `repo-gate-next.md`. GitHub stamps/intel: `eval/github_repo_gate_v0/` + `config/source-notes/github.md`.
-- Harvest pool pickup: `harvest-pool-next.md`. Decision log: `.dev/decision-logs/ops/harvest-pool-first-landing.md`. Sidecar `${BISHOP_DATA_ROOT}/harvest/ledger.sqlite` (not `bishop.db`). Next is PB-011 mill loop, not cutover.
+- Harvest pool pickup: `harvest-pool-next.md`. Decision log: `.dev/decision-logs/ops/harvest-pool-first-landing.md`. Sidecar `${BISHOP_DATA_ROOT}/harvest/ledger.sqlite` (not `bishop.db`). Mill loop (PB-011) shipped. Next **code** is PB-012 GitHub cutover. Operator pages `/scrape`, `/harvest`, `/today`. ~356k is 60d, not 2y.
 
 ## MCP / agent tool (not built)
 
 - Notes: `mcp-agent-tool-notes.md` (v1 read-only wrap of query-api search / get_entry / recent)
+- Search: name the entity in `q`. A paraphrase is a different search. The hit `summary` and `relevance_score` are not citations. Log: `.dev/decision-logs/ops/2026-09-27-search-prompt-shape.md`.
 - Write-up: `.dev/decision-logs/ops/mcp-consumer-extraction.md` — consumers extract and apply; Bishop does not. PB-010.
 - Do not treat MCP as a write surface into SQLite or the VDB.
+
+## Attention pass / digest consumer (parked, not built)
+
+- Operator idea PB-013: must-look / digest over INDEXED (parked overlay is a separate cheap pass); idempotent persist; home feed later. Open fork: Bishop sidecar vs separate consumer of query-api / stores.
+- Write-up: `.dev/decision-logs/ops/attention-pass-consumer.md`. Pickup: `.dev/direction/2026-09-17-attention-pass/plan.md`.
+- Do not fold into Call 1/2, `processing_state` past `INDEXED`, `/dashboard`, MCP, or M9.
 
 ## Eval / relevance calibration
 

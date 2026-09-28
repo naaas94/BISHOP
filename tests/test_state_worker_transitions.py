@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import sqlite3
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -33,7 +34,6 @@ from app.transitions import (  # noqa: E402
     N3_FAILURE_NORMALIZATION,
     ProvenanceIncompleteError,
     RETRY_TARGET_MAP,
-    TerminalStateError,
     apply_enrichment_stage1_results,
     apply_pre_filter_results,
     assert_pre_filter_provenance,
@@ -196,30 +196,65 @@ def test_atomic_claim_second_poll_empty(temp_db: Path) -> None:
     asyncio.run(_run())
 
 
-def test_terminal_state_blocks_pre_filter_update(temp_db: Path) -> None:
+def test_pre_filter_results_skip_terminal_rows(temp_db: Path) -> None:
+    """A terminal row is left alone and does not fail the rest of the POST."""
+
     async def _run() -> None:
         await init_pool(str(temp_db), size=1)
         try:
             async with get_db() as conn:
-                await _seed_discovered(conn)
+                await _seed_discovered(conn, _SOURCE)
+                await _seed_discovered(conn, "arxiv:2406.00002")
+                await claim_manifest_poll(conn, ProcessingState.DISCOVERED, limit=50)
                 await conn.execute(
-                    "UPDATE manifest SET processing_state = ? WHERE source_id = ?",
-                    (ProcessingState.RELEVANCE_REJECTED.value, _SOURCE),
+                    """
+                    UPDATE manifest
+                    SET processing_state = ?, pre_filter_batch_id = ?, relevance_decision = ?
+                    WHERE source_id = ?
+                    """,
+                    (
+                        ProcessingState.RELEVANCE_REJECTED.value,
+                        "batch-other",
+                        0,
+                        _SOURCE,
+                    ),
                 )
                 await conn.commit()
-                with pytest.raises(TerminalStateError):
-                    await apply_pre_filter_results(
-                        conn,
-                        "batch-1",
-                        "1.0.0",
-                        [
-                            PreFilterResultEntryWire(
-                                source_id=_SOURCE,
-                                decision=1,
-                                pre_filter_rationale="late",
-                            )
-                        ],
-                    )
+                result = await apply_pre_filter_results(
+                    conn,
+                    "batch-late",
+                    "1.0.0",
+                    [
+                        PreFilterResultEntryWire(
+                            source_id=_SOURCE,
+                            decision=1,
+                            pre_filter_rationale="late",
+                        ),
+                        PreFilterResultEntryWire(
+                            source_id="arxiv:2406.00002",
+                            decision=1,
+                            pre_filter_rationale="keep",
+                        ),
+                    ],
+                )
+                assert (result.updated, result.passed, result.rejected) == (1, 1, 0)
+                cursor = await conn.execute(
+                    """
+                    SELECT processing_state, pre_filter_batch_id, relevance_decision
+                    FROM manifest WHERE source_id = ?
+                    """,
+                    (_SOURCE,),
+                )
+                assert tuple(await cursor.fetchone()) == (
+                    ProcessingState.RELEVANCE_REJECTED.value,
+                    "batch-other",
+                    0,
+                )
+                cursor = await conn.execute(
+                    "SELECT processing_state FROM manifest WHERE source_id = ?",
+                    ("arxiv:2406.00002",),
+                )
+                assert (await cursor.fetchone())[0] == ProcessingState.RELEVANCE_PASSED.value
         finally:
             await close_pool()
 
@@ -637,6 +672,65 @@ def test_mark_indexed_idempotent(temp_db: Path) -> None:
                 row = await cursor.fetchone()
                 assert row[0] == ProcessingState.INDEXED.value
         finally:
+            await close_pool()
+
+    asyncio.run(_run())
+
+
+def test_mark_indexed_raises_when_write_lock_is_held_and_retries(
+    temp_db: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("BISHOP_SQLITE_BUSY_TIMEOUT_MS", "100")
+
+    async def _run() -> None:
+        await init_pool(str(temp_db), size=1)
+        holder: sqlite3.Connection | None = None
+        try:
+            async with get_db() as conn:
+                await _advance_to_scraped(conn)
+                await conn.execute(
+                    "UPDATE entries SET processing_state = ? WHERE source_id = ?",
+                    (ProcessingState.VECTOR_WRITE_QUEUED.value, _SOURCE),
+                )
+                await conn.execute(
+                    "UPDATE manifest SET processing_state = ? WHERE source_id = ?",
+                    (ProcessingState.VECTOR_WRITE_QUEUED.value, _SOURCE),
+                )
+                await conn.commit()
+
+            holder = sqlite3.connect(temp_db)
+            holder.execute("BEGIN IMMEDIATE")
+            with pytest.raises(sqlite3.OperationalError, match="database is locked"):
+                async with get_db() as conn:
+                    await mark_indexed(conn, _SOURCE)
+
+            peeked = sqlite3.connect(f"file:{temp_db.as_posix()}?mode=ro", uri=True)
+            try:
+                row = peeked.execute(
+                    "SELECT processing_state FROM entries WHERE source_id = ?",
+                    (_SOURCE,),
+                ).fetchone()
+            finally:
+                peeked.close()
+            assert row is not None
+            assert row[0] == ProcessingState.VECTOR_WRITE_QUEUED.value
+
+            holder.rollback()
+            holder.close()
+            holder = None
+
+            async with get_db() as conn:
+                await mark_indexed(conn, _SOURCE)
+                cursor = await conn.execute(
+                    "SELECT processing_state FROM entries WHERE source_id = ?",
+                    (_SOURCE,),
+                )
+                row = await cursor.fetchone()
+                assert row[0] == ProcessingState.INDEXED.value
+        finally:
+            if holder is not None:
+                holder.rollback()
+                holder.close()
             await close_pool()
 
     asyncio.run(_run())

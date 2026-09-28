@@ -1,0 +1,70 @@
+<div id="scrape-stats" hx-get="/scrape" hx-trigger="every 30s" hx-sync="this:drop" hx-swap="outerHTML">
+{% if not stats and not error %}
+<p class="muted">No scrape stats available.</p>
+{% endif %}
+{% if stats %}
+<section class="harvest-hero{% if stats.caught_up %} is-ok{% elif stats.lag_source %} is-bad{% endif %}">
+  {% if stats.caught_up %}
+  <div class="stat-value harvest-hero-value">Caught up</div>
+  <div class="stat-label">Incremental scrape</div>
+  <p class="muted">Every live source last ran within one scrape tick ({{ stats.schedule_interval_sec }}s).</p>
+  {% elif stats.lag_source %}
+  <div class="stat-value harvest-hero-value">{{ "%.1f"|format(stats.max_lag_hours) }}h</div>
+  <div class="stat-label">Behind ({{ stats.lag_source }})</div>
+  <p class="muted">Worst live cursor vs now. Tick is {{ stats.schedule_interval_sec }}s. Papers with Code is ignored.</p>
+  {% else %}
+  <div class="stat-value harvest-hero-value">—</div>
+  <div class="stat-label">No scrape cursor yet</div>
+  <p class="muted">scraper_state is empty. Incremental fetch has not stamped a last_successful_run_at.</p>
+  {% endif %}
+</section>
+
+<section class="harvest-walk">
+  <h2>Sources</h2>
+  <p class="muted">
+    last_successful_run_at is the incremental since. Overlay
+    {% if stats.overlay_window_days is not none %}
+    {{ stats.overlay_window_days }}d
+    {% else %}
+    unset (per-source pin)
+    {% endif %}
+    · backfill {{ "on" if stats.backfill_enabled else "off" }}.
+    GitHub mill is a sibling path, not this table.
+  </p>
+  {% for row in stats.sources %}
+  <div class="bar-row{% if row.dead %} is-dead{% elif row.stale %} is-warn{% endif %}">
+    <span class="bar-label">{{ row.source }}</span>
+    <div class="bar-track">
+      {% if row.dead %}
+      <div class="bar-fill" style="width: 0%"></div>
+      {% elif row.lag_hours is not none %}
+      <div class="bar-fill" style="width: {{ row.lag_fill_pct }}%"></div>
+      {% endif %}
+    </div>
+    <span class="bar-count">
+      {% if row.dead %}dead
+      {% elif row.lag_hours is none %}—
+      {% else %}{{ "%.1f"|format(row.lag_hours) }}h
+      {% endif %}
+    </span>
+  </div>
+  <p class="muted scrape-source-meta">
+    today {{ row.discovered_today }}
+    {% if row.source == "github" and stats.github_released_today is not none %}
+    · tap released {{ stats.github_released_today }}
+    {% endif %}
+    · queue {{ row.in_queue }} · pin {{ row.pin_window_days }}d
+    {% if row.last_successful_run_at %} · last {{ row.last_successful_run_at }}{% endif %}
+    {% if row.note %} · {{ row.note }}{% endif %}
+  </p>
+  {% endfor %}
+</section>
+
+<p class="harvest-summary">
+  {{ stats.discovered_today }} discovered
+  · queue {{ stats.in_queue }}
+  · <a href="/today">Today</a>
+</p>
+<p class="muted">{{ stats.generated_at }}</p>
+{% endif %}
+</div>

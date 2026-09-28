@@ -155,6 +155,41 @@ def test_content_scrape_cycle_empty_poll_skips_fetch(tmp_path: Path) -> None:
     state_client.post_content.assert_not_called()
 
 
+def test_content_scrape_cycle_poll_timeout_returns(tmp_path: Path) -> None:
+    loop_mod, models, client_mod, _ = _load_content_scraper_loop_stack(tmp_path)
+    state_client = _mock_state_client(client_mod, models, entries=[])
+    state_client.poll_relevance_passed = AsyncMock(
+        side_effect=httpx.ReadTimeout("timed out"),
+    )
+
+    async def _run() -> None:
+        await loop_mod.content_scrape_cycle(state_client)
+
+    asyncio.run(_run())
+    state_client.post_content.assert_not_called()
+
+
+def test_content_scrape_cycle_post_timeout_does_not_raise(tmp_path: Path) -> None:
+    loop_mod, models, client_mod, arxiv_mod = _load_content_scraper_loop_stack(tmp_path)
+    entry = _sample_poll_entry(models)
+    state_client = _mock_state_client(client_mod, models, entries=[entry])
+    state_client.post_content = AsyncMock(side_effect=httpx.ReadTimeout("timed out"))
+
+    async def _run() -> None:
+        with patch.object(loop_mod, "resolve_adapter") as mock_resolve:
+            mock_resolve.return_value = arxiv_mod.ArxivAdapter()
+            with patch.object(
+                loop_mod,
+                "failure_envelope",
+                new_callable=AsyncMock,
+                return_value="scraped body text",
+            ):
+                await loop_mod.content_scrape_cycle(state_client)
+
+    asyncio.run(_run())
+    state_client.post_content.assert_awaited_once()
+
+
 def test_content_scrape_cycle_happy_path_posts_content(tmp_path: Path) -> None:
     loop_mod, models, client_mod, arxiv_mod = _load_content_scraper_loop_stack(tmp_path)
     entry = _sample_poll_entry(models)

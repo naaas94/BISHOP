@@ -45,6 +45,9 @@ Batches (`GET /batches`, `GET /batches/{id}`) and escalations (`GET /escalations
 
 ## 3. Constraints specific to agent consumption (vs. human UI)
 
+- **Name the entity in `q`.** On 2026-09-27, `Jev TypeSafe System One decision model` returned the three indexed Jev papers at the top. The same idea phrased as the training method, as a backdoor monitor, or as a keep-or-drop gate did not. A paraphrase is a different search. Log: `.dev/decision-logs/ops/2026-09-27-search-prompt-shape.md`.
+- **The hit card is a pointer.** `summary` compressed a cascade against GPT-6 into "99% of GPT-4". `relevance_score` ranked a GUI executor at 0.76 and the useful audit at 0.38. Cite `get_entry` or the source, not the snippet, when the number matters.
+
 - **Token budget on `get_entry`.** `content_raw` is the entire scraped body. Default response should be summary + concepts + tags + challenge_hooks, with an explicit `include_content` flag or a hard character cap to opt into the full body. The UI can afford to render everything; an agent session cannot afford to eat it by default.
 - **Default hit count / pagination on `search`.** Needs an explicit small default (existing `SearchResponse.total` plus `hits` — cap before wrapping, don't just pass query-api's raw response through).
 - **Domain default.** `DEFAULT_SEARCH_DOMAIN` (`bishop_shared/query_config.py`) is `"professional"` today; personal domain profile/routing is still not implemented (per `.dev/architecture/bishop/public-interface-inventory.md` — "Still not public: personal domain profile YAML and routing"). The tool surface should not imply a personal-domain filter exists yet.
@@ -121,3 +124,11 @@ Bishop **does** owe consumers a general “how to understand this index” (MCP 
 **Value extraction is per consumer** for anything task-shaped. **Action is always per consumer.** Bishop never applies a finding (no destination skill/spec/repo). The “other way around” (Bishop extracts once into the VDB) is better for a shared corpus and worse to distribute — you would be shipping a judge. Only artifact-level claims (“this README is a landing”) would ever belong in Bishop, and only if a lightweight experiment shows they recur.
 
 **Experiment before v2:** one real task, a few hits, scout by hand. Count artifact vs task findings. Do not scale `record_scout` or a Bishop-owned extract on theory.
+
+---
+
+## 9. Related parked — operator attention pass (2026-09-17)
+
+Not MCP. Sibling idea **PB-013**: an operator (later job) pass over INDEXED in a range that flags must-looks or writes a digest, persisted so reruns are a no-op; maybe a home feed later. May be a **separate consumer** of Bishop stores rather than a Bishop mill. Do not collapse into this MCP sidecar, into Call 1/2, or into `processing_state` past `INDEXED`. Parked overlay is a different population.
+
+Write-up: `.dev/decision-logs/ops/attention-pass-consumer.md`. Pickup: `.dev/direction/2026-09-17-attention-pass/plan.md`.

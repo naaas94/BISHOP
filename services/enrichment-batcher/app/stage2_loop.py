@@ -110,6 +110,12 @@ async def stage2_cycle(
                 extra={"http_status": exc.response.status_code, "event": "state_worker_error"},
             )
             return
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            logger.error(
+                "state-worker poll failed",
+                extra={"error": type(exc).__name__, "event": "state_worker_error"},
+            )
+            return
 
         global _hold_started_at
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+import sqlite3
 from typing import Annotated
 
 import aiosqlite
@@ -42,6 +44,8 @@ from app.transitions import (
     record_failure,
     update_reading_status,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["entries"])
 
@@ -173,6 +177,17 @@ async def post_entries_indexed(
         await mark_indexed(conn, body.source_id)
     except TransitionError as exc:
         return _transition_error_response(exc)
+    except sqlite3.OperationalError as exc:
+        if "database is locked" not in str(exc):
+            raise
+        logger.warning(
+            "mark_indexed database is locked",
+            extra={"source_id": body.source_id, "event": "database_locked"},
+        )
+        return JSONResponse(
+            status_code=503,
+            content={"error": "database_locked", "source_id": body.source_id},
+        )
     return Response(status_code=204)
 
 

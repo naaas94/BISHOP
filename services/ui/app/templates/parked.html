@@ -3,6 +3,14 @@
 {% block content %}
 <h1>Parked inbox</h1>
 <p class="muted">Interesting but not sure enough to enrich. Title and abstract only — promote to pay for scrape and index.</p>
+{% if parked_by_source %}
+<p class="muted">
+  {{ entries | length }} parked
+  {% for src, n in parked_by_source %}
+  · {{ src }} {{ n }}
+  {% endfor %}
+</p>
+{% endif %}
 {% if message %}
 <p class="success">{{ message }}</p>
 {% endif %}

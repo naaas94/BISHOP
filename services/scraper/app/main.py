@@ -24,7 +24,15 @@ logger = logging.getLogger(__name__)
 
 async def _scrape_loop(client: StateWorkerClient) -> None:
     while True:
-        await scrape_cycle(client)
+        try:
+            await scrape_cycle(client)
+        except (httpx.TimeoutException, httpx.TransportError):
+            # The mill shares this process. An uncaught read timeout on a
+            # cursor stamp used to exit both loops.
+            logger.exception(
+                "scrape cycle failed",
+                extra={"event": "scrape_cycle_failed"},
+            )
         await asyncio.sleep(SCRAPER_SCHEDULE_INTERVAL_SEC)
 
 

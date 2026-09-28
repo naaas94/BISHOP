@@ -10,6 +10,8 @@ This is a temporary, operator-requested launch posture. It is not a charter slic
 
 Revert or formally promote it after the first-week spend and inbox quality are visible. Until then, treat every pin, state, and env default below as overlay — not as the new contract.
 
+**Spend snapshot (filed 2026-09-17, not a verdict):** UTC 2026-09-15 was ~25M tokens / ~$3 billed, 4,114 pre-filter rows, 52 INDEXED — a rewind day, not steady state. Reconstruction: `.dev/decision-logs/ops/2026-09-15-day-performance.md`. Inbox quality is still a separate `/parked` walk.
+
 ## Intended behavior (what this is not)
 
 | Surface | Intended (pre-overlay) |

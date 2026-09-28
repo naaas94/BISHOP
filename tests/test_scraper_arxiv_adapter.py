@@ -208,6 +208,28 @@ async def test_fetch_manifest_parses_fixture_atom_xml(
     assert "search_query" in params
     assert "cat:cs.AI" in params["search_query"][0]
     assert params["max_results"] == ["100"]
+    assert params["start"] == ["0"]
+    assert params["sortBy"] == ["submittedDate"]
+    assert params["sortOrder"] == ["ascending"]
+    assert "submittedDate:[20260605000000 TO 20260612235959]" in params["search_query"][0]
+
+
+@pytest.mark.asyncio
+async def test_fetch_manifest_until_limits_the_query_to_that_day() -> None:
+    arxiv = _load_arxiv_stack()
+    captured: dict[str, str] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["url"] = str(request.url)
+        return httpx.Response(200, content=_EMPTY_FEED.encode())
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        adapter = arxiv.ArxivAdapter(http_client=client)
+        await adapter.fetch_manifest(since=_SINCE, until=_SINCE)
+
+    params = parse_qs(urlparse(captured["url"]).query)
+    assert "submittedDate:[20260605000000 TO 20260605235959]" in params["search_query"][0]
 
 
 @pytest.mark.asyncio
@@ -340,3 +362,121 @@ async def test_fetch_manifest_logs_category_gate_event(
     assert record.skipped_by_category == 1
     assert record.kept == 3
     assert len(entries) == 3
+
+
+def _feed(entries_xml: str, *, total: int | None) -> bytes:
+    total_xml = (
+        f"<opensearch:totalResults>{total}</opensearch:totalResults>"
+        if total is not None
+        else ""
+    )
+    return (
+        "<?xml version='1.0' encoding='UTF-8'?>"
+        '<feed xmlns="http://www.w3.org/2005/Atom" '
+        'xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">'
+        f"{total_xml}{entries_xml}</feed>"
+    ).encode()
+
+
+def _one_entry(raw_id: str) -> str:
+    return (
+        "<entry>"
+        f"<id>http://arxiv.org/abs/{raw_id}v1</id>"
+        f"<title>Paper {raw_id}</title>"
+        "<published>2026-06-10T12:00:00Z</published>"
+        "</entry>"
+    )
+
+
+def test_export_ssl_context_caps_tls_1_2() -> None:
+    import ssl
+
+    arxiv = _load_arxiv_stack()
+    ctx = arxiv.arxiv_export_ssl_context()
+    assert ctx.maximum_version == ssl.TLSVersion.TLSv1_2
+    assert arxiv.ARXIV_INTER_PAGE_DELAY_SEC == 3.0
+
+
+def test_export_feed_bounds_reads_total_and_raw_entry_count() -> None:
+    arxiv = _load_arxiv_stack()
+    count, total = arxiv.export_feed_bounds(
+        _feed(_one_entry("2406.00001") + _one_entry("2406.00002"), total=2211),
+    )
+    assert count == 2
+    assert total == 2211
+    count, total = arxiv.export_feed_bounds(_EMPTY_FEED.encode())
+    assert count == 0
+    assert total is None
+
+
+@pytest.mark.asyncio
+async def test_fetch_manifest_pages_the_whole_window(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    arxiv = _load_arxiv_stack()
+    monkeypatch.setattr(arxiv, "_max_results_from_env", lambda: 1)
+    sleeps: list[float] = []
+
+    async def _sleep(seconds: float) -> None:
+        sleeps.append(seconds)
+
+    monkeypatch.setattr(arxiv.asyncio, "sleep", _sleep)
+    urls: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        urls.append(str(request.url))
+        start = int(parse_qs(urlparse(str(request.url)).query)["start"][0])
+        raw_id = "2406.00001" if start == 0 else "2406.00002"
+        return httpx.Response(200, content=_feed(_one_entry(raw_id), total=2))
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        adapter = arxiv.ArxivAdapter(http_client=client)
+        entries = await adapter.fetch_manifest(since=_SINCE)
+
+    assert [entry.source_id for entry in entries] == [
+        "arxiv:2406.00001",
+        "arxiv:2406.00002",
+    ]
+    assert len(urls) == 2
+    assert sleeps == [3.0]
+
+
+@pytest.mark.asyncio
+async def test_fetch_manifest_second_page_failure_raises(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    arxiv = _load_arxiv_stack()
+    monkeypatch.setattr(arxiv, "_max_results_from_env", lambda: 1)
+    monkeypatch.setattr(arxiv, "ARXIV_INTER_PAGE_DELAY_SEC", 0.0)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        start = int(parse_qs(urlparse(str(request.url)).query)["start"][0])
+        if start == 0:
+            return httpx.Response(200, content=_feed(_one_entry("2406.00001"), total=2))
+        return httpx.Response(406)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        adapter = arxiv.ArxivAdapter(http_client=client)
+        with pytest.raises(httpx.HTTPStatusError):
+            await adapter.fetch_manifest(since=_SINCE)
+
+
+@pytest.mark.asyncio
+async def test_fetch_manifest_does_not_finish_a_window_past_the_export_cap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    arxiv = _load_arxiv_stack()
+    monkeypatch.setattr(arxiv, "_max_results_from_env", lambda: 1)
+    monkeypatch.setattr(arxiv, "ARXIV_EXPORT_RESULT_CAP", 2)
+    monkeypatch.setattr(arxiv, "ARXIV_INTER_PAGE_DELAY_SEC", 0.0)
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=_feed(_one_entry("2406.00001"), total=None))
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        adapter = arxiv.ArxivAdapter(http_client=client)
+        with pytest.raises(arxiv.PermanentFailureError):
+            await adapter.fetch_manifest(since=_SINCE)

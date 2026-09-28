@@ -285,14 +285,18 @@ async def _fail_stale_batch(
     tracked.pop(batch.batch_id, None)
 
 
-def _is_stale_results_conflict(exc: httpx.HTTPStatusError) -> bool:
+def _settled_results_conflict(exc: httpx.HTTPStatusError) -> str | None:
+    """409s that will not succeed on retry. The batch should be marked failed."""
     if exc.response.status_code != 409:
-        return False
+        return None
     try:
         body = exc.response.json()
     except (json.JSONDecodeError, ValueError):
-        return False
-    return body.get("error") == "invalid_transition"
+        return None
+    error = body.get("error")
+    if error in {"invalid_transition", "terminal_state"}:
+        return error
+    return None
 
 
 async def _handle_results_post_error(
@@ -304,13 +308,14 @@ async def _handle_results_post_error(
     failure_event: str,
 ) -> None:
     if isinstance(exc, httpx.HTTPStatusError):
-        if _is_stale_results_conflict(exc):
+        settled = _settled_results_conflict(exc)
+        if settled is not None:
             await _fail_stale_batch(
                 state_client,
                 batch,
                 tracked,
                 event="stale_batch_results_rejected",
-                error="invalid_transition",
+                error=settled,
             )
             return
         logger.error(

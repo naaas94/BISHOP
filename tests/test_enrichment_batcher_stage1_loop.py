@@ -332,6 +332,20 @@ def test_poll_scraped_entries_uses_scraped_state() -> None:
     asyncio.run(_run())
 
 
+def test_stage1_cycle_poll_timeout_skips_submit() -> None:
+    _, loop_mod, _, client_mod = _load_enrichment_batcher_stack()
+    client = MagicMock(spec=client_mod.StateWorkerClient)
+    client.poll_scraped_entries = AsyncMock(side_effect=httpx.ReadTimeout("timed out"))
+    client.aclose = AsyncMock()
+    anthropic_client = MagicMock()
+
+    async def _run() -> None:
+        await loop_mod.stage1_cycle(client, anthropic_client)
+
+    asyncio.run(_run())
+    client.register_batch.assert_not_called()
+
+
 def test_stage1_cycle_poll_http_error_skips_submit() -> None:
     """Falsifier: non-2xx poll must skip Anthropic submit and batch registration."""
     _, loop_mod, _, client_mod = _load_enrichment_batcher_stack()

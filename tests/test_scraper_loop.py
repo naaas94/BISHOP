@@ -65,11 +65,11 @@ def _load_scraper_loop_stack() -> tuple[ModuleType, ModuleType, ModuleType, Modu
     return adapter_base, exceptions, loop_mod, main_mod, models
 
 
-def _sample_entry(models: ModuleType) -> object:
+def _sample_entry(models: ModuleType, source_id: str = "arxiv:2406.00001") -> object:
     return models.ManifestIngestEntry(
-        source_id="arxiv:2406.00001",
+        source_id=source_id,
         source=SourceEnum.ARXIV,
-        url="http://arxiv.org/abs/2406.00001",
+        url=f"http://arxiv.org/abs/{source_id.split(':', 1)[1]}",
         title="Example Paper",
         domain=DomainEnum.PROFESSIONAL,
     )
@@ -262,6 +262,128 @@ async def test_scrape_cycle_escalatable_failure_skips_batch() -> None:
 
 
 @pytest.mark.asyncio
+async def test_scrape_cycle_survives_state_worker_read_timeout() -> None:
+    """A cursor-stamp timeout must not abort the rest of the cycle."""
+    _, _, loop_mod, _, models = _load_scraper_loop_stack()
+    first = _StubAdapter([_sample_entry(models, "arxiv:2406.00001")])
+    second = _StubAdapter([_sample_entry(models, "github:acme/tool")])
+    second.source = SourceEnum.GITHUB
+    client = AsyncMock()
+    client.get_scraper_state.return_value = models.ScraperStateSnapshot(
+        source=SourceEnum.GITHUB,
+        last_successful_run_at=_LAST_RUN,
+        updated_at=_UPDATED_AT,
+    )
+    client.post_manifest_batch.return_value = models.ManifestBatchResult(
+        inserted=1,
+        skipped=0,
+    )
+    request = httpx.Request("POST", "http://state-worker:8000/scraper-state/arxiv")
+    client.post_scraper_state.side_effect = [
+        httpx.ReadTimeout("timed out", request=request),
+        None,
+    ]
+
+    with (
+        patch.object(
+            loop_mod,
+            "ADAPTER_REGISTRY",
+            [_adapter_factory(first), _adapter_factory(second)],
+        ),
+    ):
+        await loop_mod.scrape_cycle(client)
+
+    assert client.post_scraper_state.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_scrape_loop_continues_after_read_timeout() -> None:
+    _, _, _, main_mod, _ = _load_scraper_loop_stack()
+    calls = {"n": 0}
+
+    async def fake_cycle(client: object) -> None:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise httpx.ReadTimeout("timed out")
+
+    with (
+        patch.object(main_mod, "scrape_cycle", fake_cycle),
+        patch.object(main_mod, "SCRAPER_SCHEDULE_INTERVAL_SEC", 0),
+    ):
+        task = asyncio.create_task(main_mod._scrape_loop(AsyncMock()))
+        for _ in range(20):
+            if calls["n"] >= 2:
+                break
+            await asyncio.sleep(0)
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    assert calls["n"] >= 2
+
+
+@pytest.mark.asyncio
+async def test_scrape_cycle_chunks_manifest_post_before_stamping_cursor() -> None:
+    _, _, loop_mod, _, models = _load_scraper_loop_stack()
+    entries = [_sample_entry(models, f"arxiv:2406.0000{index}") for index in range(3)]
+    adapter = _StubAdapter(entries)
+    client = AsyncMock()
+    client.get_scraper_state.return_value = models.ScraperStateSnapshot(
+        source=SourceEnum.ARXIV,
+        last_successful_run_at=_LAST_RUN,
+        updated_at=_UPDATED_AT,
+    )
+    client.post_manifest_batch.return_value = models.ManifestBatchResult(
+        inserted=1,
+        skipped=0,
+    )
+
+    with (
+        patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
+        patch.object(loop_mod, "MANIFEST_POST_CHUNK", 2),
+    ):
+        await loop_mod.scrape_cycle(client)
+
+    assert client.post_manifest_batch.await_count == 2
+    first = client.post_manifest_batch.await_args_list[0].args[0]
+    second = client.post_manifest_batch.await_args_list[1].args[0]
+    assert [entry.source_id for entry in first] == [
+        "arxiv:2406.00000",
+        "arxiv:2406.00001",
+    ]
+    assert [entry.source_id for entry in second] == ["arxiv:2406.00002"]
+    client.post_scraper_state.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_scrape_cycle_skips_state_update_when_a_later_chunk_fails() -> None:
+    _, _, loop_mod, _, models = _load_scraper_loop_stack()
+    entries = [_sample_entry(models, f"arxiv:2406.0000{index}") for index in range(3)]
+    adapter = _StubAdapter(entries)
+    client = AsyncMock()
+    client.get_scraper_state.return_value = models.ScraperStateSnapshot(
+        source=SourceEnum.ARXIV,
+        last_successful_run_at=_LAST_RUN,
+        updated_at=_UPDATED_AT,
+    )
+    request = httpx.Request("POST", "http://state-worker:8000/manifest/batch")
+    response = httpx.Response(500, request=request)
+    client.post_manifest_batch.side_effect = [
+        models.ManifestBatchResult(inserted=2, skipped=0),
+        httpx.HTTPStatusError("error", request=request, response=response),
+    ]
+
+    with (
+        patch.object(loop_mod, "ADAPTER_REGISTRY", [_adapter_factory(adapter)]),
+        patch.object(loop_mod, "MANIFEST_POST_CHUNK", 2),
+    ):
+        await loop_mod.scrape_cycle(client)
+
+    assert client.post_manifest_batch.await_count == 2
+    client.post_scraper_state.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_scheduler_invokes_scrape_release_and_mill() -> None:
     _, _, loop_mod, main_mod, _ = _load_scraper_loop_stack()
     assert hasattr(main_mod, "_mill_loop")
@@ -314,6 +436,92 @@ def test_mill_loop_does_not_gate_on_harvest_enabled() -> None:
     mill_src = source[start:end]
     assert "BISHOP_HARVEST_ENABLED" not in mill_src
     assert "harvest_github_slices" in mill_src
+
+
+def test_midday_arxiv_cursor_rewalks_from_the_overlay_floor() -> None:
+    _, _, loop_mod, _, _ = _load_scraper_loop_stack()
+    now = datetime(2026, 9, 27, 15, 0, tzinfo=UTC)
+    jumped = datetime(2026, 9, 27, 12, 21, tzinfo=UTC)
+    days = loop_mod.arxiv_days_to_scrape(jumped, now, window_days=2)
+    assert days == [
+        datetime(2026, 9, 25, tzinfo=UTC),
+        datetime(2026, 9, 26, tzinfo=UTC),
+        datetime(2026, 9, 27, tzinfo=UTC),
+    ]
+
+
+def test_finished_arxiv_day_continues_on_the_next_day() -> None:
+    _, _, loop_mod, _, _ = _load_scraper_loop_stack()
+    now = datetime(2026, 9, 27, 15, 0, tzinfo=UTC)
+    done = datetime(2026, 9, 25, 23, 59, 59, tzinfo=UTC)
+    days = loop_mod.arxiv_days_to_scrape(done, now, window_days=60)
+    assert days[0] == datetime(2026, 9, 26, tzinfo=UTC)
+    assert days[-1] == datetime(2026, 9, 27, tzinfo=UTC)
+
+
+def test_arxiv_walk_is_idle_once_today_is_finished() -> None:
+    _, _, loop_mod, _, _ = _load_scraper_loop_stack()
+    now = datetime(2026, 9, 27, 15, 0, tzinfo=UTC)
+    done = datetime(2026, 9, 27, 23, 59, 59, tzinfo=UTC)
+    assert loop_mod.arxiv_days_to_scrape(done, now, window_days=60) == []
+
+
+@pytest.mark.asyncio
+async def test_arxiv_day_walk_stamps_end_of_each_day() -> None:
+    _, _, loop_mod, _, models = _load_scraper_loop_stack()
+    adapter = _StubAdapter([])
+    client = AsyncMock()
+    client.post_manifest_batch.return_value = models.ManifestBatchResult(
+        inserted=0,
+        skipped=0,
+    )
+    now = datetime(2026, 9, 27, 15, 0, tzinfo=UTC)
+    jumped = datetime(2026, 9, 27, 12, 21, tzinfo=UTC)
+
+    with (
+        patch.object(loop_mod, "resolve_backfill_window_days", return_value=1),
+        patch.object(loop_mod, "ARXIV_INTER_PAGE_DELAY_SEC", 0),
+    ):
+        await loop_mod._scrape_arxiv_days(adapter, client, jumped, now)
+
+    assert adapter.fetch_manifest.await_count == 2
+    first = adapter.fetch_manifest.await_args_list[0].kwargs
+    assert first["since"] == datetime(2026, 9, 26, tzinfo=UTC)
+    assert first["until"] == datetime(2026, 9, 26, 23, 59, 59, tzinfo=UTC)
+    stamps = [call.kwargs["timestamp"] for call in client.post_scraper_state.await_args_list]
+    assert stamps == [
+        datetime(2026, 9, 26, 23, 59, 59, tzinfo=UTC),
+        datetime(2026, 9, 27, 23, 59, 59, tzinfo=UTC),
+    ]
+
+
+@pytest.mark.asyncio
+async def test_arxiv_day_walk_stops_before_stamping_a_failed_day() -> None:
+    _, _, loop_mod, _, models = _load_scraper_loop_stack()
+    adapter = _StubAdapter([])
+    adapter.fetch_manifest.side_effect = [
+        [],
+        loop_mod.PermanentFailureError(SourceEnum.ARXIV, None, RuntimeError("stop")),
+    ]
+    client = AsyncMock()
+    client.post_manifest_batch.return_value = models.ManifestBatchResult(
+        inserted=0,
+        skipped=0,
+    )
+    now = datetime(2026, 9, 27, 15, 0, tzinfo=UTC)
+    jumped = datetime(2026, 9, 27, 12, 21, tzinfo=UTC)
+
+    with (
+        patch.object(loop_mod, "resolve_backfill_window_days", return_value=1),
+        patch.object(loop_mod, "ARXIV_INTER_PAGE_DELAY_SEC", 0),
+        pytest.raises(loop_mod.PermanentFailureError),
+    ):
+        await loop_mod._scrape_arxiv_days(adapter, client, jumped, now)
+
+    assert client.post_scraper_state.await_count == 1
+    assert client.post_scraper_state.await_args.kwargs["timestamp"] == datetime(
+        2026, 9, 26, 23, 59, 59, tzinfo=UTC
+    )
 
 
 def test_registry_lists_all_expected_sources() -> None:

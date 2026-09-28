@@ -37,6 +37,15 @@ async def index_cycle(
                 },
             )
             return
+        except httpx.RequestError as exc:
+            logger.error(
+                "state-worker poll failed",
+                extra={
+                    "error_class": type(exc).__name__,
+                    "event": "state_worker_error",
+                },
+            )
+            return
 
         if not poll.entries:
             logger.info(
